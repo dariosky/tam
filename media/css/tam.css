@@ -1,0 +1,323 @@
+/* This file skins tableSorter */
+
+table.tablesorter {
+	font-family:arial;
+	background-color: #CDCDCD;
+	margin:10px 0pt 15px;
+	font-size: 8pt;
+	width: 100%;
+	text-align: left;
+}
+table.tablesorter thead tr th, table.tablesorter tfoot tr th {
+	background-color: #FED587;
+	border: 1px solid #FFF;
+	font-size: 8pt;
+	padding: 4px;
+}
+table.tablesorter thead tr .header {
+	background-image: url(/media/theme/bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+}
+table.tablesorter tbody td {
+	color: #3D3D3D;
+	padding: 4px;
+	background-color: #FFF;
+	/*vertical-align: top;*/
+}
+table.tablesorter tbody tr.odd td {
+	background-color:#E0F4D7;
+}
+table.tablesorter thead tr .headerSortUp {
+	background-image: url(/media/theme/asc.gif);
+}
+table.tablesorter thead tr .headerSortDown {
+	background-image: url(/media/theme/desc.gif);
+}
+table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
+	background-color: #FEE6C2;
+}
+
+.notePasseggero{
+	background-color:lightyellow;
+}
+body {
+	text-align:center;
+	background:white url('/media/sfumo.png');
+    background-repeat: repeat-x;
+    background-attachment: fixed;
+}
+
+a, a:visited {color:green}
+a:hover{ color:blue; }
+
+.loghetto {
+	border:3px;
+	margin:0; padding:0;
+	position:absolute;
+	top:2px;
+	right:10px;
+}
+
+.navBar {
+	text-align:left;
+	background: white url(/media/sfuminogrigiov.png);
+	background-repeat: repeat-x;
+    background-position: top;
+	/*max-width: 100%;*/
+	min-width: 600px;
+	left:38px; right:38px;
+	top:0px;
+	margin:0;
+	/*margin: 0 30px auto;*/
+	padding: 3px 10px;
+	border: medium rgb(255,204,102) groove;
+	font-weight: bold;
+	position:fixed;
+}
+
+#footer {
+    /*text-align: right;*/
+    margin:0 30px auto;
+    max-width: 100%;
+    min-width: 600px;
+    font-size: .7em;
+	font-family: sans-serif;
+}
+
+.navBar .menuGroup {
+	margin-right:2em;
+}
+
+.content {
+    max-width: 100%;
+    min-width: 600px;
+	text-align: justify;
+	background:white url(/media/sfuminogrigioinv.png);
+	background-repeat: repeat-x;
+    background-position: bottom;
+	margin:0 30px auto;
+	padding: 5px 10px 40px 10px;
+    border: medium rgb(255,204,102) groove;
+}
+
+.mainlogo {	margin:0; }
+.mainlogo img{ margin:0; padding:0;}
+
+h1 .maintitle{
+	text-align:center;
+	color: #FF7800;
+	font-size: 2.2em;
+    font-family: verdana;
+    margin-bottom:0;
+    padding:0;
+    background:red;
+}
+
+h2 {
+	font-size:1.1em;
+	margin-top:0;
+	margin-bottom:0;
+}
+
+.credits {
+	/* il link ai credits nel footer */
+	float:right; margin:0
+}
+.credits a{
+	text-decoration:none;
+	color:black;
+}
+
+.errorlist *, .errorlist{
+    color: red;
+    font-weight: bold;
+    list-style: none;
+    padding:0;
+    margin:0;
+}
+.errorlist {margin-bottom:0}
+a.errorlist {color:red;}
+
+form p {margin-top:0}
+
+form label {
+    font-weight: bold;
+}
+
+p img { /* Keep the images (buttons) centered */
+	vertical-align: text-bottom;
+}
+
+p textarea{
+	vertical-align:text-top;
+	height:5em;
+}
+
+a img{
+	border:0;
+}
+
+form input {
+    margin-right: 1em;
+}
+
+form {
+	font-size: .8em;
+    font-family: sans-serif;
+}
+
+.buttons {
+    text-align: center;
+}
+
+.messagebox{
+	font-size:smaller;
+	margin-top:0;
+	text-align:center;
+	background:#ffffcc;
+	border:1px #5D7671 solid;
+	list-style:none;
+}
+.messagebox.message{
+	color:#5D7671;
+	font-weight:bolder;
+	padding:3px;
+}
+
+td img {vertical-align: middle;}
+
+.trip_detail {
+    font-size: smaller;
+}
+
+.hbar {
+    border: 1px black solid;
+    height: 10px;
+}
+
+.bighour {
+	font-size:2em;
+}
+.middlehour {
+	font-size:1.5em;
+}
+
+
+.warning * {
+	/*background-color:#FFBAB4;*/
+	/*border:2px solid red;*/
+}
+
+table.tablesorter tbody .row1 td{
+}
+table.tablesorter tbody .row2 td{
+	background-color:#f9f9f9;
+}
+
+table.tablesorter tbody .warning td {
+	background:white url(/media/sfumored.png);
+	background-repeat: repeat-x;
+	/* background-attachment: fixed; */
+	background-position: bottom;
+}
+
+.inattivo * {
+	background-color:plum !important;
+}
+
+.assente * {
+	background-color:cornflowerblue !important;
+}
+
+.partenza {
+	background:lightgreen !important;
+	border:1px solid green;
+	text-align:center;
+	font-size:larger;
+}
+
+.arrivo {
+	background:tomato !important;
+	border:1px solid red;
+	text-align:center;
+	font-size:larger;
+}
+.cliente{
+	font-size:larger;
+	font-weight:bolder;
+}
+
+#selActions{
+	background:white;
+	text-align:center;
+	position:fixed;
+	top:100px;
+	left:2px;
+	border: silver 2px ridge;
+
+}
+.countblock{
+	clear:both;
+	float:right;
+	font-size:smaller;
+}
+.countblock a{
+	text-decoration:none;
+}
+
+.countblock .page {
+	padding-left:10px;
+	padding-right:10px;
+	border:1px solid silver;
+}
+.countblock .blankpage {
+	padding-left:10px;
+	padding-right:10px;
+}
+
+
+.countblock .selected {
+	background:silver;
+	color:black;
+}
+#filterForm { margin:0; padding:0;}
+
+#id_note {
+	width:90%;
+	height:10em;
+}
+
+.buttonLink{
+	padding:10px;
+}
+
+#esclusivoBlock ul{ /* la choice blocco esclusivo */
+	display: inline;
+    list-style: none;
+}
+#esclusivoBlock ul li{ /* la choice blocco esclusivo */
+    display: inline;
+}
+
+.btnbox {
+	background:silver;
+	text-align:center;
+	float:left;
+	width:120px;
+	height:100px;
+	padding:10px;
+	margin:10px;
+	border: 2px ridge black;
+}
+
+.btnbox img {
+	margin:0 auto;
+	display: block;
+	text-align: center;
+}
+
+.super {
+	background: yellowgreen;
+}

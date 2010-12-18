@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="48px"
+   height="48px"
+   id="svg2160"
+   sodipodi:version="0.32"
+   inkscape:version="0.45.1"
+   sodipodi:docbase="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media"
+   sodipodi:docname="fattura.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\p.png"
+   inkscape:export-xdpi="40.833633"
+   inkscape:export-ydpi="40.833633">
+  <defs
+     id="defs2162">
+    <marker
+       inkscape:stockid="Arrow1Lend"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lend"
+       style="overflow:visible;">
+      <path
+         id="path4165"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none;"
+         transform="scale(0.8) rotate(180) translate(12.5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path4162"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3165">
+      <stop
+         style="stop-color:#808080;stop-opacity:1;"
+         offset="0"
+         id="stop3167" />
+      <stop
+         style="stop-color:#ffffff;stop-opacity:1"
+         offset="1"
+         id="stop3169" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3165"
+       id="radialGradient3171"
+       cx="26.098209"
+       cy="39.506908"
+       fx="26.098209"
+       fy="39.506908"
+       r="21.366809"
+       gradientTransform="matrix(1.1265553,-0.1863831,0.2819204,1.7040118,-11.795143,-21.905262)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.4748737"
+     inkscape:cx="118.72775"
+     inkscape:cy="103.78436"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="1280"
+     inkscape:window-height="968"
+     inkscape:window-x="0"
+     inkscape:window-y="22" />
+  <metadata
+     id="metadata2165">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <g
+       id="g2199"
+       inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\fattura.png"
+       inkscape:export-xdpi="64.690002"
+       inkscape:export-ydpi="64.690002">
+      <path
+         sodipodi:nodetypes="cccccc"
+         id="rect2168"
+         d="M 3.0544601,20.572906 L 3.0805144,4.0475906 L 19.37477,3.1714484 L 46.571058,28.67804 L 30.250749,46.079497 L 3.0544601,20.572906 z "
+         style="color:#000000;fill:url(#radialGradient3171);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;stroke-miterlimit:4;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <text
+         transform="matrix(0.6145132,0.7889065,-0.7889065,0.6145132,0,0)"
+         sodipodi:linespacing="100%"
+         id="text2171"
+         y="2.1727948"
+         x="26.391623"
+         style="font-size:19.55411911px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:100%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:Arial Black"
+         xml:space="preserve"><tspan
+           y="2.1727948"
+           x="26.391623"
+           id="tspan2173"
+           sodipodi:role="line">$</tspan></text>
+    </g>
+    <g
+       id="g3207"
+       transform="translate(41.022682,-38.857143)"
+       inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\h.png"
+       inkscape:export-xdpi="40.833633"
+       inkscape:export-ydpi="40.833633">
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot3199"
+         transform="matrix(3.941963,0,0,3.941963,177.76591,-17.927154)"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia"><flowRegion
+           id="flowRegion3201"><rect
+             id="rect3203"
+             width="49.714287"
+             height="43.142857"
+             x="-63.142857"
+             y="1.4285715"
+             style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia" /></flowRegion><flowPara
+           id="flowPara3205"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia">H</flowPara></flowRoot>      <flowRoot
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"
+         transform="matrix(3.941963,0,0,3.941963,175.67337,-18.212868)"
+         id="flowRoot3191"
+         xml:space="preserve"><flowRegion
+           id="flowRegion3193"><rect
+             style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"
+             y="1.4285715"
+             x="-63.142857"
+             height="43.142857"
+             width="49.714287"
+             id="rect3195" /></flowRegion><flowPara
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"
+           id="flowPara3197">H</flowPara></flowRoot>    </g>
+    <g
+       transform="translate(-29.691604,-34)"
+       id="g3217"
+       inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\a.png"
+       inkscape:export-xdpi="40.270943"
+       inkscape:export-ydpi="40.270943">
+      <flowRoot
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia"
+         transform="matrix(3.941963,0,0,3.941963,177.76591,-17.927154)"
+         id="flowRoot3219"
+         xml:space="preserve"><flowRegion
+           id="flowRegion3221"><rect
+             style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia"
+             y="1.4285715"
+             x="-63.142857"
+             height="43.142857"
+             width="49.714287"
+             id="rect3223" /></flowRegion><flowPara
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia"
+           id="flowPara3225">A</flowPara></flowRoot>      <flowRoot
+         xml:space="preserve"
+         id="flowRoot3227"
+         transform="matrix(3.941963,0,0,3.941963,175.67337,-18.212868)"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"><flowRegion
+           id="flowRegion3229"><rect
+             id="rect3231"
+             width="49.714287"
+             height="43.142857"
+             x="-63.142857"
+             y="1.4285715"
+             style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia" /></flowRegion><flowPara
+           id="flowPara3233"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia">A</flowPara></flowRoot>    </g>
+    <g
+       id="g3235"
+       transform="translate(8.2425539,-35.356359)"
+       inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\p.png"
+       inkscape:export-xdpi="40.833633"
+       inkscape:export-ydpi="40.833633">
+      <flowRoot
+         xml:space="preserve"
+         id="flowRoot3237"
+         transform="matrix(3.941963,0,0,3.941963,177.76591,-17.927154)"
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia"><flowRegion
+           id="flowRegion3239"><rect
+             id="rect3241"
+             width="49.714287"
+             height="43.142857"
+             x="-63.142857"
+             y="1.4285715"
+             style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia" /></flowRegion><flowPara
+           id="flowPara3243"
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;font-family:Georgia">P</flowPara></flowRoot>      <flowRoot
+         style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"
+         transform="matrix(3.941963,0,0,3.941963,175.67337,-18.212868)"
+         id="flowRoot3245"
+         xml:space="preserve"><flowRegion
+           id="flowRegion3247"><rect
+             style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"
+             y="1.4285715"
+             x="-63.142857"
+             height="43.142857"
+             width="49.714287"
+             id="rect3249" /></flowRegion><flowPara
+           style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#808000;font-family:Georgia"
+           id="flowPara3251">P</flowPara></flowRoot>    </g>
+    <g
+       id="g4381"
+       inkscape:export-xdpi="56.110001"
+       inkscape:export-ydpi="56.110001"
+       inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\timedelta.png">
+      <path
+         transform="translate(19.394929,-15.478573)"
+         d="M 81.142855 -10.857142 A 23.714285 23.714285 0 1 1  33.714285,-10.857142 A 23.714285 23.714285 0 1 1  81.142855 -10.857142 z"
+         sodipodi:ry="23.714285"
+         sodipodi:rx="23.714285"
+         sodipodi:cy="-10.857142"
+         sodipodi:cx="57.42857"
+         id="path2191"
+         style="color:#000000;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:3.9000001;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         sodipodi:type="arc" />
+      <path
+         sodipodi:nodetypes="cccc"
+         id="path3166"
+         d="M 77.377685,-25.943166 C 99.39901,-33.822356 98.686802,-32.812203 98.686802,-32.812203 C 94.400338,-40.61496 87.303295,-47.706035 78.185807,-48.166522 L 77.377685,-25.943166 z "
+         style="fill:#ff0000;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         sodipodi:nodetypes="cc"
+         id="path4157"
+         d="M 80.571428,-43.285714 C 89.428571,-42.285714 92.714285,-33.285714 92.714285,-33.285714"
+         style="fill:none;fill-opacity:0.75;fill-rule:evenodd;stroke:#000000;stroke-width:0.2;stroke-linecap:butt;stroke-linejoin:miter;marker-start:url(#Arrow1Lstart);marker-end:url(#Arrow1Lend);stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1" />
+    </g>
+  </g>
+</svg>

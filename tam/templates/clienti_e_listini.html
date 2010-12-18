@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Clienti e listini &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+
+    <a href="{% url tamCliente %}"><img src="/media/addbtn.png" alt="" /> Nuovo Cliente</a><br/>
+    <a href="{% url tamPrivati %}">Elenco passeggeri privati</a><br/>
+    {% if clienti %}
+		<table id="clienti" class="tablesorter">
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Dettagli</th>
+					<th>Listino</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for cliente in clienti %}
+				<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
+	   				<td>
+	   				    <img style="float:right;" src="/media/tipiCliente/{{ cliente.tipo }}.png" title="{{ cliente.tipo }}" alt="{{ cliente.tipo }}" />
+						<a href="{% url tamClienteNome cliente.nome %}">{{ cliente.nome }}</a>
+						{% if not cliente.attivo %}NON ATTIVO{% endif %}
+					</td>
+					<td>
+						{% if cliente.fatturazione %}<img src="/media/flag/fattura.png" alt="richiede fattura" />  {% endif %}
+						{% if cliente.pagamento_differito %}<img src="/media/flag/timedelta.png" alt="pagamento differito" />{% endif %}
+						{% if cliente.incassato_albergo %}<img src="/media/flag/incassato.png" alt="conto fine mese" />{% endif %}
+						{% if cliente.commissione %} commissione: {{ cliente.commissione }}{% ifequal cliente.tipo_commissione "P" %}%{% else %}€{% endifequal %}{% endif %}
+					</td>
+					<td><a href="{% url tamListinoId cliente.listino.id %}">{{ cliente.listino.nome }}</a></td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<h3>Nessun cliente è stato definito.</h3>
+	{% endif %}
+
+	<a href="{% url tamNuovoListino %}"><img src="/media/addbtn.png" alt="" /> Nuovo Listino</a><br/>
+	{% if listini %}
+		<table id="listini" class="tablesorter">
+			<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Tratte</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for listino in listini %}
+				<tr>
+	   				<td><a href="{% url tamListinoId listino.id %}">{{ listino.nome }}</a></td>
+					<td>{{ listino.prezzolistino_set.all|length }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+		<h3>Nessun listino è stato definito.</h3>
+	{% endif %}
+	
+
+{% endblock %}

@@ -1,0 +1,18 @@
+# Git Repository per TAM
+
+# Escludo i file DB e estensioni di supporto
+*.pyc
+*.db3
+*.bat
+Desktop.ini
+
+# Escludo le cartelle non funzionali
+/backup/
+/doc/
+/_gsdata_/
+
+# Escludo le cose relative a Netbeans
+/.project
+/.pydevproject
+.settings/
+/nbproject/

@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Nuova corsa &raquo; {{ block.super }}{% endblock %}
+
+{% block header %}
+<script type="text/javascript">
+	$( function() {
+		$("#clear").click( function(){ document.location="{% url tamCorsaClear %}"; });
+		var formChanged=false;
+		$("input").live('change', function(){
+			formChanged=true;
+		});
+		$("input:submit").live('click', function(){formChanged=false;})
+		function askConfirm(){
+			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
+		}
+		window.onbeforeunload=askConfirm;
+	} );
+</script>
+{% endblock header %}
+
+{% block content %}
+<div style="text-align:center">
+    {% if delete %}
+        <h1>Cancellazione corsa.</h1>
+        {% if note %}<h2>{{ note }}</h2>{% endif %}
+        Sicuro di voler cancellare la corsa:<br/>
+			{{ viaggio }}<br/>
+        <form action="" method="post">
+			<p><input type="submit" name="OK" value="Si" /> <input type="submit" value="No" /></p>
+		</form>
+    {% else %}
+	<form action="" method="post" id="nuovaCorsa">
+        {% if form.non_field_errors %}
+			{{ form.non_field_errors }}
+		{% endif %}
+        {% ifequal step 1 %}
+			<p> <label for="id_data_0">Data e ora</label> {{ form.data|safe }} {% if form.data.errors %}<br/> <span class="errorlist">{% for error in form.data.errors %}{{ error }}{% endfor %}</span> {% endif %}	</p>
+
+	        <p> {{ form.da.label_tag }} {{ form.da }}
+	            {{ form.a.label_tag }} {{ form.a }}
+				{% if form.da.errors or form.a.errors %}
+					<br/> <span class="errorlist">Devi indicare partenza e arrivo.</span>
+				 {% endif %}
+			</p>
+			<p>
+				{% with form.privato as field %}
+				<strong>{{ field.label_tag }}</strong>
+				{{ field }}
+				{% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %}
+				{% endwith %}
+				<span id="bloccoCliente">
+				    {% with form.cliente as field %}{{ field.label_tag }} {{ field }} {{ field.initial }}
+					{% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %} {% endwith %}
+				</span>
+				<span id="bloccoPasseggero">
+					{% with form.passeggero as field %}	{{ field.label_tag }} {{ field }} {% if field.errors %} <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %} </span> {% endif %} {% endwith %}
+				</span>
+			</p>
+			<p>
+			    {{ form.numero_passeggeri.label_tag }} {{ form.numero_passeggeri }}
+			    <span id="esclusivoBlock">{{ form.esclusivo }}</span>
+				{% with form.numero_passeggeri as field %} {% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %} {% endwith %}
+				{% with form.esclusivo as field %} {% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %} {% endwith %}
+			</p>
+
+		{% else %}
+			{% if prezzoDaListinoDiurno %}Prezzo listino diruno{% endif %}
+			{% if prezzoDaListinoNotturno %}Prezzo listino notturno{% endif %}
+			<center>
+				<table>
+					{{ form }}
+					{% if viaggio.passeggero %}
+						<tr>
+							<th>
+								Note permanenti del privato <br/>{{ viaggio.passeggero.nome }}:
+							</th>
+							<td>
+								<textarea id="id_dati_privato" style="background-color:lightyellow" rows="10" cols="40" name="datiPrivato">{% if viaggio.passeggero.dati %}{{ viaggio.passeggero.dati }}{% endif %}</textarea>
+							</td>
+						</tr>
+					{% endif %}
+				</table>
+			</center>
+        {% endifequal %}
+
+
+		<p class="buttons">
+		    {% ifnotequal step 1 %}
+		        {% if not id or not viaggio.padre %}
+					{% if not  viaggio.conducente_confermato %}
+						<a href="?back">dettagli precedenti</a>
+					{% endif %}
+				{% endif %}
+            {% else %}
+                {% if new %}<input type="button" id="clear" name="clear" value="Reset"/>{% endif %}
+			{% endifnotequal %}
+			<input type="submit" id="actionButton" name="proceed" value={% ifequal step 2 %}
+																				{% if not id %}
+																					"Crea corsa"
+																				{% else %}
+																					"Modifica corsa"
+																				{% endif %}
+																			{% else %}"Avanti {% if id %}e salva{% endif %}"{% endifequal %} />
+            {% if not new %}
+				{% ifnotequal step 1 %}
+					<a href="{% url tamCorsaCopy viaggio.pk %}">copia</a>
+					<a href="{% url actionLog %}?type=viaggio&id={{ viaggio.id }}">log</a>
+				{% endifnotequal %}
+                {% with viaggio.delete_url as deleteUrl %}
+                    {% if deleteUrl %}
+							<br/>
+							<a href="{{ deleteUrl }}">
+								<img src="/media/delbtn.png" alt="Cancella corsa" />
+		                    </a>
+					{% endif %}
+                {% endwith %}
+			{% endif %}
+		</p>
+
+	</form>
+		{% ifequal step 2 %}
+			<div>
+				<div style="font-family:monospace; ">
+						{% if viaggio.cliente %}
+							<a href="{% url tamClienteNome viaggio.cliente.nome %}?next={{ request.path_info }}">{{viaggio.cliente}}</a>
+						{% else %}
+							privato
+							{% if viaggio.passeggero %}: <a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}
+						{% endif %}
+						da {{viaggio.da}} a {{viaggio.a}} <strong>{{viaggio.data|date:"D j F, H:i"}}</strong>
+						{{viaggio.numero_passeggeri}} pax, {% if viaggio.esclusivo %}taxi{% else %}collettivo{% endif %}
+
+				</div>
+			</div>
+		{% endifequal %}
+	{% endif %}
+</div>
+{% endblock content %}

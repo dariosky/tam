@@ -1,0 +1,16 @@
+{% extends "clienti_e_listini.html" %}
+
+{% block title %}Gestione cliente &raquo; {{ block.super }}{% endblock %}
+
+{% block clienti %}{{ block.super }} &raquo; Gestione cliente {% endblock %}
+
+{% block content %}
+	<h1>Gestione cliente.</h1>
+	Se non hai ancora definito un listino adatto al cliente devi prima <a href="{% url tamNuovoListino%}">crearlo</a>.
+	<form action="" method="post">
+		{{ form.as_p }}
+		<p><input type="submit" value="{% if nuovo %}Crea{% else %}Aggiorna{% endif %} cliente" /></p>
+	</form>
+	
+
+{% endblock %}

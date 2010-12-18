@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Cancellazione utente &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Cancellazione utente.</h1>
+
+<p>Sicuro di voler cancellare l'utente '{{ userToDelete.username }}'?</p>
+<p>
+	<form action="." method="post">
+		<input type="submit" name="sure" value="Elimina utente" />
+	</form>
+</p>
+{% endblock %}

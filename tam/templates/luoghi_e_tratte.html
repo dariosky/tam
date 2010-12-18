@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Luoghi e tratte &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<script type="text/javascript">
+    $(document).ready( function() {
+		$("#accordion div").accordion({
+				header: "h2",
+				alwaysOpen: false,
+				active: false,
+				animated: false
+			});
+		//$("#accordion .selected").removeClass("selected");
+    });
+</script>
+ <div id="accordion">
+	<a href="{% url tamNuovaTratta %}"><img src="/media/addbtn.png" alt=""/> Nuova Tratta</a><br/>
+	{% if tratte %}
+		<div>
+		<h2><a href="#">Tratte</a></h2>
+		<table id="tratte" class="tablesorter">
+			<thead>
+				<tr>
+					<th>Da</th>
+					<th>A</th>
+					<th>Tratta</th>
+				</tr>
+			</thead>
+		    <tbody>
+			{% for tratta in tratte %}
+		    	<tr>
+					<td>{% ifchanged %}{{ tratta.da }}{% endifchanged %}</td>
+					<td>{{ tratta.a }}</td>
+					<td {% if not tratta.is_valid %} class="errorlist" {% endif %}>
+						<a  href="{% url tamTrattaId tratta.id %}">
+							{{ tratta.minuti }} min.
+							{% if tratta.is_long %}<strong>{% endif %}	{{ tratta.km }} km. {% if tratta.is_long %}</strong>{% endif %}
+							{% if tratta.costo_autostrada %}{{ tratta.costo_autostrada }}€{% endif %}
+						</a>
+					</td>
+				</tr>
+		    {% endfor %}
+			</tbody>
+	    </table>
+		</div>
+	{% else %}
+	    <h3>Nessuna tratta è stata definita</h3>
+    {% endif %}
+
+
+    <a href="{% url tamNuovoBacino %}"><img src="/media/addbtn.png" alt=""/> Nuovo Bacino</a><br/>
+    <a href="{% url tamNuovoLuogo %}"><img src="/media/addbtn.png" alt=""/> Nuovo Luogo</a><br/>
+
+    {% if bacini or unbacined %}
+		<div>
+		<h2><a href="#">Bacini e luoghi</a></h2>
+		<table id="luoghi" class="tablesorter">
+			<thead>
+				<tr>
+					<th>Bacino</th>
+					<th>Luogo</th>
+				</tr>
+			</thead>
+			<tbody>
+			{% if unbacined %}
+			<tr> <td><strong>Non associati</strong></td> </tr>
+			{% for  luogo in unbacined %}
+			    <tr>	<td></td>
+						<td>
+							<a href="{% url tamLuogoId luogo.id %}">{{ luogo }}</a>
+						</td>
+				</tr>
+            {% endfor %}
+            {% endif %}
+
+			{% for bacino in bacini %}
+				<tr>
+					<td>
+						<strong> <a href="{% url tamBacinoId bacino.id %}">{{ bacino.nome }}</a> </strong>
+					</td>
+				</tr>
+				{% for luogo in bacino.luogo_set.all %}
+	                <tr>
+	                    <td></td>
+						<td>
+                            <a href="{% url tamLuogoId luogo.id %}">{{ luogo }}</a>
+						</td>
+					</tr>
+                {% endfor %}
+			{% endfor %}
+			</tbody>
+		</table>
+		</div>
+	{% else %}
+		<h3>Nessun luogo è stato definito.</h3>
+	{% endif %}
+ </div>
+
+{% endblock %}

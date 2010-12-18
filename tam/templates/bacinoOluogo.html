@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Gestione {{ verbose_name_plural|lower }} &raquo; {{ block.super }}{% endblock %}
+
+{# {% block luoghi %}{{ block.super }} &raquo; Gestione {{ verbose_name_plurallower }} {% endblock %}| #}
+
+{% block content %}
+<div style="text-align:center">
+    {% if not delete %}
+		<h1>Gestione {{ verbose_name_plural }}.</h1>
+		{% if note %}<h2>{{ note }}</h2>{% endif %}
+		<form action="" method="post">
+			{{ form.as_p }}
+   
+			<p>
+				<input type="submit" value="{% if nuovo %}Crea{% else %}Modifica{% endif %} {{ verbose_name }}" />
+				{% if not nuovo and can_delete %}
+				    {% with instance.delete_url as deleteUrl %}
+				        {% if deleteUrl %}
+		                    <a href="{{ deleteUrl }}">
+								<img src="/media/delbtn.png" alt="Cancella {{ verbose_name }}" />
+		                    </a>
+                        {% endif %}
+                    {% endwith %}
+                {% endif %}
+			</p>
+		</form>
+    {% else %}
+        <h1>Cancellazione {{ verbose_name }}.</h1>
+        {% if note %}<h2>{{ note }}</h2>{% endif %}
+        Sicuro di voler cancellare il {{ verbose_name }}:<br/>
+			{{ instance }}<br/>
+        <form action="" method="post">
+			<p><input type="submit" name="OK" value="Si" /> <input type="submit" value="No" /></p>
+		</form>
+    {% endif %}
+</div>
+{% endblock %}

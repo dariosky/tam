@@ -1,0 +1,28 @@
+{% extends "clienti_e_listini.html" %}
+
+{% block title %}Elenco privati &raquo; {{ block.super }}{% endblock %}
+
+{% block clienti %}{{ block.super }} &raquo; Elenco privati {% endblock %}
+
+{% block content %}
+    <h1>Elenco privati.</h1>
+    <a href="{% url tamNuovoPrivato %}"><img src="/media/addbtn.png" alt="" /> Nuovo Privato</a><br/>
+    <table class="tablesorter">
+        <thead>
+            <tr>
+				<th>Nome</th>
+				<th>Dati</th>
+			</tr>
+		</thead>
+		
+		<tbody>
+		    {% for privato in privati %}
+		        <tr>
+					<td><a href="{% url tamPrivatoId privato.id %}">{{ privato.nome }}</a></td>
+					<td>{% with privato.dati as dati %}{% if dati %}{{ privato.dati }}{% endif %}{% endwith %}</td>
+				</tr>
+		    {% endfor %}
+		</tbody>
+    </table>
+    
+{% endblock %}

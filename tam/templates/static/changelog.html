@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Cronologia revisioni</h1>
+<table class="tablesorter">
+	<tr>
+		<th>data</th> <th>versione</th> <th></th>
+	</tr>
+	<tr>
+		<td>13/10/2010</td>
+		<td>1.3</td>
+		<td>
+			Archiviazione su altro DB usando l'accesso multiDB.<br/>
+			Aumentato la scadenza di una sessione a un'ora.<br/>
+			Aggiunti i link ai conducenti modificati sul log degli eventi.<br/>
+		</td>
+	</tr>
+
+	<tr>
+		<td>24/10/2010</td>
+		<td>1.21</td>
+		<td>
+			Revisione della maschera strumenti.<br/>
+			Il prezzo al chilometro è fatto sul (lordo-autostrada-consorzio) anziché solo sul lordo.<br/>
+		</td>
+	</tr>
+	
+	<tr>
+		<td>23/8/2010</td>
+		<td>1.2</td>
+		<td>
+			Corretto il conguaglio di corse con casette multiple in caso di conguagli parziali.<br/>
+			Aggiunta la pagina delle azioni correttive per i superuser.
+		</td>
+	</tr>
+
+	<tr>
+		<td>1/6/2010</td>
+		<td>1.19</td>
+		<td>
+			Aggiunta la data del doppio nella classifica Doppi.<br/>
+			Migrazione a Django 1.2.
+		</td>
+	</tr>
+
+	<tr>
+		<td>14/4/2010</td>
+		<td>1.18</td>
+		<td>
+			Il flag "conto fine mese" ora è disponibile ad ogni tipo di cliente.
+		</td>
+	</tr>
+
+	<tr>
+		<td>12/4/2010</td>
+		<td>1.17</td>
+		<td>
+			Nel log delle modifiche evidenziate le corse inserite postume.
+		</td>
+	</tr>
+
+	<tr>
+		<td>3/3/2010</td>
+		<td>1.16</td>
+		<td>
+			L'anagrafica dei clienti privati può ora essere cambiata direttamente dalle corse.<br/>
+			Le note del privato vengono stampate (con fondo giallo) nella lista delle corse.<br/>
+			Il privato, nella lista delle corse è cliccabile per andare all'anagrafica.
+		</td>
+	</tr>
+
+	<tr>
+		<td>18/2/2010</td>
+		<td>1.15</td>
+		<td>
+			I privati ora si possono creare al volo dalla prima pagina dell'inserimento corse.
+			In fondo, nella seconda pagina, si può tornare in fretta per modificarne i dati.
+		</td>
+	</tr>
+
+	<tr>
+		<td>13/2/2010</td>
+		<td>1.14</td>
+		<td>
+			Dietro le quinte: gestiti con Form.Media i Javascript e CSS; migrazioni gestite con South.<br/>
+			I privati ora possono avere il flag di fatturabile e pagamento differito.<br/>
+			Inserito il flag "Pagamento con carta di credito".<br/>
+			Il filtro "Prossime corse" è il predefinito.<br/>
+			Richiesta di conferma nella creazione/modifica delle corse se non si è salvato.
+		</td>
+	</tr>
+
+	<tr>
+		<td>13/1/2010</td>
+		<td>1.13</td>
+		<td>
+			Aggiunto al Log delle operazioni la possibilità di filtrare in base all'utente che ha eseguito l'operazione<br/>
+			Nella maschera dei prezzi delle corse inserite aggiunto un link alla lista di azioni svolte sulla corsa.
+		</td>
+	</tr>
+
+	<tr>
+		<td>8/1/2010</td>
+		<td>1.12</td>
+		<td>
+			Visualizzazione classifiche: riordinati i doppi Venezia e compressi i supplementari.<br/>
+			Impostato un limite di 3000 corse per l'esportazione in Excel.
+		</td>
+	</tr>
+
+	<tr>
+		<td>3/12/2009</td>
+		<td>1.1</td>
+		<td>
+			<strong>Log delle operazioni</strong>: pagina per la visione delle operazioni, log nella struttura dati, Signal per le operazioni sui modelli (Viaggi, Clienti, Conducenti, Tratte e prezzi listino).<br/>
+			Pagina per il cambio della propria password, disponibile per ogni utente cliccando sul proprio nome in fondo alla pagina.
+		</td>
+	</tr>
+
+	<tr>
+		<td>23/11/2009</td>
+		<td>1.0.2</td>
+		<td>
+			<strong>Gestione utenti</strong>: gli utenti abilitati possono creare e cancellare gli utenti di TaM, modificarne le password (cancellando automaticamente tutte le sessioni aperte) e il gruppo di permessi.<br/>
+			Reimpaginata la schermata di login.	Pagina dei cambiamenti e regole.<br/>
+		</td>
+	</tr>
+	
+	<tr>
+		<td>29/10/2009</td>
+		<td>1.0.1</td>
+		<td>
+			Gestione dettagliata dei permessi, ogni utente può avere accesso solo a determinate funzioni.
+			Per ora sono presenti 3 gruppi:
+			<ul>
+				<li>UtentePotente: Utenti che posso cambiare anche le vecchie corse.</li>
+				<li>UtenteNormale: Utente che può inserire nuove corse e modificare quelle future.</li>
+				<li>Tutti gli altri, che possono accedere in sola lettura.</li>
+			</ul>
+		</td>
+	</tr>
+	
+	<tr>
+		<td>10/10/2009</td>
+		<td><strong>1.0</strong></td>
+		<td>
+			TAM diventa definitivo.
+		</td>
+	</tr>
+</table>
+
+<p><a href="{% url tam_rules %}">Regole</a></p>
+{% endblock content %}

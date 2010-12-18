@@ -1,0 +1,100 @@
+{% extends "clienti_e_listini.html" %}
+
+{% block title %}Listino &raquo; {{ block.super }}{% endblock %}
+
+{% block clienti %}{{ block.super }} &raquo; Listino {% endblock %}
+
+{% block content %}
+	<h1>Listino.</h1>
+
+<form action="." method="post">
+    <p>
+    	{% with form.nome as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}
+    	<input name="new_name" type="submit" value="{% if listino %}Rinomina{% else %}Crea{% endif %} listino" />
+	{% if not nuovo %}
+		<a href="{% url tamListinoIdDel listino.pk%}">Elimina il listino</a>
+		<a href="{% url tamClonaListinoId listino.pk%}">Clona il listino</a>
+
+	{% endif %}
+    </p>
+</form>
+
+{% if not nuovo %}
+
+<script type="text/javascript">
+	$(	function() {
+			// $(".tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra']});
+			//$("#id_da, #id_a").autocomplete( "{% url tamGetLuogo %}", {cacheLength:10, matchContains:1} );
+			function show_hide_delprezzo() {
+			    if ( ($("#id_da").val()=="") || ($("#id_a").val()=="") )
+					$('#id_delprezzo').hide();
+			    else
+					$('#id_delprezzo').show();
+			}
+			show_hide_delprezzo();
+			$("#id_da, #id_a").change( show_hide_delprezzo );
+		}
+	);
+</script>
+
+<form action="." method="post">
+    <h3> Crea una nuova voce in listino: </h3>
+    <table>
+	<tr>
+		<td> {% with priceForm.da as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %} </td>
+		<td> {% with priceForm.a as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %} </td>
+	</tr>
+	<tr>
+	    <td> {% with priceForm.prezzo_diurno as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %} </td>
+	    <td> {% with priceForm.prezzo_notturno as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td>
+	</tr>
+	<tr>
+	    <td>{% with priceForm.commissione as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}
+		{{  priceForm.tipo_commissione }}</td>
+	</tr>
+	<tr>
+	    <td>{% with priceForm.tipo_servizio as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td>
+	    <td>{% with priceForm.max_pax as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td>
+	</tr>
+	<tr>
+	    <td>
+		<input name="new_price" value="{% if prezzoid %}Modifica prezzo{% else %}Crea prezzo{% endif %}" type="submit" />
+		<input id="id_delprezzo" type="submit" name="deletePrezzo" value="Cancella prezzo" />
+	    </td>
+	</tr>
+    </table>
+
+
+    <table class="tablesorter">
+	<thead>
+	    <tr> <th>Da</th> <th>a</th> <th>Prezzo listino</th> <th>Tipologia</th></tr>
+	</thead>
+	<tbody>
+	    {% for prezzo in prezzi %}
+		<tr>
+		    <td>{% ifchanged prezzo.tratta.da %}{{ prezzo.tratta.da }}{% endifchanged %}</td>
+		    <td>{% ifchanged prezzo.tratta.a %}{{ prezzo.tratta.a }}{% endifchanged %}</td>
+		    <td>
+			    <a href="{% url tamListinoPrezzoId listino.id,prezzo.id %}"><img src="/media/matita.ico" alt="edit" /></a>
+			    {{ prezzo.prezzo_diurno }}€ / {{ prezzo.prezzo_notturno }}€
+			    {% if prezzo.commissione %}
+				    commissione: {{ prezzo.commissione }}
+				    {% ifequal prezzo.tipo_commissione "P" %}%{% else %}€{% endifequal %}
+			    {% endif %}
+		    </td>
+		    <td>
+			{% ifequal prezzo.tipo_servizio "C" %}
+			    <img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />
+			{% else %}
+			    <img width="12px" height="12px" src="/media/t.ico" alt="taxi" />
+			{% endifequal %}
+			{{ prezzo.max_pax }}pax
+		    </td>
+		</tr>
+	    {% endfor %}
+	</tbody>
+    </table>
+    {% if not prezzi %}<p>Nessun prezzo definito.</p>{% endif %}
+</form>
+{% endif %}
+{% endblock %}

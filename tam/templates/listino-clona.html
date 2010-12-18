@@ -1,0 +1,15 @@
+{% extends "clienti_e_listini.html" %}
+
+{% block title %}Clona listino &raquo; {{ block.super }}{% endblock %}
+
+{% block clienti %}{{ block.super }} &raquo; Clona listino {% endblock %}
+
+{% block content %}
+    <h1>Clona Listino '{{ listino }}'.</h1>
+    <p>Il listino selezionato verrà clonato con tutti i suoi {{ num_prezzi }} prezzi.</p>
+	<p>Scegli il nome del nuovo listino per confermare la clonazione.</p>
+    <form method="post" action="">
+		{{ form.as_p }}
+	<p><input type="submit" value="Clona il listino" /></p>
+    </form>
+{% endblock %}

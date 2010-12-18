@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Impostazione dei permessi &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Impostazioni permessi.</h1>
+
+<form method="get" action=".">
+<p>
+	Seleziona l'utente da gestire.
+	<select name="selectedUser">
+	{% for iterUser in users %}
+		<option{% ifequal selectedUsername iterUser.username%} selected="selected"{% endifequal %}>{{ iterUser.username }}</option>
+	{% endfor %}
+	</select>
+	<input type="submit" value="Seleziona" />
+</p>
+</form>
+<p><a href="{% url newUser %}">Nuovo utente</a></p>
+{% if selectedUser %}
+	<form method="post" action=".">
+		dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
+		<p>
+			Nuova password <input type="password" name="password"> riconferma: <input type="password" name="passwordbis">
+		</p>
+		<p>
+			Gruppo di appartenenza:
+			<select name="selectedGroup" multiple="multiple">
+			{% for iterGroup in groups %}
+				<option{% if iterGroup.selected %} selected="selected"{% endif %}>{{ iterGroup.name }}</option>
+			{% endfor %}
+			</select>
+		</p>
+		<p><a href="{% url delUser username=selectedUser.username %}">Cancellazione utente</a></p>
+		<p><input type="submit" name="change" value="Applica" /></p>
+	</form>
+{% endif %}
+
+{% endblock %}

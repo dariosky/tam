@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block css %}
+	{{ block.super }}
+	<link rel="stylesheet" href="/media/css/tamrules.css" type="text/css"/>
+{% endblock css %}
+
+{% block content %}
+<h1>Regole</h1>
+<h2 class="manu-title">Il valore di un viaggio è dato da:</h2>
+<div style="margin-left:1em">
+	<span class="token">prezzo lordo</span> - <span class="token">commissione</span> - <span class="token">autostrada</span><br/>
+
+	<div style="padding-left:2em">
+			corsa singola lunga e <0.65€/km: abbuono proporzionalmente<br/>
+			corsa singola media e <0.80€/km: abbuono proporzionalmente
+	</div>
+	<span class="token">sconto il 15% se conto fine mese o fatturazione</span>
+	- <span class="token">abbuono indicato</span> - <span class="token">il costo della sosta (12€/ora calcolato automaticamente)</span>
+	+ <span class="token">il prezzo della sosta (inserito a mano scontato del 25%)</span>
+
+	<table class="manu-table">
+		<tr> <th colspan="2">Classificazione corse</th> </tr>
+		<tr>
+			<td>lunghe</td> <td>se ho fatto 50 o più chilometri</td>
+		</tr>
+		<tr>
+			<td>medie</td> <td>se ho tra i [25km-50km, o meno di 25km e più di 16€ di prezzo lordo</td>
+		</tr>
+		<tr>
+			<td>corte</td> <td>altrimenti</td>
+		</tr>
+	</table>
+</div>
+
+<h2 class="manu-title">Classifiche</h2>
+<ul>
+	<li>
+		Se la corsa non abbinata:
+		<ul>
+			<li>Se la corsa è lunga il prezzo va nei Venezia.</li>
+			<li>se è media nei Padova.</li>
+			<li>se è corta il prezzo non va in classifica.</li>
+		</ul>
+	</li>
+	<li>
+		Se la corsa è abbinata:<br/>
+		Il numero di doppi è dato dai km/120, a meno che non ci sia un unico bacino di partenza.
+		<ul>
+			<li>Se ho doppi:<br/>
+				i km rimanenti dalla divisione per 120 vanno nei Venezia a 0.65€/km<br/>
+				il resto va per punti e prezzo nei doppi Venezia.
+			</li>
+			<li>nessun doppio:
+				<ul>
+					<li>se &gt;1.25€/km conto la corsa nei DoppiPadova</li>
+					<li>altimenti:<br/>
+						se ho fatto 50 o più chilometri conto nei Venezia, altrimenti nei Padova</li>
+				</ul>
+			</li>
+		</ul>
+	</li>
+</ul>
+
+<table class="manu-table">
+	<tr> <th colspan="2">Fasce orarie supplementari</th> </tr>
+	<tr> <td>04:00-06:00]</td> <td>2 punti diurno</td> </tr>
+	<tr> <td>06:00-07:45]</td> <td>1 punti diurno</td> </tr>
+	<tr> <td>[20:30-22:30] o [20:00-22:30] sabato e domenica</td> <td>1 punti notturno</td> </tr>
+	<tr> <td>[00:00-04:00]</td> <td>2 punti notturni</td> </tr>
+</table>
+{% endblock content %}

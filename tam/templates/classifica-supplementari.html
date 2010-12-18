@@ -1,0 +1,56 @@
+{% load utilTag %}
+<div>
+<h2><a href="#">Supplementari mattutini</a></h2>
+<div>
+<table class="tablesorter">
+    <thead>
+	<tr>
+	    <th>Nome</th>
+	    <th>Punteggio</th>
+	</tr>
+    </thead>
+
+    <tbody>
+	{% for classifica in classifiche|dictsort:"puntiDiurni" %}
+	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
+		<td>{{ classifica.conducente }}</td>
+		<td>
+			{% comment %}
+				{% num_range classifica.puntiDiurni as range_diurni %}
+				{% for disturbo in  range_diurni %}
+				<img src="/media/morning.png" alt="*" />
+				{% endfor %}
+			{% endcomment %}
+			<img src="/media/morning.png" alt="*" /> x {{ classifica.puntiDiurni }}
+		</td>
+	    </tr>
+	{% endfor %}
+    </tbody>
+</table>
+</div>
+</div>
+
+<div>
+<h2><a href="#">Supplementari serali</a></h2>
+<div>
+<table class="tablesorter">
+    <thead>
+	<tr>
+	    <th>Nome</th>
+	    <th>Punteggio</th>
+	</tr>
+    </thead>
+
+    <tbody>
+	{% for classifica in classifiche|dictsort:"puntiNotturni" %}
+	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
+		<td>{{ classifica.conducente }}</td>
+		<td>
+			<img src="/media/night.png" alt="*" /> x {{ classifica.puntiNotturni }}
+		</td>
+	    </tr>
+	{% endfor %}
+    </tbody>
+</table>
+</div>
+</div>

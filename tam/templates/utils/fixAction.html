@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Azioni correttive &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Azione correttiva...</h1>
+{% if messageLines %}
+<p>
+	{% for line in messageLines %}
+		<pre>{{ line }}</pre>
+    {% endfor %}
+</p>
+{% endif %}
+
+{% if error %}
+	<p>
+  	{{ error }}
+	</p>
+{% endif %}
+
+{% endblock %}

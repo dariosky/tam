@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Associa corsa &raquo; {{ block.super }}{% endblock %}
+{% block corse %}{{ block.super }} &raquo; <a href="{% url tamCorse %}">Lista corse</a>{% endblock %}
+
+{% block content %}
+    <h1>Associazioni corsa</h1>
+    <form action='' method='post'>
+    <div>
+     
+    
+    {% if viaggi %}
+    
+	    Puoi associare la corsa<br/>
+	    di {{ viaggio.data|date:"D j F, H:i" }}<br/>
+	    da {{ viaggio.da }} a {{ viaggio.a }}<br/>
+	    {% if viaggio.esclusivo %}Servizio taxi{% else %}Servizio collettivo{% endif %}<br/>
+	    con questi altri viaggi:<br/>
+
+		{% for padre in viaggi %}
+			<p>
+				<input type="radio" name='father' value='{{ padre.id }}' {% ifequal viaggio.padre padre %}checked{% endifequal %}/>
+				    da {{ padre.da }} a {{ padre.a }} alle {{ padre.data|date:"H:i" }}
+			</p>
+	    {% endfor %}
+	    
+	{% else %}
+	    Non sono state inserite altre corse che sembrano compatibili con quella <br/>
+	    {{ viaggio }}
+	{% endif %}
+		<p> <input type="radio" name='father' value='' {% if not viaggio.padre %}checked{% endif %}/> Non associato </p>
+	    <input type="submit" name="submit" value="Ok" />
+    </div>
+	</form>
+{% endblock %}

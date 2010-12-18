@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Reset delle sessioni utente &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Reset delle sessioni utente.</h1>
+<form action="." method="post">
+<p>
+	Premi il seguente pulsante per cancellare tutte le sessioni utente esistenti.<br/>
+	Ogni utente dovrà rieffettuare il login e verranno reimpostati i filtri delle corse.
+</p>
+<p>
+	<input type="submit" name="reset" value="Reset!"/>
+</p>
+</form>
+{% endblock %}

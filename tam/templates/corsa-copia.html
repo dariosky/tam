@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Ricorrenza corse &raquo; {{ block.super }}{% endblock %}
+
+{% block corse %}{{ block.super }} &raquo; Ricorrenza corse{% endblock %}
+
+{% block content %}
+    <h1>Copia la corsa.</h1>
+    <p>Hai scelto di copiare la corsa:</p>
+	<div style="font-size:larger;">di {{corsa.data|date:"l"}} {{corsa}}</div>
+	{% if corsa.is_abbinata %}
+		con i figli:
+		<ul>
+		{% for figlio in figli %}
+			<li>{{figlio}}</li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+	
+	{% if askForm %}
+		<p>Creerò le copie identiche, ma con il conducente da confermare.</p>
+		<p>Scegli la ricorrenza e l'intervallo per le copie:</p>
+		<form method="post" action="">
+			<div class="fieldWrapper">
+				{{ form.repMode.errors }}
+				<strong>{{ form.repMode.label }}:</strong> {{ form.repMode }}
+			</div>
+			<br/>
+			<div class="fieldWrapper">
+				<table>
+					<tr>
+						<td style="width:300px">
+							{{ form.start.errors }}
+							<strong>Data iniziale:</strong><br/>
+							{{ form.start }}
+						</td>
+
+						<td>
+							{{ form.end.errors }}
+							<strong>Data finale</strong><br/>
+							{{ form.end }}
+						</td>
+					</tr>
+				</table>
+			</div>
+		<p><input id="copyBtn" type="submit" value="Copia" /> </p>
+		</form>
+	{% else %}
+		<form method="post" action="">
+			Le nuove corse partiranno nelle date seguenti:
+			<ol>
+			{% for nuovoPadre in nuoviPadri %}
+				<li>{{nuovoPadre|date:"l d F Y"}}</li>
+			{% endfor %}
+			</ol>
+			{{form}}
+			<p style="margin:10px;">
+				<input type="submit" name="conferma" value="Conferma" />
+				<input type="submit" name="annulla" value="Annulla" />
+			</p>
+		</form>
+	{% endif %}
+{% endblock %}

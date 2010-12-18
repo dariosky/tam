@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Attivazione Tam &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+	<h1>Attivazione.</h1>
+
+<form action="." method="post">
+    <div>
+        Qui attiviamo Tam, scegli i parametri per l'attivazione e dai l'ok.<br/>
+        <br/>
+		<h2>
+	        {% if tam_licensed %}
+				{% if tam_expiration_date %}
+					TaM attualmente è registrato con una licenza provvisoria che scadrà il {{ tam_expiration_date|date:"j F Y" }}.
+                {% else %}
+                    TaM attualmente è registrato a {{ tam_registred_user }}.
+				{% endif %}
+
+	        {% else %}
+	            {% if tam_expiration_date %}
+					La licenza di prova che avevi è scaduta il {{ tam_expiration_date|date:"j F Y" }}
+                {% else %}
+                    TaM non è registrato.
+	            {% endif %}
+	        {% endif %}
+        </h2>
+        <br/>
+    </div>
+
+	<table>{{ form }} <tr><td><input name="activateBTN" type="submit" value="Aggiorna l'attivazione"/></td></tr> </table>
+</form>
+
+{% endblock %}

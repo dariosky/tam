@@ -1,0 +1,9 @@
+pagine {% for pagenum in paginator.smart_page_range %}
+{% ifequal pagenum "..."%}
+	<span class="blankpage">...</span>
+{% else %}	
+	<a href="?page={{pagenum}}{% for key,value in request.GET.items %}{% ifnotequal key 'page' %}&{{ key }}={{ value }}{% endifnotequal %}{% endfor %}">
+		<span class="page{% ifequal pagenum thisPage.number %} selected{% endifequal %}">{{pagenum}}</span>
+	</a>
+{% endifequal %}
+{% endfor %}

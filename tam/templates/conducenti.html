@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Conducenti e classifiche &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<script type="text/javascript">
+    $(document).ready( function() {
+		$("#accordion div").accordion({
+				header: "h2",
+				alwaysOpen: false,
+				active: false
+			});
+		//$("#accordion .selected").removeClass("selected");
+    });
+</script>
+
+<h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
+
+
+    {% if not profilo.luogo %}
+
+	Inserisci un luogo preferito...<br/>
+	le classifiche dipendono molto dalle tratte previste.
+
+    {% else %}
+
+	{% if confirmConguaglio %}
+	    {% include "classifica-doppi.html" %}
+	{% else %}
+	    <div id="accordion">
+		{% include "classifica-supplementari.html" %}
+		{% include "classifica-doppi.html" %}
+		{% include "classifica-doppipadova.html" %}
+		{% include "classifica-prezzi.html" %}
+		{% include "elenco-conducenti.html" %}
+	    </div>
+	{% endif %}
+
+    {% endif %}
+
+
+{% endblock %}
