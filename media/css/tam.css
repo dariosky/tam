@@ -1,6 +1,6 @@
 /* This file skins tableSorter */
 
-table.tablesorter {
+.tablesorter {
 	font-family:arial;
 	background-color: #CDCDCD;
 	margin:10px 0pt 15px;
@@ -8,37 +8,17 @@ table.tablesorter {
 	width: 100%;
 	text-align: left;
 }
-table.tablesorter thead tr th, table.tablesorter tfoot tr th {
-	background-color: #FED587;
+.tablesorter th {
+	background-color: #fed587;
 	border: 1px solid #FFF;
 	font-size: 8pt;
 	padding: 4px;
 }
-table.tablesorter thead tr .header {
-	background-image: url(/media/theme/bg.gif);
-	background-repeat: no-repeat;
-	background-position: center right;
-	cursor: pointer;
-}
-table.tablesorter tbody td {
+.tablesorter td {
 	color: #3D3D3D;
 	padding: 4px;
-	background-color: #FFF;
-	/*vertical-align: top;*/
+	background-color: #ffffff;
 }
-table.tablesorter tbody tr.odd td {
-	background-color:#E0F4D7;
-}
-table.tablesorter thead tr .headerSortUp {
-	background-image: url(/media/theme/asc.gif);
-}
-table.tablesorter thead tr .headerSortDown {
-	background-image: url(/media/theme/desc.gif);
-}
-table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-	background-color: #FEE6C2;
-}
-
 .notePasseggero{
 	background-color:lightyellow;
 }
@@ -130,7 +110,7 @@ h2 {
 	color:black;
 }
 
-.errorlist *, .errorlist{
+.errorlist li, .errorlist{
     color: red;
     font-weight: bold;
     list-style: none;
@@ -204,30 +184,20 @@ td img {vertical-align: middle;}
 	font-size:1.5em;
 }
 
-.warning * {
-	/*background-color:#FFBAB4;*/
-	/*border:2px solid red;*/
+.row1 td{
+}
+.row2 td{
+	background-color:red; /*#f9f9f9;*/
 }
 
-table.tablesorter tbody .row1 td{
-}
-table.tablesorter tbody .row2 td{
-	background-color:#f9f9f9;
-}
-
-table.tablesorter tbody .warning td {
+.warning td {
 	background:white url(/media/sfumored.png);
 	background-repeat: repeat-x;
-	/* background-attachment: fixed; */
 	background-position: bottom;
 }
 
-.inattivo * {
+.inattivo td {
 	background-color:plum !important;
-}
-
-.assente * {
-	background-color:cornflowerblue !important;
 }
 
 .partenza {

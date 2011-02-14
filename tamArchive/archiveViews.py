@@ -18,7 +18,7 @@ from tam.models import Viaggio, ActionLog, ProfiloUtente, stopLog, startLog, Con
 from tamArchive.models import ViaggioArchive
 from tam.views import SmartPager
 from tam.models import logAction
-from collections import OrderedDict
+from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
 
 archiveNotBefore_days = 10
 
@@ -228,13 +228,17 @@ def flat(request, template_name="archive/flat.html"):
 		""" Date due classifiche (2 conducenti) ritorna il minimo """
 		keys = ("puntiDiurni", "puntiNotturni",
 				"prezzoDoppioPadova", "prezzoVenezia", "prezzoPadova")
-		results = OrderedDict()
+		results = SortedDict()
 		for key in keys:
-			results[key] = min(c1[key], c2[key])
+			v1, v2 = c1[key], c2[key]
+			if type(v1) is float: v1 = Decimal("%.2f" % v1)	# converto i float in Decimal
+			if type(v2) is float: v2 = Decimal("%.2f" % v2)
+			results[key] = min(v1, v2)
 		return results
 
 	minimi = reduce(trovaMinimi, classificheViaggi)
-	if "flat" in request.POST:
+	flat_needed = (max(minimi.values()) > 0)	# controllo che ci sia qualche minimo da togliere
+	if "flat" in request.POST and flat_needed:
 		logAction("F",
 					instance=request.user,
 					description="Appianamento delle classifiche",
@@ -244,14 +248,14 @@ def flat(request, template_name="archive/flat.html"):
 		for conducente in Conducente.objects.all():
 			conducente.classifica_iniziale_diurni -= minimi["puntiDiurni"]
 			conducente.classifica_iniziale_notturni -= minimi["puntiNotturni"]
-			conducente.classifica_iniziale_doppiPadova -= Decimal("%.2f" % minimi['prezzoDoppioPadova'])
-			conducente.classifica_iniziale_long -= Decimal("%.2f" % minimi['prezzoVenezia'])
-			conducente.classifica_iniziale_medium -= Decimal("%.2f" % minimi['prezzoPadova'])
+			conducente.classifica_iniziale_doppiPadova -= minimi['prezzoDoppioPadova']
+			conducente.classifica_iniziale_long -= minimi['prezzoVenezia']
+			conducente.classifica_iniziale_medium -= minimi['prezzoPadova']
 			conducente.save()
 
 		startLog(Conducente)
 		request.user.message_set.create(message=u"Appianamento effettuato.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
-	return render_to_response(template_name, {"minimi":minimi},
+	return render_to_response(template_name, {"minimi":minimi, 'flat_needed':flat_needed},
 							 context_instance=RequestContext(request))

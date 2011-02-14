@@ -15,16 +15,21 @@
 		<p>
 			Minimizza tutte le classifiche al livello degli ultimi.
 		</p>
+		{% if flat_needed %}
 		Minimi:
 		<p>
 			{% for key, value in minimi.items %}
 				Tolgo {{ value }} ai {{key}}<br/>
 			{% endfor %}
 		</p>
-
-		<input type="hidden" name="end_date" value="{{ end_date_string }}"/>
-		<input type="submit" name="flat" value="Appiana" style="width:400px; font-size:larger; " /><br/>
+		<input type="submit" name="flat" value="Appiana" class='bigButton' /><br/>
 		(attenzione, l'azione è irreversibile).<br/>
+		{% else %}
+			<h2>Non è necessario appianare le classifiche.</h2>
+			Tutti gli ultimi hanno 0 punti.<br>
+		{% endif %}
+
+		
 	
 </div>
 </form>

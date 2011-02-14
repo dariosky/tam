@@ -4,6 +4,7 @@
 *.pyc
 *.db3
 *.bat
+*.bak
 Desktop.ini
 
 # Escludo le cartelle non funzionali

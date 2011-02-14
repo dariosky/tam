@@ -1,5 +1,5 @@
 {% load utilTag %}
-<tr class="{% cycle 'row1' 'row2' %}{% if viaggio.warning %} warning{% endif %}">
+<tr{% if viaggio.warning %} class="warning"{% endif %}>
 	<td>
 		{% if not viaggio.conducente_confermato %}
 			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" /><br/>
