@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-import settings
+from django.conf import settings
 
 #urlpatterns = patterns('',
 #    url(r'^$', "django.views.generic.simple.direct_to_template", {'template':'main.html'}, name="main" ),
@@ -7,6 +7,8 @@ import settings
 
 urlpatterns = patterns ( '',
 	( r'^', include( 'tam.urls' ) ),
+	( r'^archive/', include( 'tamArchive.urls' ) ),
+	( r'^', include( 'license.urls' ) ),
  )
 
 from django.contrib import admin

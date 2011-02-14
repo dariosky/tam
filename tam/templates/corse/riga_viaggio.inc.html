@@ -1,0 +1,129 @@
+{% load utilTag %}
+<tr class="{% cycle 'row1' 'row2' %}{% if viaggio.warning %} warning{% endif %}">
+	<td>
+		{% if not viaggio.conducente_confermato %}
+			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" /><br/>
+		{% endif %}
+		{% if viaggio.padre %}
+				<img src="/media/frecciaverde.png" alt="*" />
+		{% else %}
+			{% if viaggio.is_abbinata %}
+				<img src="/media/frecciagiu.png" alt="." />
+			{% endif %}
+		{% endif %}
+	</td>
+
+	<td>
+		{% if not viaggio.padre and not viaggio.conducente_confermato  %}<a href="{% url tamNuovaCorsaId viaggio.id %}">{% endif %}
+			{% ifequal viaggio.data.date today %}
+				<span class="bighour">{{ viaggio.data|date:"H:i" }}</span>
+			{% else %}
+				<span class="middlehour">
+				{% if viaggio.data.date.year == today.year %}
+					{{ viaggio.data|date:"D j F, H:i"}}
+				{% else %}
+					{{ viaggio.data|date:"D j F Y, H:i"}}
+				{% endif %}
+				</span>
+			{% endifequal %}
+		{% if not viaggio.padre and not viaggio.conducente_confermato %}</a>{% endif %}
+		<br/>
+		{{ viaggio.html_tragitto|safe }}
+	</td>
+
+	<td>
+		<div class="cliente">
+		{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}
+		</div>
+		{{ viaggio.numero_passeggeri }} pax {% if viaggio.esclusivo%}<img width="12px" height="12px" src="/media/t.ico" alt="taxi" />{% else %}<img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />{% endif %}
+	</td>
+	{% if viaggio.arrivo %}
+		<td class="arrivo">
+			{% if viaggio.is_long %}<strong>{% endif %}
+			{% ifequal viaggio.a luogoRiferimento %}
+				ARRIVO {{ viaggio.da }}
+			{% else %}
+				{{ viaggio.da }}<img src="/media/fout.png" alt="Arrivo" />{{ viaggio.a }}
+			{% endifequal %}
+			{% if viaggio.is_long %}</strong>{% endif %}
+		</td>
+	{% else %}
+		<td class="partenza">
+			{% if viaggio.is_long %}<strong>{% endif %}
+			{% ifequal viaggio.da luogoRiferimento %}
+				PARTENZA {{ viaggio.a }}
+			{% else %}
+				{{ viaggio.da }}<img src="/media/fin.png" alt="Partenza" />{{ viaggio.a }}
+			{% endifequal %}
+			{% if viaggio.is_long %}</strong>{% endif %}
+		</td>
+	{% endif %}
+
+	<td>{{ viaggio.note }}
+		{% if viaggio.passeggero.dati %}<div class="notePasseggero">{{ viaggio.passeggero.dati }}</div>{% endif %}
+	</td>
+
+	<td>
+		
+		<p>
+			{% if viaggio.punti_abbinata %}
+				{% num_range viaggio.punti_abbinata as punti_abbinata %}
+				{% for punto in punti_abbinata %}<img src="/media/casina.png" alt='DV' />{% endfor %}
+				<br/>
+				{{viaggio.punti_abbinata}} x {{viaggio.prezzoPunti}} nei doppi Venezia.<br/>
+			{% endif %}
+			{% if  viaggio.prezzoVenezia %}{{viaggio.prezzoVenezia}} nei Venezia.{% endif %}
+			{% if  viaggio.prezzoPadova %}{{viaggio.prezzoPadova}} nei Padova.{% endif %}
+			{% if  viaggio.prezzoDoppioPadova %}{{viaggio.prezzoDoppioPadova}} nei doppi Padova.{% endif %}
+		</p>
+	
+		{% if viaggio.is_valid %}
+			{{ viaggio.km }} km.
+		{% else %}
+			<span class='errorlist'>{{ viaggio.km }} km.</span>
+		{% endif %}
+		
+		<br/>
+		{% include "corse/corse_prezzo_viaggio.inc.html" %}
+		{% if viaggio.fatturazione %}<br/><img src="/media/flag/fattura.png" alt="richiede fattura" />{% endif %}
+		{% if viaggio.pagamento_differito %}<br/><img src="/media/flag/timedelta.png" alt="pagamento differito" />{% endif %}
+		{% if viaggio.cartaDiCredito %}<br/><img src="/media/flag/card.png" alt="carta" />{% endif %}
+		{% if viaggio.incassato_albergo %}<br/>CONTO FINE MESE{% endif %}
+		{% ifequal viaggio.is_abbinata "P" %}<br/>collettivo in partenza{% endifequal %}
+	</td>
+
+
+	<td>
+	{% if viaggio.padre and recurseChild %}
+		<img src="/media/arrow_join.png" alt='' />
+	{% else %}
+		{% with viaggio.confirmed as confirmed %}
+			{% if viaggio.conducente_richiesto %}
+				<strong>no suppl:<br/>{{ viaggio.conducente }}</strong>
+			{% else %}
+				{% if confirmed %}
+					{{ viaggio.conducente }}
+				{% else %}
+					{% with viaggio.classifica as classificaViaggio %}
+					{% if classificaViaggio %}
+						<form action="" method="post">
+							<div>
+								<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
+								<select name="conducente">
+									{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
+								</select><br/>
+								<input type="checkbox" name="confirmed" class="cbConducente" />
+								<input type="submit" name="confirm" class='conducenteOkBtn' value="ok" />
+							</div>
+						</form>
+					{% else %}
+					    Nessun conducente disponibile
+					{% endif %}
+					{% endwith %}
+				{% endif %}
+			{% endif %}
+			{% if confirmed %}<br/><img alt="confermato" src="/media/ok.png" /> {% endif %}
+		{% endwith %}
+        {% endif %}
+	</td>
+</tr>

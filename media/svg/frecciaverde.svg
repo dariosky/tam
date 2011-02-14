@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -13,12 +14,13 @@
    height="1052.3622047"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.46"
+   inkscape:version="0.48.0 r9654"
    sodipodi:docname="frecciaverde.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape"
    inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\frecciaverde.png"
    inkscape:export-xdpi="5"
-   inkscape:export-ydpi="5">
+   inkscape:export-ydpi="5"
+   version="1.1">
   <defs
      id="defs4">
     <linearGradient
@@ -98,16 +100,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7"
-     inkscape:cx="205.07478"
-     inkscape:cy="434.13617"
+     inkscape:zoom="1.4"
+     inkscape:cx="443.43897"
+     inkscape:cy="340.51774"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1280"
      inkscape:window-height="968"
      inkscape:window-x="0"
-     inkscape:window-y="22" />
+     inkscape:window-y="22"
+     inkscape:window-maximized="0" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -116,6 +119,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -124,13 +128,22 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:url(#linearGradient3161);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 217.14285,595.21933 C 211.42857,862.09667 182.06476,802.36218 508.57143,823.79075 L 508.57143,918.07647 L 675.71429,768.07647 L 500.67171,627.0156 L 500.67171,723.79075 C 266.30653,660.99279 348.26741,710.78717 349.69598,596.64789 L 217.14285,595.21933 z"
+       style="fill:url(#linearGradient3161);fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:7;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 217.14285,595.21933 c -5.71428,266.87734 -35.07809,207.14285 291.42858,228.57142 l 0,94.28572 167.14286,-150 -175.04258,-141.06087 -14.14214,94.75484 c -182.94173,0 -168.11859,-6.90225 -168.11859,-127.14286 z"
        id="path2383"
-       sodipodi:nodetypes="cccccccc" />
+       sodipodi:nodetypes="cccccccc"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="C:\Stuff\development\Python\Tam\media\frecciaverde2.png"
+       inkscape:export-xdpi="4.5900002"
+       inkscape:export-ydpi="4.5900002" />
     <path
-       style="fill:url(#linearGradient3169);fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 217.15625 595.21875 C 215.13648 689.54929 209.99366 735.56582 218.65625 759.25 C 276.8895 729.35665 343.51602 712.375 414.28125 712.375 C 433.65109 712.375 452.71271 713.66515 471.375 716.125 C 273.67685 665.20097 348.32266 705.70334 349.6875 596.65625 L 217.15625 595.21875 z M 500.65625 627 L 500.65625 720.96875 C 557.40899 732.47856 609.83666 755.12691 655.34375 786.34375 L 675.71875 768.0625 L 500.65625 627 z "
-       id="path2388" />
+       style="fill:url(#linearGradient3169);fill-opacity:1;fill-rule:evenodd;stroke:none"
+       d="m 217.15625,595.21875 c -2.01977,94.33054 -7.16259,140.34707 1.5,164.03125 58.23325,-29.89335 144.85977,-44.01786 195.625,-46.875 19.33923,-1.08844 38.43146,1.29015 57.09375,3.75 -169.12673,-5.20974 -152.80724,-7.21788 -151.6875,-119.46875 z m 287.03553,36.32694 -16.16244,88.91798 c 56.75274,11.50981 121.80732,34.66324 167.31441,65.88008 l 20.375,-18.28125 z"
+       id="path2388"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccscccccccc"
+       inkscape:export-filename="C:\Stuff\development\Python\Tam\media\frecciaverde2.png"
+       inkscape:export-xdpi="4.5900002"
+       inkscape:export-ydpi="4.5900002" />
   </g>
 </svg>

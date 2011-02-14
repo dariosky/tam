@@ -57,31 +57,29 @@
 					{% with form.passeggero as field %}	{{ field.label_tag }} {{ field }} {% if field.errors %} <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %} </span> {% endif %} {% endwith %}
 				</span>
 			</p>
-			<p>
+			<div>
 			    {{ form.numero_passeggeri.label_tag }} {{ form.numero_passeggeri }}
-			    <span id="esclusivoBlock">{{ form.esclusivo }}</span>
+			    <div id="esclusivoBlock">{{ form.esclusivo }}</div>
 				{% with form.numero_passeggeri as field %} {% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %} {% endwith %}
 				{% with form.esclusivo as field %} {% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %} {% endwith %}
-			</p>
+			</div>
 
 		{% else %}
 			{% if prezzoDaListinoDiurno %}Prezzo listino diruno{% endif %}
 			{% if prezzoDaListinoNotturno %}Prezzo listino notturno{% endif %}
-			<center>
-				<table>
-					{{ form }}
-					{% if viaggio.passeggero %}
-						<tr>
-							<th>
-								Note permanenti del privato <br/>{{ viaggio.passeggero.nome }}:
-							</th>
-							<td>
-								<textarea id="id_dati_privato" style="background-color:lightyellow" rows="10" cols="40" name="datiPrivato">{% if viaggio.passeggero.dati %}{{ viaggio.passeggero.dati }}{% endif %}</textarea>
-							</td>
-						</tr>
-					{% endif %}
-				</table>
-			</center>
+			<table style='text-align:left; margin:auto;'>
+				{{ form }}
+				{% if viaggio.passeggero %}
+					<tr>
+						<th>
+							Note permanenti del privato <br/>{{ viaggio.passeggero.nome }}:
+						</th>
+						<td>
+							<textarea id="id_dati_privato" style="background-color:lightyellow" rows="10" cols="40" name="datiPrivato">{% if viaggio.passeggero.dati %}{{ viaggio.passeggero.dati }}{% endif %}</textarea>
+						</td>
+					</tr>
+				{% endif %}
+			</table>
         {% endifequal %}
 
 
@@ -105,7 +103,7 @@
             {% if not new %}
 				{% ifnotequal step 1 %}
 					<a href="{% url tamCorsaCopy viaggio.pk %}">copia</a>
-					<a href="{% url actionLog %}?type=viaggio&id={{ viaggio.id }}">log</a>
+					<a href="{% url actionLog %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
 				{% endifnotequal %}
                 {% with viaggio.delete_url as deleteUrl %}
                     {% if deleteUrl %}

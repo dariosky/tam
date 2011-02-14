@@ -57,5 +57,10 @@
 	</tr>
 {% endfor %}
 </table>
+{% if thisPage.has_other_pages %}
+	<div class="countblock">
+			{% include "paginator.inc.html" %}
+	</div>
+{% endif %}
 
 {% endblock %}

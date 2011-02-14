@@ -2,29 +2,24 @@
 from django.shortcuts import render_to_response, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect	#use the redirects
 #from django.contrib import auth	# I'll use authentication
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group
 from django import forms
-from django.contrib.auth.decorators import login_required #, permission_required   # used to force a view to logged users
 from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
-from django.core.urlresolvers import reverse	#to resolve named urls
 from tam.models import *
-from django.db import models
-import datetime
 import time
 from django.db import IntegrityError
 #from django.db import connection
-from license import *
-import logging
 from django.core.paginator import Paginator
+import StringIO
+from genericUtils import *
+
 
 # Creo gli eventuali permessi mancanti 
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
 for app in get_apps():
 	create_permissions(app, None, 2)
-
-from genericUtils import *
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -43,15 +38,12 @@ class SmartPager(object):
 		self.addToResults(currentPage-2,5)
 		self.addToResults(totalPages-3,4)
 
-@licensed
-@login_required
-def listaCorse(request, template_name="corse.html"):
+def listaCorse(request, template_name="corse/lista.html"):
 	""" Schermata principale con la lista di tutte le corse """
 	user=request.user
 	profilo, created=ProfiloUtente.objects.get_or_create(user=user)
 	dontHilightFirst=True
 	outputFormat=request.GET.get('format',None)
-
 	class Form(forms.Form):
 		class Media:
 			js = (
@@ -274,8 +266,7 @@ def listaCorse(request, template_name="corse.html"):
 	paginator=Paginator(viaggi, 100, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi=viaggi
 	page=request.GET.get("page", 1)
-	
-	try: page=int(page)
+	try:page=int(page)
 	except: page=1
 	s=SmartPager(page, paginator.num_pages)
 	paginator.smart_page_range=s.results
@@ -366,8 +357,6 @@ def listaCorse(request, template_name="corse.html"):
 		generatore.enumerateTables=djangoManagerToTable
 		generatore.run()
 		if generatore.sheetCount:
-#			import os
-			import StringIO
 			output = StringIO.StringIO()
 
 #			filename=os.path.join( os.path.dirname(__file__), 'tempExcel.xls')
@@ -392,8 +381,6 @@ def listaCorse(request, template_name="corse.html"):
 			return HttpResponseRedirect("/")	# back home
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def corsaClear(request, next=None):
 	""" Delete session saves and return to a newCorsa """
 	if not next: next=reverse("tamNuovaCorsa")
@@ -402,8 +389,6 @@ def corsaClear(request, next=None):
 			del request.session[field]	# sto ridefinendo il primo passo, lo tolgo dalla session
 	return HttpResponseRedirect(next)
 
-@licensed
-@login_required
 def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=False, redirectOk="/"):
 	user=request.user
 	profilo, created=ProfiloUtente.objects.get_or_create(user=user)
@@ -634,8 +619,6 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	#raise Exception("Sgnaps")
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def getList(request, model=Luogo, field="nome"):
 	""" API Generica che restituisce un file di testo, con una lista di righe con tutte le istanze
 		che abbiano il campo field uguale al campo q che ottengo via get
@@ -648,15 +631,11 @@ def getList(request, model=Luogo, field="nome"):
 	return HttpResponse("\n".join(results), mimetype="text/plain")
 
 
-@licensed
-@login_required
 def clienti(request, template_name="clienti_e_listini.html"):
 	listini=Listino.objects.all()
 	clienti=Cliente.objects.filter()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def cliente(request, template_name="cliente.html", nomeCliente=None):
 	nuovo = nomeCliente is None
 	user=request.user	
@@ -686,8 +665,6 @@ def cliente(request, template_name="cliente.html", nomeCliente=None):
 		return HttpResponseRedirect(reverse("tamClienteNome", kwargs={"nomeCliente": cliente.nome}))
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def listino(request, template_name="listino.html", id=None, prezzoid=None):
 	nuovo = id is None
 	listino=None
@@ -803,8 +780,6 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def luoghi(request, template_name="luoghi_e_tratte.html"):
 	""" Mostro tutti i luoghi suddivisi per bacino """
 	class Form(forms.Form):	#carico jquery per poter raggruppare con gli accordion
@@ -820,8 +795,6 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
 	tratte=Tratta.objects.all()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def conducente(*args, **kwargs):
 	request=args and args[0] or kwargs['request']
 	user=request.user
@@ -838,8 +811,6 @@ def conducente(*args, **kwargs):
 	return bacino(*args, **kwargs)
 
 
-@licensed
-@login_required
 def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectOk="/", delete=False, unique=(("nome",),),
 			note="", excludedFields=None):
 	if "next" in request.GET:
@@ -897,15 +868,11 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 				return HttpResponseRedirect(redirectOk)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def privati(request, template_name="passeggeri.html"):
 	""" Mostro tutti i passeggeri privati """
 	privati=Passeggero.objects.all()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@licensed
-@login_required
 def profilo(request, *args, **kwargs):
 	user=request.user
 	instance, created = ProfiloUtente.objects.get_or_create(user=user)
@@ -913,8 +880,6 @@ def profilo(request, *args, **kwargs):
 	kwargs["note"]=u"Puoi definire un po' di dettagli per l'utente %s." % user
 	return bacino(request, *args, **kwargs)
 
-@licensed
-@login_required
 def conducenti(request, template_name="conducenti.html", confirmConguaglio=False):
 	user=request.user
 	profilo, created=ProfiloUtente.objects.get_or_create(user=user)
@@ -1025,72 +990,6 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 	tuttiConducenti=Conducente.objects.filter()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@login_required
-def license(request, template_name="registration/license.html"):
-	if request.method=="POST":
-		if not request.user.has_perm('tam.change_tamlicense'):
-			request.user.message_set.create(message=u"Devi avere i superpoteri per cambiare la licenza.")
-			return HttpResponseRedirect("/")
-		for license in TamLicense.objects.all():
-			license.delete()
-
-	form=LicForm(request.POST or None)
-
-	if form.is_valid():
-		form.save()
-		return HttpResponseRedirect(reverse("tamCorse"))
-
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
-
-@login_required
-def activation(request, template_name="registration/activation.html"):
-	user=request.user
-	if not user.is_superuser:
-		request.user.message_set.create(message=u"Devi essere il superuser per accedere all'attivazione.")
-		return HttpResponseRedirect("/")
-	lic=get_license_detail()
-	ininame=lic.get("tam_registred_user","")
-	expiration=lic.get("tam_expiration_date", None)
-	if lic["tam_licensed"] and not expiration:
-		initype="unlimited"
-	elif lic["tam_licensed"]:
-		initype="trial"
-	else:
-		initype="no"
-
-	actualLicenseType="no"
-	if lic and lic["tam_licensed"]:
-		if lic["tam_expiration_date"]:
-			actualLicenseType="trial"
-		else:
-			actualLicenseType="unlimited"
-
-	class ActivationForm(forms.Form):
-		name=forms.CharField(max_length=50, label="Registrata a", initial=ininame)
-		type=forms.ChoiceField(
-								[("no","Non registrata"), ("trial","Licenza di prova"), ("unlimited","Illimitata")],
-								label="Tipo", initial=actualLicenseType
-							)
-		data=forms.DateField(initial=expiration or (datetime.date.today()+datetime.timedelta(days=31)), required=False )
-		def clean(self):
-			cleaned=self.cleaned_data
-			if self.cleaned_data["type"]=="unlimited":
-				cleaned["data"]="unlimited"
-			elif self.cleaned_data["type"]=="no":
-				cleaned["data"]=datetime.date.today()-datetime.timedelta(days=1) #scade ieri
-			return cleaned
-	form=ActivationForm(request.POST or None)
-	if form.is_valid():
-		for license in TamLicense.objects.all():
-			license.delete()
-#		expireDate=datetime.date(year=2008, month=10, day=15)
-		clearText="%s|%s"%(form.cleaned_data["name"], form.cleaned_data["data"])
-		licForm=LicForm({"license":encode( clearText )})
-		licForm.save()
-		return HttpResponseRedirect(reverse("tamUtil"))
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
-
-@login_required
 def clonaListino(request, id, template_name="listino-clona.html"):
 	user=request.user
 	if not user.has_perm('tam.add_listino'):
@@ -1105,7 +1004,7 @@ def clonaListino(request, id, template_name="listino-clona.html"):
 			try:
 				Listino.objects.get(nome=nome)
 				raise forms.ValidationError(u"Esiste già un listino chiamato '%s'." % nome)
-			except Listino.DoesNotExist, e:
+			except Listino.DoesNotExist:
 				return nome
 
 	form = ListinoCloneForm(request.POST or None)
@@ -1122,7 +1021,6 @@ def clonaListino(request, id, template_name="listino-clona.html"):
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@login_required
 def listinoDelete(request, id, template_name="listino-delete.html"):
 	user=request.user
 	if not user.has_perm('tam.delete_listino'):
@@ -1209,7 +1107,6 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 			resetAssociatiToDefault(viaggio)
 			viaggio.updatePrecomp()
 
-@login_required
 def corsaCopy(request, id, template_name="corsa-copia.html"):
 	user=request.user
 	if not user.has_perm('tam.add_viaggio'):
@@ -1312,71 +1209,9 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 	jsui=askForm
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-def humanizeSize(size):
-	size=float(size)
-	suffix="byte"
-	if size>1024:
-		size=size/1024
-		suffix="KB"
-		if size>1024:
-			size=size/1024
-			suffix="MB"
-	return "%.2f%s"%(size, suffix)
-
-def backup():
-	backcount=10	# numero di backup da tenere
-	import os
-	from django.conf import settings
-	dbname = os.path.join(settings.PROJECT_PATH, "tam.db3")
-	backupdir=os.path.join(settings.PROJECT_PATH, 'backup')	# backup subfolder
-	from glob import glob
-	if not os.path.isdir(backupdir):
-		os.makedirs(backupdir)
-	backups=list( glob(os.path.join(backupdir, '*.gz')) )
-	backups.sort()
-	if backups:
-		lastbackupname=backups[-1]
-		lastmodTimestamp=os.path.getmtime(lastbackupname)
-		lastbackup=datetime.datetime.fromtimestamp(lastmodTimestamp)
-	if not os.path.isfile(dbname): raise Exception("Impossibilie trovare il DB %s."%dbname)
-	import gzip
-	if len(backups)>backcount:
-		for backup in backups[:-backcount+1]:
-			logging.debug("Cancello il backup: %s"%os.path.basename(backup))
-			os.unlink(backup)
-
-	n=datetime.datetime.now()
-	backupname="%s - tam.db3.gz"% n.strftime('%Y-%m-%d %H%M')
-	backupPath=os.path.join(backupdir, backupname)
-
-	dbfile=file(dbname, "rb")
-	dbstream=dbfile.read()
-	dbfile.close()
-
-	gz=file(backupPath, 'wb')
-	f=gzip.GzipFile('tam.db3', fileobj=gz)
-	f.write(dbstream)
-	f.close()
-	gz.close()
-
-#			gz=gzip.open(backupPath, 'wb')
-#			gz.write(dbstream)
-#			gz.close()
-
-	responseFile=file(backupPath,'rb')
-	response = HttpResponse(responseFile.read(), mimetype='application/octet-stream') #'application/gzip'
-	response['Content-Disposition'] = 'attachment; filename="%s"'%backupname
-
-	return response
-
-@login_required
 def util(request, template_name="utils/util.html"):
-	if "backup" in request.POST:
-		request.user.message_set.create(message=u"Backup del database effettuato.")
-		return backup()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@login_required
 def resetSessions(request, template_name="utils/resetSessions.html"):
 	user=request.user
 	if not user.is_superuser:
@@ -1385,12 +1220,13 @@ def resetSessions(request, template_name="utils/resetSessions.html"):
 	if request.method=="POST":
 		if "reset" in request.POST:
 			logging.debug("reset delle sessioni")
-			from django.db import connection, transaction
+			from django.db import transaction
+			connection = connections['default']
 			cursor=connection.cursor()
 			query="""
 				delete from django_session
 			"""
-			cursor.execute( query, () )
+			cursor.execute( query )
 			transaction.commit_unless_managed()
 
 			#connection.commit()
@@ -1405,7 +1241,6 @@ def resetUserSession(selectedUser):
 		if ses.get_decoded().get('_auth_user_id')==selectedUser.id:
 			ses.delete()
 
-@login_required
 def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	user=request.user
 	if not user.has_perm('auth.change_user'):
@@ -1448,7 +1283,6 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 				
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@login_required
 def newUser(request, template_name="utils/newUser.html"):
 	user=request.user
 	profilo, created=ProfiloUtente.objects.get_or_create(user=user)
@@ -1470,7 +1304,6 @@ def newUser(request, template_name="utils/newUser.html"):
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-@login_required
 def delUser(request, username, template_name="utils/delUser.html"):
 	user=request.user
 	if not user.has_perm('auth.del_user'):
@@ -1487,7 +1320,6 @@ def delUser(request, username, template_name="utils/delUser.html"):
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
-@login_required
 def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
 #	from django.contrib.auth.views import password_change
 	from django.contrib.auth.forms import PasswordChangeForm
@@ -1500,7 +1332,6 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
 #	response=password_change(request, template_name=template_name, post_change_redirect='/')
 	return render_to_response(template_name, {'form': form }, context_instance=RequestContext(request))
 
-@login_required
 def actionLog(request, template_name="utils/actionLog.html"):
 	user=request.user
 	utenti=User.objects.exclude(is_superuser=True)
@@ -1567,7 +1398,7 @@ def actionLog(request, template_name="utils/actionLog.html"):
 		for action in actions:
 			if action.content_type==viaggioType:
 				action.preInsert = ( action.action_type=='A' and action.content_object and action.content_object.data<action.data.replace(hour=0, minute=0) )
-	except Exception, e:
+	except Exception:
 		user.message_set.create(message=u"La pagina %d è vuota." % page)
 		thisPage=None
 		actions=[]
@@ -1584,7 +1415,7 @@ def actionLog(request, template_name="utils/actionLog.html"):
 								"viaggioType":viaggioType
 							  },
 							  context_instance=RequestContext(request))
-@login_required
+
 def fixAction(request, template_name="utils/fixAction.html"):
 	if not request.user.is_superuser:
 		request.user.message_set.create(message=u"Devi avere i superpoteri per eseguire le azioni correttive.")

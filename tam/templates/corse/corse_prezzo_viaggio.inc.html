@@ -1,0 +1,16 @@
+{{ viaggio.prezzo }}
+{% if viaggio.commissione %}- c{{ viaggio.commissione }}{% ifequal viaggio.tipo_commissione "P" %}%{% endifequal %}{% endif %}
+{% if viaggio.costo_autostrada %}- a{{ viaggio.costo_autostrada }}{% endif %}
+{% if viaggio.pagamento_differito or viaggio.fatturazione%}- p15%{% endif %}
+{% if viaggio.abbuono_fisso %}- b{{viaggio.abbuono_fisso}}{% endif %}
+{% if viaggio.abbuono_percentuale %}- b{{viaggio.abbuono_percentuale}}%{% endif %}
+{% if viaggio.costo_sosta %}- s{{ viaggio.costo_sosta }}{% endif %}
+{% if viaggio.prezzo_sosta %}+{{viaggio.prezzo_sosta}} al 75%{% endif %}
+=
+<strong>
+	{% if nolink %}
+		{{ viaggio.prezzo_finale|floatformat:2 }}€
+	{% else %}
+		<a href="{% url tamNuovaCorsa2Id viaggio.id %}">{{ viaggio.prezzo_finale|floatformat:2 }}€</a>
+	{% endif %}
+</strong>

@@ -25,7 +25,7 @@
 			    {% endif %}
 		    </td>
 		    {% for punto in classifica.celle_abbinate %}
-			    <td> {{ punto.valore|floatformat:2 }}{% if punto.data %}<br>{{ punto.data|date:"d/m/Y " }}{% endif %}</td>
+			    <td> {{ punto.valore|floatformat:2 }}{% if punto.data %}<br/>{{ punto.data|date:"d/m/Y " }}{% endif %}</td>
 		    {% endfor %}
 		</tr>
 	    {% endfor %}

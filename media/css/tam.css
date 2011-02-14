@@ -62,7 +62,7 @@ a:hover{ color:blue; }
 
 .navBar {
 	text-align:left;
-	background: white url(/media/sfuminogrigiov.png);
+	background: white url(/media/header_fade.png);
 	background-repeat: repeat-x;
     background-position: top;
 	/*max-width: 100%;*/
@@ -204,7 +204,6 @@ td img {vertical-align: middle;}
 	font-size:1.5em;
 }
 
-
 .warning * {
 	/*background-color:#FFBAB4;*/
 	/*border:2px solid red;*/
@@ -293,11 +292,11 @@ table.tablesorter tbody .warning td {
 	padding:10px;
 }
 
+#esclusivoBlock { display:inline; }
 #esclusivoBlock ul{ /* la choice blocco esclusivo */
-	display: inline;
-    list-style: none;
+    list-style-type: none;
 }
-#esclusivoBlock ul li{ /* la choice blocco esclusivo */
+#esclusivoBlock li{ /* la choice blocco esclusivo */
     display: inline;
 }
 
@@ -320,4 +319,9 @@ table.tablesorter tbody .warning td {
 
 .super {
 	background: yellowgreen;
+}
+
+.bigButton{
+	width:400px;
+	font-size:larger;
 }

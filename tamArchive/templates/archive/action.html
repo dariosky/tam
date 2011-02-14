@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Archiviazione &raquo; {{ block.super }}{% endblock %}
+
+{% block header %}
+	{{ block.super }}
+{% endblock header %}
+
+{% block content %}
+<h1>Archiviazione.</h1>
+
+<form method="post" action="">
+<div>
+		<p>
+			Archivia tutte le corse ed i log fino a
+			<strong>{{ end_date|date:"D d M Y" }}</strong>
+			mantenendo le classifiche inalterate.
+		</p>
+		<p>
+			Archivio <strong>{{ archiveCount|intcomma }}</strong> corse.<br/>
+			Elimino <strong>{{ logCount|intcomma }}</strong> azioni dal log.
+		</p>
+
+		<input type="hidden" name="end_date" value="{{ end_date_string }}"/>
+		<input type="submit" name="archive" value="Archivia" class="bigButton" /><br/>
+		(attenzione, l'azione è irreversibile).<br/>
+	
+</div>
+</form>
+
+<a href="{% url tamArchiveUtil %}">Torna agli strumenti di archiviazione</a>
+{% endblock content %}

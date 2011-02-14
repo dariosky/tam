@@ -8,7 +8,7 @@ import datetime
 from decimal import Decimal
 import logging
 from django.core.cache import cache
-from django.db import connection
+from django.db import connections
 
 TIPICLIENTE=(("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE=[("F", "€"), ("P", "%")]
@@ -281,13 +281,13 @@ class Viaggio(models.Model):
 			# i figli non prendono nulla
 
 		if self.padre is None:
-			for (key, type), points in self.disturbi().items():
+			for (key, type), points in self.disturbi().items(): #@UnusedVariable
 				if type=="night":
 					self.punti_notturni+=points
 				else:
 					self.punti_diurni+=points
 			
-		tragitto=render_to_string('dettagli_viaggio.inc.html', {"viaggio": self})
+		tragitto=render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": self})
 		self.html_tragitto=tragitto
 
 		for field in fields:
@@ -770,67 +770,67 @@ class Viaggio(models.Model):
 			}
 		return result
 
-		def addToResult(fieldName):
-			""" Aggiunge a result tutti i conducenti con punteggio sotto il minimo contanto fieldName 
-				Meno è meglio!
-			"""
-#			logging.debug("Scelgo tra %d conducenti per %s." % (len(conducenti), fieldName))
-			if not conducenti: return	# se non ho conducenti rimanenti, esco
-			if len(conducenti)==1:
-				result.insert(0, conducenti.values()[0])	# il primo è il vincitore
-				conducenti.clear()
-			# trova il minimo per vincere tra i rimanenti
-			valoriInteressati=[classifica[fieldName] for classifica in classifiche if classifica["conducente_id"] in conducenti]
-			if valoriInteressati:
-				minToWin=min(valoriInteressati)
-			else:
-				minToWin=0
-#			logging.debug("Min to win %s: %s"%(fieldName, minToWin))
-			discarded=[]	# tutti i perdenti li metto in lista di conducenti
-				
-			for id in conducenti.keys():	# sono ordinati, tengo una copia degli id, per iterare
-				if not id in classid: continue
-				c=classid[id]
-				if c[fieldName]>minToWin:
-					conducente=conducenti.pop(c["conducente_id"])
-					discarded.append((c[fieldName], conducente)) # tolgo il conducente e lo metto tra gli scartati
-
-#			for c in classifiche:	# vecchio metodo
-#				if c["conducente_id"] not in conducenti: continue # è un conducente che è già stato messo in lista
+#		def addToResult(fieldName):
+#			""" Aggiunge a result tutti i conducenti con punteggio sotto il minimo contanto fieldName 
+#				Meno è meglio!
+#			"""
+##			logging.debug("Scelgo tra %d conducenti per %s." % (len(conducenti), fieldName))
+#			if not conducenti: return	# se non ho conducenti rimanenti, esco
+#			if len(conducenti)==1:
+#				result.insert(0, conducenti.values()[0])	# il primo è il vincitore
+#				conducenti.clear()
+#			# trova il minimo per vincere tra i rimanenti
+#			valoriInteressati=[classifica[fieldName] for classifica in classifiche if classifica["conducente_id"] in conducenti]
+#			if valoriInteressati:
+#				minToWin=min(valoriInteressati)
+#			else:
+#				minToWin=0
+##			logging.debug("Min to win %s: %s"%(fieldName, minToWin))
+#			discarded=[]	# tutti i perdenti li metto in lista di conducenti
+#				
+#			for id in conducenti.keys():	# sono ordinati, tengo una copia degli id, per iterare
+#				if not id in classid: continue
+#				c=classid[id]
 #				if c[fieldName]>minToWin:
 #					conducente=conducenti.pop(c["conducente_id"])
 #					discarded.append((c[fieldName], conducente)) # tolgo il conducente e lo metto tra gli scartati
-			discarded.sort(reverse=True)
-			for c in discarded:
-#				logging.debug("Scarto %s per %s [%s/%s]" %(c[1].nick, fieldName, classid[c[1].id][fieldName], minToWin))
-				result.insert(0, c[1])	# aggiungo il conducente ai risultati
-
-		if self.punti_diurni:
-			addToResult("puntiDiurni")
-			
-		if self.punti_notturni:
-			addToResult("puntiNotturni")
-
-		if self.is_abbinata:
-			if self.punti_abbinata: addToResult("puntiAbbinata")	# è un doppioVenezia
-			if self.prezzoDoppioPadova: addToResult("prezzoDoppioPadova") # è un doppioPadova
-
-		if self.prezzoVenezia:
-			addToResult("prezzoVenezia")
-
-		if self.prezzoPadova:
-			addToResult("prezzoPadova")
-		
-		vincitori=[]
-		for id, c in conducenti.items():  # aggiungo come vincitori tutti i conducenti non scartati
-			vincitori.append(c)
-#		logging.debug("Ho %d vincitori" % len(vincitori))
-		result=vincitori+result
-
-		for conducente in inattivi:	# aggiungo infine i conducenti inattivi
-			result.append(conducente)
-#		logging.debug("Fine classifica")
-		return result
+#
+##			for c in classifiche:	# vecchio metodo
+##				if c["conducente_id"] not in conducenti: continue # è un conducente che è già stato messo in lista
+##				if c[fieldName]>minToWin:
+##					conducente=conducenti.pop(c["conducente_id"])
+##					discarded.append((c[fieldName], conducente)) # tolgo il conducente e lo metto tra gli scartati
+#			discarded.sort(reverse=True)
+#			for c in discarded:
+##				logging.debug("Scarto %s per %s [%s/%s]" %(c[1].nick, fieldName, classid[c[1].id][fieldName], minToWin))
+#				result.insert(0, c[1])	# aggiungo il conducente ai risultati
+#
+#		if self.punti_diurni:
+#			addToResult("puntiDiurni")
+#			
+#		if self.punti_notturni:
+#			addToResult("puntiNotturni")
+#
+#		if self.is_abbinata:
+#			if self.punti_abbinata: addToResult("puntiAbbinata")	# è un doppioVenezia
+#			if self.prezzoDoppioPadova: addToResult("prezzoDoppioPadova") # è un doppioPadova
+#
+#		if self.prezzoVenezia:
+#			addToResult("prezzoVenezia")
+#
+#		if self.prezzoPadova:
+#			addToResult("prezzoPadova")
+#		
+#		vincitori=[]
+#		for id, c in conducenti.items():  # aggiungo come vincitori tutti i conducenti non scartati
+#			vincitori.append(c)
+##		logging.debug("Ho %d vincitori" % len(vincitori))
+#		result=vincitori+result
+#
+#		for conducente in inattivi:	# aggiungo infine i conducenti inattivi
+#			result.append(conducente)
+##		logging.debug("Fine classifica")
+#		return result
 
 
 	def get_classifica(self, classifiche=None):
@@ -892,6 +892,7 @@ class Conducente(models.Model):
 	classifica_iniziale_puntiDoppiVenezia=models.IntegerField("Punti Doppi Venezia", default=0)
 	classifica_iniziale_prezzoDoppiVenezia=models.DecimalField("Valore Doppi Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
 	classifica_iniziale_doppiPadova=models.DecimalField("Doppi Padova", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
+	
 	classifica_iniziale_long=models.DecimalField("Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
 	classifica_iniziale_medium=models.DecimalField("Padova", max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
 	class Meta:
@@ -960,6 +961,8 @@ class Passeggero(models.Model):
 		return self.nome
 	def delete_url(self):
 		return reverse("tamPrivatoIdDel", kwargs={"id":self.id})
+	def url(self):
+		return reverse("tamPrivatoId", kwargs={"id":self.id})
 
 
 class Listino(models.Model):
@@ -1027,12 +1030,13 @@ class ProfiloUtente(models.Model):
 	user = models.ForeignKey(User, unique=True, editable=False)
 	luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza", null=True, blank=True)
 	class Meta:
+		permissions=( ('can_backup', 'Richiede un backup'), ('get_backup', 'Scarica un backup') )
 		verbose_name_plural=_("Profili utente")
 	def __unicode__(self):
 		return "%s" % self.user
 
-class TamLicense(models.Model):
-	license=models.TextField("Inserisci qui il tuo codice licenza.")
+#class TamLicense(models.Model):
+#	license=models.TextField("Inserisci qui il tuo codice licenza.")
 
 
 class Conguaglio(models.Model):
@@ -1051,19 +1055,19 @@ def get_classifiche():
 		Utilizzo una query fuori dall'ORM di Django per migliorare le prestazioni.
 	"""
 #	logging.debug("Ottengo le classifiche globali.")
-	cursor=connection.cursor()
+	cursor=connections['default'].cursor()
 	query="""
 		select
-		 c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
-		 sum(punti_diurni)+classifica_iniziale_diurni as puntiDiurni,
-		 sum(punti_notturni)+classifica_iniziale_notturni as puntiNotturni,
-		 sum(prezzoVenezia) + classifica_iniziale_long as prezzoVenezia,
-		 sum(prezzoPadova) + classifica_iniziale_medium as prezzoPadova,
-		 sum(prezzoDoppioPadova) + classifica_iniziale_doppiPadova as prezzoDoppioPadova,
-		 sum(punti_abbinata) + classifica_iniziale_puntiDoppiVenezia as puntiAbbinata
-		from tam_viaggio v
-		join tam_conducente c on v.conducente_id=c.id
-		where conducente_confermato=1 and c.attivo=1 --and c.nick='2'
+			  c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
+			  ifnull(sum(punti_diurni),0)+classifica_iniziale_diurni as puntiDiurni,
+			  ifnull(sum(punti_notturni),0)+classifica_iniziale_notturni as puntiNotturni,
+			  ifnull(sum(prezzoVenezia),0) + classifica_iniziale_long as prezzoVenezia,
+			  ifnull(sum(prezzoPadova),0) + classifica_iniziale_medium as prezzoPadova,
+			  ifnull(sum(prezzoDoppioPadova),0) + classifica_iniziale_doppiPadova as prezzoDoppioPadova,
+			  ifnull(sum(punti_abbinata),0) + classifica_iniziale_puntiDoppiVenezia as puntiAbbinata
+		from tam_conducente c
+			 left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato=1
+		where  c.attivo=1 --and c.nick='2'
 		group by c.id, c.nick
 	"""
 	cursor.execute( query, () )
@@ -1079,12 +1083,13 @@ def get_classifiche():
 	return classifiche
 
 
-LOG_ACTION_TYPE=[ ("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione") ]
+LOG_ACTION_TYPE=[ ("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"), ('L', "Login"), ("O", "Logout"), ("K", "Archiviazione") ]
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
+
 class ActionLog(models.Model):
 	data=models.DateTimeField()
-	user=models.ForeignKey(User)
+	user=models.ForeignKey(User, null=True)
 	action_type=models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
 
 	content_type = models.ForeignKey(ContentType)
@@ -1103,24 +1108,26 @@ class ActionLog(models.Model):
 
 from django.db.models import signals
 from tam.middleware import threadlocals
-from django.contrib.admin.models import ADDITION
-from django.contrib.admin.models import CHANGE
-from django.contrib.admin.models import DELETION
+#from django.contrib.admin.models import ADDITION
+#from django.contrib.admin.models import CHANGE
+#from django.contrib.admin.models import DELETION
 
-def logAction(action_type, instance, description):
-	if action_type == CHANGE:
-		action = 'M'
-	elif action_type == ADDITION:
-		action = "A"
-	elif action_type == DELETION:
-		action = "D"
+def logAction(action, instance, description, user=None):
+	if instance:
+		content_type = ContentType.objects.get_for_model(instance)
+		object_id = instance.pk
+	else:
+		content_type = None
+		object_id = None
+	if user is None:
+		user = threadlocals.get_current_user()
 	modification = ActionLog (
 							  data=datetime.datetime.now(),
-							  user=threadlocals.get_current_user(),
+							  user=user,
 							  action_type=action,
 							  description=description,
-							  content_type=ContentType.objects.get_for_model(instance),
-							  object_id=instance.pk,
+							  content_type=content_type,
+							  object_id=object_id,
 							  )
 	modification.save()
 #	logging.debug("LOG: %s" % modification)
@@ -1136,7 +1143,6 @@ def presave_logger(sender, instance, signal, **kwargs):
 	""" Log actions to db """
 #	logging.debug( "PRESAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
 #	logging.debug("********** ID: %s ********** "%instance.id)
-	
 	try:
 		pre_instance=sender.objects.get(id=instance.id)
 	except sender.DoesNotExist:
@@ -1160,14 +1166,14 @@ def presave_logger(sender, instance, signal, **kwargs):
 def postsave_logger(sender, instance, signal, **kwargs):
 #	logging.debug( "POSTSAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
 	if instance._changeList is None:
-		logAction(ADDITION, instance, u"%s"% instance)
+		logAction('A', instance, u"%s"% instance)
 	else:
 		if instance._changeList:
-			logAction(CHANGE, instance, u"; ".join(instance._changeList))
+			logAction('M', instance, u"; ".join(instance._changeList))
 
 def predelete_logger(sender, instance, signal, **kwargs):
 #	logging.debug( "DELETE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
-	logAction(DELETION, instance, u"%s"% instance)
+	logAction('D', instance, u"%s"% instance)
 
 def startLog(ModelClass):
 	signals.pre_save.connect(
@@ -1185,6 +1191,20 @@ def startLog(ModelClass):
 								 sender=ModelClass,
 								 dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_delete')
 							 )
+
+def stopLog(ModelClass):
+	signals.pre_save.disconnect(
+		sender=ModelClass,
+		dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_save')
+	)
+	signals.post_save.disconnect(
+		sender=ModelClass,
+		dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'post_save')
+	)
+	signals.pre_delete.disconnect(
+		sender=ModelClass,
+		dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_delete')
+	)
 
 # Comincia a loggare i cambiamenti a questi Modelli
 startLog(Viaggio)

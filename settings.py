@@ -1,11 +1,12 @@
-TAM_VERSION="1.21"
-
+# coding: utf-8
 import os
-PROJECT_PATH = os.path.dirname(__file__)
-
 from socket import gethostname
+
+TAM_VERSION="1.5b"
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+
 host=gethostname().lower()
-if host in ("dariosky", "quad"):
+if host in ("dariosky", "acido"):
 	DEBUG=True	# siamo in Test
 else:
 	DEBUG=False
@@ -18,19 +19,38 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
-DATABASES = {
-	'default': {
-			'ENGINE': 'django.db.backends.sqlite3',		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-			'NAME': os.path.join(PROJECT_PATH, 'tamdb.db3')
-	},
-	'archive': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': os.path.join(PROJECT_PATH, 'tamarchive.db3')
+#DEBUG = False	# Forzo ad usare il db di produzione
+usaSqlite = True
+if usaSqlite:
+	DATABASES = {	# DB di produzione
+		'default': {
+				'ENGINE': 'django.db.backends.sqlite3',		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+				'NAME': os.path.join(PROJECT_PATH, 'tam.db3')
+		},
+		'archive': {
+				'ENGINE': 'django.db.backends.sqlite3',
+				'NAME': os.path.join(PROJECT_PATH, 'tamarchive.db3')
+		}
 	}
-}
+else:
+	DATABASES = {	# DB di test
+		'default': {
+				'ENGINE': 'django.db.backends.postgresql_psycopg2',		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+				'NAME': 'tam',
+				'USER': 'tam',
+				'PASSWORD': 'tampg',
+				'HOST':'localhost', 'PORT':5432
+		},
+		'archive': {
+				'ENGINE': 'django.db.backends.postgresql_psycopg2',
+				'NAME': 'tamArchive',
+				'USER': 'tam',
+				'PASSWORD': 'tampg',
+				'HOST':'localhost', 'PORT':5432
+		}
+	}
 
-DATABASE_ROUTERS = [ 'tam.db_routers.TamArchiveRouter', ]
+DATABASE_ROUTERS = [ 'db_routers.TamArchiveRouter', ]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -78,12 +98,15 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'tam.middleware.loginRequirement.RequireLoginMiddleware',
     'django.middleware.doc.XViewMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
 	
+    'django.middleware.transaction.TransactionMiddleware',
+
 	'tam.middleware.threadlocals.ThreadLocals',
 #	'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 #    'debug_toolbar.middleware.DebugToolbarMiddleware',
+	
 )
 INTERNAL_IPS = ('127.0.0.1',)
 DEBUG_TOOLBAR_CONFIG={"INTERCEPT_REDIRECTS":False}
@@ -91,19 +114,21 @@ DEBUG_TOOLBAR_CONFIG={"INTERCEPT_REDIRECTS":False}
 ROOT_URLCONF = 'Tam.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Put strings here, like "/home/html/django_templates"
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 )
 
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-	"django.core.context_processors.auth",
+	"django.contrib.auth.context_processors.auth",
 	"django.core.context_processors.debug",
 	"django.core.context_processors.i18n",
 	"django.core.context_processors.media",
-	"django.core.context_processors.request",
-	'tam.views.license.license_context',
+	'django.core.context_processors.request',
+	"django.contrib.messages.context_processors.messages",
+
+	"license.context_processors.license_details",
 	)
 
 INSTALLED_APPS = (
@@ -112,10 +137,12 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.admin',
-    
-    "tam",
+    'django.contrib.humanize',
+
+    'tam',
 	'south',
 	'tamArchive',
+	'license',
 #    'debug_toolbar',
 )
 
@@ -130,8 +157,23 @@ EMAIL_PORT = 587
 
 if DEBUG:
 	import logging
-	logging.basicConfig(	level=logging.DEBUG,
+	logging.basicConfig(
+				level=logging.DEBUG,
 				format='%(asctime)s %(levelname)s %(message)s'
 			)
 
-SESSION_COOKIE_AGE=60*60	# cookie age in seconds (60 minutes)
+SESSION_COOKIE_AGE = 2*60*60	# cookie age in seconds (60 minutes)
+
+LICENSE_OWNER = 'ARTE Taxi'
+#import datetime
+#LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
+
+# RabbitMQ info
+rmquser = "tam"
+rmqpass = "tamRMQ"
+tmqhost = "tam"
+""" To configure RMQ:
+$ rabbitmqctl add_user tam tamRMQ
+$ rabbitmqctl add_vhost tam
+$ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
+"""

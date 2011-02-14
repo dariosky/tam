@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Gestione backup &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Gestione dei backup.</h1>
+
+<div>
+	TaM consente di effettuare contemporaneamente un backup di tutti
+	i dati sul server e poterne scaricare una copia in locale.
+	<form action="" method="post">
+		<table class="tablesorter">
+			<thead>
+				<tr>
+					<th></th>
+					<th>Utente</th>
+					<th>Data</th>
+					<th>Dimensione</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for backup in backupInfo.backups %}
+				<tr>
+					<td>{{ forloop.counter }}.</td>
+					<td>{{ backup.username }}</td>
+					<td>
+						{% with backup.date|date:"d-m-Y-Hi" as f_date %}
+							<a href='{% url tamGetBackup f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
+						{% endwith %}
+					</td>
+					<td>{{ backup.size }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		<p>
+			<input type="submit" name="backup" value="Backup DB" class="bigButton"/>
+		</p>
+	</form>
+</div>
+{% endblock %}

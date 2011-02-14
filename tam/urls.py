@@ -2,7 +2,6 @@ from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth.decorators import login_required 
 from tam.models import *
-import settings
 #import django.contrib.auth.views
 
 urlpatterns = patterns('tam.views',
@@ -64,12 +63,12 @@ urlpatterns = patterns('tam.views',
     url(r'^conducente/(?P<id>\d*)/delete/$', 'conducente', {"Model": Conducente, "redirectOk":"/CC/", "delete":True, "note":"Verranno eliminate tutte le corse di questo conducente." }, name="tamConducenteIdDel"),
     
     url(r'^profilo/$', 'profilo', {"Model": ProfiloUtente, "unique":[] }, name="tamUserProfile" ),
-    url(r'^licenza/$', 'license', name="tamLicense" ),
-    
+
     url(r'^conguaglio/$', 'conducenti', {"confirmConguaglio":True}, name="tamConguaglio" ),
     
 	url(r"^util/$", "util", name="tamUtil"),
-    url(r"^activation/$", "activation", name="tamActivation"),
+	url(r"^backup/$", "backup", name="tamBackup"),
+    url(r"^backup/(?P<backupdate>.*)/$", "getbackup", name="tamGetBackup"),
     url(r"^resetSessions/$", "resetSessions", name="tamResetSessions"),
     url(r"^permissions/$", "permissions", name="tamManage"),
 	url(r"^permissions/(?P<username>.*)/$", "permissions", name="tamManage"),
@@ -80,17 +79,14 @@ urlpatterns = patterns('tam.views',
 	url(r'^password/$', 'passwordChangeAndReset', name='change_password'),
 
 	url(r'^fixAction/$', 'fixAction', name='fix_action'),
-	
-	url(r'^archiveUtil/$', 'archivation.archivation', name='tamArchivation'),
-	url(r'^archiveUtil/doArchive/$', 'archivation.action', name='tamArchiveAction'),
-	url(r'^archiveUtil/flatScore/$', 'archivation.flat', name='tamArchiveFlat'),
-	url(r'^archive/$', 'archivation.archive', name='tamArchive'),
 
 )
 
-urlpatterns += patterns('', 
-	url(r'^login/$', 'django.contrib.auth.views.login', {"template_name":"registration/login.html"}, name="login"),
-    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', {"login_url":"/"}, name="logout")
+urlpatterns += patterns('tam.views',
+#	url(r'^login/$', 'django.contrib.auth.views.login', {"template_name":"login.html"}, name="login"),
+#    url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', {"login_url":"/"}, name="logout")
+	url(r'^login/$', 'login', name="login"),
+	url(r'^logout/$', 'logout', name="logout")
 )
 
 urlpatterns += patterns('',

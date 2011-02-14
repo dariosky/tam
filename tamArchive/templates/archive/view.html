@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Corse archiviate &raquo; {{ block.super }}{% endblock %}
+
+{% block header %}
+	{{ block.super }}
+{% endblock header %}
+
+{% block content %}
+<h1>Archivio</h1>
+<a href="{% url tamArchiveUtil %}">Torna agli strumenti di archiviazione</a>
+
+<div class="countblock">
+			{% if thisPage.has_other_pages %}
+				{% include "paginator.inc.html" %}
+			{% endif %}
+			corse totali: {{ paginator.count }}
+</div>
+<br style="clear:right;" />
+
+{% if list %}
+<table id="listaArchiviate" style="text-align:center" class="tablesorter">
+	<thead>
+		<tr>
+		<th>Data</th>
+		<th>Cliente</th>
+		<th>Da-a</th>
+		<th>Flags e note</th>
+		<th>Prezzi</th>
+		<th>Conducente</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for padre in list %}
+			{% with padre as viaggio %}
+				{% include "archive/inc.archive-row.html" %}
+			{% endwith %}
+			{% for viaggio in padre.viaggioarchive_set.all %}
+				{% include "archive/inc.archive-row.html" %}
+			{% endfor %}
+		{% endfor %}
+	</tbody>
+</table>
+ <div class="countblock">
+	{% if thisPage.has_other_pages %}
+		{% include "paginator.inc.html" %}
+	{% endif %}
+	corse totali: {{ paginator.count }}
+</div><br style="clear:right;" />
+{% else %}
+<h2>Nessun viaggio archiviato.</h2>
+{% endif %}
+
+<div>
+	
+</div>
+
+
+{% endblock content %}

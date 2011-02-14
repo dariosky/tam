@@ -5,13 +5,11 @@
 {% block content %}
 <h1>Strumenti per TaM.</h1>
 
-<form action="." method="post">
+{% if perms.tam.can_backup %}
 	<div class="btnbox">
-		{% if lastbackup %}L'ultimo backup è stato effettuato il {{lastbackup|date:"j F Y - H:i"}}.{% endif %}
-		<input type="image" src="/media/buuf/backup.png" name="backup" value="Backup"/><br/>
-		<input type="submit" name="backup" value="Backup"/>
+		<a href="{% url tamBackup %}"><img src="/media/buuf/backup.png" alt=""/>Backup</a>
 	</div>
-</form>
+{% endif %}
 
 <div class="btnbox">
 	<a href="{% url actionLog %}"><img src="/media/buuf/log.png" alt="" />Log degli accessi</a>
@@ -30,9 +28,8 @@
 {% endif %}
 
 {% if user.is_superuser %}
-	<div class="btnbox super"><a href="{%url tamActivation%}"><img src="/media/buuf/Strong-box-money-icon.png" alt="" />attivazione</a>.</div>
 	<div class="btnbox super"><a href="{%url fix_action%}"><img src="/media/buuf/Dildo-icon.png" alt="" />azione correttiva</a> (warning).</div>
-	<div class="btnbox super"><a href="{%url tamArchivation%}"><img src="/media/buuf/File-Manager-icon.png" alt="" />archiviazione</a>.</div>
+	<div class="btnbox super"><a href="{% url tamArchiveUtil %}"><img src="/media/buuf/File-Manager-icon.png" alt="" />archiviazione</a>.</div>
 {% endif %}
 <br style="clear:both" />
 {% if error %}

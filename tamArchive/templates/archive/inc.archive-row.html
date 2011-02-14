@@ -1,0 +1,52 @@
+{% load utilTag %}
+{% comment %}
+	Riceve in ingesso un viaggio archiviato chiamato 'viaggio'
+{% endcomment %}
+<tr>
+	<td>{{ viaggio.data|date:"D j F, H:i" }}<br>
+		{{ viaggio.path|safe }}
+	</td>
+	<td>{{ viaggio.cliente|default:"<i>Privato</i>" }}<br>
+		{{ viaggio.pax }} pax
+		{% if viaggio.flag_esclusivo%}
+			<img width="12px" height="12px" src="/media/t.ico" alt="taxi" />
+		{% else %}
+			<img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />
+		{% endif %}
+	</td>
+	{% if viaggio.flag_arrivo %}
+		<td class="arrivo">
+			{% ifequal viaggio.a luogoRiferimento %}
+				ARRIVO {{ viaggio.da }}
+			{% else %}
+				{{ viaggio.da }}<img src="/media/fout.png" alt="Arrivo" />{{ viaggio.a }}
+			{% endifequal %}
+		</td>
+	{% else %}
+		<td class="partenza">
+			{% ifequal viaggio.da luogoRiferimento %}
+				PARTENZA {{ viaggio.a }}
+			{% else %}
+				{{ viaggio.da }}<img src="/media/fin.png" alt="Partenza" />{{ viaggio.a }}
+			{% endifequal %}
+		</td>
+	{% endif %}
+	<td>
+		{{ viaggio.note|default:"" }}
+	</td>
+	<td>
+		{% if viaggio.punti_abbinata %}
+			{% num_range viaggio.punti_abbinata as punti_abbinata %}
+			{% for punto in punti_abbinata %}<img src="/media/casina.png" alt='DV'>{% endfor %}
+			<br>
+		{% endif %}
+		{{ viaggio.prezzo }}<br>{{ viaggio.prezzo_detail|safe }}
+		{% if viaggio.flag_fatturazione %}<br/><img src="/media/flag/fattura.png" alt="richiede fattura" />{% endif %}
+		{% if viaggio.flag_pagamentoDifferito %}<br/><img src="/media/flag/timedelta.png" alt="pagamento differito" />{% endif %}
+		{% if viaggio.flag_cartaDiCredito %}<br/><img src="/media/flag/card.png" alt="carta" />{% endif %}
+		{% if viaggio.flag_fineMese %}<br/>CONTO FINE MESE{% endif %}
+		{{ viaggio.numero_pratica|default:"" }}
+	</td>
+
+	<td{% if viaggio.flag_richiesto %} style='font-weight:bold;'{% endif %}>{{ viaggio.conducente }}</td>
+</tr>
