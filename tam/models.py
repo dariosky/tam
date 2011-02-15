@@ -9,6 +9,7 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
+from django import forms
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -26,14 +27,20 @@ class Luogo(models.Model):
 	"""
 	nome = models.CharField("Località ", max_length=25, unique=True)
 	bacino = models.ForeignKey("Bacino", verbose_name="Bacino di appartenenza", null=True, blank=True)
-	# una delle località  sarà  la predefinita... tra le proprietà  dell'utente
+	speciale = models.CharField("Luogo particolare", max_length=1,
+							null=True,
+							default=None,
+							choices=((None, "-"), ("A", "Aereoporto"), ("S", "Stazione")))
+	# una delle località sarà  la predefinita... tra le proprietà  dell'utente
 
 	class Meta:
 		verbose_name_plural = _("Luoghi")
 		ordering = ["nome"]
+
 	def __unicode__(self):
 		if self.nome[0] == ".": return self.nome[1:]
 		return self.nome
+	
 	def delete_url(self):
 		return reverse("tamLuogoIdDel", kwargs={"id":self.id})
 
@@ -550,7 +557,7 @@ class Viaggio(models.Model):
 		"""	Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
 			Assieme si andrà  ad una destinazione comune
 		"""
-		# TODO: Dovrei assicurarmi che qualche nextbro vada alla mia destinazione
+		# FIXME: Dovrei assicurarmi che qualche nextbro vada alla mia destinazione
 #		logging.debug("Is collettivo in partenza %s" %self.id)
 		nextbro = self.nextfratello
 		if nextbro and nextbro.da == self.a:	# se il successivo parte da dove arrivo è sicuramente un collettivo in successione
@@ -1095,13 +1102,17 @@ def get_classifiche():
 	return classifiche
 
 
-LOG_ACTION_TYPE = [ ("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"), ('L', "Login"), ("O", "Logout"), ("K", "Archiviazione") ]
+LOG_ACTION_TYPE = [
+					("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
+					('L', "Login"), ("O", "Logout"),
+					("K", "Archiviazione"), ("F", "Appianamento"),
+				  ]
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
 class ActionLog(models.Model):
 	data = models.DateTimeField()
-	user = models.ForeignKey(User, null=True)
+	user = models.ForeignKey(User, null=True, blank=True, default=None)
 	action_type = models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
 
 	content_type = models.ForeignKey(ContentType)
@@ -1120,9 +1131,6 @@ class ActionLog(models.Model):
 
 from django.db.models import signals
 from tam.middleware import threadlocals
-#from django.contrib.admin.models import ADDITION
-#from django.contrib.admin.models import CHANGE
-#from django.contrib.admin.models import DELETION
 
 def logAction(action, instance, description, user=None):
 	if instance:

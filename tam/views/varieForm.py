@@ -41,7 +41,6 @@ class AutoCompleteWidget(forms.widgets.Widget):
 		self.fieldname=fieldname
 		
 	def render(self, name, value, attrs=None):
-		logging.debug("widget render %s" % value)
 		if value is None:
 			value=""
 		else:

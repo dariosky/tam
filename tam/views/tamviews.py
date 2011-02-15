@@ -295,13 +295,13 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 
 	if settings.DEBUG:
-		q=[ q["sql"] for q in connections['default'].queries ]
+		q = [ q["sql"] for q in connections['default'].queries ]
 	#	q.sort()
-		qfile=file("querylog.sql", "w")
+		qfile = file("querylog.sql", "w")
 		for query in q:
-			qfile.write("%s\n"%query)
+			qfile.write("%s\n" % query)
 		qfile.close()
-		logging.debug("**** Number of queryes: %d ****"% len(connections['default'].queries) )
+		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
 	if outputFormat == 'xls':
 		import xlsUtil
@@ -527,6 +527,13 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 						default["tipo_commissione"] = prezzolistino.tipo_commissione
 
 			default["costo_autostrada"] = viaggioStep1.costo_autostrada_default()
+
+			if a.speciale:	# creando un viaggio verso una stazione/aereoporto
+				logging.debug("Sto andando ad un luogo speciale, aggiungo un abbuono di 5/10€")
+				speciale_abbuono = a.speciale	# lo restituisco al template per aggiungere l'IMG
+				if speciale_abbuono == "A": default["abbuono_fisso"] = 10
+				elif speciale_abbuono == "S": default["abbuono_fisso"] = 5
+				
 			form.initial.update(default)
 
 	# *************** REMOVE FIELDS ********************************

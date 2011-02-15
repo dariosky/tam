@@ -15,6 +15,12 @@
 			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
 		}
 		window.onbeforeunload=askConfirm;
+		{% if speciale_abbuono = "A" %}
+			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-airport.png" />');
+		{% endif%}
+		{% if speciale_abbuono = "S" %}
+			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-train.png" />');
+		{% endif%}
 	} );
 </script>
 {% endblock header %}
