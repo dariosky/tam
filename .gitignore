@@ -17,3 +17,4 @@ Desktop.ini
 /.pydevproject
 .settings/
 /nbproject/
+/querylog.sql

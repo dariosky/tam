@@ -13,7 +13,7 @@ from django.db import IntegrityError
 from django.core.paginator import Paginator
 import StringIO
 from genericUtils import *
-
+from django.conf import settings
 
 # Creo gli eventuali permessi mancanti 
 from django.contrib.auth.management import create_permissions
@@ -265,6 +265,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
+	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero")
 	paginator = Paginator(viaggi, 100, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
 	page = request.GET.get("page", 1)
@@ -293,13 +294,14 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggio.classifica = viaggio.get_classifica(classifiche=classifiche) # ottengo la classifica di conducenti per questo viaggio
 
 
-#	q=[ q["sql"] for q in connection.queries ]
-##	q.sort()
-#	qfile=file("querylog.sql", "w")
-#	for query in q:
-#		qfile.write("%s\n"%query)
-#	qfile.close()
-#	logging.debug("**** Number of queryes: %d ****"% len(connection.queries) )
+	if settings.DEBUG:
+		q=[ q["sql"] for q in connections['default'].queries ]
+	#	q.sort()
+		qfile=file("querylog.sql", "w")
+		for query in q:
+			qfile.write("%s\n"%query)
+		qfile.close()
+		logging.debug("**** Number of queryes: %d ****"% len(connections['default'].queries) )
 
 	if outputFormat == 'xls':
 		import xlsUtil
@@ -353,7 +355,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 			request.user.message_set.create(message=u"Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
 			return HttpResponseRedirect("/")	# back home
 
-		tuttiViaggi = tuttiViaggi.select_related()
+		tuttiViaggi = tuttiViaggi.select_related("da", "a", "cliente", "conducente", "passeggero")
 		generatore = xlsUtil.Sql2xls(doc, manager=tuttiViaggi)
 
 		generatore.enumerateTables = djangoManagerToTable

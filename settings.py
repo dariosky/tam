@@ -19,8 +19,7 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-#DEBUG = False	# Forzo ad usare il db di produzione
-usaSqlite = True
+usaSqlite = True # Forzo ad usare il db in sqlite
 if usaSqlite:
 	DATABASES = {	# DB di produzione
 		'default': {
@@ -106,7 +105,6 @@ MIDDLEWARE_CLASSES = (
 	'tam.middleware.threadlocals.ThreadLocals',
 #	'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 #    'debug_toolbar.middleware.DebugToolbarMiddleware',
-	
 )
 INTERNAL_IPS = ('127.0.0.1',)
 DEBUG_TOOLBAR_CONFIG={"INTERCEPT_REDIRECTS":False}
