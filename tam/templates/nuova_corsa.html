@@ -15,10 +15,10 @@
 			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
 		}
 		window.onbeforeunload=askConfirm;
-		{% if speciale_abbuono = "A" %}
+		{% if viaggio.a.speciale = "A" %}
 			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-airport.png" />');
 		{% endif%}
-		{% if speciale_abbuono = "S" %}
+		{% if viaggio.a.speciale = "S" %}
 			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-train.png" />');
 		{% endif%}
 	} );

@@ -528,12 +528,6 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 
 			default["costo_autostrada"] = viaggioStep1.costo_autostrada_default()
 
-			if a.speciale:	# creando un viaggio verso una stazione/aereoporto
-				logging.debug("Sto andando ad un luogo speciale, aggiungo un abbuono di 5/10€")
-				speciale_abbuono = a.speciale	# lo restituisco al template per aggiungere l'IMG
-				if speciale_abbuono == "A": default["abbuono_fisso"] = 10
-				elif speciale_abbuono == "S": default["abbuono_fisso"] = 5
-				
 			form.initial.update(default)
 
 	# *************** REMOVE FIELDS ********************************
@@ -1098,11 +1092,20 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 		if assoType == 'unlink':
 			viaggio.padre = None
 		elif assoType == 'link':
+			if viaggio.a.speciale != "-":	# creando un viaggio verso una stazione/aereoporto
+				logging.debug("Sto andando ad un luogo speciale, aggiungo un abbuono di 5/10€")
+				if viaggio.a.speciale == "A" and viaggio.abbuono_fisso<>10:
+					request.user.message_set.create(message="Il %d° viaggio è un aereoporto do un abbuono di 10€, era di %s€." % (contatore, viaggio.abbuono_fisso))
+					viaggio.abbuono_fisso = 10
+				elif viaggio.a.speciale == "S" and viaggio.abbuono_fisso<>5:
+					request.user.message_set.create(message="Il %d° viaggio è una stazione do un abbuono di 5€, era di %s€." % (contatore, viaggio.abbuono_fisso))
+					viaggio.abbuono_fisso = 5
+			
 			if viaggio != primo:
 				viaggio.padre = primo
 			if contatore > 2:
 				if viaggio.abbuono_fisso <> 5:
-					request.user.message_set.create(message="Dò un abbuono di 5€ al %do viaggio, era di %s." % (contatore, viaggio.abbuono_fisso))
+					request.user.message_set.create(message="Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 
 

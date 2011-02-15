@@ -9,7 +9,6 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
-from django import forms
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -28,9 +27,8 @@ class Luogo(models.Model):
 	nome = models.CharField("Località ", max_length=25, unique=True)
 	bacino = models.ForeignKey("Bacino", verbose_name="Bacino di appartenenza", null=True, blank=True)
 	speciale = models.CharField("Luogo particolare", max_length=1,
-							null=True,
-							default=None,
-							choices=((None, "-"), ("A", "Aereoporto"), ("S", "Stazione")))
+							default="",
+							choices=(("-", "-"), ("A", "Aereoporto"), ("S", "Stazione")))
 	# una delle località sarà  la predefinita... tra le proprietà  dell'utente
 
 	class Meta:

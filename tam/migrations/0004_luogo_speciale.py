@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
         db.alter_column('tam_actionlog', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
 
         # Adding field 'Luogo.speciale'
-        db.add_column('tam_luogo', 'speciale', self.gf('django.db.models.fields.CharField')(default=None, max_length=1, null=True), keep_default=False)
+        db.add_column('tam_luogo', 'speciale', self.gf('django.db.models.fields.CharField')(default='', max_length=1), keep_default=False)
 
 
     def backwards(self, orm):
@@ -140,7 +140,7 @@ class Migration(SchemaMigration):
             'bacino': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Bacino']", 'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '25'}),
-            'speciale': ('django.db.models.fields.CharField', [], {'default': 'None', 'max_length': '1', 'null': 'True'})
+            'speciale': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '1'})
         },
         'tam.passeggero': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Passeggero'},

@@ -2,7 +2,7 @@
 import os
 from socket import gethostname
 
-TAM_VERSION="1.5b"
+TAM_VERSION="2.0b"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 host=gethostname().lower()

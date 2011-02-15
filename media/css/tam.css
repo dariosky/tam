@@ -153,8 +153,11 @@ form {
 }
 
 .messagebox{
+	margin:0 auto;
+	padding:0;
+	position:fixed;
+	right:150px; left:150px;
 	font-size:smaller;
-	margin-top:0;
 	text-align:center;
 	background:#ffffcc;
 	border:1px #5D7671 solid;
