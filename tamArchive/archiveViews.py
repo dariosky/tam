@@ -20,12 +20,12 @@ from tam.views import SmartPager
 from tam.models import logAction
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
 
-archiveNotBefore_days = 10
+archiveNotBefore_days = 365
 
 def menu(request, template_name="archive/menu.html"):
 	dontHilightFirst = True
-	if not request.user.is_superuser:
-		request.user.message_set.create(message=u"Devi avere i superpoteri per accedere all'archiviazione.")
+	if not request.user.has_perm('tamArchive.archive') and not request.user.has_perm('tamArchive.flat'):
+		request.user.message_set.create(message=u"Devi avere accesso o all'archiviazione o all'appianamento.")
 		return HttpResponseRedirect(reverse("tamUtil"))
 
 	class ArchiveForm(forms.Form):
@@ -100,6 +100,10 @@ def daRicordareDelViaggio(ricordi, viaggio):
 @transaction.commit_manually(using="archive")
 def action(request, template_name="archive/action.html"):
 	""" Archivia le corse, mantenendo le classifiche inalterate """
+	if not request.user.has_perm('tamArchive.archive'):
+		request.user.message_set.create(message=u"Devi avere accesso all'archiviazione.")
+		return HttpResponseRedirect(reverse("tamArchiveUtil"))
+	
 	end_date_string = request.POST.get("end_date")
 	try:
 		timetuple = time.strptime(end_date_string, '%d/%m/%Y')
@@ -117,6 +121,7 @@ def action(request, template_name="archive/action.html"):
 
 	logDaEliminare = ActionLog.objects.filter(data__lt=end_date)
 	logCount = logDaEliminare.count()
+	archive_needed = archiveCount and logCount
 
 	if "archive" in request.POST:
 		viaggiDaArchiviare = Viaggio.objects.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().filter(filtroViaggi)
@@ -190,7 +195,14 @@ def action(request, template_name="archive/action.html"):
 		transaction.commit()
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+	return render_to_response(template_name, 
+							 {"archiveCount":archiveCount,
+							  "logCount":logCount,
+							  "archive_needed":archive_needed,
+							  "end_date":end_date,
+							  "end_date_string":end_date_string,
+							},
+							context_instance=RequestContext(request))
 
 
 def view(request, template_name="archive/view.html"):
@@ -222,6 +234,10 @@ def view(request, template_name="archive/view.html"):
 
 def flat(request, template_name="archive/flat.html"):
 	""" Livella le classifiche, in modo che gli ultimi abbiano zero """
+	if not request.user.has_perm('tamArchive.flat'):
+		request.user.message_set.create(message=u"Devi avere accesso all'appianamento.")
+		return HttpResponseRedirect(reverse("tamArchiveUtil"))
+	
 	classificheViaggi = get_classifiche()
 
 	def trovaMinimi(c1, c2):

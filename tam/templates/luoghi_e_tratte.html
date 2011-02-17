@@ -69,8 +69,8 @@
 			    <tr>	<td></td>
 						<td>
 							<a href="{% url tamLuogoId luogo.id %}">{{ luogo }}</a>
-							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" />{%endif%}
-							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" />{%endif%}							
+							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" alt="air" />{%endif%}
+							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" alt="train"/>{%endif%}							
 						</td>
 				</tr>
             {% endfor %}
@@ -79,7 +79,7 @@
 			{% for bacino in bacini %}
 				<tr>
 					<td>
-						<strong> <a href="{% url tamBacinoId bacino.id %}">{{ bacino.nome }}</a> </strong>
+						<strong><a href="{% url tamBacinoId bacino.id %}">{{ bacino.nome }}</a></strong>
 					</td>
 				</tr>
 				{% for luogo in bacino.luogo_set.all %}
@@ -87,6 +87,8 @@
 	                    <td></td>
 						<td>
                             <a href="{% url tamLuogoId luogo.id %}">{{ luogo }}</a>
+							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" alt="air"/>{%endif%}
+							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" alt="train"/>{%endif%}	
 						</td>
 					</tr>
                 {% endfor %}

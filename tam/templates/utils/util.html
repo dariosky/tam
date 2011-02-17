@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Strumenti per TaM.</h1>
 
-{% if perms.tam.can_backup %}
+{% if perms.tam.get_backup or perms.tam.can_backup %}
 	<div class="btnbox">
 		<a href="{% url tamBackup %}"><img src="/media/buuf/backup.png" alt=""/>Backup</a>
 	</div>
@@ -25,10 +25,10 @@
 	<div class="btnbox super">
 		<a href="{%url tamResetSessions%}"><img src="/media/buuf/Hatchet-icon.png" alt="" />Reset sessioni utente</a>
 	</div>
+	<div class="btnbox super"><a href="{%url fix_action%}"><img src="/media/buuf/Dildo-icon.png" alt="" />azione correttiva</a> (warning).</div>
 {% endif %}
 
-{% if user.is_superuser %}
-	<div class="btnbox super"><a href="{%url fix_action%}"><img src="/media/buuf/Dildo-icon.png" alt="" />azione correttiva</a> (warning).</div>
+{% if perms.tamArchive.archive or perms.tamArchive.flat %}
 	<div class="btnbox super"><a href="{% url tamArchiveUtil %}"><img src="/media/buuf/File-Manager-icon.png" alt="" />archiviazione</a>.</div>
 {% endif %}
 <br style="clear:both" />

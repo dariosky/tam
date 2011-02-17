@@ -15,7 +15,7 @@ import StringIO
 from genericUtils import *
 from django.conf import settings
 
-# Creo gli eventuali permessi mancanti 
+# Creo gli eventuali permessi mancanti
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
 for app in get_apps():
@@ -43,6 +43,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 	dontHilightFirst = True
+#	request.user.message_set.create(message="Messaggio di test.")
+
 	outputFormat = request.GET.get('format', None)
 	class Form(forms.Form):
 		class Media:
@@ -1094,13 +1096,13 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 		elif assoType == 'link':
 			if viaggio.a.speciale != "-":	# creando un viaggio verso una stazione/aereoporto
 				logging.debug("Sto andando ad un luogo speciale, aggiungo un abbuono di 5/10€")
-				if viaggio.a.speciale == "A" and viaggio.abbuono_fisso<>10:
+				if viaggio.a.speciale == "A" and viaggio.abbuono_fisso <> 10:
 					request.user.message_set.create(message="Il %d° viaggio è un aereoporto do un abbuono di 10€, era di %s€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 10
-				elif viaggio.a.speciale == "S" and viaggio.abbuono_fisso<>5:
+				elif viaggio.a.speciale == "S" and viaggio.abbuono_fisso <> 5:
 					request.user.message_set.create(message="Il %d° viaggio è una stazione do un abbuono di 5€, era di %s€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
-			
+
 			if viaggio != primo:
 				viaggio.padre = primo
 			if contatore > 2:
@@ -1428,64 +1430,4 @@ def actionLog(request, template_name="utils/actionLog.html"):
 							  },
 							  context_instance=RequestContext(request))
 
-def fixAction(request, template_name="utils/fixAction.html"):
-	if not request.user.is_superuser:
-		request.user.message_set.create(message=u"Devi avere i superpoteri per eseguire le azioni correttive.")
-		return HttpResponseRedirect(reverse("tamUtil"))
 
-	messageLines = []
-#	messageLines.append("Nessuna azione correttiva impostata. Meglio tenere tutto fermo di default.")
-
-	corseCambiate = corse = 0
-
-	corseDaSistemare = Viaggio.objects.filter(data__gt=datetime.date.today() - datetime.timedelta(days=60), padre__isnull=True)
-#	corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
-	for corsa in corseDaSistemare:
-		oldDPadova = corsa.prezzoDoppioPadova
-		oldVenezia = corsa.prezzoVenezia
-		corsa.updatePrecomp(forceDontSave=True)
-#		da = corsa.dettagliAbbinamento()
-		if oldDPadova <> corsa.prezzoDoppioPadova or oldVenezia <> corsa.prezzoVenezia:
-			messageLines.append("%s\n   DPD: %d->%d VE: %d->%d" % (corsa, oldDPadova, corsa.prezzoDoppioPadova, oldVenezia, corsa.prezzoVenezia))
-			corseCambiate += 1
-		corse += 1
-	messageLines.append("Corse aggiornate %d/%d" % (corseCambiate, corse))
-
-#	messageLines.append("Conguaglio completamente la corsa 35562")
-#	messageLines.append("e tolgo il conguaglio alle 38740 e 38887")
-#
-#	def status():
-#		corsa=Viaggio.objects.filter(pk=35562)[0]
-#		messageLines.append("la prima del %s è conguagliata di %d km su %d punti. Andrebbe 360."
-#				%(corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata) )
-#
-#		corsa=Viaggio.objects.filter(pk=38740)[0]
-#		messageLines.append("la seconda del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-#				%(corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata) )
-#
-#		corsa=Viaggio.objects.filter(pk=38887)[0]
-#		messageLines.append("la terza del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-#				%(corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata) )
-#
-#	status()
-#
-#	messageLines.append("EFFETTUO LE AZIONI!")
-#	corsa=Viaggio.objects.filter(pk=35562)[0]
-#	corsa.km_conguagliati=360
-#	corsa.save()
-#	corsa.updatePrecomp() # salvo perché mi toglierà i punti
-#
-#	corsa=Viaggio.objects.filter(pk=38740)[0]
-#	corsa.km_conguagliati=0
-#	corsa.save()
-#	corsa.updatePrecomp() # salvo perché mi toglierà i punti
-#
-#	corsa=Viaggio.objects.filter(pk=38887)[0]
-#	corsa.km_conguagliati=0
-#	corsa.save()
-#	corsa.updatePrecomp() # salvo perché mi toglierà i punti
-#
-#	status()
-#	request.user.message_set.create(message=u"Aziene correttiva eseguita!")
-
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))

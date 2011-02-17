@@ -14,6 +14,7 @@ $( function() {
 {% block content %}
 <h1>Archiviazione.</h1>
 
+{% if perms.tamArchive.archive %}
 <form method="post" action="{% url tamArchiveAction  %}">
 <div>
 	<h2>Archivio corse</h2>
@@ -24,9 +25,10 @@ $( function() {
 	<a href="{% url tamArchiveView %}"><strong>Consulta qui tutte le corse archiviate.</strong></a>
 </div>
 </form>
-
 <br/>
+{% endif %}
 
+{% if perms.tamArchive.flat %}
 <form method="get" action="{% url tamArchiveFlat %}">
 <div>
 	<h2>Appianamento delle classifiche</h2>
@@ -34,4 +36,5 @@ $( function() {
 	<input type="submit" name="preview" value="Anteprima dell'appianamento" />
 </div>
 </form>
+{% endif %}
 {% endblock content %}
