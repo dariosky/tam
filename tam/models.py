@@ -38,7 +38,7 @@ class Luogo(models.Model):
 	def __unicode__(self):
 		if self.nome[0] == ".": return self.nome[1:]
 		return self.nome
-	
+
 	def delete_url(self):
 		return reverse("tamLuogoIdDel", kwargs={"id":self.id})
 
@@ -555,7 +555,6 @@ class Viaggio(models.Model):
 		"""	Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
 			Assieme si andrà  ad una destinazione comune
 		"""
-		# FIXME: Dovrei assicurarmi che qualche nextbro vada alla mia destinazione
 #		logging.debug("Is collettivo in partenza %s" %self.id)
 		nextbro = self.nextfratello
 		if nextbro and nextbro.da == self.a:	# se il successivo parte da dove arrivo è sicuramente un collettivo in successione
@@ -1130,7 +1129,7 @@ class ActionLog(models.Model):
 from django.db.models import signals
 from tam.middleware import threadlocals
 
-def logAction(action, instance, description, user=None):
+def logAction(action, instance, description, user=None, log_date=None):
 	if instance:
 		content_type = ContentType.objects.get_for_model(instance)
 		object_id = instance.pk
@@ -1139,8 +1138,9 @@ def logAction(action, instance, description, user=None):
 		object_id = None
 	if user is None:
 		user = threadlocals.get_current_user()
+	if log_date is None: log_date = datetime.datetime.now()
 	modification = ActionLog (
-							  data=datetime.datetime.now(),
+							  data=log_date,
 							  user=user,
 							  action_type=action,
 							  description=description,

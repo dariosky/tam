@@ -10,7 +10,6 @@ if host in ("dariosky", "acido"):
 	DEBUG=True	# siamo in Test
 else:
 	DEBUG=False
-#print "Debug:", DEBUG, host
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -160,7 +159,7 @@ if DEBUG:
 				format='%(asctime)s %(levelname)s %(message)s'
 			)
 
-SESSION_COOKIE_AGE = 2*60*60	# cookie age in seconds (60 minutes)
+SESSION_COOKIE_AGE = 30*60	# cookie age in seconds (30 minutes)
 
 LICENSE_OWNER = 'ARTE Taxi'
 #import datetime

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
+
 <svg
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
@@ -12,7 +13,7 @@
    height="744.09448"
    id="svg2"
    sodipodi:version="0.32"
-   inkscape:version="0.46"
+   inkscape:version="0.48.0 r9654"
    version="1.0"
    sodipodi:docname="typepill.svg"
    inkscape:output_extension="org.inkscape.output.svg.inkscape">
@@ -65,16 +66,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="502.93594"
-     inkscape:cy="410.67228"
+     inkscape:zoom="1.979899"
+     inkscape:cx="606.27602"
+     inkscape:cy="343.24766"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1280"
-     inkscape:window-height="968"
-     inkscape:window-x="-4"
-     inkscape:window-y="-4" />
+     inkscape:window-width="1366"
+     inkscape:window-height="716"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -83,6 +85,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -303,9 +306,9 @@
     </g>
     <g
        id="g3195"
-       inkscape:export-filename="C:\Documents and Settings\DARIOSKY\Desktop\Dariosky\MION\eclipseWorkspace\Tam\media\timedelta.png"
-       inkscape:export-xdpi="22.482676"
-       inkscape:export-ydpi="22.482676"
+       inkscape:export-filename="C:\Stuff\development\Python\Tam\media\flag\timedelta2.png"
+       inkscape:export-xdpi="20.94816"
+       inkscape:export-ydpi="20.94816"
        transform="translate(250.71428,166.42857)">
       <rect
          rx="16.162441"
@@ -323,7 +326,7 @@
          height="52.022858"
          width="201.02036"
          id="rect3199"
-         style="opacity:1;fill:#186f54;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         style="opacity:1;fill:#182d54;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
          rx="16.162441" />
       <path
          id="path3201"
@@ -353,6 +356,60 @@
            x="428.27289"
            id="tspan3209"
            sodipodi:role="line">P.Post.</tspan></text>
+    </g>
+    <g
+       id="g3029"
+       inkscape:export-filename="C:\Stuff\development\Python\Tam\media\flag\incassato.png"
+       inkscape:export-xdpi="20.860001"
+       inkscape:export-ydpi="20.860001"
+       transform="translate(257.14285,247.14286)">
+      <rect
+         rx="16.162441"
+         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3199);enable-background:accumulate"
+         id="rect3031"
+         width="201.02036"
+         height="52.022858"
+         x="275.26657"
+         y="98.101936"
+         ry="16.162441" />
+      <rect
+         ry="16.162441"
+         y="96.081627"
+         x="273.75134"
+         height="52.022858"
+         width="201.02036"
+         id="rect3033"
+         style="fill:#03a0fe;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         rx="16.162441" />
+      <path
+         id="path3035"
+         d="m 289.90625,96.09375 c -6.47857,0 -12.01204,3.77185 -14.59375,9.25 21.84178,6.62732 57.02239,10.9375 96.6875,10.9375 42.1281,0 79.16122,-4.85023 100.5625,-12.1875 -2.79738,-4.795709 -7.99429,-8 -13.96875,-8 l -168.6875,0 z"
+         style="opacity:0.60352418;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3348);enable-background:accumulate"
+         inkscape:connector-curvature="0" />
+      <text
+         xml:space="preserve"
+         style="font-size:46.7380867px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;writing-mode:lr-tb;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;filter:url(#filter3498);font-family:Arial Black;-inkscape-font-specification:Arial Black"
+         x="352.74893"
+         y="124.10883"
+         id="text3037"
+         sodipodi:linespacing="100%"
+         transform="matrix(0.75123939,0,0,1.023049,111.38686,13.054916)"><tspan
+           sodipodi:role="line"
+           id="tspan3039"
+           x="352.74893"
+           y="124.10883">FineMese</tspan></text>
+      <text
+         transform="scale(0.90068105,1.1102709)"
+         sodipodi:linespacing="100%"
+         id="text3041"
+         y="123.05016"
+         x="415.621"
+         style="font-size:41.29727554px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:100%;writing-mode:lr-tb;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Arial Black;-inkscape-font-specification:Arial Black"
+         xml:space="preserve"><tspan
+           y="123.05016"
+           x="415.621"
+           id="tspan3043"
+           sodipodi:role="line">FineMese</tspan></text>
     </g>
   </g>
 </svg>

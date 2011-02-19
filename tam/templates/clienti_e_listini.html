@@ -24,9 +24,9 @@
 						{% if not cliente.attivo %}NON ATTIVO{% endif %}
 					</td>
 					<td>
-						{% if cliente.fatturazione %}<img src="/media/flag/fattura.png" alt="richiede fattura" />  {% endif %}
-						{% if cliente.pagamento_differito %}<img src="/media/flag/timedelta.png" alt="pagamento differito" />{% endif %}
-						{% if cliente.incassato_albergo %}<img src="/media/flag/incassato.png" alt="conto fine mese" />{% endif %}
+						{% if cliente.fatturazione %}<img src="/media/flag/fattura.png" alt="fattura" />  {% endif %}
+						{% if cliente.pagamento_differito %}<img src="/media/flag/timedelta.png" alt="posticipato" />{% endif %}
+						{% if cliente.incassato_albergo %}<img src="/media/flag/incassato.png" alt="fine mese" />{% endif %}
 						{% if cliente.commissione %} commissione: {{ cliente.commissione }}{% ifequal cliente.tipo_commissione "P" %}%{% else %}€{% endifequal %}{% endif %}
 					</td>
 					<td><a href="{% url tamListinoId cliente.listino.id %}">{{ cliente.listino.nome }}</a></td>

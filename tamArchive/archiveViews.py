@@ -153,9 +153,6 @@ def action(request, template_name="archive/action.html"):
 
 			if archiviati > 400:
 #				transaction.commit(using='archive')
-#				for i, query in enumerate(connection.queries):
-#					print i, query
-#					print
 				for conducente_id, classifica in ricordi.items():
 					conducente = Conducente.objects.get(pk=conducente_id)
 					conducente.classifica_iniziale_diurni += classifica['punti_diurni']
@@ -167,7 +164,6 @@ def action(request, template_name="archive/action.html"):
 					conducente.classifica_iniziale_puntiDoppiVenezia += classifica['punti_abbinata']
 					conducente.save()
 
-#				print ricordi
 				ricordi = {}
 #				assert(False)	#TMP: faccio solo i primi
 

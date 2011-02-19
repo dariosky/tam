@@ -70,8 +70,8 @@ def getbackup(request, backupdate):
     dataScelta = datetime.datetime(t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min)
     backupInfo = getBackupInfo(doCleanup=True)
     for backup in backupInfo["backups"]:
-        logging.debug("%s - %s" % (backup["date"], dataScelta))
         if backup["date"].timetuple()[:5] == dataScelta.timetuple()[:5]:
+            logAction('G', instance=request.user, description='Backup del %s scaricato' % backupdate, user=request.user)
             backup_filename = backup["filename"]
             backupPath = os.path.join(backupInfo["backupdir"], backup_filename)
             responseFile = file(backupPath, 'rb')

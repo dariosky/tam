@@ -109,7 +109,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 #	logging.debug("Comincio a caricare la lista corse")
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
-	clienti = Cliente.objects.filter(attivo=True)
+	clienti = Cliente.objects.filter(attivo=True).only('id')
 	today = datetime.date.today()	# today to compare with viaggio.date
 	adesso = datetime.datetime.now()
 	recurseChild = True
@@ -306,85 +306,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
 	if outputFormat == 'xls':
-		import xlsUtil
-		doc = xlsUtil.pyExcelerator.Workbook()
-
-		def djangoManagerToTable(self):
-			""" Should return a list of tables
-				Take a list of django object managers and a list of fields to return as input
-			"""
-			# trasformo il manager viaggi in una lista di righe
-			fields = ["data", "da.nome", "a.nome",
-					"cliente.nome", "numero_passeggeri",
-					"prezzo", "prezzo_commissione", "prezzo_sosta",
-					"fatturazione", "incassato_albergo", "pagamento_differito", "cartaDiCredito",
-					"conducente.nick",
-					"note",
-				]
-			fieldsDesc = ["Data", "Da", "A",
-						"Cliente", "pax",
-						"Lordo", "Quota cons.", "Sosta",
-						"Fattura?", "Inc.albergo?", "Posticipato?", "Carta?",
-						"Conducente",
-						"note",
-						]
-
-			self.queryDescriptor = fieldsDesc
-			manager = self.manager
-			table = []
-			for record in manager:
-				row = []
-				for field in fields:
-					if "." in field:
-						related = record
-						for token in field.split('.'):	# iterate sub object with .
-							if related:
-								related = related.__getattribute__(token)
-							else:
-								break
-					else:
-						related = record.__getattribute__(field)
-
-					if callable(related): related = related()	# if it's a method call it
-					row.append(related)
-				table.append(row)
-			return (table,)	# only one result sheet with our table
-
-		numViaggi = tuttiViaggi.count()
-		logging.debug("Export to EXCEL %d viaggi." % numViaggi)
-		maxViaggi = 3000
-		if numViaggi > maxViaggi:
-			request.user.message_set.create(message=u"Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
-			return HttpResponseRedirect("/")	# back home
-
-		tuttiViaggi = tuttiViaggi.select_related("da", "a", "cliente", "conducente", "passeggero")
-		generatore = xlsUtil.Sql2xls(doc, manager=tuttiViaggi)
-
-		generatore.enumerateTables = djangoManagerToTable
-		generatore.run()
-		if generatore.sheetCount:
-			output = StringIO.StringIO()
-
-#			filename=os.path.join( os.path.dirname(__file__), 'tempExcel.xls')
-#			doc.save(filename)
-#			responseFile=file(filename,"rb")
-#			response = HttpResponse(responseFile.read(), mimetype='application/excel')
-#			responseFile.close()
-
-			doc.save(output)	# save the excel
-			output.seek(0)
-			response = HttpResponse(output.getvalue(), mimetype='application/excel')
-
-			response['Content-Disposition'] = 'attachment; filename="%s"' % 'tamExport.xls'
-			del generatore
-			del tuttiViaggi
-			del xlsUtil
-			del viaggi
-			return response
-		else:
-			request.user.message_set.create(message=u"Non ho alcun viaggio da mettere in Excel, cambia i filtri per selezionarne qualcuno.")
-			del generatore
-			return HttpResponseRedirect("/")	# back home
+		from tamXml import xlsResponse
+		return xlsResponse(request, tuttiViaggi)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def corsaClear(request, next=None):
@@ -530,6 +453,15 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 
 			default["costo_autostrada"] = viaggioStep1.costo_autostrada_default()
 
+			if da!=profilo.luogo and da.speciale != "-":	# creando un viaggio di arrivo da una stazione/aereoporto
+				logging.debug("Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€")
+				if da.speciale == "A":
+					default["abbuono_fisso"] = 10
+					da_speciale = "A"
+				elif da.speciale == "S":
+					default["abbuono_fisso"] = 5
+					da_speciale = "S"
+			
 			form.initial.update(default)
 
 	# *************** REMOVE FIELDS ********************************
@@ -636,7 +568,6 @@ def getList(request, model=Luogo, field="nome"):
 	results = [l.__unicode__() for l in model.objects.filter(**fieldApiString)]
 
 	return HttpResponse("\n".join(results), mimetype="text/plain")
-
 
 def clienti(request, template_name="clienti_e_listini.html"):
 	listini = Listino.objects.all()
@@ -1093,15 +1024,23 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 
 		if assoType == 'unlink':
 			viaggio.padre = None
-		elif assoType == 'link':
-			if viaggio.a.speciale != "-":	# creando un viaggio verso una stazione/aereoporto
-				logging.debug("Sto andando ad un luogo speciale, aggiungo un abbuono di 5/10€")
-				if viaggio.a.speciale == "A" and viaggio.abbuono_fisso <> 10:
-					request.user.message_set.create(message="Il %d° viaggio è un aereoporto do un abbuono di 10€, era di %s€." % (contatore, viaggio.abbuono_fisso))
+			if viaggio.da.speciale != "-":	# tolgo l'associazione a un viaggio da stazione/aereoporto
+				logging.debug("Deassocio da un luogo speciale, rimetto l'eventuale abbuono di 5/10€")
+				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != 10:
+					request.user.message_set.create(message="Il %d° viaggio è da un aereoporto rimetto l'abbuono di 10€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 10
-				elif viaggio.a.speciale == "S" and viaggio.abbuono_fisso <> 5:
-					request.user.message_set.create(message="Il %d° viaggio è una stazione do un abbuono di 5€, era di %s€." % (contatore, viaggio.abbuono_fisso))
+				elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso != 5:
+					request.user.message_set.create(message="Il %d° viaggio è da una stazione rimetto l'abbuono di 5€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
+		elif assoType == 'link':
+			if viaggio.da.speciale != "-":	# associando un viaggio da stazione/aereoporto
+				logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono di 5/10€")
+				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == 10:
+					request.user.message_set.create(message="Il %d° viaggio è da un aereoporto tolgo l'abbuono di 10€." % contatore)
+					viaggio.abbuono_fisso = 0
+				elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso == 5:
+					request.user.message_set.create(message="Il %d° viaggio è da una stazione tolgo l'abbuono di 5€." % contatore)
+					viaggio.abbuono_fisso = 0
 
 			if viaggio != primo:
 				viaggio.padre = primo
@@ -1346,88 +1285,5 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
 #	response=password_change(request, template_name=template_name, post_change_redirect='/')
 	return render_to_response(template_name, {'form': form }, context_instance=RequestContext(request))
 
-def actionLog(request, template_name="utils/actionLog.html"):
-	user = request.user
-	utenti = User.objects.exclude(is_superuser=True)
-	filterUtente = request.GET.get('user', '')
-	filterType = request.GET.get('type', '')
-	filterId = request.GET.get('id', '')
-	filterPreInsert = 'preInsert' in request.GET.keys()	# se ho preinsert cerco tutte le inserite postume
-	content_type = None
-	viaggioType = ContentType.objects.get(app_label="tam", model='viaggio')
-	if filterType:
-		try:
-			content_type = ContentType.objects.get(app_label="tam", model=filterType)
-		except:
-			user.message_set.create(message=u"Tipo di oggetto non valido %s." % filterType)
-
-	actions = ActionLog.objects.all()
-	if filterUtente:		# rendo filterUtente un intero
-		try:
-			filterUtente = int(filterUtente)
-		except:
-			user.message_set.create(message=u"Utente %s non valido." % filterUtente)
-			filterUtente = ""
-	if filterId and content_type:		# rendo filterUtente un intero
-		try:
-			filterId = int(filterId)
-		except:
-			user.message_set.create(message=u"ID %s non valido." % filterId)
-			filterId = ""
-
-
-	if filterUtente:
-		logging.debug("Filtro per utente %s" % filterUtente)
-		actions = actions.filter(user__id=filterUtente)
-	if content_type:
-		logging.debug("Filtro per tipo oggetto %s" % content_type)
-		actions = actions.filter(content_type=content_type)
-	if filterId:
-		logging.debug("Filtro per id %s" % filterId)
-		actions = actions.filter(object_id=filterId)
-	if filterPreInsert:
-		actions = actions.filter(content_type=viaggioType)
-		actions = actions.filter(action_type='A')
-#			select tam_actionlog.[data] as inserimento, tam_viaggio.[data] as corsa
-#			from tam_actionlog, tam_viaggio
-#			where content_type_id=13
-#			and tam_viaggio.id=tam_actionlog.object_id
-#			and tam_viaggio.[data]<tam_actionlog.[data]
-#			and action_type='A'
-
-		# inserimento postumo se la data della corsa è precedente alla mezzanotte del giorno di inserimento
-		actions = actions.extra(where=['tam_viaggio.id=tam_actionlog.object_id', 'tam_viaggio.data<datetime(tam_actionlog.data,\'start of day\')'], tables=['tam_viaggio'])
-
-	paginator = Paginator(actions, 60, orphans=3)	# pagine
-	page = request.GET.get("page", 1)
-	try: page = int(page)
-	except: page = 1
-
-	s = SmartPager(page, paginator.num_pages)
-	paginator.smart_page_range = s.results
-
-	try:
-		thisPage = paginator.page(page)
-		actions = thisPage.object_list
-		for action in actions:
-			if action.content_type == viaggioType:
-				action.preInsert = (action.action_type == 'A' and action.content_object and action.content_object.data < action.data.replace(hour=0, minute=0))
-	except Exception:
-		user.message_set.create(message=u"La pagina %d è vuota." % page)
-		thisPage = None
-		actions = []
-
-	return render_to_response(template_name,
-							  {
-								"actions":actions,
-								"today": datetime.date.today(),
-								"thisPage":thisPage,
-								"paginator":paginator,
-								"utenti":utenti,
-								"filterUtente":filterUtente,
-								"filterPreInsert":filterPreInsert,
-								"viaggioType":viaggioType
-							  },
-							  context_instance=RequestContext(request))
 
 

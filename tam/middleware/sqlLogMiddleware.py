@@ -18,6 +18,4 @@ class SQLLogMiddleware:
 				qfile.close()
 			except:
 				pass
-#			print "*************** FINAL QUERIES: %d ******************" % len(connection.queries)
-#			print "time: %f" % time
 		return response

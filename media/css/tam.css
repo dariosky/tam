@@ -274,7 +274,9 @@ td img {vertical-align: middle;}
 }
 
 .btnbox {
-	background:silver;
+	background:white url(/media/sfuminogrigioinv.png);
+	background-repeat: repeat-x;
+    background-position: bottom;
 	text-align:center;
 	float:left;
 	width:120px;
@@ -286,12 +288,12 @@ td img {vertical-align: middle;}
 
 .btnbox img {
 	margin:0 auto;
+	margin-top: 6px;
 	display: block;
 	text-align: center;
 }
 
 .super {
-	background: yellowgreen;
 }
 
 .bigButton{
