@@ -17,7 +17,7 @@
 		    <img alt="" class="hbar" src="/media/hbar.png" width="{% widthratio classifica.prezzoVenezia prezzoVeneziaMax 130 %}" />
 		</td>
 		<td>{{ classifica.conducente }}</td>
-		<td><a href="{% url tamCorse %}?filterConducente={{ classifica.conducente_id }}&amp;filterType=Venezia">{{ classifica.prezzoVenezia }}€</a></td>
+		<td><a href="{% url tamCorse %}?filterConducente={{ classifica.conducente_id }}&amp;filterType=Venezia">{{ classifica.prezzoVenezia|floatformat:"-2" }}€</a></td>
 	    </tr>
 	{% endfor %}
     </tbody>
@@ -44,7 +44,7 @@
 		    <img alt="" class="hbar" src="/media/hbar.png" width="{% widthratio classifica.prezzoPadova prezzoPadovaMax 130 %}" />
 		</td>
 		<td>{{ classifica.conducente }}</td>
-		<td><a href="{% url tamCorse %}?filterConducente={{ classifica.conducente_id }}&amp;filterType=Padova">{{ classifica.prezzoPadova }}€</a></td>
+		<td><a href="{% url tamCorse %}?filterConducente={{ classifica.conducente_id }}&amp;filterType=Padova">{{ classifica.prezzoPadova|floatformat:"-2" }}€</a></td>
 	    </tr>
 	{% endfor %}
     </tbody>
