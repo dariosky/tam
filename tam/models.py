@@ -1051,10 +1051,6 @@ class ProfiloUtente(models.Model):
 	def __unicode__(self):
 		return "%s" % self.user
 
-#class TamLicense(models.Model):
-#	license=models.TextField("Inserisci qui il tuo codice licenza.")
-
-
 class Conguaglio(models.Model):
 	""" Memorizza tutti i conguagli effettuati tra i conducenti """
 	data = models.DateTimeField(auto_now=True)

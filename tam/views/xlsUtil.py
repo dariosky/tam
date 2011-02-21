@@ -280,7 +280,7 @@ class Sql2xls(object):
 
 			if self.imageFields and self.sheetCount < len(self.imageFields):
 				imageField, imageMaxX, imageMaxY = splitImageFormat(self.imageFields[self.sheetCount])
-				from PIL import Image as PILImage	# used to write and convert embedded images
+				from PIL import Image as PILImage	# used to write and convert embedded images @UnresolvedImport
 			else:
 				imageField = None
 

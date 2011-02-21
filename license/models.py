@@ -1,3 +1,5 @@
 from django.db import models
 
-# Create your models here.
+class TamLicense(models.Model):
+    license=models.TextField("Inserisci qui il tuo codice licenza.")
+

@@ -139,7 +139,7 @@ INSTALLED_APPS = (
     'tam',
 	'south',
 	'tamArchive',
-	'license',
+#	'license',
 #    'debug_toolbar',
 )
 

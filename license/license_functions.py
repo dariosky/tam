@@ -105,6 +105,8 @@ from django.conf import settings
 #	return wrapCheckLicense
 
 from markViews import public
+from django.shortcuts import render_to_response
+from django.template.context import RequestContext
 
 @public
 def notLicensed(request, template_name="registration/license.html"):
