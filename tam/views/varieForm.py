@@ -8,15 +8,12 @@ from django.utils.safestring import mark_safe
 #from django.core.urlresolvers import reverse
 from tam.widgets import MySplitDateTimeField, MySplitDateWidget
 
-
-
-
 class AutoCompleteForm(forms.ModelChoiceField):
-    def __init__(self, *args, **kwargs):
-        kwargs['widget'] = kwargs.pop('widget', AutoCompleteWidget)
-        super(AutoCompleteForm, self).__init__(*args, **kwargs)
+	def __init__(self, *args, **kwargs):
+		kwargs['widget'] = kwargs.pop('widget', AutoCompleteWidget)
+		super(AutoCompleteForm, self).__init__(*args, **kwargs)
 
-    def clean(self, value):
+	def clean(self, value):
 #		logging.debug("form clean %s" % value)
 		if not value:
 			return None
@@ -89,9 +86,9 @@ class ViaggioForm(forms.ModelForm):
 															)
 								)
 	esclusivo=forms.TypedChoiceField(coerce=lambda str: str=="t",
-                   choices=(('c', 'Collettivo'), ('t', 'Taxi')),
-                   widget=forms.RadioSelect
-                )
+				   choices=(('c', 'Collettivo'), ('t', 'Taxi')),
+				   widget=forms.RadioSelect
+				)
 
 	
 	def clean(self):

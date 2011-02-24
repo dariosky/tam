@@ -11,7 +11,6 @@ import time
 from django.db import IntegrityError
 #from django.db import connection
 from django.core.paginator import Paginator
-import StringIO
 from genericUtils import *
 from django.conf import settings
 
