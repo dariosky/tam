@@ -913,6 +913,7 @@ class Conducente(models.Model):
 		permissions = (('change_classifiche_iniziali', 'Cambia classifiche iniziali'),)
 
 	def save(self, *args, **kwargs):
+		global cache_conducentiPerPersona
 		cache_conducentiPerPersona = {}	# cancello la cache dei conducenti con capienza
 		super(Conducente, self).save(*args, **kwargs)
 
