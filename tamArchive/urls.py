@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls.defaults import *
 
 urlpatterns = patterns('tamArchive.archiveViews',
     url(r'^panel/$', 'menu', name='tamArchiveUtil'),
