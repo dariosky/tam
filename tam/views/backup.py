@@ -89,12 +89,14 @@ def doBackup(username):
     newBackupFilename = "%s - tam - %s.db3.gz" % (n.strftime('%Y-%m-%d %H%M'), username)
     backupPath = os.path.join(backupInfo["backupdir"], newBackupFilename)
     logging.debug("%s ===> %s" % (backupInfo["dbname"], backupPath))
+    
     f_in = file(backupInfo["dbname"], "rb")
-    dbstream = f_in.read()
+    real_out = open(backupPath, 'wb')
+    f_out = gzip.GzipFile('tam.db3', fileobj=real_out)	# scrivo sul file Gzip il contenuto si chiama sempre tam.db3
+    f_out.write(f_in.read())
     f_in.close()
-    f_out = gzip.open(backupPath, 'wb')
-    f_out.write(dbstream)
     f_out.close()
+    real_out.close()
     return HttpResponseRedirect(reverse("tamBackup"))
 
 def backup(request, template_name="utils/backup.html"):
