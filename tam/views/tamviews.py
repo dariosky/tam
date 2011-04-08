@@ -52,6 +52,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 					'js/jquery.scrollTo-min.js', 'js/jquery.localscroll-min.js', # per scorrere
 					'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 	# calendario nel filtro avanzato
 					'js/listaCorse.js', 		# definizioni personalizzate della lista corse
+					'js/jquery.hotkeys.js',		# tasti di scelta rapida
 				 )
 
 			css = {

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import * #@UnusedWildImport
 from django.conf import settings
 
 #urlpatterns = patterns('',
@@ -15,5 +15,5 @@ from django.contrib import admin
 admin.autodiscover()
 urlpatterns += patterns('',
     ("^"+settings.MEDIA_URL[1:]+r'(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
-    (r'^admin/(.*)', admin.site.root),
+    url(r'^admin/', include(admin.site.urls)),
 )
