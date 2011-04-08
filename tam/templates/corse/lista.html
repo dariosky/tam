@@ -70,4 +70,17 @@
 	{% else %}
 	    <h3>Nessuna corsa programmata.</h3>
 	{% endif %}
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$(document).bind('keydown', 'esc', function(){
+				location.href='{% url logout %}';
+				return false;
+			});
+			
+			$(document).bind('keydown', 'n', function(){
+				moveToNext();
+				return false;
+			});
+		});
+	</script>
 {% endblock %}
