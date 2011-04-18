@@ -96,7 +96,7 @@ class Tratta(models.Model):
 def get_tratta(da, a):
 	""" Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
 	if not da or not a: return
-	keyword = "tratta%s-%s" % (da, a)
+	keyword = ("tratta%s-%s" % (da, a)).replace(" ","")
 	trattacache = cache.get(keyword)
 	if trattacache:
 		return trattacache
@@ -485,9 +485,9 @@ class Viaggio(models.Model):
 		fineNotte = end.replace(hour=6, minute=0)
 		if fineNotte < inizioNotte: fineNotte += datetime.timedelta(days=1)
 		result = False
-		if start < inizioNotte and end >= inizioNotte: result = True
-		if start < fineNotte and end > fineNotte: result = True
-		if start > inizioNotte and end < fineNotte: result = True
+		if start <= inizioNotte and end >= inizioNotte: result = True
+		if start < fineNotte and end >= fineNotte: result = True
+		if start >= inizioNotte and end <= fineNotte: result = True
 #		if start.hour> and end.hour>22: return result
 		return result
 

@@ -39,9 +39,10 @@ def styleCopy(style=None, **kwargs):
 	return sty(proplist, **newParameters)
 
 
-def sty(propList=[], num_format="general", background_color=None, foreground_color=None):
+def sty(propList=None, num_format="general", background_color=None, foreground_color=None):
 	""" Given a list of properties, create an Excel style """
 	if isinstance(propList, str): propList = [propList]
+	if propList is None: propList = []
 	propList.sort()	#sort so order is ininfluent
 	stylename = "-".join(propList)
 	if num_format:
