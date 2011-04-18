@@ -152,12 +152,12 @@ EMAIL_HOST_USER = 'info@dariosky.it'
 EMAIL_HOST_PASSWORD = 'bangbangD'
 EMAIL_PORT = 587
 
-if DEBUG:
-	import logging
-	logging.basicConfig(
-				level=logging.DEBUG,
-				format='%(asctime)s %(levelname)s %(message)s'
-			)
+#if DEBUG:
+#	import logging
+#	logging.basicConfig(
+#				level=logging.DEBUG,
+#				format='%(asctime)s %(levelname)s %(message)s'
+#			)
 
 SESSION_COOKIE_AGE = 30*60	# cookie age in seconds (30 minutes)
 

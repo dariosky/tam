@@ -296,14 +296,14 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggio.classifica = viaggio.get_classifica(classifiche=classifiche) # ottengo la classifica di conducenti per questo viaggio
 
 
-	if settings.DEBUG:
-		q = [ q["sql"] for q in connections['default'].queries ]
-	#	q.sort()
-		qfile = file("querylog.sql", "w")
-		for query in q:
-			qfile.write("%s\n" % query)
-		qfile.close()
-		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
+#	if settings.DEBUG:
+#		q = [ q["sql"] for q in connections['default'].queries ]
+#	#	q.sort()
+#		qfile = file("querylog.sql", "w")
+#		for query in q:
+#			qfile.write("%s\n" % query)
+#		qfile.close()
+#		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
 	if outputFormat == 'xls':
 		from tamXml import xlsResponse
@@ -437,16 +437,19 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					prezzolistino = cliente.listino.get_prezzo(da, a,
 										tipo_servizio=viaggioStep1.esclusivo and "T" or "C",
 										pax=viaggioStep1.numero_passeggeri)
-
+				
+				if not viaggioStep1.trattaInNotturna():
+					prezzoDaListinoDiurno = True
+				else:
+					prezzoDaListinoNotturno = True
+				
 				if prezzolistino:
-					if not viaggioStep1.trattaInNotturna():
+					if prezzoDaListinoDiurno:	# "Scelgo il prezzo normale"
 						default["prezzo"] = prezzolistino.prezzo_diurno
-						prezzoDaListinoDiurno = True
-						# "Scelgo il prezzo normale"
-					else:
+					else:		# "Scelgo il prezzo notturno"
 						default["prezzo"] = prezzolistino.prezzo_notturno
-						prezzoDaListinoNotturno = True
-#						# "Scelgo il prezzo notturno"
+						
+#						
 					if prezzolistino.commissione is not None:
 						default["commissione"] = prezzolistino.commissione
 						default["tipo_commissione"] = prezzolistino.tipo_commissione
