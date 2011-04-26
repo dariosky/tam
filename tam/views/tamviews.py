@@ -438,10 +438,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 										tipo_servizio=viaggioStep1.esclusivo and "T" or "C",
 										pax=viaggioStep1.numero_passeggeri)
 				
-				if not viaggioStep1.trattaInNotturna():
-					prezzoDaListinoDiurno = True
-				else:
-					prezzoDaListinoNotturno = True
+				prezzoDaListinoNotturno = viaggioStep1.trattaInNotturna()
+				prezzoDaListinoDiurno = not prezzoDaListinoNotturno 
 				
 				if prezzolistino:
 					if prezzoDaListinoDiurno:	# "Scelgo il prezzo normale"
