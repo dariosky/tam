@@ -1,1 +1,82 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd"><html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it"><head>	<title>{% block title %}TaM{% endblock %}{% ifequal request.META.USERDOMAIN "MION" %} - Stealth version{% endifequal %}</title>	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>	{% ifnotequal request.META.USERDOMAIN "MION" %}		<link rel="icon" href="/media/tam.ico" type="image/ico"/>	{% endifnotequal %}	{% block css %}		<link rel="stylesheet" href="/media/css/tam.css" type="text/css"/>		{% ifequal request.META.USERDOMAIN "MION" %}<link rel="stylesheet" href="/media/css/tam-stealth.css" type="text/css"/>{% endifequal %}	{% endblock %}	{% if form %}{{ form.media }}{% endif %}	<script type="text/javascript" src='/media/js/tam-common.js'></script>	{% block header %}{% endblock header %}	{% if form and not dontHilightFirst %}		<script type="text/javascript">	      $(document).ready(function() {	          $('input:first').focus(); // focus on first input	      });		</script>	{% endif %} </head><body>{% block titleContent %}    {#{% ifnotequal request.META.USERDOMAIN "MION" %}<h1 class="maintitle"><img src="/media/logo.png" alt="TaM" title="TaM"/></h1>{% endifnotequal %}#}{% endblock %}{% block superNavBar %}<div class="navBar">	{% block navBar %}		<span class="menuGroup">{% block corse %}<a href="/">TaM</a>		{% if perms.tam.add_viaggio %}&raquo;<a href="{% url tamNuovaCorsa %}" class="buttonLink"><img src="/media/addbtn.png" alt=""/> Nuova corsa</a>{% endif %}		{% endblock %}</span>		<span class="menuGroup">{% block luoghi %}<a href="{% url tamLuoghi %}">Tratte e Luoghi</a>{% endblock %}</span>		<span class="menuGroup">{% block clienti %}<a href="{% url tamListini %}">Clienti</a>{% endblock %}</span>		<span class="menuGroup">{% block conducenti %}<a href="{% url tamConducenti %}">Classifiche</a>{% endblock %}</span>		<span class="menuGroup">{% block util %}<a href="{% url tamUtil %}">Strumenti</a>{% endblock %}</span>		{% ifnotequal request.META.USERDOMAIN "MION" %}<img src="/media/minilogo.gif" class="loghetto" alt="" />{% endifnotequal %}	{% endblock navBar %}	{% block topContent %}{% endblock %}</div>{% block spacer %}<div style="height:2em"></div>{% endblock %}{% endblock superNavBar %}<div class="content">    {% if messages %}		<ul class="messagebox">			{% for message in messages %}				<li class="message">{{ message }}</li>			{% endfor %}		</ul>	{% endif %}	{% block content %}{% endblock %}</div><div id="footer">	{% block authblock %}    <p style="float:left; margin:0">    {% if request.user.is_authenticated %}		Sei connesso come <a href="{% url change_password %}">{{ request.user }}</a> - <a href="{% url logout %}">disconnettiti</a>		{% if user.is_superuser %} - <a href="/admin/">amministrazione</a>{% endif %}    {% else %}		Stai accedendo come utente non registrato. <a href="{% url login %}">Fatti riconoscere</a>.    {% endif %}    </p>	{% endblock authblock %}		<p class="credits">		<a href="{% url tam_changelog %}">TaM v.{{ tam_version }}</a>.	    {% if license_expiration %}				Versione di prova {% if license_valid %}valida fino al{% else %}scaduta il{% endif %} {{ license_expiration|date:"j F Y" }}.        {% endif %}	    {% if license_owner %}			{{ license_owner }}.        {% else %}            Versione non registrata.        {% endif %}		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>	</p></div></body></html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it">
+<head>
+	<title>{% block title %}TaM{% endblock %}{% ifequal request.META.USERDOMAIN "MION" %} - Stealth version{% endifequal %}</title>
+	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>
+	{% ifnotequal request.META.USERDOMAIN "MION" %}
+		<link rel="icon" href="/media/tam.ico" type="image/ico"/>
+	{% endifnotequal %}
+	{% block css %}
+		<link rel="stylesheet" href="/media/css/tam.css" type="text/css"/>
+		{% ifequal request.META.USERDOMAIN "MION" %}<link rel="stylesheet" href="/media/css/tam-stealth.css" type="text/css"/>{% endifequal %}
+	{% endblock %}
+	{% if form %}{{ form.media }}{% endif %}
+	<script type="text/javascript" src='/media/js/tam-common.js'></script>
+	{% block header %}{% endblock header %}
+	{% if form and not dontHilightFirst %}
+		<script type="text/javascript">
+	      $(document).ready(function() {
+	          $('input:first').focus(); // focus on first input
+	      });
+		</script>
+	{% endif %}
+ </head>
+
+<body>
+{% block titleContent %}
+    {#{% ifnotequal request.META.USERDOMAIN "MION" %}<h1 class="maintitle"><img src="/media/logo.png" alt="TaM" title="TaM"/></h1>{% endifnotequal %}#}
+{% endblock %}
+{% block superNavBar %}
+<div class="navBar">
+	{% block navBar %}
+		<span class="menuGroup">{% block corse %}<a href="/">TaM</a>
+		{% if perms.tam.add_viaggio %}&raquo;<a href="{% url tamNuovaCorsa %}" class="buttonLink"><img src="/media/addbtn.png" alt=""/> Nuova corsa</a>{% endif %}
+		{% endblock %}</span>
+		<span class="menuGroup">{% block luoghi %}<a href="{% url tamLuoghi %}">Tratte e Luoghi</a>{% endblock %}</span>
+		<span class="menuGroup">{% block clienti %}<a href="{% url tamListini %}">Clienti</a>{% endblock %}</span>
+		<span class="menuGroup">{% block conducenti %}<a href="{% url tamConducenti %}">Classifiche</a>{% endblock %}</span>
+		<span class="menuGroup">{% block util %}<a href="{% url tamUtil %}">Strumenti</a>{% endblock %}</span>
+		{% ifnotequal request.META.USERDOMAIN "MION" %}<img src="/media/minilogo.gif" class="loghetto" alt="" />{% endifnotequal %}
+	{% endblock navBar %}
+	{% block topContent %}{% endblock %}
+</div>
+{% block spacer %}<div style="height:2em"></div>{% endblock %}
+{% endblock superNavBar %}
+<div class="content">
+    {% if messages %}
+		<ul class="messagebox">
+			{% for message in messages %}
+				<li class="message">{{ message }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+	{% block content %}{% endblock %}
+</div>
+
+<div id="footer">
+	{% block authblock %}
+    <p style="float:left; margin:0">
+    {% if request.user.is_authenticated %}
+		Sei connesso come <a href="{% url change_password %}">{{ request.user }}</a> - <a id='logout' href="{% url logout %}">disconnettiti</a>
+		{% if user.is_superuser %} - <a href="/admin/">amministrazione</a>{% endif %}
+    {% else %}
+		Stai accedendo come utente non registrato. <a href="{% url login %}">Fatti riconoscere</a>.
+    {% endif %}
+    </p>
+	{% endblock authblock %}
+	
+	<p class="credits">
+		<a href="{% url tam_changelog %}">TaM v.{{ tam_version }}</a>.
+	    {% if license_expiration %}
+				Versione di prova {% if license_valid %}valida fino al{% else %}scaduta il{% endif %} {{ license_expiration|date:"j F Y" }}.
+        {% endif %}
+	    {% if license_owner %}
+			{{ license_owner }}.
+        {% else %}
+            Versione non registrata.
+        {% endif %}
+		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>
+	</p>
+</div>
+</body>
+</html>
