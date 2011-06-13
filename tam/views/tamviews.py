@@ -839,12 +839,17 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 	#	il conducente
 	#	la lista di punti-valore abbinate
 	doppiVenezia = []	# lista per la visualizzazione delle classifiche doppi ordinata è (punti, conducentenick, classifica)
+	puntiDiurni = []	# anche le classifiche diurne e notturne le metto in lista per ordinarle qui in vista
+	puntiNotturni = []
+	
 	punti_assocMin = 0
 
 	for classifica in classificheViaggi:	# creo le classifiche un po' estese
 		for conducente in conducenti:
 			if conducente.id == classifica["conducente_id"]:
 				doppiVenezia.append((classifica["puntiAbbinata"], conducente.nick, classifica))
+				puntiDiurni.append((classifica["puntiDiurni"], conducente.nick, classifica))
+				puntiNotturni.append((classifica["puntiNotturni"], conducente.nick, classifica))
 				classifica["conducente"] = conducente   # aggiungo alle classifiche il campo "conducente" con l'oggetto django del conducente
 				classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0)
 				classifica["punti_abbinate"] = []
@@ -860,6 +865,9 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 						classifica["celle_abbinate"].append({"valore": viaggio.prezzoPunti, "data":viaggio.data})
 				classifiche.append(classifica)
 	doppiVenezia.sort()
+	puntiDiurni.sort()
+	puntiNotturni.sort()
+	
 	if classifiche:
 		prezzoDoppioPadovaMax = max([c["prezzoDoppioPadova"] for c in classifiche])
 		prezzoVeneziaMax = max([c["prezzoVenezia"] for c in classifiche])
@@ -918,7 +926,6 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 					viaggio.save()
 					viaggio.updatePrecomp() # salvo perché mi toglierà i punti
 
-
 			conguaglio = Conguaglio(conducente=conducente, dare=c["debitoAbbinate"])
 			conguaglio.save()
 		user.message_set.create(message=u"Conguaglio memorizzato.")
@@ -926,6 +933,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 
 	tuttiConducenti = Conducente.objects.filter()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def clonaListino(request, id, template_name="listino-clona.html"):
 	user = request.user
