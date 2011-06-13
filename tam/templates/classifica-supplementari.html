@@ -11,7 +11,8 @@
     </thead>
 
     <tbody>
-	{% for classifica in classifiche|dictsort:"puntiDiurni" %}
+	{% comment %}{% for classifica in classifiche|dictsort:"puntiDiurni" %}{%endcomment%}
+	{% for punti, nick, classifica in puntiDiurni %}
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td>{{ classifica.conducente }}</td>
 		<td>
@@ -21,7 +22,7 @@
 				<img src="/media/morning.png" alt="*" />
 				{% endfor %}
 			{% endcomment %}
-			<img src="/media/morning.png" alt="*" /> x {{ classifica.puntiDiurni }}
+			<img src="/media/morning.png" alt="*" /> x {{ punti }}
 		</td>
 	    </tr>
 	{% endfor %}
@@ -42,11 +43,11 @@
     </thead>
 
     <tbody>
-	{% for classifica in classifiche|dictsort:"puntiNotturni" %}
+	{% for punti, nick, classifica in puntiNotturni %}
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td>{{ classifica.conducente }}</td>
 		<td>
-			<img src="/media/night.png" alt="*" /> x {{ classifica.puntiNotturni }}
+			<img src="/media/night.png" alt="*" /> x {{ punti }}
 		</td>
 	    </tr>
 	{% endfor %}

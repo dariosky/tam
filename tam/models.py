@@ -892,7 +892,6 @@ class Viaggio(models.Model):
 
 				conducenti.append((chiave, conducente))
 		conducenti.sort()
-
 		return [c[1] for c in conducenti] + inattivi
 
 
