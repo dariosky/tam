@@ -1107,6 +1107,7 @@ LOG_ACTION_TYPE = [
 					("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
 					('L', "Login"), ("O", "Logout"),
 					("K", "Archiviazione"), ("F", "Appianamento"),
+					('X', "Export Excel"),
 				  ]
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
