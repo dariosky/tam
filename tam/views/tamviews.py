@@ -307,6 +307,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	if outputFormat == 'xls':
 		from tamXml import xlsResponse
+		logAction(action='X', instance=request.user, description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
