@@ -1,4 +1,4 @@
-{{ viaggio.prezzo }}
+<strong style="font-size:1.1em">{{ viaggio.prezzo }}</strong>
 {% if viaggio.commissione %}- c{{ viaggio.commissione }}{% ifequal viaggio.tipo_commissione "P" %}%{% endifequal %}{% endif %}
 {% if viaggio.costo_autostrada %}- a{{ viaggio.costo_autostrada }}{% endif %}
 {% if viaggio.pagamento_differito or viaggio.fatturazione%}- p15%{% endif %}
