@@ -73,6 +73,11 @@
 	<script type="text/javascript">
 		$(document).ready(function(){
 			$(document).bind('keydown', 'esc', function(){
+				var overlay=$("<div style='position:fixed; left:50%; top:50%; width:300px; height:200px; margin-top:-200px; margin-left:-150px; font-size:2em; font-family:Times; text-align:center; z-index:1000;'>"+
+				"Disconnessione in corso"+
+				"</div>");
+				$('.content').animate({opacity:0.25});
+				$('body').append(overlay);
 				location.href='{% url logout %}';
 				return false;
 			});
