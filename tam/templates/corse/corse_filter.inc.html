@@ -9,7 +9,7 @@
 			    <option value="">Tutti i clienti</option>
 			    <option value="Privato"{% ifequal "Privato" filterCliente %} selected="selected"{% endifequal %}>Privato</option>
 			    {% for cliente in clienti %}
-					<option value="{{ cliente.id }}"{% ifequal cliente.id filterCliente %} selected="selected"{% endifequal %}>{{ cliente }}</option>
+					<option value="{{ cliente.id }}"{% ifequal cliente.id filterCliente %} selected="selected"{% endifequal %}>{{ cliente.nome }}{% if cliente.inattivo %}(inattivo){% endif %}</option>
 				{% endfor %}
 	        </select>
 

@@ -19,6 +19,17 @@ cache_conducentiPerPersona = {} # Tengo un dizionari con tutti i conducenti con 
 		# per evitare di interrogare il DB ogni volta.
 		# quando cambio un conducente lo svuoto
 
+
+#invalidation of cache-template-tag cache
+from django.utils.hashcompat import md5_constructor
+from django.utils.http import urlquote
+
+def invalidate_template_cache(fragment_name, *variables):
+	args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
+	cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
+	cache.delete(cache_key)
+# ******************
+
 class Luogo(models.Model):
 	""" Indica un luogo, una destinazione conosciuta.
 		Ogni luogo appartiene ad un bacino all'interno del quale verrano cercati gli accoppiamenti.
@@ -320,6 +331,7 @@ class Viaggio(models.Model):
 		if not self.conducente_confermato:
 			self.conducente = None
 		logging.debug("Update di *%s*." % self.pk)
+		invalidate_template_cache("viaggio", self.id)
 		super(Viaggio, self).save(*args, **kwargs)
 		for figlio in self.viaggio_set.all(): # i figli ereditano dal padre
 			changed = False
@@ -678,7 +690,7 @@ class Viaggio(models.Model):
 		result = self.prezzo - self.costo_autostrada - self.prezzo_commissione()
 #		logging.debug("Corsa padre: %s" % result )
 		for figlio in self.viaggio_set.all():
-#			logging.debug("     figlio: %s" % (figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()) )
+#			logging.debug("	 figlio: %s" % (figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()) )
 			result += figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()
 		return result
 
@@ -704,7 +716,7 @@ class Viaggio(models.Model):
 	def dettagliAbbinamento(self, numDoppi=None):
 		""" Restituisce un dizionario con i dettagli dell'abbinamento
 			la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
-		    Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
+			Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
 		"""
 		kmNonConguagliati = 0
 		partiAbbinamento = 0

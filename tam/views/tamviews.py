@@ -17,6 +17,8 @@ from django.conf import settings
 # Creo gli eventuali permessi mancanti
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
+from django.db.models.aggregates import Count
+from django.views.decorators.cache import cache_page
 for app in get_apps():
 	create_permissions(app, None, 2)
 
@@ -37,6 +39,14 @@ class SmartPager(object):
 		self.addToResults(currentPage - 2, 5)
 		self.addToResults(totalPages - 3, 4)
 
+def parseDateString(s, default=None):
+	try:
+		t = time.strptime(s, '%d/%m/%Y')
+		return datetime.date(t.tm_year, t.tm_mon, t.tm_mday)
+	except:
+		logging.debug("Errore nel parsing della data.")
+		return default
+
 def listaCorse(request, template_name="corse/lista.html"):
 	""" Schermata principale con la lista di tutte le corse """
 	user = request.user
@@ -48,7 +58,6 @@ def listaCorse(request, template_name="corse/lista.html"):
 	class Form(forms.Form):
 		class Media:
 			js = (
-					'js/jquery.min.js', 		# jquery
 					'js/jquery.scrollTo-min.js', 'js/jquery.localscroll-min.js', # per scorrere
 					'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 	# calendario nel filtro avanzato
 					'js/listaCorse.js', 		# definizioni personalizzate della lista corse
@@ -109,7 +118,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 #	logging.debug("Comincio a caricare la lista corse")
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
-	clienti = Cliente.objects.filter(attivo=True).only('id')
+	clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
 	today = datetime.date.today()	# today to compare with viaggio.date
 	adesso = datetime.datetime.now()
 	recurseChild = True
@@ -176,13 +185,6 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	data_inizio = None
 	data_fine = None
-	def parseDateString(s):
-		try:
-			t = time.strptime(s, '%d/%m/%Y')
-			return datetime.date(t.tm_year, t.tm_mon, t.tm_mday)
-		except:
-			logging.debug("Errore nel parsing della data.")
-			return None
 
 	filtroWhenAvanzato = False
 	if filterWhen == "advanced":
@@ -572,8 +574,8 @@ def getList(request, model=Luogo, field="nome"):
 	return HttpResponse("\n".join(results), mimetype="text/plain")
 
 def clienti(request, template_name="clienti_e_listini.html"):
-	listini = Listino.objects.all()
-	clienti = Cliente.objects.filter()
+	listini = Listino.objects.annotate(Count('prezzolistino'))
+	clienti = Cliente.objects.all().select_related('listino')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def cliente(request, template_name="cliente.html", nomeCliente=None):
@@ -727,7 +729,7 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
 			css = {
 				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
 			}
-			js = ('js/jquery.min.js', 'js/jquery.ui/jquery-ui.custom-min.js')
+			js = ('js/jquery.ui/jquery-ui.custom-min.js',)
 	form = Form()
 
 	unbacined = Luogo.objects.filter(bacino__isnull=True)
@@ -827,7 +829,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 			css = {
 				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
 			}
-			js = ('js/jquery.min.js', 'js/jquery.ui/jquery-ui.custom-min.js')
+			js = ('js/jquery.ui/jquery-ui.custom-min.js',)
 	form = Form()
 
 	conducenti = Conducente.objects.filter(attivo=True)
@@ -1085,7 +1087,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 			css = {
 				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
 			}
-			js = ('js/jquery.min.js', 'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 'js/rangeCalendar.js')
+			js = ('js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 'js/rangeCalendar.js')
 		repMode = forms.ChoiceField(label="Ricorrenza", choices=[("m", "Mensile"), ("w", "Settimanale"), ("d", "Giornaliero")])
 		start = forms.DateField(label="Data iniziale", input_formats=[_('%d/%m/%Y')])
 		end = forms.DateField(label="Data finale", input_formats=[_('%d/%m/%Y')])

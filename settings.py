@@ -105,8 +105,6 @@ MIDDLEWARE_CLASSES = (
 #	'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 #    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
-INTERNAL_IPS = ('127.0.0.1',)
-DEBUG_TOOLBAR_CONFIG={"INTERCEPT_REDIRECTS":False}
 
 ROOT_URLCONF = 'Tam.urls'
 
@@ -132,13 +130,15 @@ INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.sites',
+#    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.humanize',
 
     'tam',
 	'south',
 	'tamArchive',
+	
+	'fatturazione',
 #	'license',
 #    'debug_toolbar',
 )
@@ -174,3 +174,28 @@ $ rabbitmqctl add_user tam tamRMQ
 $ rabbitmqctl add_vhost tam
 $ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
 """
+
+#===============================================================================
+# Set to True to use the debug_toolbar
+use_debug_toolbar = DEBUG
+if use_debug_toolbar:
+	# put the debug toolbar middleware right after the Gzip middleware
+	try:
+		middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware')+1
+		MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES[:middleware_split_position]+ \
+						('debug_toolbar.middleware.DebugToolbarMiddleware',)+ \
+						MIDDLEWARE_CLASSES[middleware_split_position:]
+	except:
+		pass	
+#	MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+	DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS":False}
+	INTERNAL_IPS = ('127.0.0.1',)
+	INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
+#===============================================================================
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'TaM',
+    }
+}

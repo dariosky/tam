@@ -40,9 +40,8 @@ $(function(){
     });
     
     $(".viaggioId").click(function(){ // ma lo mostro se seleziono qualche corsa
-        if ($(".viaggioId:checked").size() > 0) {
+        if (this.checked || $(".viaggioId:checked").size() > 0)
             $('#selActions').show();
-        }
         else 
             $('#selActions').hide();
     });

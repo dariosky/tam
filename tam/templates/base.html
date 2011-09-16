@@ -10,16 +10,10 @@
 		<link rel="stylesheet" href="/media/css/tam.css" type="text/css"/>
 		{% ifequal request.META.USERDOMAIN "MION" %}<link rel="stylesheet" href="/media/css/tam-stealth.css" type="text/css"/>{% endifequal %}
 	{% endblock %}
-	{% if form %}{{ form.media }}{% endif %}
-	<script type="text/javascript" src='/media/js/tam-common.js'></script>
+	{% if form %}{{ form.media.css }}{% endif %}
+	<script type="text/javascript" src='/media/js/jquery.min.js'></script>
+	<script type="text/javascript" src='/media/js/jquery.hotkeys.js'></script>
 	{% block header %}{% endblock header %}
-	{% if form and not dontHilightFirst %}
-		<script type="text/javascript">
-	      $(document).ready(function() {
-	          $('input:first').focus(); // focus on first input
-	      });
-		</script>
-	{% endif %}
  </head>
 
 <body>
@@ -36,6 +30,9 @@
 		<span class="menuGroup">{% block clienti %}<a href="{% url tamListini %}">Clienti</a>{% endblock %}</span>
 		<span class="menuGroup">{% block conducenti %}<a href="{% url tamConducenti %}">Classifiche</a>{% endblock %}</span>
 		<span class="menuGroup">{% block util %}<a href="{% url tamUtil %}">Strumenti</a>{% endblock %}</span>
+		{% if request.user.is_superuser %}
+			<span class="menuGroup">{% block fatture %}<a href="{% url tamGenerazioneFatture %}">Fatture</a>{% endblock %}</span>
+		{% endif %}
 		{% ifnotequal request.META.USERDOMAIN "MION" %}<img src="/media/minilogo.gif" class="loghetto" alt="" />{% endifnotequal %}
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}
@@ -78,5 +75,15 @@
 		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>
 	</p>
 </div>
+	<script type="text/javascript" src='/media/js/tam-common.js'></script>
+	{% if form %}{{ form.media.js }}{% endif %}
+	{% if form and not dontHilightFirst %}
+		<script type="text/javascript">
+	      $(document).ready(function() {
+	          $('input:first').focus(); // focus on first input
+	      });
+		</script>
+	{% endif %}
+	{% block bottom %}{% endblock bottom %}
 </body>
 </html>
