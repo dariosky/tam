@@ -61,7 +61,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
 		
 class ViaggioForm(forms.ModelForm):
 	class Media:
-		js = ('js/jquery.min.js', 'js/nuovaCorsaPag1.js',)
+		js = ('js/nuovaCorsaPag1.js',)
 		
 	data=MySplitDateTimeField(label="Data e ora", date_input_formats=[_('%d/%m/%Y')], time_input_formats=[_('%H:%M')],
 						 widget=MySplitDateWidget())
@@ -106,7 +106,7 @@ class ViaggioForm(forms.ModelForm):
 
 class ViaggioForm2(forms.ModelForm):
 	class Media:
-		js = ('js/jquery.min.js',)
+		pass
 	class Meta:
 		model=Viaggio
 		exclude=ViaggioForm.Meta.fields + ["padre", "pagato", "costo_sosta", "luogoDiRiferimento"]

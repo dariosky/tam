@@ -1,4 +1,6 @@
 {% load utilTag %}
+{% load cache %}
+{% cache 3600 viaggio viaggio.id %}
 <tr{% if viaggio.warning %} class="warning"{% endif %}>
 	<td>
 		{% if not viaggio.conducente_confermato %}
@@ -14,57 +16,18 @@
 	</td>
 
 	<td>
-		{% if not viaggio.padre and not viaggio.conducente_confermato  %}<a href="{% url tamNuovaCorsaId viaggio.id %}">{% endif %}
-			{% ifequal viaggio.data.date today %}
-				<span class="bighour">{{ viaggio.data|date:"H:i" }}</span>
-			{% else %}
-				<span class="middlehour">
-				{% if viaggio.data.date.year == today.year %}
-					{{ viaggio.data|date:"D j F, H:i"}}
-				{% else %}
-					{{ viaggio.data|date:"D j F Y, H:i"}}
-				{% endif %}
-				</span>
-			{% endifequal %}
-		{% if not viaggio.padre and not viaggio.conducente_confermato %}</a>{% endif %}
-		<br/>
-		{{ viaggio.html_tragitto|safe }}
+		{% include "corse/cella_ora_e_percorso.inc.html" %}
 	</td>
 
 	<td>
-		<div class="cliente">
-		{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}
-		</div>
-		{{ viaggio.numero_passeggeri }} pax {% if viaggio.esclusivo%}<img width="12px" height="12px" src="/media/t.ico" alt="taxi" />{% else %}<img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />{% endif %}
+		{% include "corse/cella_cliente.inc.html" %}
 	</td>
-	{% if viaggio.arrivo %}
-		<td class="arrivo">
-			{% if viaggio.is_long %}<strong>{% endif %}
-			{% ifequal viaggio.a luogoRiferimento %}
-				ARRIVO {{ viaggio.da }}
-			{% else %}
-				{{ viaggio.da }}<img src="/media/fout.png" alt="Arrivo" />{{ viaggio.a }}
-			{% endifequal %}
-			{% if viaggio.is_long %}</strong>{% endif %}
-		</td>
-	{% else %}
-		<td class="partenza">
-			{% if viaggio.is_long %}<strong>{% endif %}
-			{% ifequal viaggio.da luogoRiferimento %}
-				PARTENZA {{ viaggio.a }}
-			{% else %}
-				{{ viaggio.da }}<img src="/media/fin.png" alt="Partenza" />{{ viaggio.a }}
-			{% endifequal %}
-			{% if viaggio.is_long %}</strong>{% endif %}
-		</td>
-	{% endif %}
 
-	<td>{{ viaggio.note }}
-		{% if viaggio.passeggero.dati %}<div class="notePasseggero">{{ viaggio.passeggero.dati }}</div>{% endif %}
-	</td>
+	{% include "corse/cella_partenza_arrivo.inc.html" %}
+
+	<td>{% include "corse/cella_note.inc.html" %}</td>
 
 	<td>
-		
 		<p>
 			{% if viaggio.punti_abbinata %}
 				{% num_range viaggio.punti_abbinata as punti_abbinata %}
@@ -85,11 +48,7 @@
 		
 		<br/>
 		{% include "corse/corse_prezzo_viaggio.inc.html" %}
-		{% if viaggio.fatturazione %}<br/><img src="/media/flag/fattura.png" alt="richiede fattura" />{% endif %}
-		{% if viaggio.pagamento_differito %}<br/><img src="/media/flag/timedelta.png" alt="pagamento differito" />{% endif %}
-		{% if viaggio.cartaDiCredito %}<br/><img src="/media/flag/card.png" alt="carta" />{% endif %}
-		{% if viaggio.incassato_albergo %}<br/>CONTO FINE MESE{% endif %}
-		{% ifequal viaggio.is_abbinata "P" %}<br/>collettivo in partenza{% endifequal %}
+		{% include "corse/flags.inc.html" %}
 	</td>
 
 
@@ -127,3 +86,4 @@
         {% endif %}
 	</td>
 </tr>
+{% endcache %}

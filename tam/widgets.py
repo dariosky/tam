@@ -14,7 +14,7 @@ class MySplitDateWidget(forms.widgets.SplitDateTimeWidget):
 		css = {
 			'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css', )
 		}
-		js= ('js/jquery.min.js', 'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js')
+		js= ('js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js')
 
 	def decompress(self, value):
 		if value:

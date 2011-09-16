@@ -51,7 +51,7 @@
 			{% for listino in listini %}
 				<tr>
 	   				<td><a href="{% url tamListinoId listino.id %}">{{ listino.nome }}</a></td>
-					<td>{{ listino.prezzolistino_set.all|length }}</td>
+					<td>{{ listino.prezzolistino__count }}</td>
 				</tr>
 			{% endfor %}
 			</tbody>

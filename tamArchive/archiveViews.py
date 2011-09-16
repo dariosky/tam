@@ -34,7 +34,7 @@ def menu(request, template_name="archive/menu.html"):
 			css = {
 				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
 			}
-			js = ('js/jquery.min.js', 'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js')
+			js = ('js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js')
 
 		end_date_suggested = (datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)).replace(month=1, day=1).strftime('%d/%m/%Y')
 		end_date = forms.DateField(

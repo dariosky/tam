@@ -222,13 +222,13 @@ td img {vertical-align: middle;}
 }
 
 #selActions{
+	display:none;
 	background:white;
 	text-align:center;
 	position:fixed;
 	top:100px;
 	left:2px;
 	border: silver 2px ridge;
-
 }
 .countblock{
 	clear:both;

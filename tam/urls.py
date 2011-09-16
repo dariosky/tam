@@ -1,7 +1,7 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import * #@UnusedWildImport
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth.decorators import login_required 
-from tam.models import *
+from tam.models import * #@UnusedWildImport
 #import django.contrib.auth.views
 
 urlpatterns = patterns('tam.views',

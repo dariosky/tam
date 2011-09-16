@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+	<h1>Generazione fatture.</h1>
+	<div id='date_range'>
+		<form method='get' action=''>
+			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
+			a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<input type="submit" value="Trova corse fatturabili"/>
+		</form>
+	</div>
+	<div style='float:right'>
+		Anno <input type='text' name='end_date' maxlength="4">
+		Progressivo iniziale <input type='text' name='progressivo' maxlength="5">
+	</div>
+	<br style="clear: both"/>
+	
+	<div>
+		<h3>Fatture consorzio</h3>
+		<p>Le fatture che il consorzio fa ai clienti.<br>
+			Tutti i viaggi confermati con l'indicazione della fattura.
+		</p>
+		<p>
+			{{ da_consorzio.count }} corse.<br />
+			{% if da_consorzio %}
+			<form method="post" action="">
+			<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+			<thead>
+				<tr>
+					<th>Cliente</th>
+				    <th><input type="checkbox" id='check_consorzio'/></th>
+				    <th>Data</th>
+				    <th>Da - A</th>
+				    <th>Note</th>
+				    <th>Prezzo lordo</th>
+				    <th>Conducente</th>
+				</tr>
+			</thead>
+			{% for viaggio in da_consorzio %}
+				<tr>
+					<td>{% ifchanged viaggio.cliente %}
+						{% include "corse/cella_cliente.inc.html" %}
+					{% endifchanged %}</td>
+					<td><input type='checkbox' name='id' value='{{viaggio.id}}' ></td>
+					<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
+					{% include "corse/cella_partenza_arrivo.inc.html" %}
+					<td>{% include "corse/cella_note.inc.html" %}</td>
+					<td>{{viaggio.prezzo}}
+						{% include "corse/flags.inc.html" %}
+					</td>
+					<td>{{viaggio.conducente}}</td>
+				</tr>
+			{% endfor %}
+			</table>
+			<input type="submit" id="genera_consorzio" name="genera_consorzio" value="Genera le fatture consorzio"/>
+			</form>
+			
+			{% endif %}
+		</p>
+	</div>
+	
+	<div>
+		<h3>Fatture conducente</h3>
+		<p>Le fatture che il conducente fa al consorzio.
+		</p>
+	</div>
+	
+	<div>
+		<h3>Ricevute</h3>
+		<p>I viaggi con pagamento posticipato vengono pagati con ricevuta.
+		</p>
+	</div>
+
+{% endblock %}
+
+{% block bottom %}
+	<script type="text/javascript" src="/media/js/table_selector.js"></script>
+	<script type="text/javascript">
+		table_selector('#check_consorzio', '#table_consorzio');
+		$('#date_range input[type=text]').datepicker();
+	</script>
+{% endblock bottom %}
