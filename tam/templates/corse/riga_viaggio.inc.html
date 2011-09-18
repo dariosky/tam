@@ -1,7 +1,7 @@
 {% load utilTag %}
 {% load cache %}
-{% cache 3600 viaggio viaggio.id %}
 <tr{% if viaggio.warning %} class="warning"{% endif %}>
+{% cache 3600 viaggio viaggio.id %}
 	<td>
 		{% if not viaggio.conducente_confermato %}
 			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" /><br/>
@@ -51,6 +51,7 @@
 		{% include "corse/flags.inc.html" %}
 	</td>
 
+{% endcache %}
 
 	<td>
 	{% if viaggio.padre and recurseChild %}
@@ -86,4 +87,3 @@
         {% endif %}
 	</td>
 </tr>
-{% endcache %}

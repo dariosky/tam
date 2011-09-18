@@ -5,11 +5,17 @@
 {% block clienti %}{{ block.super }} &raquo; Gestione cliente {% endblock %}
 
 {% block content %}
-	<h1>Gestione cliente.</h1>
+	<h1>Gestione cliente</h1>
 	Se non hai ancora definito un listino adatto al cliente devi prima <a href="{% url tamNuovoListino%}">crearlo</a>.
 	<form action="" method="post">
-		{{ form.as_p }}
-		<p><input type="submit" value="{% if nuovo %}Crea{% else %}Aggiorna{% endif %} cliente" /></p>
+		<table>
+			{{ form.as_table }}
+			<tr>
+				<td>
+					<input type="submit" value="{% if nuovo %}Crea{% else %}Aggiorna{% endif %} cliente" />
+				</td>
+			</tr>
+		</table>
 	</form>
 	
 
