@@ -7,24 +7,29 @@
 {% block content %}
 <div style="text-align:center">
     {% if not delete %}
-		<h1>Gestione {{ verbose_name_plural }}.</h1>
+		<h1>Gestione {{ verbose_name_plural }}</h1>
 		{% if note %}<h2>{{ note }}</h2>{% endif %}
+		<center>
 		<form action="" method="post">
-			{{ form.as_p }}
-   
-			<p>
-				<input type="submit" value="{% if nuovo %}Crea{% else %}Modifica{% endif %} {{ verbose_name }}" />
-				{% if not nuovo and can_delete %}
-				    {% with instance.delete_url as deleteUrl %}
-				        {% if deleteUrl %}
-		                    <a href="{{ deleteUrl }}">
-								<img src="/media/delbtn.png" alt="Cancella {{ verbose_name }}" />
-		                    </a>
-                        {% endif %}
-                    {% endwith %}
-                {% endif %}
-			</p>
+			<table>
+				{{ form.as_table }}	
+				<tr>
+					<td>
+						<input type="submit" value="{% if nuovo %}Crea{% else %}Modifica{% endif %} {{ verbose_name }}" />
+						{% if not nuovo and can_delete %}
+						    {% with instance.delete_url as deleteUrl %}
+						        {% if deleteUrl %}
+				                    <a href="{{ deleteUrl }}">
+										<img src="/media/delbtn.png" alt="Cancella {{ verbose_name }}" />
+				                    </a>
+		                        {% endif %}
+		                    {% endwith %}
+		                {% endif %}
+					</td>
+				</tr>
+			</table>
 		</form>
+	</center>	
     {% else %}
         <h1>Cancellazione {{ verbose_name }}.</h1>
         {% if note %}<h2>{{ note }}</h2>{% endif %}

@@ -734,7 +734,7 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
 
 	unbacined = Luogo.objects.filter(bacino__isnull=True)
 	bacini = Bacino.objects.all()
-	tratte = Tratta.objects.all()
+	tratte = Tratta.objects.select_related()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def conducente(*args, **kwargs):
