@@ -1,16 +1,17 @@
 {% load utilTag %}
+{% load media %}
 {% load cache %}
 <tr{% if viaggio.warning %} class="warning"{% endif %}>
-{% cache 3600 viaggio viaggio.id %}
+{% cache 36000 viaggio viaggio.id %}
 	<td>
 		{% if not viaggio.conducente_confermato %}
-			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" /><br/>
+			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
 		{% endif %}
 		{% if viaggio.padre %}
-				<img src="/media/frecciaverde.png" alt="*" />
+				<img src="{% media_url "frecciaverde.png" %}" alt="*" />
 		{% else %}
 			{% if viaggio.is_abbinata %}
-				<img src="/media/frecciagiu.png" alt="." />
+				<img src="{% media_url "frecciagiu.png" %}" alt="." />
 			{% endif %}
 		{% endif %}
 	</td>
@@ -31,7 +32,7 @@
 		<p>
 			{% if viaggio.punti_abbinata %}
 				{% num_range viaggio.punti_abbinata as punti_abbinata %}
-				{% for punto in punti_abbinata %}<img src="/media/casina.png" alt='DV' />{% endfor %}
+				{% for punto in punti_abbinata %}<img src="{% media_url "casina.png" %}" alt='DV' />{% endfor %}
 				<br/>
 				{{viaggio.punti_abbinata}} x {{viaggio.prezzoPunti}} nei doppi Venezia.<br/>
 			{% endif %}
@@ -55,7 +56,7 @@
 
 	<td>
 	{% if viaggio.padre and recurseChild %}
-		<img src="/media/arrow_join.png" alt='' />
+		<img src="{% media_url "arrow_join.png" %}" alt='' />
 	{% else %}
 		{% with viaggio.confirmed as confirmed %}
 			{% if viaggio.conducente_richiesto %}
@@ -67,14 +68,12 @@
 					{% with viaggio.classifica as classificaViaggio %}
 					{% if classificaViaggio %}
 						<form action="" method="post">
-							<div>
-								<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
-								<select name="conducente">
-									{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
-								</select><br/>
-								<input type="checkbox" name="confirmed" class="cbConducente" />
-								<input type="submit" name="confirm" class='conducenteOkBtn' value="ok" />
-							</div>
+							<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
+							<select name="conducente" style='display:block'>
+								{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
+							</select>
+							<input type="checkbox" name="confirmed" class="cbConducente" />
+							<input type="submit" name="confirm" class='conducenteOkBtn' value="ok" />
 						</form>
 					{% else %}
 					    Nessun conducente disponibile
@@ -82,7 +81,7 @@
 					{% endwith %}
 				{% endif %}
 			{% endif %}
-			{% if confirmed %}<br/><img alt="confermato" src="/media/ok.png" /> {% endif %}
+			{% if confirmed %}<br/><img alt="confermato" src="{% media_url "ok.png" %}" /> {% endif %}
 		{% endwith %}
         {% endif %}
 	</td>

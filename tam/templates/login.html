@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load media %}
 
 {% comment %}
 {% block title %}Accesso &raquo; {{ block.super }}{% endblock %}
@@ -7,7 +8,7 @@
 
 {% block superNavBar %}
 	<div class="mainlogo">
-		<img src="/media/logo.png" alt="TaM" />
+		<img src="{% media_url "logo.png" %}" alt="TaM" />
 	</div>
 {% endblock superNavBar %}
 

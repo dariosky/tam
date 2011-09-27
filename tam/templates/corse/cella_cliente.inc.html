@@ -1,9 +1,10 @@
+{% load media %}
 <div class="cliente">
 	{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}
 </div>
 {{ viaggio.numero_passeggeri }} pax
 {% if viaggio.esclusivo%}
-	<img width="12px" height="12px" src="/media/t.ico" alt="taxi" />
+	<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
 {% else %}
-	<img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />
+	<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
 {% endif %}

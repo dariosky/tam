@@ -27,9 +27,6 @@ class AutoCompleteForm(forms.ModelChoiceField):
 
 class AutoCompleteWidget(forms.widgets.Widget):
 	lookup_url = None
-	class Media:
-		js= ('js/jquery-autocomplete/jquery.autocomplete.min.js',)
-		css={'all':('js/jquery-autocomplete/jquery.autocomplete.css',)}
 
 	def __init__(self, lookup_url, Model, fieldname, **kwargs):
 		super(AutoCompleteWidget, self).__init__(**kwargs)

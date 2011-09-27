@@ -1,0 +1,20 @@
+Pulizia del DOM (http://developer.yahoo.com/performance/rules.html#min_dom):
+cominciamo da 23.098
+con un po' di pulizia siamo ancora a 22775
+
+Sul mese di agosto:
+document.getElementsByTagName('*').length
+	41.139
+	
+Senza corse la home (senza DJtoolbar, ma con Debug media) ha 412 elementi! Troppi
+
+elementi	dimensione
+412			5.2kb
+
+gran parte è usata dalla lista clienti e conducenti
+
+su agosto, dopo aver portato conducenti e clienti dinamici: 3863
+mentre la pagina senza corse diventa solo 88 elementi! Eureka :) 2,1kb
+
+** ** ** ** ** ** 27/9/2011
+

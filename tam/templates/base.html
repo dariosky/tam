@@ -1,43 +1,45 @@
+{% load media %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it">
 <head>
 	<title>{% block title %}TaM{% endblock %}{% ifequal request.META.USERDOMAIN "MION" %} - Stealth version{% endifequal %}</title>
 	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>
-	{% ifnotequal request.META.USERDOMAIN "MION" %}
-		<link rel="icon" href="/media/tam.ico" type="image/ico"/>
-	{% endifnotequal %}
+	{% ifnotequal request.META.USERDOMAIN "MION" %}<link rel="icon" href="{% media_url "tam.ico" %}" type="image/ico"/>{% endifnotequal %}
+	{% if mediabundle %}
+		{% for bundle in mediabundle %}{%include_media bundle %}{% endfor %}
+	{% else %}
+		{% include_media 'tam.css' %}
+		{% include_media 'tambase.js' %}
+	{% endif %}	
 	{% block css %}
-		<link rel="stylesheet" href="/media/css/tam.css" type="text/css"/>
-		{% ifequal request.META.USERDOMAIN "MION" %}<link rel="stylesheet" href="/media/css/tam-stealth.css" type="text/css"/>{% endifequal %}
-	{% endblock %}
-	{% if form %}{{ form.media.css }}{% endif %}
-	<script type="text/javascript" src='/media/js/jquery.min.js'></script>
-	<script type="text/javascript" src='/media/js/jquery.hotkeys.js'></script>
+		{% ifequal request.META.USERDOMAIN "MION" %}{% include_media 'tam-stealth.css' %}{% endifequal %}
+	{% endblock %}	
 	{% block header %}{% endblock header %}
  </head>
 
 <body>
-{% block titleContent %}
-    {#{% ifnotequal request.META.USERDOMAIN "MION" %}<h1 class="maintitle"><img src="/media/logo.png" alt="TaM" title="TaM"/></h1>{% endifnotequal %}#}
-{% endblock %}
+{% block titleContent %}{% endblock %}
 {% block superNavBar %}
 <div class="navBar">
 	{% block navBar %}
-		<span class="menuGroup">{% block corse %}<a href="/">TaM</a>
-		{% if perms.tam.add_viaggio %}&raquo;<a href="{% url tamNuovaCorsa %}" class="buttonLink"><img src="/media/addbtn.png" alt=""/> Nuova corsa</a>{% endif %}
-		{% endblock %}</span>
-		<span class="menuGroup">{% block luoghi %}<a href="{% url tamLuoghi %}">Tratte e Luoghi</a>{% endblock %}</span>
-		<span class="menuGroup">{% block clienti %}<a href="{% url tamListini %}">Clienti</a>{% endblock %}</span>
-		<span class="menuGroup">{% block conducenti %}<a href="{% url tamConducenti %}">Classifiche</a>{% endblock %}</span>
-		<span class="menuGroup">{% block util %}<a href="{% url tamUtil %}">Strumenti</a>{% endblock %}</span>
-		{% if request.user.is_superuser %}
-			<span class="menuGroup">{% block fatture %}<a href="{% url tamGenerazioneFatture %}">Fatture</a>{% endblock %}</span>
+		{% block corse %}<a href="/" class='menuGroup'>TaM</a>
+		{% if perms.tam.add_viaggio %}
+			<span style="margin-left:-1.8em;">&raquo; <a href="{% url tamNuovaCorsa %}" class='menuGroup'>
+			<img src="{% media_url "addbtn.png" %}" alt=""/> Nuova corsa</a>
+			</span>
 		{% endif %}
-		{% ifnotequal request.META.USERDOMAIN "MION" %}<img src="/media/minilogo.gif" class="loghetto" alt="" />{% endifnotequal %}
+		{% endblock corse%}
+		{% block luoghi %}<a href="{% url tamLuoghi %}" class='menuGroup'>Tratte e Luoghi</a>{% endblock %}
+		{% block clienti %}<a href="{% url tamListini %}" class='menuGroup'>Clienti</a>{% endblock %}
+		{% block conducenti %}<a href="{% url tamConducenti %}" class='menuGroup'>Classifiche</a>{% endblock %}
+		{% block util %}<a href="{% url tamUtil %}" class='menuGroup'>Strumenti</a>{% endblock %}
+		{% if request.user.is_superuser %}
+			{% block fatture %}<a href="{% url tamGenerazioneFatture %}" class='menuGroup'>Fatture</a>{% endblock %}
+		{% endif %}
+		{% ifnotequal request.META.USERDOMAIN "MION" %}<img src="{% media_url "minilogo.gif" %}" class="loghetto" alt="" />{% endifnotequal %}
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}
 </div>
-{% block spacer %}<div style="height:2em"></div>{% endblock %}
 {% endblock superNavBar %}
 <div class="content">
     {% if messages %}
@@ -52,14 +54,12 @@
 
 <div id="footer">
 	{% block authblock %}
-    <p style="float:left; margin:0">
     {% if request.user.is_authenticated %}
 		Sei connesso come <a href="{% url change_password %}">{{ request.user }}</a> - <a id='logout' href="{% url logout %}">disconnettiti</a>
 		{% if user.is_superuser %} - <a href="/admin/">amministrazione</a>{% endif %}
     {% else %}
 		Stai accedendo come utente non registrato. <a href="{% url login %}">Fatti riconoscere</a>.
     {% endif %}
-    </p>
 	{% endblock authblock %}
 	
 	<p class="credits">
@@ -75,8 +75,6 @@
 		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>
 	</p>
 </div>
-	<script type="text/javascript" src='/media/js/tam-common.js'></script>
-	{% if form %}{{ form.media.js }}{% endif %}
 	{% if form and not dontHilightFirst %}
 		<script type="text/javascript">
 	      $(document).ready(function() {

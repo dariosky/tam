@@ -18,3 +18,5 @@ Desktop.ini
 .settings/
 /nbproject/
 /querylog.sql
+_generated_media
+_generated_media_names.py

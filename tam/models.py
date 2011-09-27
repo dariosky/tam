@@ -234,7 +234,8 @@ class Viaggio(models.Model):
 		changed = False
 
 		# lista dei campi che vengono ricalcolati
-		fields = ["html_tragitto",
+		fields = [
+				"html_tragitto",
 				"prezzo_finale", "km",
 				"prezzoVenezia", "prezzoPadova",
 				"prezzoDoppioPadova",

@@ -6,7 +6,6 @@ Created on 11/set/2011
 '''
 import datetime
 from tam.models import Viaggio, ProfiloUtente
-from django import forms
 
 """
 Generazione fatture:
@@ -35,19 +34,7 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from tam.views import parseDateString
 
-def generazione(request, template_name="generazione.html"):
-	class Form(forms.Form):
-		class Media:
-			js = (
-					'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 	# calendario nel filtro avanzato
-				 )
-
-			css = {
-				'all': (
-						'js/jquery.ui/themes/ui-lightness/ui.all.css',
-					 )	# per il calendario nel filtro date avanzato
-			}
-	form = Form()
+def generazione(request, template_name="generazione.djhtml"):
 	data_start = parseDateString(	# dal primo del mese scorso
 									request.GET.get("data_start"),
 									default=(datetime.date.today()-datetime.timedelta(days=31)).replace(day=1)
@@ -57,7 +44,7 @@ def generazione(request, template_name="generazione.html"):
 									default=datetime.date.today().replace(day=1)-datetime.timedelta(days=1)
 								)
 	# prendo i viaggi da fatturare
-	da_consorzio = Viaggio.objects.filter(data__gte=data_start, data__lte=data_end, fatturazione=True, conducente__isnull=False).order_by("cliente")[:1]
+	da_consorzio = Viaggio.objects.filter(data__gte=data_start, data__lte=data_end, fatturazione=True, conducente__isnull=False).order_by("cliente")[:1].select_related()
 	
 	profile = ProfiloUtente.objects.get(user=request.user)
 	luogoRiferimento = profile.luogo
@@ -68,7 +55,7 @@ def generazione(request, template_name="generazione.html"):
 								"luogoRiferimento":luogoRiferimento,
 								"data_start":data_start,
 								"data_end":data_end,
-								"form":form,
 								"dontHilightFirst":True,
+								"mediabundle": ('tamUI.css', 'tamUI.js'),
                               },
                               context_instance=RequestContext(request))

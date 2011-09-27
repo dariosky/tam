@@ -1,10 +1,11 @@
+{% load media %}
 {% if viaggio.arrivo %}
 	<td class="arrivo">
 		{% if viaggio.is_long %}<strong>{% endif %}
 		{% ifequal viaggio.a luogoRiferimento %}
 			ARRIVO {{ viaggio.da }}
 		{% else %}
-			{{ viaggio.da }}<img src="/media/fout.png" alt="Arrivo" />{{ viaggio.a }}
+			{{ viaggio.da }}<img src="{% media_url "fout.png" %}" alt="Arrivo" />{{ viaggio.a }}
 		{% endifequal %}
 		{% if viaggio.is_long %}</strong>{% endif %}
 	</td>
@@ -14,7 +15,7 @@
 		{% ifequal viaggio.da luogoRiferimento %}
 			PARTENZA {{ viaggio.a }}
 		{% else %}
-			{{ viaggio.da }}<img src="/media/fin.png" alt="Partenza" />{{ viaggio.a }}
+			{{ viaggio.da }}<img src="{% media_url "fin.png" %}" alt="Partenza" />{{ viaggio.a }}
 		{% endifequal %}
 		{% if viaggio.is_long %}</strong>{% endif %}
 	</td>

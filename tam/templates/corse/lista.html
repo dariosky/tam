@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load media %}
 {% comment %}
 {% block title %}Lista corse &raquo; {{ block.super }}{% endblock %}
 {% block corse %}{{ block.super }} &raquo; <a href="{% url tamCorse %}">Lista corse</a>{% endblock %}
@@ -8,8 +8,8 @@
 {% block topContent %}
 	{% include "corse/corse_filter.inc.html" %}
 {% endblock %}
-{% block spacer %}<div style="height:3em"></div>{% endblock %}
 {% block content %}
+	<br style="margin-top:1em">
 	{% if thisPage.has_other_pages %}
 	<div class="countblock">
 			{% include "paginator.inc.html" %}
@@ -20,9 +20,8 @@
 	<div id="selActions">
 		<div id="associa">
 			<strong>Link</strong><br/>
-			<a id="linkUrl" href="#"><img src="/media/assoc.png" alt="semplice" title="associazione semplice"/></a><br/>
-			<!-- <a id="linkUrlBus" href="#"><img src="/media/assobus.ico" alt="bus" title="associazione bus" /></a><br/> -->
-			<a id="unlinkUrl" href="#"><img src="/media/smallX.png" alt="x" title="disassocia" /></a><br/>
+			<a id="linkUrl" href="#"><img src="{% media_url "assoc.png" %}" alt="semplice" title="associazione semplice"/></a><br/>
+			<a id="unlinkUrl" href="#"><img src="{% media_url "smallX.png" %}" alt="x" title="disassocia" /></a><br/>
 		</div>
 	</div>
 	
