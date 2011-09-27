@@ -1,6 +1,5 @@
 from django.conf.urls.defaults import * #@UnusedWildImport
 from django.views.generic.simple import direct_to_template
-from django.contrib.auth.decorators import login_required 
 from tam.models import * #@UnusedWildImport
 #import django.contrib.auth.views
 
@@ -9,8 +8,15 @@ urlpatterns = patterns('tam.views',
 
 	url(r'^api/get/luogo/$', 'getList', {"model":Luogo}, name="tamGetLuogo"), 
 	url(r'^api/get/passeggero/$', 'getList', {"model":Passeggero}, name="tamGetPasseggero"), 
-	url(r'^api/get/cliente/$', 'getList', {"model":Cliente}, name="tamGetCliente"), 
-
+	url(r'^api/get/cliente/$', 'getList', {"model":Cliente}, name="tamGetCliente"),
+	url(r'^api/get/cliente/json/$', 'getList',
+							{"model":Cliente, "format":'json',
+							"fields":("id", "nome", "attivo")},
+							name="tamGetClienteJson"),
+	url(r'^api/get/conducente/json/$', 'getList',
+							{"model":Conducente, "format":'json',
+							"fields":("id", "nick")},
+							name="tamGetConducenteJson"),
     
     url(r'^corsa/$', 'corsa', name="tamNuovaCorsa"), 
     url(r'^corsa/dettagli/$', 'corsa', {"step":2}, name="tamNuovaCorsa2"), 
@@ -90,8 +96,8 @@ urlpatterns += patterns('tam.views',
 )
 
 urlpatterns += patterns('',
-	url(r'^changelog/$', login_required(direct_to_template), {'template': 'static/changelog.html'}, name="tam_changelog" ),
-	url(r'^rules/$', login_required(direct_to_template), {'template': 'static/rules.html'}, name="tam_rules" ),
+	url(r'^changelog/$', direct_to_template, {'template': 'static/changelog.html'}, name="tam_changelog" ),
+	url(r'^rules/$', direct_to_template, {'template': 'static/rules.html'}, name="tam_rules" ),
 )
 
 

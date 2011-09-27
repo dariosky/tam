@@ -8,7 +8,8 @@
 		$("#accordion div").accordion({
 				header: "h2",
 				alwaysOpen: false,
-				active: false
+				active: false,
+				collapsible: true
 			});
 		//$("#accordion .selected").removeClass("selected");
     });
@@ -16,12 +17,9 @@
 
 <h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
 
-
     {% if not profilo.luogo %}
-
-	Inserisci un luogo preferito...<br/>
-	le classifiche dipendono molto dalle tratte previste.
-
+		Inserisci un luogo preferito...<br/>
+		le classifiche dipendono molto dalle tratte previste.
     {% else %}
 
 	{% if confirmConguaglio %}
@@ -37,6 +35,5 @@
 	{% endif %}
 
     {% endif %}
-
 
 {% endblock %}

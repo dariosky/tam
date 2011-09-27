@@ -1,48 +1,39 @@
+{% load media %}
 <form action="" method="get" id="filterForm">
 	<div style="float:right;">
-			{#{% if request.user.is_staff %}#}
-				<a href="?format=xls">
-					<img src='/media/ico_excel.gif' alt='Excel' />
-				</a>
-			{#{% endif %}#}
-			<select name="filterCliente" class="selectFilter" style="width:100px;">
-			    <option value="">Tutti i clienti</option>
-			    <option value="Privato"{% ifequal "Privato" filterCliente %} selected="selected"{% endifequal %}>Privato</option>
-			    {% for cliente in clienti %}
-					<option value="{{ cliente.id }}"{% ifequal cliente.id filterCliente %} selected="selected"{% endifequal %}>{{ cliente.nome }}{% if cliente.inattivo %}(inattivo){% endif %}</option>
-				{% endfor %}
-	        </select>
-
-			<select name="filterConducente" class="selectFilter">
-			    <option value="">Tutti i conducenti</option>
-			    <option value="Non confermate"{% ifequal "Non confermate" filterConducente %} selected="selected"{% endifequal %}>Non confermate</option>
-			    {% for conducente in conducenti %}
-					<option value="{{ conducente.id }}"{% ifequal conducente.id filterConducente %} selected="selected"{% endifequal %}>{{ conducente }}</option>
-				{% endfor %}
-	        </select>
-	        
-			<select name="filterType" class="selectFilter">
-				<option value="Tutti i tipi">Tutti i tipi</option>
-			    {% for valore in filtriTipo %}
-					<option value="{{ valore }}"{% ifequal valore filterType %} selected="selected"{% endifequal %}>{{ valore }}</option>
-				{% endfor %}
-	        </select>
-			<select name="filterFlag" class="selectFilter">
-				<option value="Tutti i flag">Tutti i flag</option>
-			    {% for valore in filtriFlag %}
-					<option value="{{ valore }}"{% ifequal valore filterFlag %} selected="selected"{% endifequal %}>{{ valore }}</option>
-				{% endfor %}
-	        </select>
-            <select name="filterWhen" id="whenSelect" class="selectFilter">
-                {% for filterValue, desc in filtriWhen %}
-                    <option value="{{ filterValue }}"{% ifequal filterValue filterWhen %} selected="selected"{% endifequal %}>{{ desc }}</option>
-                {% endfor %}
-				<option value="advanced" id="advDateFilter"{% if filtroWhenAvanzato %} selected="selected"{% endif %}>Filtro avanzato...</option>
-            </select>
-			<span class="advFilters"{% if not filtroWhenAvanzato %} style='display:none;'{% endif %}>
-					dal <input name="dstart" style="width:80px" type="text" value='{{ data_inizio|date:"d/m/Y" }}' />
-					 al <input name="dend" style="width:80px" type="text" value='{{ data_fine|date:"d/m/Y" }}' />
-			</span>
-			<input class="filterOkBTN" type="submit" value="Filtra" style="padding:0 15px; margin:0;"/>
+		<a href="?format=xls"><img src='{% media_url "ico_excel.gif" %}' alt='Excel' /></a>
+		<select name="filterCliente" class="selectFilter" id='select_clienti' style="width:100px;">
+			<option value="">Tutti i clienti</option>
+			<option value="Privato"{% ifequal "Privato" filterCliente %} selected="selected"{% endifequal %}>Privato</option>
+			{% comment %}
+			{% for cliente in clienti %} <option value="{{ cliente.id }}"{% ifequal cliente.id filterCliente %} selected="selected"{% endifequal %}>{{ cliente.nome }}{% if cliente.inattivo %}(inattivo){% endif %}</option>
+			{% endfor %}
+			{% endcomment %}
+		</select>
+		<select name="filterConducente" class="selectFilter" id='select_conducenti'>
+			<option value="">Tutti i conducenti</option>
+			<option value="Non confermate"{% ifequal "Non confermate" filterConducente %} selected="selected"{% endifequal %}>Non confermate</option>
+			{% comment %}
+			{% for conducente in conducenti %} <option value="{{ conducente.id }}"{% ifequal conducente.id filterConducente %} selected="selected"{% endifequal %}>{{ conducente }}</option>
+			{% endfor %}
+			{% endcomment %}
+		</select>
+		<select name="filterType" class="selectFilter">
+			<option value="Tutti i tipi">Tutti i tipi</option>
+			{% for valore in filtriTipo %}<option value="{{ valore }}"{% ifequal valore filterType %} selected="selected"{% endifequal %}>{{ valore }}</option>{% endfor %}
+		</select>
+		<select name="filterFlag" class="selectFilter">
+			<option value="Tutti i flag">Tutti i flag</option>
+			{% for valore in filtriFlag %}<option value="{{ valore }}"{% ifequal valore filterFlag %} selected="selected"{% endifequal %}>{{ valore }}</option>{% endfor %}
+		</select>
+		<select name="filterWhen" id="whenSelect" class="selectFilter">
+			{% for filterValue, desc in filtriWhen %}<option value="{{ filterValue }}"{% ifequal filterValue filterWhen %} selected="selected"{% endifequal %}>{{ desc }}</option>{% endfor %} <option value="advanced" id="advDateFilter"{% if filtroWhenAvanzato %} selected="selected"{% endif %}>Filtro avanzato...</option>
+		</select>
+		<span class="advFilters"{% if not filtroWhenAvanzato %} style='display:none;'{% endif %}> dal
+			<input name="dstart" type="text" value='{{ data_inizio|date:"d/m/Y" }}' />
+			al
+			<input name="dend" type="text" value='{{ data_fine|date:"d/m/Y" }}' />
+		</span>
+		<input class="filterOkBTN" type="submit" value="Filtra" style="padding:0 15px; margin:0;"/>
 	</div>
 </form>

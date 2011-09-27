@@ -30,12 +30,6 @@ def menu(request, template_name="archive/menu.html"):
 
 	class ArchiveForm(forms.Form):
 		""" Form che chiede una data non successiva a 30 giorni fa """
-		class Media:
-			css = {
-				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
-			}
-			js = ('js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js')
-
 		end_date_suggested = (datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)).replace(month=1, day=1).strftime('%d/%m/%Y')
 		end_date = forms.DateField(
 								   label="Data finale",
@@ -49,6 +43,7 @@ def menu(request, template_name="archive/menu.html"):
 			{
 				"dontHilightFirst": dontHilightFirst,
 				"form": form,
+				"mediabundle": ('tamUI.css', 'tamUI.js'),
 			}
 			, context_instance=RequestContext(request))
 
@@ -62,11 +57,12 @@ def vacuum_db(using='default'):
 
 def archiveFromViaggio(viaggio):
 	""" Crea una voce di archivio dato un viaggio """
+	html_tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": viaggio})
 	voceArchivio = ViaggioArchive(
 			data=viaggio.data,
 			da=viaggio.da,
 			a=viaggio.a,
-			path=viaggio.html_tragitto,
+			path=html_tragitto,
 			pax=viaggio.numero_passeggeri,
 			flag_esclusivo=viaggio.esclusivo,
 			conducente="%s" % viaggio.conducente,

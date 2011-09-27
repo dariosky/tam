@@ -24,7 +24,7 @@
 }
 body {
 	text-align:center;
-	background:white url('/media/sfumo.png');
+	background:white url(../v-grad-yellow.png);
     background-repeat: repeat-x;
     background-attachment: fixed;
 }
@@ -42,7 +42,7 @@ a:hover{ color:blue; }
 
 .navBar {
 	text-align:left;
-	background: white url(/media/header_fade.png);
+	background: white url(../header_fade.png);
 	background-repeat: repeat-x;
     background-position: top;
 	/*max-width: 100%;*/
@@ -55,10 +55,11 @@ a:hover{ color:blue; }
 	border: medium rgb(255,204,102) groove;
 	font-weight: bold;
 	position:fixed;
+	z-index:900;
 }
 
 #footer {
-    /*text-align: right;*/
+    text-align: left;
     margin:0 30px auto;
     max-width: 100%;
     min-width: 600px;
@@ -67,17 +68,17 @@ a:hover{ color:blue; }
 }
 
 .navBar .menuGroup {
-	margin-right:2em;
+	margin-right:1.8em;
 }
 
 .content {
     max-width: 100%;
     min-width: 600px;
 	text-align: justify;
-	background:white url(/media/sfuminogrigioinv.png);
+	background:white url(../v-grad-inv.png);
 	background-repeat: repeat-x;
     background-position: bottom;
-	margin:0 30px auto;
+	margin:2em 30px auto;
 	padding: 5px 10px 40px 10px;
     border: medium rgb(255,204,102) groove;
 }
@@ -194,7 +195,7 @@ td img {vertical-align: middle;}
 }
 
 .warning td {
-	background:white url(/media/sfumored.png);
+	background:white url(../v-grad-red.png);
 	background-repeat: repeat-x;
 	background-position: bottom;
 }
@@ -261,10 +262,6 @@ td img {vertical-align: middle;}
 	height:10em;
 }
 
-.buttonLink{
-	padding:10px;
-}
-
 #esclusivoBlock { display:inline; }
 #esclusivoBlock ul{ /* la choice blocco esclusivo */
     list-style-type: none;
@@ -274,7 +271,7 @@ td img {vertical-align: middle;}
 }
 
 .btnbox {
-	background:white url(/media/sfuminogrigioinv.png);
+	background:white url(../v-grad-inv.png);
 	background-repeat: repeat-x;
     background-position: bottom;
 	text-align:center;
@@ -299,4 +296,31 @@ td img {vertical-align: middle;}
 .bigButton{
 	width:400px;
 	font-size:larger;
+}
+
+.today{
+	font-size: 1.2em;
+	font-weight:bold;
+}
+
+.viaggioId {
+	/* i checkbox per selezionare i viaggi nella lista corse */
+	display:block;
+	margin:0 auto;
+}
+.accordhead {
+	/* La testa cliccabile nei div simili agli accordion */
+	font-size:1.5em;
+	cursor:pointer;
+	padding: 20px 0 10px 0;
+	text-decoration: underline;
+}
+.lordo {
+	/* span con il prezzo lordo */
+	font-weight: bold;
+	font-size: 1.2em; /* era 1.1 */
+}
+.advFilters input {
+	/* il filtro data avanzato, abbrevio gli input */
+	width:75px;
 }

@@ -6,19 +6,19 @@ from django.contrib.auth.models import Group
 from django import forms
 from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
-from tam.models import *
+from tam.models import * #@UnusedWildImport
 import time
 from django.db import IntegrityError
 #from django.db import connection
 from django.core.paginator import Paginator
 from genericUtils import *
-from django.conf import settings
 
 # Creo gli eventuali permessi mancanti
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
 from django.db.models.aggregates import Count
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page #@UnusedImport
+from django.utils import simplejson
 for app in get_apps():
 	create_permissions(app, None, 2)
 
@@ -55,21 +55,6 @@ def listaCorse(request, template_name="corse/lista.html"):
 #	request.user.message_set.create(message="Messaggio di test.")
 
 	outputFormat = request.GET.get('format', None)
-	class Form(forms.Form):
-		class Media:
-			js = (
-					'js/jquery.scrollTo-min.js', 'js/jquery.localscroll-min.js', # per scorrere
-					'js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 	# calendario nel filtro avanzato
-					'js/listaCorse.js', 		# definizioni personalizzate della lista corse
-					'js/jquery.hotkeys.js',		# tasti di scelta rapida
-				 )
-
-			css = {
-				'all': (
-						'js/jquery.ui/themes/ui-lightness/ui.all.css',
-					 )	# per il calendario nel filtro date avanzato
-			}
-	form = Form()
 
 #	precalcolati=0
 #	for viaggio in Viaggio.objects.all(): #filter(html_tragitto=""):
@@ -269,7 +254,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
-	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero")
+	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 	paginator = Paginator(viaggi, 100, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
 	page = request.GET.get("page", 1)
@@ -311,6 +296,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		from tamXml import xlsResponse
 		logAction(action='X', instance=request.user, description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
+	mediabundle = ('tamUI.css', 'tamCorse.js')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def corsaClear(request, next=None):
@@ -324,6 +310,8 @@ def corsaClear(request, next=None):
 def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=False, redirectOk="/"):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
+
+	mediabundle = ('tamUI.css', 'tamCorse.js')
 	if id and not user.has_perm('tam.change_viaggio'):
 		user.message_set.create(message=u"Non hai il permesso di modificare le corse.")
 		return HttpResponseRedirect("/")
@@ -440,16 +428,16 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					prezzolistino = cliente.listino.get_prezzo(da, a,
 										tipo_servizio=viaggioStep1.esclusivo and "T" or "C",
 										pax=viaggioStep1.numero_passeggeri)
-				
+
 				prezzoDaListinoNotturno = viaggioStep1.trattaInNotturna()
-				prezzoDaListinoDiurno = not prezzoDaListinoNotturno 
-				
+				prezzoDaListinoDiurno = not prezzoDaListinoNotturno
+
 				if prezzolistino:
 					if prezzoDaListinoDiurno:	# "Scelgo il prezzo normale"
 						default["prezzo"] = prezzolistino.prezzo_diurno
 					else:		# "Scelgo il prezzo notturno"
 						default["prezzo"] = prezzolistino.prezzo_notturno
-						
+
 #						
 					if prezzolistino.commissione is not None:
 						default["commissione"] = prezzolistino.commissione
@@ -457,7 +445,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 
 			default["costo_autostrada"] = viaggioStep1.costo_autostrada_default()
 
-			if da!=profilo.luogo and da.speciale != "-":	# creando un viaggio di arrivo da una stazione/aereoporto
+			if da != profilo.luogo and da.speciale != "-":	# creando un viaggio di arrivo da una stazione/aereoporto
 				logging.debug("Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€")
 				if da.speciale == "A":
 					default["abbuono_fisso"] = 10
@@ -465,7 +453,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				elif da.speciale == "S":
 					default["abbuono_fisso"] = 5
 					da_speciale = "S"
-			
+
 			form.initial.update(default)
 
 	# *************** REMOVE FIELDS ********************************
@@ -562,21 +550,32 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	#raise Exception("Sgnaps")
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-def getList(request, model=Luogo, field="nome"):
+def getList(request, model=Luogo, field="nome", format="txt", fields=None):
 	""" API Generica che restituisce un file di testo, con una lista di righe con tutte le istanze
 		che abbiano il campo field uguale al campo q che ottengo via get
 	"""
 	q = request.GET.get("q")
-	if q is None: return HttpResponse("", mimetype="text/plain")
-	fieldApiString = {"%s__icontains" % field:q}
-	results = [l.__unicode__() for l in model.objects.filter(**fieldApiString)]
+	if q is not None:
+		fieldApiString = {"%s__icontains" % field:q}
+	else:
+		fieldApiString = {}
+		
+	querySet = model.objects.filter(**fieldApiString)
 
-	return HttpResponse("\n".join(results), mimetype="text/plain")
+	if format == "txt":
+		results = "\n".join([record.__unicode__() for record in querySet])
+		return HttpResponse(results, mimetype="text/plain")
+	if format == "json" and fields:
+		records = querySet.values(*fields)
+		results = [ [record[key] for key in fields] for record in records]
+		return HttpResponse(simplejson.dumps(results), mimetype="application/javascript")
+
 
 def clienti(request, template_name="clienti_e_listini.html"):
 	listini = Listino.objects.annotate(Count('prezzolistino'))
 	clienti = Cliente.objects.all().select_related('listino')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def cliente(request, template_name="cliente.html", nomeCliente=None):
 	nuovo = nomeCliente is None
@@ -606,6 +605,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None):
 		request.user.message_set.create(message=u"%s il cliente %s." % (nuovo and "Creato" or "Aggiornato", cliente))
 		return HttpResponseRedirect(reverse("tamClienteNome", kwargs={"nomeCliente": cliente.nome}))
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def listino(request, template_name="listino.html", id=None, prezzoid=None):
 	nuovo = id is None
@@ -722,20 +722,15 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
+
 def luoghi(request, template_name="luoghi_e_tratte.html"):
 	""" Mostro tutti i luoghi suddivisi per bacino """
-	class Form(forms.Form):	#carico jquery per poter raggruppare con gli accordion
-		class Media:
-			css = {
-				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
-			}
-			js = ('js/jquery.ui/jquery-ui.custom-min.js',)
-	form = Form()
-
 	unbacined = Luogo.objects.filter(bacino__isnull=True)
 	bacini = Bacino.objects.all()
 	tratte = Tratta.objects.select_related()
+	mediabundle = ('tamUI.css', 'tamUI.js')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def conducente(*args, **kwargs):
 	request = args and args[0] or kwargs['request']
@@ -823,14 +818,7 @@ def profilo(request, *args, **kwargs):
 def conducenti(request, template_name="conducenti.html", confirmConguaglio=False):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
-
-	class Form(forms.Form):
-		class Media:
-			css = {
-				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
-			}
-			js = ('js/jquery.ui/jquery-ui.custom-min.js',)
-	form = Form()
+	mediabundle = ('tamUI.css', 'tamUI.js')
 
 	conducenti = Conducente.objects.filter(attivo=True)
 	if not profilo.luogo:
@@ -844,7 +832,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 	doppiVenezia = []	# lista per la visualizzazione delle classifiche doppi ordinata è (punti, conducentenick, classifica)
 	puntiDiurni = []	# anche le classifiche diurne e notturne le metto in lista per ordinarle qui in vista
 	puntiNotturni = []
-	
+
 	punti_assocMin = 0
 
 	for classifica in classificheViaggi:	# creo le classifiche un po' estese
@@ -870,7 +858,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 	doppiVenezia.sort()
 	puntiDiurni.sort()
 	puntiNotturni.sort()
-	
+
 	if classifiche:
 		prezzoDoppioPadovaMax = max([c["prezzoDoppioPadova"] for c in classifiche])
 		prezzoVeneziaMax = max([c["prezzoVenezia"] for c in classifiche])
@@ -1083,16 +1071,12 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 		figli = corsa.viaggio_set.all()	# ottengo anche i figli
 
 	class RecurrenceForm(forms.Form):
-		class Media:
-			css = {
-				'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css',)
-			}
-			js = ('js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js', 'js/rangeCalendar.js')
 		repMode = forms.ChoiceField(label="Ricorrenza", choices=[("m", "Mensile"), ("w", "Settimanale"), ("d", "Giornaliero")])
 		start = forms.DateField(label="Data iniziale", input_formats=[_('%d/%m/%Y')])
 		end = forms.DateField(label="Data finale", input_formats=[_('%d/%m/%Y')])
 
 	form = RecurrenceForm(request.POST or None)
+	mediabundle = ('tamUI.css', 'tamUI.js')
 	dataIniziale = max(datetime.date.today(), corsa.data.date()) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
 	form.initial["start"] = dataIniziale.strftime('%d/%m/%Y')
 	form.initial["end"] = dataIniziale.strftime('%d/%m/%Y')
@@ -1296,6 +1280,3 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
 		return HttpResponseRedirect('/')
 #	response=password_change(request, template_name=template_name, post_change_redirect='/')
 	return render_to_response(template_name, {'form': form }, context_instance=RequestContext(request))
-
-
-
