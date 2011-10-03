@@ -1,7 +1,9 @@
 {% extends "base.html" %}
+{% load media %}
 {% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
-	<h1>Generazione fatture.</h1>
+
+	<h1>Generazione fatture</h1>
 	<div id='date_range'>
 		<form method='get' action=''>
 			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
@@ -9,21 +11,26 @@
 			<input type="submit" value="Trova corse fatturabili"/>
 		</form>
 	</div>
-	<div style='float:right'>
-		Anno <input type='text' name='end_date' maxlength="4">
-		Progressivo iniziale <input type='text' name='progressivo' maxlength="5">
-	</div>
-	<br style="clear: both"/>
-	
+
+<div id='accordion'>
+	<h2 class='accordhead'>Fatture consorzio</h2>
 	<div>
-		<h3>Fatture consorzio</h3>
+		<div id='gotoConsorzio' class='floatingBlock'>
+			<a href="#generaConsorzio"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+		</div>
+		<form method="get" action="{% url tamFattureGeneraConsorzio %}">
 		<p>Le fatture che il consorzio fa ai clienti.<br>
 			Tutti i viaggi confermati con l'indicazione della fattura.
 		</p>
+		
+		<div>
+			Anno <input type='text' name='anno' maxlength="4" value="{{ anno_consorzio }}">
+			Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{progressivo_consorzio}}">
+		</div>
+
 		<p>
 			{{ da_consorzio.count }} corse.<br />
 			{% if da_consorzio %}
-			<form method="post" action="">
 			<table class='tablesorter' id='table_consorzio' style="text-align:center" >
 			<thead>
 				<tr>
@@ -38,8 +45,9 @@
 			</thead>
 			{% for viaggio in da_consorzio %}
 				<tr>
-					<td>{% ifchanged viaggio.cliente %}
-						{% include "corse/cella_cliente.inc.html" %}
+					<td>{% ifchanged viaggio.cliente_id viaggio.passeggero_id %}
+						<div class='cliente'>{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}</div>
+						<a href="#" class='clientSelect'>seleziona tutto</a>
 					{% endifchanged %}</td>
 					<td><input type='checkbox' name='id' value='{{viaggio.id}}' ></td>
 					<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
@@ -48,35 +56,74 @@
 					<td>{{viaggio.prezzo}}
 						{% include "corse/flags.inc.html" %}
 					</td>
-					<td>{{viaggio.conducente}}</td>
+					<td>{{viaggio.conducente.nick}}</td>
 				</tr>
 			{% endfor %}
 			</table>
-			<input type="submit" id="genera_consorzio" name="genera_consorzio" value="Genera le fatture consorzio"/>
-			</form>
+			<a name="generaConsorzio"></a>
+			<input type="submit" id="genera_consorzio" name="preview" value="Genera le fatture consorzio"/>
 			
 			{% endif %}
 		</p>
+		</form>
 	</div>
 	
-	<div>
-		<h3>Fatture conducente</h3>
-		<p>Le fatture che il conducente fa al consorzio.
-		</p>
+	<h2 class='accordhead'>Fatture conducente</h2>
+	<div style='display:none;'>
+		<p>Le fatture che il conducente fa al consorzio.</p>
 	</div>
 	
-	<div>
-		<h3>Ricevute</h3>
-		<p>I viaggi con pagamento posticipato vengono pagati con ricevuta.
-		</p>
+	<h2 class='accordhead'>Ricevute</h2>
+	<div style='display:none;'>
+		<div id='gotoRicevute' class='floatingBlock'>
+			<a href="#generaRicevute"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+		</div>
+		<p>I viaggi con pagamento posticipato vengono pagati con ricevuta.</p>
+	<a name="generaRicevute"></a>
+	Genera ricevute
 	</div>
+	
+</div>
 
 {% endblock %}
 
 {% block bottom %}
-	<script type="text/javascript" src="/media/js/table_selector.js"></script>
+	<script type="text/javascript" src="/media/js/fatture/table_selector.js"></script>
 	<script type="text/javascript">
-		table_selector('#check_consorzio', '#table_consorzio');
+	    $(document).ready( function() {
+			$("#accordion .accordhead").click(function(){
+					$(this).next().toggle('slow');
+					return false;
+				});
+			
+			function scrollableGoto(scroller) {
+				if (!scroller.is(":visible")) return;
+				var scrollParent = scroller.parent();
+				//var deltaH = scroller.offset().top - scrollParent.scrollTop();
+				//console.log("deltaH:"+deltaH);
+				deltaH = 0;
+				//console.log("Scroll da "+scroller_min+" a "+scroller_max);
+				$(window).scroll(function(){
+					var scroller_min = scrollParent.offset().top;
+					var scroller_max = scrollParent.offset().top+scrollParent.height();
+					//$(window).height()/2
+					var newTop = $(window).scrollTop()+deltaH;
+					if (newTop>scroller_max) newTop=scroller_max;
+					if (newTop<scroller_min) newTop=scroller_min;
+					//console.log("set to "+newTop+" ["+scroller_min+","+scroller_max+"]");
+					scroller.stop().animate({"top": newTop+"px"}, "fast");
+				});
+			}
+			scrollableGoto($('#gotoConsorzio'));
+			scrollableGoto($('#gotoRicevute'));
+			
+	    });
+	    table_selector('#check_consorzio', '#table_consorzio');
 		$('#date_range input[type=text]').datepicker();
+		$('.clientSelect').click(function(){
+			// seleziono da qui al prossimo cliente indicato
+			selectCheckboxToNext(this, ".cliente");
+			return false;
+		});
 	</script>
 {% endblock bottom %}

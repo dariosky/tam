@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load media %}
+{% block title %}Fatturazione consorzio &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+
+<h1>Generazione fatture consorzio</h1>
+
+<div>
+		{{ da_consorzio.count }} corse.<br />
+		{% if da_consorzio %}
+		<form method="post" action="">
+		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+		<thead>
+			<tr>
+				<th>Fattura</th>
+				<th>Cliente</th>
+			    <th>Data</th>
+			    <th>Da - A</th>
+			    <th>Note</th>
+			    <th>Prezzo lordo</th>
+			    <th>Conducente</th>
+			</tr>
+		</thead>
+		{% for viaggio in da_consorzio %}
+			<tr>
+				<td>
+					{% ifchanged viaggio.progressivo_fattura %}
+					FC{{anno}}/{{viaggio.progressivo_fattura}}
+					{% endifchanged %}
+				</td>
+				<td>
+				<input type='hidden' name='id' value='{{viaggio.id}}' >
+				{% ifchanged viaggio.cliente_id %}
+					{% include "corse/cella_cliente.inc.html" %}
+				{% endifchanged %}</td>
+				<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
+				{% include "corse/cella_partenza_arrivo.inc.html" %}
+				<td>{% include "corse/cella_note.inc.html" %}</td>
+				<td>{{viaggio.prezzo}}
+					{% include "corse/flags.inc.html" %}
+				</td>
+				<td>{{viaggio.conducente.nick}}</td>
+			</tr>
+		{% endfor %}
+		</table>
+		<input type="submit" id="genera_consorzio" name="generate" value="Genera le fatture consorzio"/>
+		</form>
+		
+		{% endif %}
+</div>
+
+</div>
+
+{% endblock %}

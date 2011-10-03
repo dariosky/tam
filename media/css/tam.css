@@ -324,3 +324,8 @@ td img {vertical-align: middle;}
 	/* il filtro data avanzato, abbrevio gli input */
 	width:75px;
 }
+
+.floatingBlock {
+	/* i div galleggianti con degli strumenti */
+	position:absolute; left:2px; text-align:center; padding:10px; width:30px;
+}

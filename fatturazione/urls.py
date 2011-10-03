@@ -6,5 +6,6 @@ Created on 11/set/2011
 from django.conf.urls.defaults import * #@UnusedWildImport
 
 urlpatterns = patterns ( 'fatturazione.views',
-    url(r'^genera/$', 'generazione', name="tamGenerazioneFatture"),
+    url(r'^$', 'generazione', name="tamGenerazioneFatture"),
+    url(r'^genera/consorzio/$', 'genera_consorzio', name="tamFattureGeneraConsorzio"),
 )

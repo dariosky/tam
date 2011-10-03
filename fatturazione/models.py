@@ -23,5 +23,5 @@ class RigaFattura(models.Model):
 	prezzo = models.DecimalField( max_digits=9, decimal_places=2)	#fissa in euro
 	iva = models.IntegerField()	# iva in percentuale
 	
-	viaggio = models.ForeignKey(Viaggio, null=True, related_name="fattura")
+	viaggio = models.OneToOneField(Viaggio, null=True, related_name="riga_fattura")
 	
