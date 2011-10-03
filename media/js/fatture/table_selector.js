@@ -1,5 +1,4 @@
 function table_selector(global_check, table) {
-
 	/*
 	 * Onchange dei singoli checkbox della lista.
 	 * Controllo tutti i checkbox nella tabella tranne quello "master"
@@ -33,4 +32,30 @@ function table_selector(global_check, table) {
 		checkboxes.attr("checked", this.checked);
 	});
 	
+}
+
+function selectCheckboxToNext(from, next) {
+	/* TODO: popolo con tutte le checkbox da-a
+	 * se sono tutte selezionate le deseleziono altrimenti le seleziono
+	 */
+	//$(alba).closest("tr").nextAll().has(".cliente")
+	
+	var questaRiga = $(from).closest("tr")[0];
+	var nextRows = $(questaRiga).nextAll().andSelf(); // tutte le prossime righe
+	
+	console.log("Processo le prossime ", nextRows.length, " righe.")
+	nextRows.each(function(){
+		console.log("passo la linea", this);
+		if (this!=questaRiga && $(this).has(".cliente").length){
+			console.log("Esco", this, "ha clienti");
+			return false;	// stop the loop
+		}
+		else {
+			console.log("Seleziono la riga", this);
+			$(this).find("input[type=checkbox]").attr("checked", true);
+		}
+	});
+	
+	console.log("Seleziono da ", from, " a ", next);
+
 }
