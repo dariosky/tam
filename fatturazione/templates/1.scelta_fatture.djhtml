@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% load media %}
+{% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+
+	<h1>Generazione fatture</h1>
+	<div id='date_range'>
+		<form method='get' action=''>
+			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
+			a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<input type="submit" value="Trova corse fatturabili"/>
+		</form>
+	</div>
+
+<div>
+	<h2 class='accordhead fatturaTipo1'>Fatture consorzio</h2>
+	{{ lista_consorzio.count }} corse.
+	<div style='display:none;'>
+		<div id='gotoConsorzio' class='floatingBlock'>
+			<a href="#generaConsorzio"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+		</div>
+		<form method="get" action="{% url tamFattureGeneraConsorzio %}">
+		<p>Le fatture che il consorzio fa ai clienti.<br>
+			Tutti i viaggi confermati con l'indicazione della fattura.
+		</p>
+		
+		<div>
+			Anno <input type='text' name='anno' maxlength="4" value="{{ anno_consorzio }}">
+			Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{progressivo_consorzio}}">
+		</div>
+		
+		<div class='fatturaTipo1'>
+			{% with lista_consorzio as lista %}
+				{% if lista %}
+					<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+					<thead>
+						<tr>
+							<th>Cliente</th>
+						    <th><input type="checkbox" id='check_consorzio'/></th>
+						    <th>Data</th>
+						    <th>Da - A</th>
+						    <th>Note</th>
+						    <th>Prezzo lordo</th>
+						    <th>Conducente</th>
+						</tr>
+					</thead>
+					{% for viaggio in lista %}
+						<tr>
+							<td>{% ifchanged viaggio.cliente_id viaggio.passeggero_id %}
+								<div class='cliente'>{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}</div>
+								<a href="#" class='clientSelect'>seleziona tutto</a>
+							{% endifchanged %}</td>
+							<td><input type='checkbox' name='id' value='{{viaggio.id}}' ></td>
+							<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
+							{% include "corse/cella_partenza_arrivo.inc.html" %}
+							<td>{% include "corse/cella_note.inc.html" %}</td>
+							<td>{{viaggio.prezzo}}
+								{% include "corse/flags.inc.html" %}
+							</td>
+							<td>{{viaggio.conducente.nick}}</td>
+						</tr>
+					{% endfor %}
+					</table>
+					<a name="generaConsorzio"></a>
+					<input type="submit" name="preview" value="Genera le fatture consorzio"/>
+				{% endif %}
+			{% endwith %}
+		</div>
+		
+		</form>
+	</div>
+	
+	
+	<h2 class='accordhead fatturaTipo2'>Fatture conducente</h2>
+	{{ lista_conducente.count }} corse.
+	<div style='display:none;' class='fatturaTipo2'>
+		<div id='gotoConsorzio' class='floatingBlock'>
+			<a href="#generaConducente"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+		</div>
+		<form method="get" action="{% url tamFattureGeneraConducente %}">
+		<p>Le fatture che il conducente fa al consorzio.</p>
+		</form>
+	</div>
+	
+
+	<h2 class='accordhead fatturaTipo3'>Ricevute</h2>
+	{{ lista_ricevute.count }} corse.
+	<div style='display:none;' class='fatturaTipo3'>
+		<div id='gotoRicevute' class='floatingBlock'>
+			<a href="#generaRicevute"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+		</div>
+		<p>I viaggi con pagamento posticipato (e non fatturabili) vengono pagati con ricevuta.</p>
+		<div>
+			{% with lista_ricevute as lista %}
+				{% if lista %}
+					<form method="get" action="{% url tamFattureGeneraRicevute %}">
+					<table class='tablesorter' id='table_ricevute' style="text-align:center" >
+					<thead>
+						<tr>
+							<th>Conducente</th>
+							<th>Cliente</th>
+						    <th><input type="checkbox" id='check_ricevute'/></th>
+						    <th>Data</th>
+						    <th>Da - A</th>
+						    <th>Note</th>
+						    <th>Prezzo lordo</th>
+						</tr>
+					</thead>
+					{% for viaggio in lista %}
+						<tr>
+							<td>{% ifchanged viaggio.conducente_id %}
+								<div>{{viaggio.conducente.nick}}</div>
+								<a href="#" class='clientSelect'>seleziona tutto</a>
+								{% endifchanged %}
+							</td>
+							<td>{% ifchanged viaggio.conducente_id viaggio.cliente_id %}
+								<div class='cliente'>{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}</div>
+								{% endifchanged %}
+							</td>
+							<td><input type='checkbox' name='id' value='{{viaggio.id}}' ></td>
+							<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
+							{% include "corse/cella_partenza_arrivo.inc.html" %}
+							<td>{% include "corse/cella_note.inc.html" %}</td>
+							<td>{{viaggio.prezzo}}
+								{% include "corse/flags.inc.html" %}
+							</td>
+						</tr>
+					{% endfor %}
+					</table>
+					<a name="generaRicevute"></a>
+					<input type="submit" name="preview" value="Genera ricevute"/>
+					</form>
+				{% endif %}
+			{% endwith %}
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block bottom %}
+	<script type="text/javascript" src="/media/js/fatture/table_selector.js"></script>
+	<script type="text/javascript">
+	    $(function() {
+			$(".accordhead").click(function(){
+					$(this).next().toggle('slow');
+					return false;
+				});
+			
+			scrollableGoto($('#gotoConsorzio'));
+			scrollableGoto($('#gotoRicevute'));
+		
+			table_selector('#check_consorzio', '#table_consorzio');
+			table_selector('#check_ricevute', '#table_ricevute');
+			$('#date_range input[type=text]').datepicker();
+			$('.clientSelect').click(function(){
+				// seleziono da qui al prossimo cliente indicato
+				selectCheckboxToNext(this);
+				return false;
+			});	
+	    });
+	</script>
+{% endblock bottom %}

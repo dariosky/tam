@@ -1,4 +1,7 @@
 {% load media %}
+{% if tam_stealth %}
+	<td>{{ viaggio.da.nome.0 }} - {{ viaggio.a.nome.0 }}</td>
+{% else %}
 {% if viaggio.arrivo %}
 	<td class="arrivo">
 		{% if viaggio.is_long %}<strong>{% endif %}
@@ -19,4 +22,5 @@
 		{% endifequal %}
 		{% if viaggio.is_long %}</strong>{% endif %}
 	</td>
+{% endif %}
 {% endif %}

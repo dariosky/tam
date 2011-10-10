@@ -34,19 +34,17 @@ function table_selector(global_check, table) {
 	
 }
 
-function selectCheckboxToNext(from, next) {
+function selectCheckboxToNext(from) {
 	/* TODO: popolo con tutte le checkbox da-a
 	 * se sono tutte selezionate le deseleziono altrimenti le seleziono
 	 */
-	//$(alba).closest("tr").nextAll().has(".cliente")
-	
 	var questaRiga = $(from).closest("tr")[0];
 	var nextRows = $(questaRiga).nextAll().andSelf(); // tutte le prossime righe
 	
 	console.log("Processo le prossime ", nextRows.length, " righe.")
 	nextRows.each(function(){
 		console.log("passo la linea", this);
-		if (this!=questaRiga && $(this).has(".cliente").length){
+		if (this!=questaRiga && $(this).has(".clientSelect").length){
 			console.log("Esco", this, "ha clienti");
 			return false;	// stop the loop
 		}
@@ -55,7 +53,23 @@ function selectCheckboxToNext(from, next) {
 			$(this).find("input[type=checkbox]").attr("checked", true);
 		}
 	});
-	
-	console.log("Seleziono da ", from, " a ", next);
+}
 
+function scrollableGoto(scroller) {
+	var scrollParent = scroller.parent();
+	//var deltaH = scroller.offset().top - scrollParent.scrollTop();
+	//console.log("deltaH:"+deltaH);
+	deltaH = 0;
+	//console.log("Scroll da "+scroller_min+" a "+scroller_max);
+	$(window).scroll(function(){
+		if (!scroller.is(":visible")) return;
+		var scroller_min = scrollParent.offset().top;
+		var scroller_max = scrollParent.offset().top+scrollParent.height();
+		//$(window).height()/2
+		var newTop = $(window).scrollTop()+deltaH;
+		if (newTop>scroller_max) newTop=scroller_max;
+		if (newTop<scroller_min) newTop=scroller_min;
+		//console.log("set to "+newTop+" ["+scroller_min+","+scroller_max+"]");
+		scroller.stop().animate({"top": newTop+"px"}, "fast");
+	});
 }
