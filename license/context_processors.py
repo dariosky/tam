@@ -8,4 +8,5 @@ def license_details(request):
 	""" Add license detail to request context """
 	result=get_license_detail()
 	result["tam_version"] = settings.TAM_VERSION
+	result["tam_stealth"] = settings.DEBUG
 	return result

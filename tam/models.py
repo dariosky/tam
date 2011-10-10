@@ -913,6 +913,7 @@ class Conducente(models.Model):
 		Ogni conducente può essere in servizio o meno.
 	"""
 	nome = models.CharField("Nome", max_length=40, unique=True)
+	dati = models.TextField(null=True, blank=True)
 	nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
 	max_persone = models.IntegerField(default=4)
 	attivo = models.BooleanField(default=True)

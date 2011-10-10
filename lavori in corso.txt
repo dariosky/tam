@@ -16,5 +16,10 @@ gran parte è usata dalla lista clienti e conducenti
 su agosto, dopo aver portato conducenti e clienti dinamici: 3863
 mentre la pagina senza corse diventa solo 88 elementi! Eureka :) 2,1kb
 
+#TODO: Faccio in modo che se ho filtrato per conducente o cliente si veda nei filtri
+
 ** ** ** ** ** ** 27/9/2011
+Richiesta una bacheca su Tam:
+	in modo che gli utentipotenti possano uploadare/cancellare i file sulla bacheca
+	e gli altri possano leggere
 

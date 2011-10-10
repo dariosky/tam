@@ -165,6 +165,10 @@ else:
 	SESSION_COOKIE_AGE = 30 * 60	# cookie age in seconds (30 minutes)
 
 LICENSE_OWNER = 'ARTE Taxi'
+DATI_CONSORZIO = """A.R.T.E. Taxi
+via Teulada 66
+35100 Padova"""
+
 #import datetime
 #LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
 

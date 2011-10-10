@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}Fatturazione consorzio &raquo; {{ block.super }} {% endblock %}
+{% block title %}Generazione {{ tipo }} &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
-<h1>Generazione fatture consorzio</h1>
+<h2 class='fatturaTipo1'>Generazione fatture consorzio</h2>
 
-<div>
-		{{ da_consorzio.count }} corse.<br />
-		{% if da_consorzio %}
+{# {% if error_message %}<div class='errorlist'>{{error_message}}</div>{% endif %} #}
+<div class='fatturaTipo1'>
+		{{ fatture }} fatture / {{ lista.count }} corse.<br />
+		{% if lista %}
 		<form method="post" action="">
 		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
 		<thead>
@@ -21,12 +22,14 @@
 			    <th>Conducente</th>
 			</tr>
 		</thead>
-		{% for viaggio in da_consorzio %}
+		{% for viaggio in lista %}
 			<tr>
 				<td>
-					{% ifchanged viaggio.progressivo_fattura %}
-					FC{{anno}}/{{viaggio.progressivo_fattura}}
-					{% endifchanged %}
+					{% if viaggio.progressivo_fattura %}
+						{% ifchanged viaggio.progressivo_fattura %}
+						FC{{viaggio.anno_fattura}}/{{viaggio.progressivo_fattura}}
+						{% endifchanged %}
+					{%endif%}
 				</td>
 				<td>
 				<input type='hidden' name='id' value='{{viaggio.id}}' >
@@ -43,7 +46,7 @@
 			</tr>
 		{% endfor %}
 		</table>
-		<input type="submit" id="genera_consorzio" name="generate" value="Genera le fatture consorzio"/>
+		<input type="submit" id="genera_consorzio" name="generate" value="Genera fatture consorzio"/>
 		</form>
 		
 		{% endif %}
