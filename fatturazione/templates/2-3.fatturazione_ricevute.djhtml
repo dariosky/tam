@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load media %}
+{% block title %}Generazione {{ plurale }} &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+
+<h2 class='fatturaTipo3'>Generazione {{plurale}}</h2>
+
+{# {% if error_message %}<div class='errorlist'>{{error_message}}</div>{% endif %} #}
+<div class='fatturaTipo3'>
+		{{ fatture }} {{plurale}} / {{ lista.count }} corse.<br />
+		{% if lista %}
+		<form method="post" action="">
+		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+		<thead>
+			<tr>
+				<th>Conducente</th>
+				<th>Cliente</th>
+			    <th>Corsa</th>
+			    <th>Note</th>
+			    <th>Prezzo lordo</th>
+			</tr>
+		</thead>
+		{% for viaggio in lista %}
+			<tr>
+				<td>{% ifchanged viaggio.conducente_id %}
+						<strong>{{viaggio.conducente.nick}}</strong>
+						{% if viaggio.conducente.dati %}<div class='dati'>{{ viaggio.conducente.dati }}</div>{%endif%}
+					{%endifchanged%}
+				</td>
+				<td>
+				<input type='hidden' name='id' value='{{viaggio.id}}' >
+				{% ifchanged viaggio.cliente_id viaggio.passeggero_id %}
+					{% if viaggio.cliente %}{{ viaggio.cliente }}{% if viaggio.cliente.dati %}<div class='dati'>{{ viaggio.cliente.dati }}</div>{% endif %}
+					{% else %}
+						<i>Privato</i>
+						{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.id %}?next={{ request.path_info }}">{{ viaggio.passeggero }}{% if viaggio.passeggero.dati %}</a><div class='dati'>{{ viaggio.passeggero.dati }}</div>{% endif %}{%endif%}
+					{% endif %}
+				{% endifchanged %}
+				</td>
+				<td>{% include "inc.cellaViaggio.djhtml" %}</td>
+				<td>{% include "corse/cella_note.inc.html" %}</td>
+				<td>{{viaggio.prezzo}}
+					{% include "corse/flags.inc.html" %}
+				</td>
+			</tr>
+		{% endfor %}
+		</table>
+		<input type="submit" name="generate" value="Genera {{plurale}}" />
+		</form>
+		
+		{% endif %}
+</div>
+
+</div>
+
+{% endblock %}

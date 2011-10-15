@@ -8,9 +8,10 @@ import datetime
 from tam.models import Viaggio, ProfiloUtente
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from fatturazione.models import Fattura, RigaFattura, nomi_fatture
+from fatturazione.models import Fattura, RigaFattura, nomi_fatture, nomi_plurale
 from django.db.models import Q
 from fatturazione.views.util import ultimoProgressivoFattura
+from django.db import transaction
 
 """
 Generazione fatture:
@@ -44,7 +45,7 @@ from django.conf import settings
 filtro_consorzio = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None)
 
 # Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
-filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None) # applicato sulle righe fatture
+filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None, conducente__attivo=True) # applicato sulle righe fatture
 
 # se un viaggio ha sia pagamento differito che fatturazione, faccio solo la fattura
 filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None)
@@ -68,11 +69,11 @@ def lista_fatture(request, template_name="1.scelta_fatture.djhtml", tipo="1"):
 	oggi = datetime.date.today()
 	anno_consorzio = oggi.year
 	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, tipo) + 1
-	
+
 	# FATTURE CONDUCENTE ****************
 	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end)
-	lista_conducente = fatture.filter(filtro_conducente)
-	
+	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").select_related().all()
+
 	# RICEVUTE CONDUCENTE
 	lista_ricevute = viaggi.filter(filtro_ricevute)
 	lista_ricevute = lista_ricevute.order_by("conducente", "cliente", "data").select_related().all()
@@ -87,7 +88,7 @@ def lista_fatture(request, template_name="1.scelta_fatture.djhtml", tipo="1"):
 								"data_end":data_end,
 								"dontHilightFirst":True,
 								"mediabundle": ('tamUI.css', 'tamUI.js'),
-								
+
 								"anno_consorzio":anno_consorzio,
 								"progressivo_consorzio":progressivo_consorzio,
 								"lista_consorzio":lista_consorzio,
@@ -97,13 +98,18 @@ def lista_fatture(request, template_name="1.scelta_fatture.djhtml", tipo="1"):
                               context_instance=RequestContext(request))
 
 
-def genera_fatture(request, tipo="1", filtro=filtro_consorzio, keys=["cliente"], template_name="2.fatturazione_consorzio.djhtml"):
+@transaction.commit_on_success
+def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, keys=["cliente"], order_by=None,
+					manager=Viaggio.objects,
+				):
 	ids = request.GET.getlist("id")
+	plurale = nomi_plurale[tipo]
+
 	if not ids:
 		request.user.message_set.create(message="Devi selezionare qualche corsa da fatturare.")
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
-	
-	if tipo =="1":	# la generazione fatture consorzio richiede anno e progressivo
+
+	if tipo == "1":	# la generazione fatture consorzio richiede anno e progressivo - li controllo
 		try:
 			anno = int(request.GET.get("anno"))
 		except:
@@ -115,38 +121,43 @@ def genera_fatture(request, tipo="1", filtro=filtro_consorzio, keys=["cliente"],
 			request.user.message_set.create(message="Ho bisogno di un progressivo iniziale numerico.")
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 		ultimo_progressivo = ultimoProgressivoFattura(anno, tipo)
-		if ultimo_progressivo>=progressivo:
-			request.user.message_set.create(message="Il progressivo è troppo piccolo, ho già la %s %s/%s." %(nomi_fatture[tipo], anno, ultimo_progressivo))
+		if ultimo_progressivo >= progressivo:
+			request.user.message_set.create(message="Il progressivo è troppo piccolo, ho già la %s %s/%s." % (nomi_fatture[tipo], anno, ultimo_progressivo))
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
-	
-	lista = Viaggio.objects.filter(id__in=ids)
+
+	lista = manager.filter(id__in=ids)
 	lista = lista.filter(filtro)
-	order_by = keys+["data"]	# ordino per chiave - quindi per data
+	if order_by is None:
+		order_by = keys + ["data"]	# ordino per chiave - quindi per data
 	lista = lista.order_by(*order_by).select_related().all()
 	if not lista:
-		request.user.message_set.create(message="Tutte le corse selezionate sono già state fatturate.")
+		request.user.message_set.create(message="Tutte le %s selezionate sono già state fatturate." % plurale)
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
-	
 	fatture = 0
 	lastKey = None
-	for viaggio in lista:
-		key = [getattr(viaggio, keyName) for keyName in keys]
+	for elemento in lista:
+		key = [getattr(elemento, keyName) for keyName in keys]
 		if lastKey <> key:
-			if lastKey <> None and tipo=='1': progressivo += 1
+			if lastKey <> None and tipo == '1': progressivo += 1
 			lastKey = key
-			fatture+=1
-		viaggio.key = key
-		if tipo=='1':
-			viaggio.progressivo_fattura = progressivo
+			fatture += 1
+		elemento.key = key
+		if tipo == '1':
+			elemento.progressivo_fattura = progressivo
+			elemento.anno_fattura = anno
 
 	if request.method == "POST":
 		if request.POST.has_key("generate"):
 			lastKey = None
 			fatture_generate = 0
-			
-			for viaggio in lista:
-				if viaggio.key <> lastKey:
+
+			for elemento in lista:
+				if tipo in ("1", "3"):
+					viaggio = elemento
+				else:
+					viaggio = elemento.viaggio
+				if elemento.key <> lastKey:
 					# TESTATA
 					fattura = Fattura(tipo=tipo)
 					fattura.data = datetime.date.today()
@@ -154,30 +165,42 @@ def genera_fatture(request, tipo="1", filtro=filtro_consorzio, keys=["cliente"],
 						fattura.anno = anno
 						fattura.progressivo = viaggio.progressivo_fattura
 						fattura.emessa_da = settings.DATI_CONSORZIO
-						fattura.emessa_a = viaggio.cliente.nome + "\n" + viaggio.cliente.dati
+						fattura.emessa_a = viaggio.cliente.dati or viaggio.cliente.nome
 					elif tipo == "3": # ricevuta: da conducente a cliente
-						fattura.emessa_da = viaggio.conducente.dati
-						fattura.emessa_a = viaggio.cliente.nome + "\n" + viaggio.cliente.dati
+						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
+						fattura.emessa_a = viaggio.cliente.dati or viaggio.cliente.nome
+					elif tipo=="2": #fattura conducente
+						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
+						fattura.emessa_a = settings.DATI_CONSORZIO
 
 					fattura.save()
 					fatture_generate += 1
 					riga = 1
 
-					lastKey = viaggio.key
+					lastKey = elemento.key
 
 				# RIGHE dettaglio
 				riga_fattura = RigaFattura()
-				riga_fattura.riga = riga
-				riga_fattura.descrizione = "%s" % viaggio
-				riga_fattura.qta = 1
-				riga_fattura.prezzo = viaggio.prezzo
-				riga_fattura.iva = 10
-				riga_fattura.viaggio = viaggio
+				riga_fattura.riga = riga	# progressivo riga
+				if tipo in ("1", "3"):
+					riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
+								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y %H:%M"),
+									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
+					riga_fattura.qta = 1
+					riga_fattura.prezzo = viaggio.prezzo
+					riga_fattura.iva = 10
+					riga_fattura.viaggio = viaggio
+				else:
+					campi_da_riportare = "descrizione", "qta", "prezzo"
+					for campo in campi_da_riportare:
+						setattr(riga_fattura, campo, getattr(elemento, campo))
+					riga_fattura.riga_fattura_consorzio = elemento
+				riga_fattura.conducente = viaggio.conducente
 				fattura.righe.add(riga_fattura)
 				riga += 1
 
 			print "Genero le %s" % nomi_fatture[tipo]
-			request.user.message_set.create(message="Generate %d fatture." % fatture_generate)
+			request.user.message_set.create(message="Generate %d %s." % (fatture_generate, plurale))
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
 	return render_to_response(template_name,
@@ -186,11 +209,7 @@ def genera_fatture(request, tipo="1", filtro=filtro_consorzio, keys=["cliente"],
 								"mediabundle": ('tamUI.css', 'tamUI.js'),
 								"tipo": nomi_fatture[tipo],
 								"fatture":fatture,
+								"plurale":plurale,
 #								"error_message":error_message,
                               },
                               context_instance=RequestContext(request))
-	
-def genera_conducente(request):
-	return render_to_response("2.fatturazione_conducente.djhtml",
-							{},
-							context_instance=RequestContext(request))

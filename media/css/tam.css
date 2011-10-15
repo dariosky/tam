@@ -291,6 +291,7 @@ td img {vertical-align: middle;}
 }
 
 .super {
+	border-color: red;
 }
 
 .bigButton{
@@ -337,6 +338,12 @@ h2.fatturaTipo1 {
 .fatturaTipo1 th {
 	background: #0080ff;
 }
+.fatturaTipo1 input {
+	background: #0080ff;
+	padding:10px;
+	width:100%;
+	font-size:1.2em;
+}
 .fatturaTipo1 table {
 	border: 3px solid #0080ff;
 }
@@ -346,6 +353,12 @@ h2.fatturaTipo2 {
 }
 .fatturaTipo2 th {
 	background: #8000ff;
+}
+.fatturaTipo2 input {
+	background: #8000ff;
+	padding:10px;
+	width:100%;
+	font-size:1.2em;
 }
 .fatturaTipo2 table {
 	border: 3px solid #8000ff;
@@ -357,7 +370,18 @@ h2.fatturaTipo3 {
 .fatturaTipo3 th {
 	background: #008000;
 }
+.fatturaTipo3 input {
+	background: #008000;
+	padding:10px;
+	width:100%;
+	font-size:1.2em;
+}
 .fatturaTipo3 table {
 	border: 3px solid #008000;
 }
 
+.dati {
+	/* i dati di clienti nelle tabelle */
+	white-space:pre-line;
+	color: gray;
+}

@@ -917,6 +917,7 @@ class Conducente(models.Model):
 	nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
 	max_persone = models.IntegerField(default=4)
 	attivo = models.BooleanField(default=True)
+	emette_ricevute = models.BooleanField(default=True)
 	assente = models.BooleanField(default=False)
 
 	classifica_iniziale_diurni = models.IntegerField("Supplementari diurni", default=0)
