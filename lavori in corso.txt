@@ -19,7 +19,13 @@ mentre la pagina senza corse diventa solo 88 elementi! Eureka :) 2,1kb
 #TODO: Faccio in modo che se ho filtrato per conducente o cliente si veda nei filtri
 
 ** ** ** ** ** ** 27/9/2011
+#TODO:
 Richiesta una bacheca su Tam:
 	in modo che gli utentipotenti possano uploadare/cancellare i file sulla bacheca
 	e gli altri possano leggere
-
+	
+11/10/2011
+	#TODO: Le fatture conducente dovrebbero prendere dalle fatture consorzio, non dal
+		viaggio collegato. In modo che se cambio una fattura consorzio prima
+		di generare quella conducente, il cambiamento sia riportato.
+		Per farlo, devo aggiungere un campo conducente_proprietario alle fatture consorzio (nullabile)

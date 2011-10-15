@@ -1,0 +1,21 @@
+{% load media %}
+<tr>
+	<td>{% ifchanged rigafattura.conducente_id %}
+			<div>{{rigafattura.conducente.nick}}</div>
+			{%if rigafattura.conducente.dati%}<div class='dati'>{{rigafattura.conducente.dati}}</div>{%endif%}
+			<a href="#" class='clientSelect'>seleziona tutto</a>
+		{% endifchanged %}
+	</td>
+	<td>{% ifchanged rigafattura.conducente_id rigafattura.fattura.emessa_a %}
+		<div class='dati'>{{rigafattura.fattura.emessa_a}}</div>
+		{% endifchanged %}
+	</td>
+	<td><input type='checkbox' name='id' value='{{rigafattura.id}}' ></td>
+	<td>{% if rigafattura.viaggio %}
+		{% with viaggio=rigafattura.viaggio %}
+			{% include "inc.cellaViaggio.djhtml" %}
+		{%endwith%}
+	{%endif%}</td>
+	<td>{{rigafattura.descrizione}}</td>
+	<td>{{rigafattura.prezzo}}</td>
+</tr>

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load media %}
+{% block title %}Generazione {{ plurale }} &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+
+<h2 class='fatturaTipo2'>Generazione {{plurale}}</h2>
+
+{# {% if error_message %}<div class='errorlist'>{{error_message}}</div>{% endif %} #}
+<div class='fatturaTipo2'>
+		{{ fatture }} {{plurale}} / {{ lista.count }} corse.<br />
+		{% if lista %}
+		<form method="post" action="">
+		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+		<thead>
+			<tr>
+				<th>Conducente</th>
+				<th>Cliente</th>
+			    <th>Corsa</th>
+			    <th>Note</th>
+			    <th>Prezzo lordo</th>
+			</tr>
+		</thead>
+		{% for rigafattura in lista %}
+			{% with rigafattura.viaggio as viaggio %}
+			<tr>
+				<td>{% ifchanged rigafattura.conducente_id %}
+						<strong>{{rigafattura.conducente.nick}}</strong>
+						{%if rigafattura.conducente.dati%}<div class='dati'>{{ rigafattura.conducente.dati }}</div>{%endif%}
+					{%endifchanged%}
+				</td>
+				<td>
+				<input type='hidden' name='id' value='{{viaggio.id}}' >
+				{% ifchanged rigafattura.conducente_id rigafattura.emessa_a %}
+					<div class='dati'>{{rigafattura.fattura.emessa_a}}</div>
+				{% endifchanged %}
+				</td>
+				<td>{%if viaggio%}{% include "inc.cellaViaggio.djhtml" %}{%endif%}</td>
+				<td>{{rigafattura.descrizione}}</td>
+				<td>{{rigafattura.prezzo}}</td>
+			</tr>
+			{% endwith %}
+		{% endfor %}
+		</table>
+		<input type="submit" name="generate" value="Genera {{plurale}}" />
+		</form>
+		
+		{% endif %}
+</div>
+
+</div>
+
+{% endblock %}

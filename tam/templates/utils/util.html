@@ -25,12 +25,21 @@
 	<div class="btnbox super">
 		<a href="{%url tamResetSessions%}"><img src="/media/buuf/Hatchet-icon.png" alt="" />Reset sessioni utente</a>
 	</div>
-	<div class="btnbox super"><a href="{%url fix_action%}"><img src="/media/buuf/Dildo-icon.png" alt="" />azione correttiva</a></div>
+	<div class="btnbox super"><a href="{%url fix_action%}"><img src="/media/buuf/Dildo-icon.png" alt="" />Azione correttiva</a></div>
 {% endif %}
 
 {% if perms.tamArchive.archive or perms.tamArchive.flat %}
-	<div class="btnbox super"><a href="{% url tamArchiveUtil %}"><img src="/media/buuf/File-Manager-icon.png" alt="" />archiviazione</a>.</div>
+	<div class="btnbox"><a href="{% url tamArchiveUtil %}"><img src="/media/buuf/File-Manager-icon.png" alt="" />Archiviazione</a>.</div>
 {% endif %}
+
+{% if perms.fatturazione.generate %}
+	<div class="btnbox"><a href="{% url tamGenerazioneFatture %}"><img src="/media/buuf/Calculator-icon.png" alt="" />Generazione fattuae</a>.</div>
+{% endif %}
+
+{% if perms.fatturazione.view %}
+	<div class="btnbox"><a href="{% url tamVisualizzazioneFatture %}"><img src="/media/buuf/invoice-icon.png" alt="" />Fatture</a>.</div>
+{% endif %}
+
 <br style="clear:both" />
 {% if error %}
 	<p>

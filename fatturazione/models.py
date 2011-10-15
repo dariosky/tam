@@ -1,8 +1,10 @@
 #coding: utf8
 from django.db import models
-from tam.models import Viaggio
+from tam.models import Viaggio, Conducente
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta"}
+nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute"}
+
 class Fattura(models.Model):
 	emessa_da = models.TextField()	# anagrafica emittente
 	emessa_a = models.TextField()	# anagrafica cliente
@@ -19,10 +21,12 @@ class Fattura(models.Model):
 	class Meta:
 		verbose_name_plural = "Fatture"
 		ordering = ("anno", "progressivo")
+		permissions = ( ('generate', 'Genera le fatture'),
+						('view', 'Visualizzazione fatture'))
 	def __unicode__(self):
 		destinatario = self.emessa_a.split('\n')[0]
 		anno = self.anno or "-"
-		progressivo = self.anno or "-"
+		progressivo = self.progressivo or "-"
 		return u"%s %s/%s del %s emessa a %s. %d righe" % (nomi_fatture[self.tipo], anno, progressivo,
 															self.data.strftime("%d/%m/%Y %H:%M"), destinatario,
 															self.righe.count()
@@ -40,8 +44,9 @@ class RigaFattura(models.Model):
 	prezzo = models.DecimalField(max_digits=9, decimal_places=2)	#fissa in euro
 	iva = models.IntegerField()	# iva in percentuale
 
-	viaggio = models.OneToOneField(Viaggio, null=True, related_name="riga_fattura")
-	riga_fattura_conducente = models.OneToOneField("RigaFattura", null=True, related_name="fattura_conducente_collegata")
+	viaggio = models.OneToOneField(Viaggio, null=True, related_name="riga_fattura", on_delete=models.SET_NULL)
+	conducente = models.ForeignKey(Conducente, null=True, related_name="fatture", on_delete=models.SET_NULL)
+	riga_fattura_consorzio = models.OneToOneField("RigaFattura", null=True, related_name="fattura_conducente_collegata")
 
 	class Meta:
 		verbose_name_plural = "Righe Fattura"

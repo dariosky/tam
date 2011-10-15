@@ -28,7 +28,7 @@ def getBackupInfo(doCleanup=False):
         and current backup status.
         doCleanup tell to keep at most backcount backups
     """
-    backcount = 30    # numero di backup da tenere
+    backcount = 20    # numero di backup da tenere
     dbname = os.path.join(settings.PROJECT_PATH, "tam.db3")
     if not os.path.isfile(dbname):
         raise Exception("Impossibilie trovare il DB %s." % dbname)

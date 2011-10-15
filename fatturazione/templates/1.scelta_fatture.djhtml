@@ -37,28 +37,14 @@
 						<tr>
 							<th>Cliente</th>
 						    <th><input type="checkbox" id='check_consorzio'/></th>
-						    <th>Data</th>
-						    <th>Da - A</th>
+						    <th>Corsa</th>
 						    <th>Note</th>
 						    <th>Prezzo lordo</th>
 						    <th>Conducente</th>
 						</tr>
 					</thead>
 					{% for viaggio in lista %}
-						<tr>
-							<td>{% ifchanged viaggio.cliente_id viaggio.passeggero_id %}
-								<div class='cliente'>{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}</div>
-								<a href="#" class='clientSelect'>seleziona tutto</a>
-							{% endifchanged %}</td>
-							<td><input type='checkbox' name='id' value='{{viaggio.id}}' ></td>
-							<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
-							{% include "corse/cella_partenza_arrivo.inc.html" %}
-							<td>{% include "corse/cella_note.inc.html" %}</td>
-							<td>{{viaggio.prezzo}}
-								{% include "corse/flags.inc.html" %}
-							</td>
-							<td>{{viaggio.conducente.nick}}</td>
-						</tr>
+						{% include "1-1.scelta_riga_consorzio.djhtml" %}
 					{% endfor %}
 					</table>
 					<a name="generaConsorzio"></a>
@@ -74,11 +60,36 @@
 	<h2 class='accordhead fatturaTipo2'>Fatture conducente</h2>
 	{{ lista_conducente.count }} corse.
 	<div style='display:none;' class='fatturaTipo2'>
-		<div id='gotoConsorzio' class='floatingBlock'>
+		<div id='gotoConducente' class='floatingBlock'>
 			<a href="#generaConducente"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
 		</div>
 		<form method="get" action="{% url tamFattureGeneraConducente %}">
 		<p>Le fatture che il conducente fa al consorzio.</p>
+		
+		{% with lista_conducente as lista %}
+			{% if lista %}
+				<form method="get" action="{% url tamFattureGeneraConducente %}">
+				<table class='tablesorter' id='table_conducente' style="text-align:center" >
+				<thead>
+					<tr>
+						<th>Conducente</th>
+						<th>Cliente</th>
+					    <th><input type="checkbox" id='check_conducente'/></th>
+					    <th>Corsa</th>
+					    <th>Descrizione</th>
+					    <th>Prezzo lordo</th>
+					</tr>
+				</thead>
+				{% for rigafattura in lista %}
+					{% include "1-2.scelta_riga_conducente.djhtml" %}
+				{% endfor %}
+				</table>
+				<a name="generaConducente"></a>
+				<input type="submit" name="preview" value="Genera fatture conducente"/>
+				</form>
+			{% endif %}
+		{% endwith %}
+		
 		</form>
 	</div>
 	
@@ -100,31 +111,13 @@
 							<th>Conducente</th>
 							<th>Cliente</th>
 						    <th><input type="checkbox" id='check_ricevute'/></th>
-						    <th>Data</th>
-						    <th>Da - A</th>
+						    <th>Corsa</th>
 						    <th>Note</th>
 						    <th>Prezzo lordo</th>
 						</tr>
 					</thead>
 					{% for viaggio in lista %}
-						<tr>
-							<td>{% ifchanged viaggio.conducente_id %}
-								<div>{{viaggio.conducente.nick}}</div>
-								<a href="#" class='clientSelect'>seleziona tutto</a>
-								{% endifchanged %}
-							</td>
-							<td>{% ifchanged viaggio.conducente_id viaggio.cliente_id %}
-								<div class='cliente'>{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}</div>
-								{% endifchanged %}
-							</td>
-							<td><input type='checkbox' name='id' value='{{viaggio.id}}' ></td>
-							<td> {% include "corse/cella_ora_e_percorso.inc.html" %} </td>
-							{% include "corse/cella_partenza_arrivo.inc.html" %}
-							<td>{% include "corse/cella_note.inc.html" %}</td>
-							<td>{{viaggio.prezzo}}
-								{% include "corse/flags.inc.html" %}
-							</td>
-						</tr>
+						{% include "1-3.scelta_riga_ricevuta.djhtml" %}
 					{% endfor %}
 					</table>
 					<a name="generaRicevute"></a>
@@ -148,9 +141,11 @@
 				});
 			
 			scrollableGoto($('#gotoConsorzio'));
+			scrollableGoto($('#gotoConducente'));
 			scrollableGoto($('#gotoRicevute'));
 		
 			table_selector('#check_consorzio', '#table_consorzio');
+			table_selector('#check_conducente', '#table_conducente');
 			table_selector('#check_ricevute', '#table_ricevute');
 			$('#date_range input[type=text]').datepicker();
 			$('.clientSelect').click(function(){
