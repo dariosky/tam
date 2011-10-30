@@ -2,7 +2,6 @@
 <tr>
 	<td>{% ifchanged rigafattura.conducente_id %}
 			<div>{{rigafattura.conducente.nick}}</div>
-			{%if rigafattura.conducente.dati%}<div class='dati'>{{rigafattura.conducente.dati}}</div>{%endif%}
 			<a href="#" class='clientSelect'>seleziona tutto</a>
 		{% endifchanged %}
 	</td>
@@ -17,5 +16,5 @@
 		{%endwith%}
 	{%endif%}</td>
 	<td>{{rigafattura.descrizione}}</td>
-	<td>{{rigafattura.prezzo}}</td>
+	<td>{{rigafattura.viaggio.prezzo|default:rigafattura.prezzo}}</td>
 </tr>

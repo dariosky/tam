@@ -108,7 +108,6 @@
 					<table class='tablesorter' id='table_ricevute' style="text-align:center" >
 					<thead>
 						<tr>
-							<th>Conducente</th>
 							<th>Cliente</th>
 						    <th><input type="checkbox" id='check_ricevute'/></th>
 						    <th>Corsa</th>
@@ -136,7 +135,7 @@
 	<script type="text/javascript">
 	    $(function() {
 			$(".accordhead").click(function(){
-					$(this).next().toggle('slow');
+					$(this).next().toggle();
 					return false;
 				});
 			

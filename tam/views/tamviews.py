@@ -296,7 +296,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		from tamXml import xlsResponse
 		logAction(action='X', instance=request.user, description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
-	mediabundle = ('tamUI.css', 'tamCorse.js')
+	mediabundleJS = ('tamCorse.js',)
+	mediabundleCSS = ('tamUI.css',)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def corsaClear(request, next=None):
@@ -311,7 +312,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 
-	mediabundle = ('tamUI.css', 'tamCorse.js')
+	mediabundleJS = ('tamUI.js',)
+	mediabundleCSS = ('tamUI.css',)
 	if id and not user.has_perm('tam.change_viaggio'):
 		user.message_set.create(message=u"Non hai il permesso di modificare le corse.")
 		return HttpResponseRedirect("/")
@@ -550,7 +552,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	#raise Exception("Sgnaps")
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
-def getList(request, model=Luogo, field="nome", format="txt", fields=None):
+def getList(request, model=Luogo.objects, field="nome", format="txt", fields=None):
 	""" API Generica che restituisce un file di testo, con una lista di righe con tutte le istanze
 		che abbiano il campo field uguale al campo q che ottengo via get
 	"""
@@ -559,8 +561,8 @@ def getList(request, model=Luogo, field="nome", format="txt", fields=None):
 		fieldApiString = {"%s__icontains" % field:q}
 	else:
 		fieldApiString = {}
-		
-	querySet = model.objects.filter(**fieldApiString)
+
+	querySet = model.filter(**fieldApiString)
 
 	if format == "txt":
 		results = "\n".join([record.__unicode__() for record in querySet])
@@ -573,12 +575,13 @@ def getList(request, model=Luogo, field="nome", format="txt", fields=None):
 
 def clienti(request, template_name="clienti_e_listini.html"):
 	listini = Listino.objects.annotate(Count('prezzolistino'))
-	clienti = Cliente.objects.all().select_related('listino')
+	clienti = Cliente.objects.filter(attivo=True).select_related('listino')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
-def cliente(request, template_name="cliente.html", nomeCliente=None):
-	nuovo = nomeCliente is None
+def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=None):
+	nuovo = (nomeCliente is None) and (id_cliente is None)
+	if id_cliente: id_cliente = int(id_cliente)
 	user = request.user
 	actionName = getActionName(delete=False, nuovo=nuovo)
 	if not user.has_perm('tam.%s_cliente' % actionName):
@@ -590,6 +593,13 @@ def cliente(request, template_name="cliente.html", nomeCliente=None):
 			model = Cliente
 
 	cliente = None
+	if id_cliente:
+		try:
+			cliente = Cliente.objects.get(id=id_cliente)		# modifying an existing Client
+			logging.debug("Modifica di %s" % cliente)
+		except:
+			request.user.message_set.create(message="Cliente inesistente.")
+			return HttpResponseRedirect(reverse("tamListini"))
 	if nomeCliente:
 		try:
 			cliente = Cliente.objects.get(nome=nomeCliente)		# modifying an existing Client
@@ -603,7 +613,11 @@ def cliente(request, template_name="cliente.html", nomeCliente=None):
 	if form.is_valid():
 		cliente = form.save()
 		request.user.message_set.create(message=u"%s il cliente %s." % (nuovo and "Creato" or "Aggiornato", cliente))
-		return HttpResponseRedirect(reverse("tamClienteNome", kwargs={"nomeCliente": cliente.nome}))
+		if "next" in request.GET:
+			redirectOk = request.GET["next"]
+		else:
+			redirectOk = reverse("tamListini")
+		return HttpResponseRedirect(redirectOk)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
@@ -728,7 +742,8 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
 	unbacined = Luogo.objects.filter(bacino__isnull=True)
 	bacini = Bacino.objects.all()
 	tratte = Tratta.objects.select_related()
-	mediabundle = ('tamUI.css', 'tamUI.js')
+	mediabundleJS = ('tamUI.js',)
+	mediabundleCSS = ('tamUI.css',)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
@@ -818,7 +833,8 @@ def profilo(request, *args, **kwargs):
 def conducenti(request, template_name="conducenti.html", confirmConguaglio=False):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
-	mediabundle = ('tamUI.css', 'tamUI.js')
+	mediabundleJS = ('tamUI.js',)
+	mediabundleCSS = ('tamUI.css',)
 
 	conducenti = Conducente.objects.filter(attivo=True)
 	if not profilo.luogo:
@@ -1076,7 +1092,8 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 		end = forms.DateField(label="Data finale", input_formats=[_('%d/%m/%Y')])
 
 	form = RecurrenceForm(request.POST or None)
-	mediabundle = ('tamUI.css', 'tamUI.js')
+	mediabundleJS = ('tamUI.js',)
+	mediabundleCSS = ('tamUI.css',)
 	dataIniziale = max(datetime.date.today(), corsa.data.date()) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
 	form.initial["start"] = dataIniziale.strftime('%d/%m/%Y')
 	form.initial["end"] = dataIniziale.strftime('%d/%m/%Y')

@@ -1,0 +1,55 @@
+#fatturaHtml {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	margin: 0;
+	padding: 0;
+}
+.editable {
+	background-color: #eee;
+}
+div.editable, .pre {
+	white-space: pre-line;
+}
+#fat_logo {
+	margin:30px 0;
+	width: 500px;
+	max-width: 40%;
+}
+#fat_mittente {
+	float: right;
+	padding: 20px;
+	margin:10px 0;
+	width: 300px;
+}
+#fat_destinatario {
+	clear: right;
+	float: right;
+	width: 300px;
+	padding: 20px;
+	margin:10px 0;
+	border: 1px solid black;
+	border-radius: 20px;
+}
+#righe {
+	clear: both;
+	margin-top: 50px;
+	border: 2px solid black;
+	width: 100%;
+}
+#righe tr {
+	clear: both;
+	margin-top: 50px;
+}
+#totale {
+	float: right;
+	padding: 30px;
+	width: 300px;
+}
+
+#fat_footer {
+}
+#fat_footer #privacy {
+	padding-top: 15px;
+	margin: 0 auto;
+	font-size: 8pt;
+}

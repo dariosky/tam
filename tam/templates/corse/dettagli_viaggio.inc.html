@@ -2,9 +2,9 @@
 {% load media %}
 {% spaceless %}
 {% num_range viaggio.punti_diurni as range_diurni %}
-{% for i in range_diurni %}<img style="float:left; padding:0 3px;" src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
+{% for i in range_diurni %}<img class='morning' src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
 {% num_range viaggio.punti_notturni as range_notturni %}
-{% for i in range_notturni %}<img style="float:right; padding:0 3px;" src="{% media_url "night.png" %}" alt="*" />{% endfor %}
+{% for i in range_notturni %}<img class='evening' src="{% media_url "night.png" %}" alt="*" />{% endfor %}
 <div class="trip_detail">
 {% with viaggio.tratta_start as tratta_start %}
     {% if tratta_start %}

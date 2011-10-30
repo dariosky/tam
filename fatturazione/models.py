@@ -1,6 +1,7 @@
 #coding: utf8
 from django.db import models
-from tam.models import Viaggio, Conducente
+from tam.models import Viaggio, Conducente, Cliente, Passeggero
+from decimal import Decimal
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta"}
 nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute"}
@@ -8,7 +9,12 @@ nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricev
 class Fattura(models.Model):
 	emessa_da = models.TextField()	# anagrafica emittente
 	emessa_a = models.TextField()	# anagrafica cliente
-	note = models.TextField(blank=True)
+	# cliente e passeggero sono prepopolati in automatico (uno dei 2) ma non sono obbligatori.
+	# servono solo per avere un'associazione, emessa_a fa fede
+	cliente = models.ForeignKey(Cliente, null=True, related_name="fatture", on_delete=models.SET_NULL)
+	passeggero = models.ForeignKey(Passeggero, null=True, related_name="fatture", on_delete=models.SET_NULL)
+	
+	note = models.TextField(blank=True)	# note in testata
 
 	tipo = models.CharField(max_length=1) # tipo fattura: 1.Consorzio (a cliente), 2.Conducente (a consorzio), 3.Ricevuta (a cliente)
 
@@ -24,13 +30,19 @@ class Fattura(models.Model):
 		permissions = ( ('generate', 'Genera le fatture'),
 						('view', 'Visualizzazione fatture'))
 	def __unicode__(self):
-		destinatario = self.emessa_a.split('\n')[0]
 		anno = self.anno or "-"
 		progressivo = self.progressivo or "-"
 		return u"%s %s/%s del %s emessa a %s. %d righe" % (nomi_fatture[self.tipo], anno, progressivo,
-															self.data.strftime("%d/%m/%Y %H:%M"), destinatario,
+															self.data.strftime("%d/%m/%Y %H:%M"),
+															self.destinatario(),
 															self.righe.count()
 														  )
+		
+	def destinatario(self):
+		return self.emessa_a.replace('\r', '').split('\n')[0]
+	
+	def lordo_totale(self):
+		return sum([riga.prezzo*(1+riga.iva/Decimal(100)) for riga in self.righe.all()])
 
 
 class RigaFattura(models.Model):

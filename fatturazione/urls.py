@@ -9,7 +9,7 @@ from fatturazione.views.generazione import filtro_consorzio, filtro_ricevute, \
 from fatturazione.models import RigaFattura
 
 urlpatterns = patterns ('fatturazione.views',
-    url(r'^$', 'lista_fatture', name="tamGenerazioneFatture"),
+    url(r'^$', 'lista_fatture_generabili', name="tamGenerazioneFatture"),
 
     url(r'^genera/consorzio/$', 'genera_fatture', { 'filtro':filtro_consorzio,
 													"tipo":"1",
@@ -26,9 +26,12 @@ urlpatterns = patterns ('fatturazione.views',
 	   		 name="tamFattureGeneraConducente"),
 
 	url(r'^genera/ricevute/$', 'genera_fatture', {'filtro':filtro_ricevute, "tipo":"3",
-												  "keys":["conducente", "cliente"],
+												  "keys":["cliente", "passeggero"],
 												  "template_name":"2-3.fatturazione_ricevute.djhtml"},
 	   		name="tamFattureGeneraRicevute"),
 
-	url(r'^archivio/$', 'lista_fatture', name="tamVisualizzazioneFatture"),
+	url(r'^archivio/$', 'view_fatture', name="tamVisualizzazioneFatture"),
+	
+	url(r'archivio/(?P<id_fattura>\d*)/$', 'fattura', name='tamFattura'),
+	
 )
