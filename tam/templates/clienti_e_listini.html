@@ -20,7 +20,7 @@
 				<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
 	   				<td>
 	   				    <img style="float:right;" src="/media/tipiCliente/{{ cliente.tipo }}.png" title="{{ cliente.tipo }}" alt="{{ cliente.tipo }}" />
-						<a href="{% url tamClienteNome cliente.nome %}">{{ cliente.nome }}</a>
+						<a href="{% url tamClienteId cliente.id %}">{{ cliente.nome }}</a>
 						{% if not cliente.attivo %}NON ATTIVO{% endif %}
 					</td>
 					<td>

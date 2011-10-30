@@ -2,15 +2,6 @@
 
 {% block title %}Strumenti per l'archiviazione &raquo; {{ block.super }}{% endblock %}
 
-{% block header %}
-	{{ block.super }}
-<script type="text/javascript">
-$( function() {
-	$("#id_end_date").datepicker( {maxDate: '-1m'} );
-});
-</script>
-{% endblock header %}
-
 {% block content %}
 <h1>Archiviazione.</h1>
 
@@ -38,3 +29,11 @@ $( function() {
 </form>
 {% endif %}
 {% endblock content %}
+
+{% block bottom %}
+	<script type="text/javascript">
+	$( function() {
+		$("#id_end_date").datepicker( {maxDate: '-1m'} );
+	});
+	</script>
+{% endblock bottom %}

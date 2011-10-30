@@ -2,29 +2,6 @@
 
 {% block title %}Nuova corsa &raquo; {{ block.super }}{% endblock %}
 
-{% block header %}
-<script type="text/javascript">
-	$( function() {
-		$("#clear").click( function(){ document.location="{% url tamCorsaClear %}"; });
-		var formChanged=false;
-		$("input").live('change', function(){
-			formChanged=true;
-		});
-		$("input:submit").live('click', function(){formChanged=false;})
-		function askConfirm(){
-			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
-		}
-		window.onbeforeunload=askConfirm;
-		{% if da_speciale = "A" %}
-			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-airport.png" />');
-		{% endif%}
-		{% if da_speciale = "S" %}
-			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-train.png" />');
-		{% endif%}
-	} );
-</script>
-{% endblock header %}
-
 {% block content %}
 <div style="text-align:center">
     {% if delete %}
@@ -127,10 +104,10 @@
 			<div>
 				<div style="font-family:monospace; ">
 						{% if viaggio.cliente %}
-							<a href="{% url tamClienteNome viaggio.cliente.nome %}?next={{ request.path_info }}">{{viaggio.cliente}}</a>
+							<a href="{% url tamClienteId viaggio.cliente.id %}?next={{ full_request_path }}">{{viaggio.cliente}}</a>
 						{% else %}
 							privato
-							{% if viaggio.passeggero %}: <a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ request.path_info }}">{{ viaggio.passeggero }}</a>{% endif %}
+							{% if viaggio.passeggero %}: <a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ full_request_path }}">{{ viaggio.passeggero }}</a>{% endif %}
 						{% endif %}
 						da {{viaggio.da}} a {{viaggio.a}} <strong>{{viaggio.data|date:"D j F, H:i"}}</strong>
 						{{viaggio.numero_passeggeri}} pax, {% if viaggio.esclusivo %}taxi{% else %}collettivo{% endif %}
@@ -141,3 +118,26 @@
 	{% endif %}
 </div>
 {% endblock content %}
+
+{% block bottom %}
+<script type="text/javascript">
+	$( function() {
+		$("#clear").click( function(){ document.location="{% url tamCorsaClear %}"; });
+		var formChanged=false;
+		$("input").live('change', function(){
+			formChanged=true;
+		});
+		$("input:submit").live('click', function(){formChanged=false;})
+		function askConfirm(){
+			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
+		}
+		window.onbeforeunload=askConfirm;
+		{% if da_speciale = "A" %}
+			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-airport.png" />');
+		{% endif%}
+		{% if da_speciale = "S" %}
+			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-train.png" />');
+		{% endif%}
+	} );
+</script>
+{% endblock bottom %}

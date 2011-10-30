@@ -20,23 +20,6 @@
 </form>
 
 {% if not nuovo %}
-
-<script type="text/javascript">
-	$(	function() {
-			// $(".tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra']});
-			//$("#id_da, #id_a").autocomplete( "{% url tamGetLuogo %}", {cacheLength:10, matchContains:1} );
-			function show_hide_delprezzo() {
-			    if ( ($("#id_da").val()=="") || ($("#id_a").val()=="") )
-					$('#id_delprezzo').hide();
-			    else
-					$('#id_delprezzo').show();
-			}
-			show_hide_delprezzo();
-			$("#id_da, #id_a").change( show_hide_delprezzo );
-		}
-	);
-</script>
-
 <form action="." method="post">
     <h3> Crea una nuova voce in listino: </h3>
     <table>
@@ -97,4 +80,22 @@
     {% if not prezzi %}<p>Nessun prezzo definito.</p>{% endif %}
 </form>
 {% endif %}
+{% endblock %}
+
+{% block bottom %}
+<script type="text/javascript">
+	$(	function() {
+			// $(".tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra']});
+			//$("#id_da, #id_a").autocomplete( "{% url tamGetLuogo %}", {cacheLength:10, matchContains:1} );
+			function show_hide_delprezzo() {
+			    if ( ($("#id_da").val()=="") || ($("#id_a").val()=="") )
+					$('#id_delprezzo').hide();
+			    else
+					$('#id_delprezzo').show();
+			}
+			show_hide_delprezzo();
+			$("#id_da, #id_a").change( show_hide_delprezzo );
+		}
+	);
+</script>
 {% endblock %}

@@ -48,7 +48,9 @@ class AutoCompleteWidget(forms.widgets.Widget):
 		
 		js="""
 			<script type="text/javascript">
-				$("#%(id)s").autocomplete( "%(lookup_url)s", {minChars:2} );
+				window.onload = function(){
+					$("#%(id)s").autocomplete( "%(lookup_url)s", {minChars:2} );
+				}	
 			</script>
 		""" % { "id": id, 'lookup_url':self.lookup_url }
 		return mark_safe("<input%(attrs)s /> %(js)s"% {"attrs":forms.widgets.flatatt(final_attrs), "js":js } )

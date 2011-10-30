@@ -24,7 +24,7 @@
 			{% with rigafattura.viaggio as viaggio %}
 			<tr>
 				<td>{% ifchanged rigafattura.conducente_id %}
-						<strong>{{rigafattura.conducente.nick}}</strong>
+						<strong><a href='{% url tamConducenteId rigafattura.conducente.id %}?next={{ full_request_path }}'>{{rigafattura.conducente.nick}}</a></strong>
 						{%if rigafattura.conducente.dati%}<div class='dati'>{{ rigafattura.conducente.dati }}</div>{%endif%}
 					{%endifchanged%}
 				</td>
@@ -36,7 +36,7 @@
 				</td>
 				<td>{%if viaggio%}{% include "inc.cellaViaggio.djhtml" %}{%endif%}</td>
 				<td>{{rigafattura.descrizione}}</td>
-				<td>{{rigafattura.prezzo}}</td>
+				<td>{{rigafattura.viaggio.prezzo|default:rigafattura.prezzo}}</td>
 			</tr>
 			{% endwith %}
 		{% endfor %}

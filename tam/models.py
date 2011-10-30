@@ -331,6 +331,8 @@ class Viaggio(models.Model):
 			self.conducente_confermato = True
 		if not self.conducente_confermato:
 			self.conducente = None
+		if self.cliente:
+			self.passeggero = None	
 		logging.debug("Update di *%s*." % self.pk)
 		invalidate_template_cache("viaggio", self.id)
 		super(Viaggio, self).save(*args, **kwargs)
@@ -973,6 +975,7 @@ class Cliente(models.Model):
 	commissione = models.DecimalField("Quota consorzio", max_digits=9, decimal_places=2, default=0)	#fissa in euro
 	tipo_commissione = models.CharField("Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F")
 	attivo = models.BooleanField(default=True)
+	note = models.TextField(null=True, blank=True)
 	class Meta:
 		verbose_name_plural = _("Clienti")
 		ordering = ["nome"]
@@ -981,7 +984,7 @@ class Cliente(models.Model):
 		if not self.attivo: result += "(inattivo)"
 		return result
 	def url(self):
-		return reverse("tamClienteNome", kwargs={"nomeCliente":self.nome})
+		return reverse("tamClienteId", kwargs={"id_cliente":self.id})
 
 	def save(self, *args, **kwargs):
 		if self.nome.lower() == "privato":

@@ -1,5 +1,13 @@
 /* This file skins tableSorter */
 
+.morning{
+	float: left;
+	padding:0 3px;
+}
+.evening{
+	float: right;
+	padding:0 3px;
+}
 .tablesorter {
 	font-family:arial;
 	background-color: #CDCDCD;
@@ -384,4 +392,13 @@ h2.fatturaTipo3 {
 	/* i dati di clienti nelle tabelle */
 	white-space:pre-line;
 	color: gray;
+}
+.prezzo {
+	text-align: right;
+}
+#fatturaHtml {
+	width:100%;
+}
+.cellaPrezzo a {
+	font-weight: bold;	/*nella cella prezzo, i link (il netto) sono in grossetto */ 
 }

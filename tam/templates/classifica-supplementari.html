@@ -16,12 +16,6 @@
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td>{{ classifica.conducente }}</td>
 		<td>
-			{% comment %}
-				{% num_range classifica.puntiDiurni as range_diurni %}
-				{% for disturbo in  range_diurni %}
-				<img src="/media/morning.png" alt="*" />
-				{% endfor %}
-			{% endcomment %}
 			<img src="/media/morning.png" alt="*" /> x {{ punti }}
 		</td>
 	    </tr>

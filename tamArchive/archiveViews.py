@@ -43,7 +43,8 @@ def menu(request, template_name="archive/menu.html"):
 			{
 				"dontHilightFirst": dontHilightFirst,
 				"form": form,
-				"mediabundle": ('tamUI.css', 'tamUI.js'),
+				"mediabundleJS": ('tamUI.js',),
+				"mediabundleCSS": ('tamUI.css',),
 			}
 			, context_instance=RequestContext(request))
 
@@ -99,7 +100,7 @@ def action(request, template_name="archive/action.html"):
 	if not request.user.has_perm('tamArchive.archive'):
 		request.user.message_set.create(message=u"Devi avere accesso all'archiviazione.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
-	
+
 	end_date_string = request.POST.get("end_date")
 	try:
 		timetuple = time.strptime(end_date_string, '%d/%m/%Y')
@@ -187,7 +188,7 @@ def action(request, template_name="archive/action.html"):
 		transaction.commit()
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
-	return render_to_response(template_name, 
+	return render_to_response(template_name,
 							 {"archiveCount":archiveCount,
 							  "logCount":logCount,
 							  "archive_needed":archive_needed,
@@ -229,7 +230,7 @@ def flat(request, template_name="archive/flat.html"):
 	if not request.user.has_perm('tamArchive.flat'):
 		request.user.message_set.create(message=u"Devi avere accesso all'appianamento.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
-	
+
 	classificheViaggi = get_classifiche()
 
 	def trovaMinimi(c1, c2):

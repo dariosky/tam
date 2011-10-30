@@ -5,15 +5,17 @@
 	<title>{% block title %}TaM{% endblock %}{% if tam_stealth %} - Stealth version{% endif %}</title>
 	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>
 	{% if not tam_stealth %}<link rel="icon" href="{% media_url "tam.ico" %}" type="image/ico"/>{% endif %}
-	{% if mediabundle %}
-		{% for bundle in mediabundle %}{%include_media bundle %}{% endfor %}
+	
+	{% if mediabundleCSS %}
+		{% for bundle in mediabundleCSS %}{%include_media bundle %}{% endfor %}
 	{% else %}
 		{% include_media 'tam.css' %}
-		{% include_media 'tambase.js' %}
 	{% endif %}
+	
 	{% block css %}
 		{% if tam_stealth %}{% include_media 'tam-stealth.css' %}{% endif %}
-	{% endblock %}	
+	{% endblock %}
+	
 	{% block header %}{% endblock header %}
  </head>
 
@@ -75,6 +77,13 @@
 		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>
 	</p>
 </div>
+	{% if mediabundleJS %}
+		{% for bundle in mediabundleJS %}{%include_media bundle %}{% endfor %}
+	{% else %}
+		{% include_media 'tambase.js' %}
+	{% endif %}
+	{% if form %}{{ form.media }}{% endif %}
+	{% block bottom %}{% endblock bottom %}
 	{% if form and not dontHilightFirst %}
 		<script type="text/javascript">
 	      $(document).ready(function() {
@@ -82,6 +91,5 @@
 	      });
 		</script>
 	{% endif %}
-	{% block bottom %}{% endblock bottom %}
 </body>
 </html>

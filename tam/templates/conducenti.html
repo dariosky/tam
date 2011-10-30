@@ -3,18 +3,6 @@
 {% block title %}Conducenti e classifiche &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<script type="text/javascript">
-    $(document).ready( function() {
-		$("#accordion div").accordion({
-				header: "h2",
-				alwaysOpen: false,
-				active: false,
-				collapsible: true
-			});
-		//$("#accordion .selected").removeClass("selected");
-    });
-</script>
-
 <h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
 
     {% if not profilo.luogo %}
@@ -35,5 +23,18 @@
 	{% endif %}
 
     {% endif %}
+{% endblock content%}
 
-{% endblock %}
+{% block bottom %}
+<script type="text/javascript">
+    $(document).ready( function() {
+		$("#accordion div").accordion({
+				header: "h2",
+				alwaysOpen: false,
+				active: false,
+				collapsible: true
+			});
+		//$("#accordion .selected").removeClass("selected");
+    });
+</script>
+{% endblock bottom %}

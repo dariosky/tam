@@ -33,7 +33,7 @@ function moveToNext() {
 
 $(function() {
 	$(".advFilters input").datepicker();
-	$('.conducenteOkBtn').hide();
+	//$('.conducenteOkBtn').hide();	// lo usavo quando lasciavo il pulsante to degrade gracefully
 	// hide ok button on confirm conducente...
 	$('.cbConducente').click(function() {// and submit them on cb
 		$(this).hide();

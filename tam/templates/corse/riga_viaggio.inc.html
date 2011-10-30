@@ -28,8 +28,7 @@
 
 	<td>{% include "corse/cella_note.inc.html" %}</td>
 
-	<td>
-		<p>
+	<td class='cellaPrezzo'>
 			{% if viaggio.punti_abbinata %}
 				{% num_range viaggio.punti_abbinata as punti_abbinata %}
 				{% for punto in punti_abbinata %}<img src="{% media_url "casina.png" %}" alt='DV' />{% endfor %}
@@ -39,7 +38,6 @@
 			{% if  viaggio.prezzoVenezia %}{{viaggio.prezzoVenezia}} nei Venezia.{% endif %}
 			{% if  viaggio.prezzoPadova %}{{viaggio.prezzoPadova}} nei Padova.{% endif %}
 			{% if  viaggio.prezzoDoppioPadova %}{{viaggio.prezzoDoppioPadova}} nei doppi Padova.{% endif %}
-		</p>
 	
 		{% if viaggio.is_valid %}
 			{{ viaggio.km }} km.
@@ -73,7 +71,7 @@
 								{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
 							</select>
 							<input type="checkbox" name="confirmed" class="cbConducente" />
-							<input type="submit" name="confirm" class='conducenteOkBtn' value="ok" />
+							{# <input type="submit" name="confirm" class='conducenteOkBtn' value="ok" /> #}
 						</form>
 					{% else %}
 					    Nessun conducente disponibile

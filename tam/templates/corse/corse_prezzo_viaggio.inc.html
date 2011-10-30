@@ -8,11 +8,9 @@
 {% if viaggio.costo_sosta %}- s{{ viaggio.costo_sosta }}{% endif %}
 {% if viaggio.prezzo_sosta %}+{{viaggio.prezzo_sosta}} al 75%{% endif %}
 =
-<strong>
-	{% if nolink %}
-		{{ viaggio.prezzo_finale|floatformat:2 }}€
-	{% else %}
-		<a href="{% url tamNuovaCorsa2Id viaggio.id %}">{{ viaggio.prezzo_finale|floatformat:2 }}€</a>
-	{% endif %}
-</strong>
+{% if nolink %}
+	<strong>{{ viaggio.prezzo_finale|floatformat:2 }}€</strong>
+{% else %}
+	<a href="{% url tamNuovaCorsa2Id viaggio.id %}">{{ viaggio.prezzo_finale|floatformat:2 }}€</a>
+{% endif %}
 {% endspaceless %}

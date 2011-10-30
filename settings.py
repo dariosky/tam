@@ -61,6 +61,8 @@ TIME_ZONE = 'Europe/Rome'
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'it-it'
+USE_L10N = True
+#USE_THOUSAND_SEPARATOR = True # mi incasina gli invii delle form
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -165,9 +167,12 @@ else:
 	SESSION_COOKIE_AGE = 30 * 60	# cookie age in seconds (30 minutes)
 
 LICENSE_OWNER = 'ARTE Taxi'
-DATI_CONSORZIO = """A.R.T.E. Taxi
-via Teulada 66
-35100 Padova"""
+DATI_CONSORZIO = """ARTE Taxi
+via P.Abano, 14
+35031 Abano Terme (PD)
+Partita IVA e CF: 01106280280
+Tel: 049 667842 Fax: 049 667845
+www.artetaxi.it  -  info@artetaxi.it"""
 
 #import datetime
 #LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
@@ -220,6 +225,9 @@ MEDIA_BUNDLES = (
 	),
 	('tam-stealth.css',
 		'css/tam-stealth.css',
+	),
+	('fatturaHtml.css',
+		'css/fatture.css',
 	),
 	('tamUI.css',
 		'jquery.ui/css/ui-lightness/jquery-ui-1.8.16.custom.css',

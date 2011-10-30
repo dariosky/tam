@@ -3,18 +3,7 @@
 {% block title %}Luoghi e tratte &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<script type="text/javascript">
-    $(document).ready( function() {
-		$("#accordion div").accordion({
-				header: "h2",
-				alwaysOpen: false,
-				active: false,
-				animated: false
-			});
-		//$("#accordion .selected").removeClass("selected");
-    });
-</script>
- <div id="accordion">
+<div id="accordion">
 	<a href="{% url tamNuovaTratta %}"><img src="/media/addbtn.png" alt=""/> Nuova Tratta</a><br/>
 	{% if tratte %}
 		<div>
@@ -102,3 +91,17 @@
  </div>
 
 {% endblock %}
+
+{% block bottom %}
+<script type="text/javascript">
+    $(document).ready( function() {
+		$("#accordion div").accordion({
+				header: "h2",
+				alwaysOpen: false,
+				active: false,
+				animated: false
+			});
+		//$("#accordion .selected").removeClass("selected");
+    });
+</script>
+{% endblock bottom %}
