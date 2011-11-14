@@ -14,34 +14,34 @@
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='header'>
 		{% if not tam_stealth %}<img id='fat_logo' src='/media/fatture/logo.png'>{%endif%}
-		<div id='fat_mittente' class='editable'>{{ emessa_da_html|safe }}</div>
-		<div id='fat_destinatario' class='editable'>Spett.le {{fattura.emessa_a}}</div>
+		<div id='fat_mittente' class='{% if not fattura.tipo = "1" %}editable{%else%}pre{%endif%}'>{{ emessa_da_html|safe }}</div>
+		<div id='fat_destinatario' class='editable'>{{fattura.emessa_a}}</div>
 		<div id='fat_data'>
-			Fattura <span class='editable'>{{fattura.anno}}</span>/<span class='editable'>{{fattura.progressivo}}</span>
-			del <span class='editable'>{{fattura.data}}</span>
+			Fattura <span class='editable' id='fat_anno'>{{fattura.anno}}</span>/<span class='editable' id='fat_progressivo'>{{fattura.progressivo}}</span>
+			del <span>{{fattura.data}}</span>
 		</div>
-		<div id='fat_note' class='editable'>{{fattura.note}}</div>
+		<div id='fat_note' class='editable'>{{fattura.note}}
+		</div>
 	</div>
 	
 	
 	<table id='righe'>
 		<thead>
-			<tr><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th><th>IVA</th><th>IMPORTO</th></tr>
+			<tr><th></th><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th><th>IVA</th><th>IMPORTO</th></tr>
 		</thead>
 		<tbody>
 			{% for riga in fattura.righe.all %}
-				<tr>
-					<td>{{ riga.descrizione }}</td>
-				</tr>
+				{% include "6.fattura-riga.inc.djhtml" %}
 			{% endfor %}
+			<tr><td>
+				<img src='/media/addbtn.png' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
+			</td></tr>
+			
+			<tr style='text-align:right;'><td colspan=5>Totale imponibile</td><td>{{fattura.imponibile|floatformat:"2"}}</td></tr>
+			<tr style='text-align:right;'><td colspan=5>IVA</td><td>{{fattura.iva|floatformat:"2"}}</td></tr>
+			<tr style='text-align:right; font-weight:bold;'><td colspan=5>Imponibile</td><td>{{fattura.lordo_totale|floatformat:"2"}}</td></tr>
 		</tbody>
 	</table>
-	
-	<div id='totale'>
-		Imponibile: fattura
-		IVA:
-		Totale fattura:
-	</div>
 	
 	<div id='fat_footer' class='pre'>
 		Si prega di effettuare il pagamento sul conto Corrente:
@@ -53,16 +53,5 @@
 
 {% block bottom %}
 <script type="text/javascript" src='/media/js/jquery.editable-1.3.3.js'></script>
-<script type='text/javascript'>
-	function strip(s) {
-		console.log("Tolgo gli spazi da *"+s+"*");
-		while (s[0]==' '|| s[0]=='\n' || s[0]=='\r' || s[0]=='\t') s=s.slice(1);
-		console.log("Mi fermo a : *"+s[0]+"*");
-		console.log("Ottengo: *"+s+"*");
-		return s
-	}
-	$('.editable').editable({
-					type:'textarea',
-					})
-</script>
+<script type="text/javascript" src='/media/js/fatture/fattura.js'></script>
 {% endblock bottom %}

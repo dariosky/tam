@@ -255,7 +255,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
 	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
-	paginator = Paginator(viaggi, 100, orphans=10)	# pagine da tot viaggi
+	paginator = Paginator(viaggi, 80, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
 	page = request.GET.get("page", 1)
 	try:page = int(page)
