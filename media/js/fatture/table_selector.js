@@ -11,20 +11,20 @@ function table_selector(global_check, table) {
 		if(this.checked == true) {
 			var areAllSelected = (checkboxes.not(":checked").length == 0);
 			if(areAllSelected) {
-				console.log("all");
+				//console.log("all");
 				$(global_check).attr("checked", true);
 				return;
 			}
 		} else {
 			var areNoneSelected = (checkboxes.filter(":checked").length == 0);
 			if(areNoneSelected) {
-				console.log("none");
+				//console.log("none");
 				$(global_check).attr("checked", false);
 				return;
 			}
 		}
 		$(this).css("background")
-		console.log("partial");
+		//console.log("partial");
 	});
 	
 	$(global_check).change(function(){
@@ -41,15 +41,15 @@ function selectCheckboxToNext(from) {
 	var questaRiga = $(from).closest("tr")[0];
 	var nextRows = $(questaRiga).nextAll().andSelf(); // tutte le prossime righe
 	
-	console.log("Processo le prossime ", nextRows.length, " righe.")
+	//console.log("Processo le prossime ", nextRows.length, " righe.")
 	nextRows.each(function(){
-		console.log("passo la linea", this);
+		//console.log("passo la linea", this);
 		if (this!=questaRiga && $(this).has(".clientSelect").length){
-			console.log("Esco", this, "ha clienti");
+			//console.log("Esco", this, "ha clienti");
 			return false;	// stop the loop
 		}
 		else {
-			console.log("Seleziono la riga", this);
+			//console.log("Seleziono la riga", this);
 			$(this).find("input[type=checkbox]").attr("checked", true);
 		}
 	});

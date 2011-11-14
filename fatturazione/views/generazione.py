@@ -63,7 +63,8 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 									default=datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
 								)
 	# prendo i viaggi da fatturare
-	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lte=data_end)
+	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
+	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lt=data_end+datetime.timedelta(days=1))
 	# FATTURE CONSORZIO ****************
 	lista_consorzio = viaggi.filter(filtro_consorzio)
 	lista_consorzio = lista_consorzio.order_by("cliente", "data").select_related().all()
@@ -258,7 +259,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 				else:
 					riga_fattura.conducente = elemento.conducente
 				fattura.righe.add(riga_fattura)
-				riga += 1
+				riga += 10
 
 #			print "Genero le %s" % nomi_fatture[tipo]
 			request.user.message_set.create(message="Generate %d %s." % (fatture_generate, plurale))

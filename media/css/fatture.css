@@ -4,11 +4,23 @@
 	margin: 0;
 	padding: 0;
 }
-.editable {
+.editable, .editable * {
 	background-color: #eee;
+	margin:0; padding:0;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10pt;
 }
 div.editable, .pre {
 	white-space: pre-line;
+}
+.editable textarea {
+	width:100%;
+}
+td.editable input { width:100%; }
+#fat_note {
+	padding:10px;
+	margin: 10px;
+	margin-right: 350px;
 }
 #fat_logo {
 	margin:30px 0;
@@ -37,8 +49,11 @@ div.editable, .pre {
 	width: 100%;
 }
 #righe tr {
-	clear: both;
-	margin-top: 50px;
+	border: 1px solid silver;
+}
+#righe td {
+	padding: 5px;
+	
 }
 #totale {
 	float: right;

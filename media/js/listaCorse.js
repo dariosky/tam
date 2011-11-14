@@ -73,7 +73,7 @@ $(function() {
 		$(select).bind('click keydown', function() {
 			var is_populated = $(this).data('done');
 			if(!is_populated) {
-				console.log("populate " + this);
+				//console.log("populate " + this);
 				$(this).data('done', true);
 				// mark the select as populated
 				var options = $(this);

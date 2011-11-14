@@ -172,7 +172,7 @@ via P.Abano, 14
 35031 Abano Terme (PD)
 Partita IVA e CF: 01106280280
 Tel: 049 667842 Fax: 049 667845
-www.artetaxi.it  -  info@artetaxi.it"""
+www.artetaxi.com  -  info@artetaxi.com"""
 
 #import datetime
 #LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
@@ -189,7 +189,7 @@ $ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
 
 #===============================================================================
 # Set to True to use the debug_toolbar
-use_debug_toolbar = DEBUG and False
+use_debug_toolbar = DEBUG # and False
 if use_debug_toolbar:
 	# put the debug toolbar middleware right after the Gzip middleware
 	try:

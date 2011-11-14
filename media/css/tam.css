@@ -171,10 +171,13 @@ form {
 	background:#ffffcc;
 	border:1px #5D7671 solid;
 	list-style:none;
-}
-.messagebox.message{
+	cursor: pointer;
 	color:#5D7671;
 	font-weight:bolder;
+	z-index: 1000;
+}
+
+.messagebox li{
 	padding:3px;
 }
 
@@ -401,4 +404,8 @@ h2.fatturaTipo3 {
 }
 .cellaPrezzo a {
 	font-weight: bold;	/*nella cella prezzo, i link (il netto) sono in grossetto */ 
+}
+
+.actionButton {
+	cursor:pointer;
 }
