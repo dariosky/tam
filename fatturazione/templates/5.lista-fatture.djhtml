@@ -27,14 +27,16 @@
 				</td>
 				<td>
 					{% if fattura.cliente %}
-						<a href='{%url tamClienteId fattura.cliente.id %}?next={{ full_request_path }}'>{{fattura.destinatario}}</a>
+						<a href='{%url tamClienteId fattura.cliente.id %}?next={{ full_request_path }}'>{{fattura.cliente.nome}}</a>
 					{% else %}	
 						{% if fattura.passeggero %}
-							<a href='{%url tamPrivatoId fattura.privato.id %}?next={{ full_request_path }}'>{{fattura.privato.nome}}</a>
+							Privato:<br/>
+							<a href='{%url tamPrivatoId fattura.passeggero.id %}?next={{ full_request_path }}'>{{fattura.passeggero.nome}}</a>
 						{% else %}
 							{{ fattura.destinatario }}
 						{% endif %}
-					{% endif %}	
+					{% endif %}
+					<div class='dati'>{{ fattura.emessa_a }}</div>	
 				</td>
 				<td>{{fattura.righe.count}}</td>
 				<td class='prezzo'>{{fattura.lordo_totale|floatformat:"-2"}} €</td>

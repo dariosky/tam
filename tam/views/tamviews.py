@@ -106,7 +106,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 	clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
 	today = datetime.date.today()	# today to compare with viaggio.date
 	adesso = datetime.datetime.now()
-	recurseChild = True
+	distinct = False
 
 	# ------------------ raccolgo tutti i possibili filtri
 	filtriTipo = [
@@ -147,12 +147,9 @@ def listaCorse(request, template_name="corse/lista.html"):
 	else:
 		filterCliente = request.session.get("filterCliente", None)
 
+	viaggi = Viaggio.objects.all()	# mostro tutti i figli, non raggruppo per padre
 	if filterCliente or (filterFlag != "Tutti i flag") or outputFormat:		# non raggruppo
-		viaggi = Viaggio.objects.all()	# mostro tutti i figli, non raggruppo per padre
-		recurseChild = False
-		logging.debug("Non raggruppo")
-	else:
-		viaggi = Viaggio.objects.filter(padre__isnull=True)	# hide child
+		distinct = True
 
 #	viaggi=Viaggio.objects.filter(pk=5266)	#TMP
 	if filterConducente:
@@ -160,6 +157,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggi = viaggi.filter(conducente__isnull=True)
 		else:
 			viaggi = viaggi.filter(conducente=filterConducente)    # filtro il conducente
+			conducenteFiltrato = Conducente.objects.get(id=filterConducente)
 
 	filtriWhen = [ ("next", "Prossime corse"), ("all", "Tutte le date"), ("thisM", "Questo mese"), ("lastM", "Scorso mese")]
 	if u"filterWhen" in request.GET:
@@ -231,6 +229,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggi = viaggi.filter(cliente__isnull=True)	# solo i privati
 		else:
 			viaggi = viaggi.filter(cliente__id=filterCliente)	# cliente specifico
+			clienteFiltrato = Cliente.objects.get(id=filterCliente) 
 
 	if data_inizio: viaggi = viaggi.filter(data__gt=data_inizio)
 	if data_fine: viaggi = viaggi.filter(data__lt=data_fine) # prossimi 15 giorni
@@ -254,7 +253,6 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
-	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 	paginator = Paginator(viaggi, 80, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
 	page = request.GET.get("page", 1)
@@ -270,6 +268,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		thisPage = None
 		viaggi = []
 
+	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 	num_viaggi = len(viaggi)
 #	logging.debug("Ho caricato %d viaggi." % num_viaggi)
 	classifiche = None	# ottengo le classifiche globali

@@ -16,9 +16,9 @@ class Fattura(models.Model):
 	
 	note = models.TextField(blank=True)	# note in testata
 
-	tipo = models.CharField(max_length=1) # tipo fattura: 1.Consorzio (a cliente), 2.Conducente (a consorzio), 3.Ricevuta (a cliente)
+	tipo = models.CharField(max_length=1, db_index=True) # tipo fattura: 1.Consorzio (a cliente), 2.Conducente (a consorzio), 3.Ricevuta (a cliente)
 
-	data = models.DateField()
+	data = models.DateField(db_index=True)
 	anno = models.IntegerField()
 	progressivo = models.IntegerField()
 
