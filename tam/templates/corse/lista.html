@@ -43,15 +43,8 @@
 				</tr>
 			</thead>
 			<tbody>
-			{% for padre in viaggi %}
-			    {% with padre as viaggio %}
-                	{% include "corse/riga_viaggio.inc.html" %}
-                {% endwith %}
-				{% if recurseChild %}
-					{% for viaggio in padre.viaggio_set.all %}
-						{% include "corse/riga_viaggio.inc.html" %}
-					{% endfor %}
-				{% endif %}
+			{% for viaggio in viaggi %}
+               	{% include "corse/riga_viaggio.inc.html" %}
 			{% endfor %}
 			</tbody>
 		</table>

@@ -157,6 +157,9 @@ class Viaggio(models.Model):
 	numero_pratica = models.CharField(max_length=20, null=True, blank=True)
 
 	padre = models.ForeignKey("Viaggio", null=True, blank=True) # l'eventuale viaggio padre nei raggruppamenti
+	data_padre = models.DateTimeField("Data e ora padre", db_index=True, null=True)
+	id_padre = models.PositiveIntegerField("ID Gruppo", db_index=True, null=True)
+	
 	conducente_richiesto = models.BooleanField("Escluso dai supplementari", default=False)	# True quando il conducente è fissato
 	conducente = models.ForeignKey("Conducente", null=True, blank=True, db_index=True)	# conducente (proposto o fissato)
 	conducente_confermato = models.BooleanField("Conducente confermato", default=False)	# True quando il conducente è fissato
@@ -192,7 +195,7 @@ class Viaggio(models.Model):
 	class Meta:
 		verbose_name_plural = _("Viaggi")
 		permissions = (('change_oldviaggio', 'Cambia vecchio viaggio'), ('change_doppi', 'Cambia il numero di casette'))
-		ordering = ("data",)
+		ordering = ("data_padre", "id_padre", "data")
 
 	def url(self):
 		return reverse("tamNuovaCorsaId", kwargs={"id":self.id})
@@ -332,9 +335,14 @@ class Viaggio(models.Model):
 		if not self.conducente_confermato:
 			self.conducente = None
 		if self.cliente:
-			self.passeggero = None	
+			self.passeggero = None
+
+		# inserisco data e ID del gruppo per gli ordinamenti
+		self.id_padre = self.padre.id if self.padre is not None else self.id
+		self.data_padre = self.padre.data if self.padre is not None else self.data
+
 		logging.debug("Update di *%s*." % self.pk)
-		invalidate_template_cache("viaggio", self.id)
+		#invalidate_template_cache("viaggio", self.id)
 		super(Viaggio, self).save(*args, **kwargs)
 		for figlio in self.viaggio_set.all(): # i figli ereditano dal padre
 			changed = False

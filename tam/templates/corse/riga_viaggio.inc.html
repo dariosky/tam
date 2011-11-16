@@ -2,7 +2,7 @@
 {% load media %}
 {% load cache %}
 <tr{% if viaggio.warning %} class="warning"{% endif %}>
-{% cache 36000 viaggio viaggio.id %}
+{# {% cache 36000 viaggio viaggio.id %} #}
 	<td>
 		{% if not viaggio.conducente_confermato %}
 			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
@@ -50,10 +50,10 @@
 		{% include "corse/flags.inc.html" %}
 	</td>
 
-{% endcache %}
+{# {% endcache %} #}
 
 	<td>
-	{% if viaggio.padre and recurseChild %}
+	{% if viaggio.padre and not distinct %}
 		<img src="{% media_url "arrow_join.png" %}" alt='' />
 	{% else %}
 		{% with viaggio.confirmed as confirmed %}

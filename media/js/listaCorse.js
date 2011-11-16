@@ -71,19 +71,22 @@ $(function() {
 	});
 	function populateSelect(select, address) {
 		$(select).bind('click keydown', function() {
-			var is_populated = $(this).data('done');
-			if(!is_populated) {
-				//console.log("populate " + this);
-				$(this).data('done', true);
-				// mark the select as populated
-				var options = $(this);
-				$.getJSON(address, function(result) {
-					$.each(result, function() {
-						// this è un array: (id, nome, attivo)
-						options.append($('<option />').val(this[0]).text(this[1]));
-					});
+			var select = $(this);
+			if (select.data('done')) return;
+			
+			$(this).data('done', true);
+			// mark the select as populated
+			var options = $(this);
+			//var textToInsert = [];
+			//var i = 0;
+			$.getJSON(address, function(result) {
+				$.each(result, function() {
+					// this è un array: (id, nome, attivo)
+					options.append($('<option />', {value:this[0], text:this[1] }));
+					//console.log('<option id="'+ this[0] +'">'+this[1]+'</option>')
+					//textToInsert[i++] = '<option id="'+ this[0] +'">'+this[1]+'</option>';
 				});
-			}
+			});
 		});
 	}
 
