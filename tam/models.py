@@ -107,7 +107,7 @@ class Tratta(models.Model):
 def get_tratta(da, a):
 	""" Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
 	if not da or not a: return
-	keyword = ("tratta%s-%s" % (da, a)).replace(" ","")
+	keyword = ("tratta%s-%s" % (da, a)).replace(" ", "")
 	trattacache = cache.get(keyword)
 	if trattacache:
 		return trattacache
@@ -260,7 +260,7 @@ class Viaggio(models.Model):
 		self.arrivo = self.is_arrivo()
 
 		self.km = self.get_kmrow()	# richiede le tratte
-		self.costo_sosta = Decimal(self.sostaFinaleMinuti())*12 / 60  # costo della sosta 12€/h, richiede tratte, usa _isabbinata e nexbro
+		self.costo_sosta = Decimal(self.sostaFinaleMinuti()) * 12 / 60  # costo della sosta 12€/h, richiede tratte, usa _isabbinata e nexbro
 
 
 		self.is_abbinata = self._is_abbinata()
@@ -304,8 +304,8 @@ class Viaggio(models.Model):
 			# i figli non prendono nulla
 
 		if self.padre is None:
-			for (key, type), points in self.disturbi().items(): #@UnusedVariable
-				if type == "night":
+			for (key, fascia), points in self.disturbi().items(): #@UnusedVariable
+				if fascia == "night":
 					self.punti_notturni += points
 				else:
 					self.punti_diurni += points
@@ -535,19 +535,19 @@ class Viaggio(models.Model):
 			if fascia_start <= date_start < fascia_end or \
 			fascia_start < date_end <= fascia_end or \
 			(date_start < fascia_start and date_end > fascia_end):
-				logging.debug("mi disturba [%d] la fascia %s" % (points,fasciaKey))
+				logging.debug("mi disturba [%d] la fascia %s" % (points, fasciaKey))
 				result[fasciaKey] = max(result.get(fasciaKey), points)
 
 		date_start = self.date_start
 		date_end = self.date_end(recurse=True)
-		logging.debug("Disturbo dalle %s alle %s"%(date_start, date_end) )
+		logging.debug("Disturbo dalle %s alle %s" % (date_start, date_end))
 		dayMarker = date_start.replace()   # creo una copia
 		#daymaker mi serve per scorrere tra i giorni, partendo da quello di date_start al giorno di arrivo
 		result = {}
 		while dayMarker.date() <= date_end.date():
 			# fino alle 4:00 sono 2 punti notturni, ma assegnati con chiave al giorno precedente
 			aggiungi_fascia(0, 0, 4, 1, points=2,
-							fasciaKey=((dayMarker-datetime.timedelta(days=1)).strftime("%d/%m/%Y"), "night"))	
+							fasciaKey=((dayMarker - datetime.timedelta(days=1)).strftime("%d/%m/%Y"), "night"))	
 			aggiungi_fascia(4, 1, 6, 1, points=2,
 							fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "morning")) # alle 6:00 sono 2 punto diurno
 			aggiungi_fascia(6, 1, 7, 46, points=1,

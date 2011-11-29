@@ -1,12 +1,14 @@
-<tr>
+<tr class='priceRow'>
 	<td style='width:40px'>
-		<img src="/media/delbtn.png" class='delrow actionButton' title='cancella riga' />
+		{% if perms.fatturazione.generate %}
+			<img src="/media/delbtn.png" class='delrow actionButton' title='cancella riga' />
+		{% endif %}	
 		{% if riga.viaggio %}<a href="{% url tamNuovaCorsa2Id riga.viaggio.id %}" target="_blank" title='Corsa collegata'><img src="/media/tam.ico" width=16 height=16/></a>{%endif%}
 		<input name='row' type="hidden" value='{{riga.id}}'/>
 	</td>
 	<td class='editable' id='riga-desc-{{riga.id}}'>{{ riga.descrizione }}</td>
-	<td class='editable' id='riga-qta-{{riga.id}}'>{{ riga.qta }}</td>
+	<td class='editable qta' id='riga-qta-{{riga.id}}'>{{ riga.qta }}</td>
 	<td class='editable prezzo' id='riga-prezzo-{{riga.id}}'>{{ riga.prezzo|floatformat:"2" }}</td>
-	<td class='editable' id='riga-iva-{{riga.id}}'>{{ riga.iva }}</td>
+	<td class='editable iva' id='riga-iva-{{riga.id}}'>{{ riga.iva }}</td>
 	<td class='prezzo totale'>{{ riga.totale|floatformat:"2" }}</td>
 </tr>

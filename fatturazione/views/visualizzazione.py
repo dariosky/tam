@@ -2,13 +2,15 @@
 
 from django.template.context import RequestContext
 from django.shortcuts import render_to_response
-from fatturazione.models import Fattura, RigaFattura
+from fatturazione.models import Fattura, RigaFattura, nomi_fatture
 import datetime
 from tam.views.tamviews import parseDateString
 from django.contrib.auth.decorators import permission_required
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.aggregates import Max
-import logging
+from fatturazione.views.util import ultimoProgressivoFattura
+from django.conf import settings
+from django.core.urlresolvers import reverse
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -23,7 +25,7 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 	
 	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
 #	lista_consorzio = lista_consorzio.annotate(valore=Sum(F('righe__prezzo')*(1+F('righe__iva')/100)))
-	#TODO: dovrei annotare prezzo*1+iva/100, non si può fare attualmente 
+	#TODO: (Django 1.4) dovrei annotare prezzo*1+iva/100, non si può fare attualmente 
 	return render_to_response(template_name,
                               {
 								"data_start":data_start,
@@ -42,13 +44,16 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 	
 @permission_required('fatturazione.view', '/')
 def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
+	""" Vedo la fattura ed (eventualmente) ne consento la modifica """
+	
 	fattura = Fattura.objects.get(id=id_fattura)
 	emessa_da_html = fattura.emessa_da\
 					.replace("www.artetaxi.com", "<a target='_blank' href='http://www.artetaxi.com'>www.artetaxi.com</a>")\
 					.replace("info@artetaxi.com", "<a target='_blank' href='mailto:info@artetaxi.com'>info@artetaxi.com</a>")
 	
 	if request.is_ajax():
-		#TODO: Controllo permessi di scrittura
+		if not request.user.has_perm('fatturazione.generate'):
+			return HttpResponse('Non hai permessi sufficienti per modificare le fatture.', status=400)
 		action = request.POST.get('action')
 		if action == 'delete-row':
 			try:
@@ -85,7 +90,7 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 #							)
 				if object_id == "fat_progressivo":
 					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value))
-					if esistenti.count()>0:
+					if esistenti.count() > 0:
 						return HttpResponse("Esiste già una fattura con questo progressivo.", status=500)
 				#print header_ids[object_id], "=",  object_value
 				setattr(fattura, header_ids[object_id], object_value)
@@ -93,6 +98,7 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 				return HttpResponse('Header changed.', status=200)	
 			else:
 				row_ids = {'riga-desc-':'descrizione', 'riga-qta-':'qta', 'riga-prezzo-':'prezzo', 'riga-iva-':'iva'}
+				row_numerici = ['riga-qta-', 'riga-prezzo-', 'riga-iva-']
 				for prefix in row_ids.keys():
 					if object_id.startswith(prefix):
 						try:
@@ -100,19 +106,41 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 							riga = fattura.righe.get(id=riga_id)
 						except:
 							return HttpResponse('Non ho trovato la riga corrispondente a %s.' % object_id, status=500)
+						if prefix in row_numerici:
+							print "converto il valore in un numerico"
+							# tolgo i punti delle migliaia e metto il punto come separatore decimali
+							object_value = object_value.replace(".", "").replace(",", ".")
+						
 						print "cambio la riga %d" % riga_id
+						print "imposto il valore %s" % object_value
 						setattr(riga, row_ids[prefix], object_value)
 						riga.save()
-						return HttpResponse('OK.', status=200)	
+						return HttpResponse('OK.', status=200)
 				return HttpResponse('Non conosco il campo %s.' % object_id, status=500)	
 			return HttpResponse('OK.', status=200)	
-				#fattura.save()
 		return HttpResponse('Azione sconosciuta.', status=500)
 		
 	return render_to_response(template_name,
                               {
 								"fattura":fattura,
 								"emessa_da_html":emessa_da_html,
-
+								"nome_fattura":nomi_fatture[fattura.tipo],
                               },
                               context_instance=RequestContext(request))
+
+@permission_required('fatturazione.generate', '/')
+def nuova_fattura(request, tipo):
+	anno=datetime.date.today().year
+	ultimo = ultimoProgressivoFattura(anno, tipo=tipo)
+	fattura = Fattura(
+					anno=anno,
+					tipo=tipo,
+					progressivo=ultimo+1,
+					data=datetime.date.today()
+					)
+	if tipo == "1":
+		fattura.emessa_da = settings.DATI_CONSORZIO
+	fattura.save()
+	request.user.message_set.create(message="Creata la fattura %s/%s." % (anno, fattura.progressivo))
+	return HttpResponseRedirect(reverse("tamFattura", kwargs={'id_fattura': fattura.id}))
+	

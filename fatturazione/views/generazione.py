@@ -13,6 +13,7 @@ from django.db.models import Q
 from fatturazione.views.util import ultimoProgressivoFattura
 from django.db import transaction
 from django.db.models.aggregates import Max
+from django.contrib.auth.decorators import permission_required
 
 """
 Generazione fatture:
@@ -52,7 +53,7 @@ filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None, cond
 filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None)
 
 
-
+@permission_required('fatturazione.generate', '/')
 def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", tipo="1"):
 	data_start = parseDateString(# dal primo del mese scorso
 									request.GET.get("data_start"),
@@ -67,18 +68,22 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lt=data_end+datetime.timedelta(days=1))
 	# FATTURE CONSORZIO ****************
 	lista_consorzio = viaggi.filter(filtro_consorzio)
-	lista_consorzio = lista_consorzio.order_by("cliente", "data").select_related().all()
+	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
+						.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 	oggi = datetime.date.today()
 	anno_consorzio = oggi.year
 	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, tipo) + 1
 
 	# FATTURE CONDUCENTE ****************
 	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end)
-	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").select_related().all()
+	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").all()\
+		.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
+						 'fattura', 'conducente')
 
 	# RICEVUTE CONDUCENTE
 	lista_ricevute = viaggi.filter(filtro_ricevute)
-	lista_ricevute = lista_ricevute.order_by("cliente", "passeggero", "data").select_related().all()
+	lista_ricevute = lista_ricevute.order_by("cliente", "passeggero", "data").all()\
+		.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 
 	profile = ProfiloUtente.objects.get(user=request.user)
 	luogoRiferimento = profile.luogo
@@ -101,6 +106,7 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
                               context_instance=RequestContext(request))
 
 @transaction.commit_on_success
+@permission_required('fatturazione.generate', '/')
 def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, keys=["cliente"], order_by=None,
 					manager=Viaggio.objects,
 				):
@@ -132,9 +138,14 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 
 	lista = manager.filter(id__in=ids)
 	lista = lista.filter(filtro)
+	if manager == Viaggio.objects:
+		lista = lista.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+	elif manager == RigaFattura.objects:
+		lista = lista.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
+						 'fattura', 'conducente')
 	if order_by is None:
 		order_by = keys + ["data"]	# ordino per chiave - quindi per data
-	lista = lista.order_by(*order_by).select_related().all()
+	lista = lista.order_by(*order_by).all()
 	if not lista:
 		request.user.message_set.create(message="Tutte le %s selezionate sono già state fatturate." % plurale)
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))

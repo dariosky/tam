@@ -1,8 +1,42 @@
+function rowProcess(row){
+	var id = row.find('input:hidden').val();
+	var price=parseFloat(row.find('#riga-prezzo-'+id).text());
+	var iva=parseFloat(row.find('#riga-iva-'+id).text());
+	var qta=parseFloat(row.find('#riga-qta-'+id).html());
+	return {
+			id:id,
+			price:price,
+			iva:iva,
+			qta:qta,
+			imponibile:qta*price,
+			tot_iva:Math.round(price*qta*iva)/100,
+			tot_riga:Math.round(price*qta*(100+iva))/100
+		}
+}
+
+function ricalcolaTotali(){
+	console.log("Ritotalo")
+	var imponibile=0;
+	var iva=0;
+	var totale=0;
+	 
+	var righe=$('#righe .priceRow').each(function(){
+		var rowData=rowProcess( $(this) );
+		iva= iva + rowData.tot_iva;
+		imponibile += rowData.imponibile;
+		totale += rowData.tot_riga;
+	})
+	$('#tot_imponibile').text(imponibile.formatMoney(2, ',', '.' ));
+	$('#tot_iva').text(iva.formatMoney(2, ',', '.' ));
+	$('#tot_totale').text(totale.formatMoney(2, ',', '.' ));
+	
+}
+
 function editableSubmit(content) {
-	if (content.current!=content.previous || true) {
+	var pre = $.trim(content.previous), post=$.trim(content.current)
+	if (post!=pre || true) {
 		var $this = $(this);
 		var id = $this.attr('id');
-		var pre = $.trim(content.previous), post=$.trim(content.current)
 		$.post("", {action:"set",
 					id:id,
 					value:post
@@ -10,20 +44,13 @@ function editableSubmit(content) {
 		.complete(function(xhr, data){
 			if (xhr.status==200) {
 				//console.log("set successful")
-				var row = $this.closest('#righe tr');
+				var row = $this.closest('#righe .priceRow');
 				if (row.length==1) {
+					rowData=rowProcess(row);
 					console.log("Modifica ad una riga. Ricomputo.");
-					var id = row.find('input:hidden').val();
-					var prezzo=parseFloat(row.find('#riga-prezzo-'+id).html());
-					var qta=parseFloat(row.find('#riga-qta-'+id).html());
-					var iva=parseFloat(row.find('#riga-iva-'+id).html());
-					var prezzoRiga = Math.round(prezzo*qta*(100+iva))/100;
-					console.log("prezzo:" +prezzo, "qta:"+qta, "iva:"+iva);
-					console.log("tot:"+prezzoRiga);
-					console.log(row);
-					var $totaleRiga=row.find('.totale').html(prezzoRiga.formatMoney(2, ',', '.' ));
-					
-					$this.find()
+					var $totaleRiga=row.find('.totale').text(rowData.tot_riga.formatMoney(2, ',', '.' ));
+					//TODO: Dovrei formattare le celle appena inserite, se sono della classe price
+					ricalcolaTotali();
 				}
 			}
 			else {
@@ -80,4 +107,4 @@ $('#newRow').click(
 $('div.editable').editable({type:'textarea', onSubmit:editableSubmit});
 $('span.editable').editable({onSubmit:editableSubmit});
 $('td.editable').editable({onSubmit:editableSubmit});
-/* TODO: Editable Data fattura */
+// TODO: Editable Data fattura
