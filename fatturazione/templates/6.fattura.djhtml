@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}Fattura #{{fattura.id}} &raquo; {{ block.super }} {% endblock %}
+{% block title %}{{nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}} &raquo; {{ block.super }} {% endblock %}
 
 {% block css %}
 {{ block.super }}
@@ -8,8 +8,9 @@
 {% endblock css %}
 
 {% block content %}
+<a href="{% url tamVisualizzazioneFatture %}">Torna all'elenco fatture</a>
+<h1>{{nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}</h1>
 
-<h1>Fattura #{{fattura.id}}</h1>
 	
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='header'>
@@ -33,13 +34,14 @@
 			{% for riga in fattura.righe.all %}
 				{% include "6.fattura-riga.inc.djhtml" %}
 			{% endfor %}
+			{% if perms.fatturazione.generate %}
 			<tr><td>
 				<img src='/media/addbtn.png' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
 			</td></tr>
-			
-			<tr style='text-align:right;'><td colspan=5>Totale imponibile</td><td>{{fattura.imponibile|floatformat:"2"}}</td></tr>
-			<tr style='text-align:right;'><td colspan=5>IVA</td><td>{{fattura.iva|floatformat:"2"}}</td></tr>
-			<tr style='text-align:right; font-weight:bold;'><td colspan=5>Imponibile</td><td>{{fattura.lordo_totale|floatformat:"2"}}</td></tr>
+			{% endif %}
+			<tr style='text-align:right;'><td colspan=5>Totale imponibile</td><td id='tot_imponibile'>{{fattura.imponibile|floatformat:"2"}}</td></tr>
+			<tr style='text-align:right;'><td colspan=5>IVA</td><td id='tot_iva'>{{fattura.iva|floatformat:"2"}}</td></tr>
+			<tr style='text-align:right; font-weight:bold;'><td colspan=5>Imponibile</td><td id='tot_totale'>{{fattura.lordo_totale|floatformat:"2"}}</td></tr>
 		</tbody>
 	</table>
 	
@@ -47,11 +49,22 @@
 		Si prega di effettuare il pagamento sul conto Corrente:
 		UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824
 		<div id='privacy'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</div>
+	</div>
+</div>
+<a href='pdf/'>
+	<div>
+		<img src='/media/fatture/pdficon.png' title='Genera PDF' alt='Genera PDF'/>
 	</div>	
-</div>	
+</a>
 {% endblock %}
 
 {% block bottom %}
-<script type="text/javascript" src='/media/js/jquery.editable-1.3.3.js'></script>
-<script type="text/javascript" src='/media/js/fatture/fattura.js'></script>
+{% if perms.fatturazione.generate %}
+	<script type="text/javascript" src='/media/js/jquery.editable-1.3.3.js'></script>
+	<script type="text/javascript" src='/media/js/fatture/fattura.js'></script>
+{% else %}
+	<script type="text/javascript">
+		$('.editable').removeClass('editable');
+	</script>
+{% endif %}
 {% endblock bottom %}

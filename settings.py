@@ -77,10 +77,36 @@ MEDIA_ROOT = os.path.join(PROJECT_PATH, "media/")
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
 MEDIA_URL = '/media/'
 
+# Absolute path to the directory static files should be collected to.
+# Don't put anything in this directory yourself; store your static files
+# in apps' "static/" subdirectories and in STATICFILES_DIRS.
+# Example: "/home/media/media.lawrence.com/static/"
+STATIC_ROOT = os.path.join(PROJECT_PATH, 'static/')
+
+# URL prefix for static files.
+# Example: "http://media.lawrence.com/static/"
+STATIC_URL = '/static/'
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/admin/'
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
+# Additional locations of static files
+STATICFILES_DIRS = (
+    # Put strings here, like "/home/html/static" or "C:/www/django/static".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+)
+
+# List of finder classes that know how to find static files in
+# various locations.
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+)
+
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '7@*a$hce=f6fhavob3i4lj*3h72wu73dw!trinyuz-87zqd^3e'
@@ -94,12 +120,13 @@ TEMPLATE_LOADERS = (
 
 MIDDLEWARE_CLASSES = (
 	'mediagenerator.middleware.MediaMiddleware',
-	'django.middleware.gzip.GZipMiddleware',
+#	'django.middleware.gzip.GZipMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
     'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'tam.middleware.loginRequirement.RequireLoginMiddleware',
-    'django.middleware.doc.XViewMiddleware',
+#    'django.middleware.doc.XViewMiddleware',	# currently useless?
 
     'django.middleware.transaction.TransactionMiddleware',
 
@@ -132,7 +159,11 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
 #    'django.contrib.sites',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+
     'django.contrib.admin',
+    'django.contrib.admindocs',
     'django.contrib.humanize',
 	'mediagenerator',
 
@@ -189,7 +220,7 @@ $ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
 
 #===============================================================================
 # Set to True to use the debug_toolbar
-use_debug_toolbar = DEBUG # and False
+use_debug_toolbar = DEBUG and False
 if use_debug_toolbar:
 	# put the debug toolbar middleware right after the Gzip middleware
 	try:

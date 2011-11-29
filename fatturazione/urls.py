@@ -30,6 +30,8 @@ urlpatterns = patterns ('fatturazione.views',
 												  "template_name":"2-3.fatturazione_ricevute.djhtml"},
 	   		name="tamFattureGeneraRicevute"),
 
+	url(r'^genera/consorzio/manuale/$', 'nuova_fattura', {"tipo":"1"}, name="tam-nuova-fattura-consorzio"),
+	
 	url(r'^archivio/$', 'view_fatture', name="tamVisualizzazioneFatture"),
 	
 	url(r'archivio/(?P<id_fattura>\d*)/$', 'fattura', name='tamFattura'),

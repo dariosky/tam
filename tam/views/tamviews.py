@@ -44,7 +44,7 @@ def parseDateString(s, default=None):
 		t = time.strptime(s, '%d/%m/%Y')
 		return datetime.date(t.tm_year, t.tm_mon, t.tm_mday)
 	except:
-		logging.debug("Errore nel parsing della data.")
+		#logging.debug("Errore nel parsing della data.")
 		return default
 
 def listaCorse(request, template_name="corse/lista.html"):

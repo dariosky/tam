@@ -16,16 +16,19 @@ gran parte è usata dalla lista clienti e conducenti
 su agosto, dopo aver portato conducenti e clienti dinamici: 3863
 mentre la pagina senza corse diventa solo 88 elementi! Eureka :) 2,1kb
 
-#TODO: Faccio in modo che se ho filtrato per conducente o cliente si veda nei filtri
-
 ** ** ** ** ** ** 27/9/2011
-#TODO:
-Richiesta una bacheca su Tam:
+#TODO: Bacheca su Tam:
 	in modo che gli utentipotenti possano uploadare/cancellare i file sulla bacheca
 	e gli altri possano leggere
 	
 11/10/2011
-	#TODO: Le fatture conducente dovrebbero prendere dalle fatture consorzio, non dal
+	Le fatture conducente dovrebbero prendere dalle fatture consorzio, non dal
 		viaggio collegato. In modo che se cambio una fattura consorzio prima
 		di generare quella conducente, il cambiamento sia riportato.
 		Per farlo, devo aggiungere un campo conducente_proprietario alle fatture consorzio (nullabile)
+16/11/2011:
+	Aggiunti i campi per ordinare per gruppo ai viaggi, performance boost impressionante.
+	Posso togliere la cache sulle righe (eventualmente la rimetterò)
+	Per il futuro: Attenzione agli indici, che South li elimina durante i schemamigration
+					ho creato uno script che li cancella tutti, per poi ricrearli in automatico
+	Attenzione anche ai Select_related specificandoli si ottengono molte meno query
