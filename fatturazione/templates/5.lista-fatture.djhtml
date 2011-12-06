@@ -39,7 +39,7 @@
 					<div class='dati'>{{ fattura.emessa_a }}</div>	
 				</td>
 				<td>{{fattura.righe.count}}</td>
-				<td class='prezzo'>{{fattura.lordo_totale|floatformat:"-2"}} €</td>
+				<td class='prezzo'>{{fattura.val_totale|floatformat:"-2"}} €</td>
 			</tr>
 		{% endfor %}
 		</table>

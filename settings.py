@@ -221,13 +221,14 @@ $ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
 #===============================================================================
 # Set to True to use the debug_toolbar
 use_debug_toolbar = DEBUG and False
-if use_debug_toolbar:
+if use_debug_toolbar :
 	# put the debug toolbar middleware right after the Gzip middleware
 	try:
-		middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
+		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
+		middleware_split_position = 0 #  put the toolbar middleware at the start
 		MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES[:middleware_split_position] + \
 						('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
-						MIDDLEWARE_CLASSES[middleware_split_position:]
+						MIDDLEWARE_CLASSES
 	except:
 		pass
 #	MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)

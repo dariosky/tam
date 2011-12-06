@@ -11,6 +11,7 @@ from django.db.models.aggregates import Max
 from fatturazione.views.util import ultimoProgressivoFattura
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from fatturazione.views.pdf import render_to_pdf
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -22,7 +23,7 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 									request.GET.get("data_end"),
 									default=datetime.date.today()
 								)
-	
+
 	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
 #	lista_consorzio = lista_consorzio.annotate(valore=Sum(F('righe__prezzo')*(1+F('righe__iva')/100)))
 	#TODO: (Django 1.4) dovrei annotare prezzo*1+iva/100, non si può fare attualmente 
@@ -33,24 +34,25 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 								"dontHilightFirst":True,
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),
-								
+
 								"lista_consorzio":lista_consorzio,
 #								"lista_conducente":lista_conducente,
 #								"lista_ricevute":lista_ricevute,
 
                               },
                               context_instance=RequestContext(request))
-	
-	
+
+
 @permission_required('fatturazione.view', '/')
 def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 	""" Vedo la fattura ed (eventualmente) ne consento la modifica """
-	
-	fattura = Fattura.objects.get(id=id_fattura)
-	emessa_da_html = fattura.emessa_da\
-					.replace("www.artetaxi.com", "<a target='_blank' href='http://www.artetaxi.com'>www.artetaxi.com</a>")\
-					.replace("info@artetaxi.com", "<a target='_blank' href='mailto:info@artetaxi.com'>info@artetaxi.com</a>")
-	
+	try:
+		fattura = Fattura.objects.get(id=id_fattura)
+	except Fattura.DoesNotExist:
+		request.user.message_set.create(message="Fattura non trovata.")
+		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
+
+
 	if request.is_ajax():
 		if not request.user.has_perm('fatturazione.generate'):
 			return HttpResponse('Non hai permessi sufficienti per modificare le fatture.', status=400)
@@ -62,7 +64,7 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 				riga = fattura.righe.get(id=rowid)
 				riga.delete()
 				return HttpResponse('Riga eliminata.', status=200)
-			except Exception, e:	
+			except Exception, e:
 				return HttpResponse('Impossibile trovare la riga.\n%s' % e, status=500)
 		if action == 'append-row':
 			ultimaRiga = fattura.righe.aggregate(Max('riga'))['riga__max'] or 0
@@ -72,7 +74,7 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 							iva=10 if fattura.tipo in ('1', '2') else 0,
 							riga=ultimaRiga + 10)
 			riga.save()
-			fattura.righe.add(riga)	
+			fattura.righe.add(riga)
 			return render_to_response('6.fattura-riga.inc.djhtml',
 									{
 										"riga":riga,
@@ -95,7 +97,7 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 				#print header_ids[object_id], "=",  object_value
 				setattr(fattura, header_ids[object_id], object_value)
 				fattura.save()
-				return HttpResponse('Header changed.', status=200)	
+				return HttpResponse('Header changed.', status=200)
 			else:
 				row_ids = {'riga-desc-':'descrizione', 'riga-qta-':'qta', 'riga-prezzo-':'prezzo', 'riga-iva-':'iva'}
 				row_numerici = ['riga-qta-', 'riga-prezzo-', 'riga-iva-']
@@ -110,32 +112,30 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 							print "converto il valore in un numerico"
 							# tolgo i punti delle migliaia e metto il punto come separatore decimali
 							object_value = object_value.replace(".", "").replace(",", ".")
-						
+
 						print "cambio la riga %d" % riga_id
 						print "imposto il valore %s" % object_value
 						setattr(riga, row_ids[prefix], object_value)
 						riga.save()
 						return HttpResponse('OK.', status=200)
-				return HttpResponse('Non conosco il campo %s.' % object_id, status=500)	
-			return HttpResponse('OK.', status=200)	
+				return HttpResponse('Non conosco il campo %s.' % object_id, status=500)
+			return HttpResponse('OK.', status=200)
 		return HttpResponse('Azione sconosciuta.', status=500)
-		
+
 	return render_to_response(template_name,
                               {
 								"fattura":fattura,
-								"emessa_da_html":emessa_da_html,
-								"nome_fattura":nomi_fatture[fattura.tipo],
                               },
                               context_instance=RequestContext(request))
 
 @permission_required('fatturazione.generate', '/')
 def nuova_fattura(request, tipo):
-	anno=datetime.date.today().year
+	anno = datetime.date.today().year
 	ultimo = ultimoProgressivoFattura(anno, tipo=tipo)
 	fattura = Fattura(
 					anno=anno,
 					tipo=tipo,
-					progressivo=ultimo+1,
+					progressivo=ultimo + 1,
 					data=datetime.date.today()
 					)
 	if tipo == "1":
@@ -143,4 +143,24 @@ def nuova_fattura(request, tipo):
 	fattura.save()
 	request.user.message_set.create(message="Creata la fattura %s/%s." % (anno, fattura.progressivo))
 	return HttpResponseRedirect(reverse("tamFattura", kwargs={'id_fattura': fattura.id}))
-	
+
+
+# *********************************** EXPORT IN PDF ******************************
+
+@permission_required('fatturazione.view', '/')
+def exportfattura(request, id_fattura, export_type='html'):
+#	response['Content-Disposition'] = 'attachment; filename="fattura %s.pdf"' % id_fattura
+	try:
+		fattura = Fattura.objects.get(id=id_fattura)
+	except Fattura.DoesNotExist:
+		request.user.message_set.create(message="Fattura non trovata.")
+		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
+	context = {"fattura":fattura, "readonly":True, 'export_type':export_type}
+	template_name = 'fat_model/fattura_1.djhtml'
+#	tamFatturaPdf(fattura, response)	# popola la response con il file
+	if export_type == "pdf":
+		return render_to_pdf(template_name, context)
+	elif export_type == 'html':
+		return render_to_response(template_name, context,
+                              context_instance=RequestContext(request))
+

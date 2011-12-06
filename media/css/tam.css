@@ -409,3 +409,9 @@ h2.fatturaTipo3 {
 .actionButton {
 	cursor:pointer;
 }
+
+@media print {	/* print stylesheet */
+	body {background: white;}
+	.content { border: 0px; margin:0; padding:0; background:white;}
+	.noprint { display:none; }
+}

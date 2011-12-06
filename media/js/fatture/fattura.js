@@ -1,30 +1,43 @@
+function myParse(string) {
+	string = string.replace(",", ".")
+	var result = parseFloat(string);
+	if (result==NaN) {
+		throw("Valore non valido.");
+		result=0;
+	}	
+	return result
+}
 function rowProcess(row){
 	var id = row.find('input:hidden').val();
-	var price=parseFloat(row.find('#riga-prezzo-'+id).text());
-	var iva=parseFloat(row.find('#riga-iva-'+id).text());
-	var qta=parseFloat(row.find('#riga-qta-'+id).html());
+	var price=myParse(row.find('#riga-prezzo-'+id).text());
+	var iva=myParse(row.find('#riga-iva-'+id).text());
+	var qta=myParse(row.find('#riga-qta-'+id).html());
+	//console.log("Valori letti", qta, price, iva);
+	var val_imponibile = Math.round(price*qta*100)/100;
+	var val_iva = Math.round(price*qta*iva)/100;
+	var val_totale = val_imponibile + val_iva;
+	//console.log("Valori:", val_imponibile, val_iva, val_totale);
 	return {
 			id:id,
 			price:price,
 			iva:iva,
 			qta:qta,
-			imponibile:qta*price,
-			tot_iva:Math.round(price*qta*iva)/100,
-			tot_riga:Math.round(price*qta*(100+iva))/100
+			val_imponibile:val_imponibile,
+			val_iva:val_iva,
+			val_totale:val_totale
 		}
 }
 
 function ricalcolaTotali(){
-	console.log("Ritotalo")
 	var imponibile=0;
 	var iva=0;
 	var totale=0;
 	 
 	var righe=$('#righe .priceRow').each(function(){
 		var rowData=rowProcess( $(this) );
-		iva= iva + rowData.tot_iva;
-		imponibile += rowData.imponibile;
-		totale += rowData.tot_riga;
+		iva= iva + rowData.val_iva;
+		imponibile += rowData.val_imponibile;
+		totale += rowData.val_totale;
 	})
 	$('#tot_imponibile').text(imponibile.formatMoney(2, ',', '.' ));
 	$('#tot_iva').text(iva.formatMoney(2, ',', '.' ));
@@ -34,7 +47,7 @@ function ricalcolaTotali(){
 
 function editableSubmit(content) {
 	var pre = $.trim(content.previous), post=$.trim(content.current)
-	if (post!=pre || true) {
+	if (post!=pre) {
 		var $this = $(this);
 		var id = $this.attr('id');
 		$.post("", {action:"set",
@@ -46,10 +59,9 @@ function editableSubmit(content) {
 				//console.log("set successful")
 				var row = $this.closest('#righe .priceRow');
 				if (row.length==1) {
-					rowData=rowProcess(row);
-					console.log("Modifica ad una riga. Ricomputo.");
-					var $totaleRiga=row.find('.totale').text(rowData.tot_riga.formatMoney(2, ',', '.' ));
-					//TODO: Dovrei formattare le celle appena inserite, se sono della classe price
+					var rowData=rowProcess(row);
+					//console.log("Modifica ad una riga. Ricomputo.");
+					var $totaleRiga=row.find('.totale').text(rowData.val_totale.formatMoney(2, ',', '.' ));
 					ricalcolaTotali();
 				}
 			}

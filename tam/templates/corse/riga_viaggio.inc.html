@@ -7,7 +7,7 @@
 		{% if not viaggio.conducente_confermato %}
 			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
 		{% endif %}
-		{% if viaggio.padre %}
+		{% if viaggio.padre_id %}
 				<img src="{% media_url "frecciaverde.png" %}" alt="*" />
 		{% else %}
 			{% if viaggio.is_abbinata %}
@@ -53,7 +53,7 @@
 {# {% endcache %} #}
 
 	<td>
-	{% if viaggio.padre and not distinct %}
+	{% if viaggio.padre_id and not distinct %}
 		<img src="{% media_url "arrow_join.png" %}" alt='' />
 	{% else %}
 		{% with viaggio.confirmed as confirmed %}

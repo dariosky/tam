@@ -1,59 +1,28 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}{{nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}} &raquo; {{ block.super }} {% endblock %}
+{% block title %}{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}} &raquo; {{ block.super }} {% endblock %}
 
 {% block css %}
 {{ block.super }}
 	{% include_media 'fatturaHtml.css' %}
+	{% if perms.fatturazione.generate %}
+	<style type="text/css">
+		.editable, .editable * {
+			background-color: #eee;
+		}	
+	</style>
+	{% endif %}
 {% endblock css %}
 
 {% block content %}
 <a href="{% url tamVisualizzazioneFatture %}">Torna all'elenco fatture</a>
-<h1>{{nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}</h1>
+<h1>{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}</h1>
 
-	
-<div id='fatturaHtml' style='position:relative;'>
-	<div id='header'>
-		{% if not tam_stealth %}<img id='fat_logo' src='/media/fatture/logo.png'>{%endif%}
-		<div id='fat_mittente' class='{% if not fattura.tipo = "1" %}editable{%else%}pre{%endif%}'>{{ emessa_da_html|safe }}</div>
-		<div id='fat_destinatario' class='editable'>{{fattura.emessa_a}}</div>
-		<div id='fat_data'>
-			Fattura <span class='editable' id='fat_anno'>{{fattura.anno}}</span>/<span class='editable' id='fat_progressivo'>{{fattura.progressivo}}</span>
-			del <span>{{fattura.data}}</span>
-		</div>
-		<div id='fat_note' class='editable'>{{fattura.note}}
-		</div>
-	</div>
-	
-	
-	<table id='righe'>
-		<thead>
-			<tr><th></th><th>Descrizione</th><th>Q.tà</th><th>Prezzo</th><th>IVA</th><th>IMPORTO</th></tr>
-		</thead>
-		<tbody>
-			{% for riga in fattura.righe.all %}
-				{% include "6.fattura-riga.inc.djhtml" %}
-			{% endfor %}
-			{% if perms.fatturazione.generate %}
-			<tr><td>
-				<img src='/media/addbtn.png' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
-			</td></tr>
-			{% endif %}
-			<tr style='text-align:right;'><td colspan=5>Totale imponibile</td><td id='tot_imponibile'>{{fattura.imponibile|floatformat:"2"}}</td></tr>
-			<tr style='text-align:right;'><td colspan=5>IVA</td><td id='tot_iva'>{{fattura.iva|floatformat:"2"}}</td></tr>
-			<tr style='text-align:right; font-weight:bold;'><td colspan=5>Imponibile</td><td id='tot_totale'>{{fattura.lordo_totale|floatformat:"2"}}</td></tr>
-		</tbody>
-	</table>
-	
-	<div id='fat_footer' class='pre'>
-		Si prega di effettuare il pagamento sul conto Corrente:
-		UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824
-		<div id='privacy'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</div>
-	</div>
-</div>
-<a href='pdf/'>
-	<div>
-		<img src='/media/fatture/pdficon.png' title='Genera PDF' alt='Genera PDF'/>
+{% include "fat_model/_fattura.djhtml" %}	
+
+<a href='html/' target='_blank' class='noprint'>
+	<div style="text-align: center">
+		<img src='/media/fatture/print_icon.png' title='Versione stampabile' alt='Versione stampabile' />
 	</div>	
 </a>
 {% endblock %}

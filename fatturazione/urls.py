@@ -35,5 +35,6 @@ urlpatterns = patterns ('fatturazione.views',
 	url(r'^archivio/$', 'view_fatture', name="tamVisualizzazioneFatture"),
 	
 	url(r'archivio/(?P<id_fattura>\d*)/$', 'fattura', name='tamFattura'),
+	url(r'archivio/(?P<id_fattura>\d*)/(?P<export_type>pdf|html)/$', 'exportfattura', name='tamExportFattura'),
 	
 )
