@@ -23,7 +23,7 @@
 <body>
 {% block titleContent %}{% endblock %}
 {% block superNavBar %}
-<div class="navBar">
+<div class="navBar noprint">
 	{% block navBar %}
 		{% block corse %}<a href="/" class='menuGroup'>TaM</a>
 		{% if perms.tam.add_viaggio %}
@@ -37,7 +37,7 @@
 		{% block conducenti %}<a href="{% url tamConducenti %}" class='menuGroup'>Classifiche</a>{% endblock %}
 		{% block util %}<a href="{% url tamUtil %}" class='menuGroup'>Strumenti</a>{% endblock %}
 
-		{% if not tam_stealth %}<img src="{% media_url "minilogo.gif" %}" class="loghetto" alt="" />{% endif %}
+		{% if not tam_stealth %}<img src="{% media_url "tam_16.png" %}" class="loghetto" alt="" />{% endif %}
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}
 </div>
@@ -53,7 +53,7 @@
 	{% block content %}{% endblock %}
 </div>
 
-<div id="footer">
+<div id="footer" class='noprint'>
 	{% block authblock %}
     {% if request.user.is_authenticated %}
 		Sei connesso come <a href="{% url change_password %}">{{ request.user }}</a> - <a id='logout' href="{% url logout %}">disconnettiti</a>

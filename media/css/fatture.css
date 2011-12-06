@@ -5,7 +5,6 @@
 	padding: 0;
 }
 .editable, .editable * {
-	background-color: #eee;
 	margin:0; padding:0;
 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 	font-size: 10pt;
@@ -23,6 +22,7 @@ td.editable input { width:100%; }
 	margin-right: 350px;
 }
 #fat_logo {
+	float:left;
 	margin:30px 0;
 	width: 500px;
 	max-width: 40%;
@@ -53,7 +53,8 @@ td.editable input { width:100%; }
 }
 #righe td {
 	padding: 5px;
-	
+	margin:0;
+	border: 1px solid;
 }
 #totale {
 	float: right;

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load media %}
+	
+{% block title %}{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}{% endblock %}
+
+{% block css %}
+	<link rel="stylesheet" type="text/css" href="/media/css/fatture.css" />
+	<style type="text/css">
+		body {background: white;}
+		.content { border: 0px; margin:0; padding:0; background:white;}
+		.navBar{display:none;}
+		#footer {display:none}
+		
+		@media print {
+			.noprint { display:none; }
+		}
+		
+{% if export_type == "pdf" %}
+
+@page {
+	size: a4 portrait;
+	margin: 6cm;
+	margin-bottom: 2.5cm;
+	font-size: 10pt;
+	-pdf-frame-border: 1;
+
+	@frame header {
+		margin:0;
+		top:1cm; left:1.5cm; right:1.5cm;
+		-pdf-frame-content: fat_header;
+		-pdf-frame-border: 1;
+	}
+	
+	@frame footer {
+		bottom: 0;
+		height: 1.5cm;
+		
+		-pdf-frame-content: fat_footer;
+		-pdf-frame-border: 1;
+	}
+}
+   
+{% endif %}
+
+		
+		
+	</style>
+{% endblock css %}
+
+{% block content %}
+
+{% include "fat_model/_fattura.djhtml" %}
+
+<div style="text-align: center" class='noprint'>
+	<a href='javascript:window.print()' target='_blank'>
+		<img src='/media/fatture/print_icon.png' title='Stampa' alt='Stampa' />
+	</a>
+</div>	
+
+{%endblock content %}
