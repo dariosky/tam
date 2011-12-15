@@ -134,7 +134,7 @@ MIDDLEWARE_CLASSES = (
 	# 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 )
 
-ROOT_URLCONF = 'Tam.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates"
@@ -263,7 +263,6 @@ MEDIA_BUNDLES = (
 	),
 	('tamUI.css',
 		'jquery.ui/css/ui-lightness/jquery-ui-1.8.16.custom.css',
-		'js/jquery-autocomplete/jquery.autocomplete.css',
 		'css/tam.css',
 	),
 	# JS **************
@@ -274,14 +273,12 @@ MEDIA_BUNDLES = (
 	('tamUI.js',
 		'js/jquery.min.js', 'js/jquery.hotkeys.js',
 		'jquery.ui/js/jquery-ui-1.8.16.custom.min.js', 'js/calendarPreferences.js',
-		'js/jquery-autocomplete/jquery.autocomplete.min.js',
 		'js/tam-common.js',
 	),
 	('tamCorse.js',
 		'js/jquery.min.js', 'js/jquery.hotkeys.js',
 		'jquery.ui/js/jquery-ui-1.8.16.custom.min.js', 'js/calendarPreferences.js',
-		'js/jquery-autocomplete/jquery.autocomplete.min.js',		
-		'js/tam-common.js', 'js/jquery.scrollTo-min.js', 'js/listaCorse.js', 'js/nuovaCorsaPag1.js'
+		'js/tam-common.js', 'js/jquery.scrollTo-min.js', 'js/listaCorse.js',
 	),
 )
 YUICOMPRESSOR_PATH = os.path.join(PROJECT_PATH, 'yuicompressor.jar')

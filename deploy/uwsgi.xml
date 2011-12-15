@@ -1,0 +1,24 @@
+﻿<uwsgi>
+    <master/>
+    <socket>/home/dariosky/webapps/uwsgi/var/uwsgi.sock</socket>
+    <uid>dariosky</uid>
+    <gid>dariosky</gid>
+
+    <processes>1</processes>
+    <master/>
+    <no-orphans/>
+    <enable-threads/>
+    <threads>10</threads>
+
+    <daemonize>/home/dariosky/logs/user/uwsgi.log</daemonize>
+    <pidfile>/home/dariosky/webapps/uwsgi/var/uwsgi.pid</pidfile>
+	<virtualenv>/home/dariosky/environments/tamenv</virtualenv>
+
+    <max-requests>1500</max-requests>
+    <idle>60</idle>
+    <reload-on-rss>100</reload-on-rss>
+    <harakiri>60</harakiri>
+    <disable-logging/>
+
+    <wsgi-file>/home/dariosky/projects/tam-project/deploy/tam.wsgi</wsgi-file>
+</uwsgi>

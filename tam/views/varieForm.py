@@ -2,7 +2,7 @@
 
 from django import forms
 from django.utils.translation import ugettext as _
-from tam.models import *
+from tam.models import * #@UnusedWildImport
 #from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 #from django.core.urlresolvers import reverse
@@ -26,6 +26,12 @@ class AutoCompleteForm(forms.ModelChoiceField):
 
 
 class AutoCompleteWidget(forms.widgets.Widget):
+	class Media:
+		js =('/media/js/jquery-autocomplete/jquery.autocomplete.min.js',)
+		css = {
+            'all': ('/media/js/jquery-autocomplete/jquery.autocomplete.css',)
+        }
+		
 	lookup_url = None
 
 	def __init__(self, lookup_url, Model, fieldname, **kwargs):
@@ -60,8 +66,8 @@ class AutoCompleteWidget(forms.widgets.Widget):
 		
 class ViaggioForm(forms.ModelForm):
 	class Media:
-		js = ('js/nuovaCorsaPag1.js',)
-		
+		js = ('/media/js/nuovaCorsaPag1.js',)
+
 	data=MySplitDateTimeField(label="Data e ora", date_input_formats=[_('%d/%m/%Y')], time_input_formats=[_('%H:%M')],
 						 widget=MySplitDateWidget())
 	data.widget.widgets[0].format='%d/%m/%Y'
@@ -104,8 +110,6 @@ class ViaggioForm(forms.ModelForm):
 
 
 class ViaggioForm2(forms.ModelForm):
-	class Media:
-		pass
 	class Meta:
 		model=Viaggio
 		exclude=ViaggioForm.Meta.fields + ["padre", "pagato", "costo_sosta", "luogoDiRiferimento"]
