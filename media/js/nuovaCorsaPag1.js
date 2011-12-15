@@ -19,7 +19,4 @@ $( function() {
 			}
 	} );
 	$("#id_privato").change();    // fa scattare il controllo del cliente per nascondere gli altri controlli all'avvio
-
-	$("#id_numero_passeggeri").width("3em");
-
 });

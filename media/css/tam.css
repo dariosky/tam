@@ -161,6 +161,10 @@ form {
     text-align: center;
 }
 
+#id_numero_passeggeri{ /* l'input per i passeggeri è più corto */
+	width: 3em;
+}
+
 .messagebox{
 	margin:0 auto;
 	padding:0;

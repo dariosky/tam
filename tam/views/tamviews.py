@@ -311,7 +311,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 
-	mediabundleJS = ('tamUI.js',)
+	mediabundleJS = ('tamCorse.js',)
 	mediabundleCSS = ('tamUI.css',)
 	if id and not user.has_perm('tam.change_viaggio'):
 		user.message_set.create(message=u"Non hai il permesso di modificare le corse.")

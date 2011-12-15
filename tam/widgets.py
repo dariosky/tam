@@ -10,11 +10,11 @@ class MySplitDateTimeField(forms.fields.SplitDateTimeField):
 
 class MySplitDateWidget(forms.widgets.SplitDateTimeWidget):
 	""" Ridefinisco il widget per mostrare data e ora con il formato che mi interessa """
-	class Media:
-		css = {
-			'all': ('js/jquery.ui/themes/ui-lightness/ui.all.css', )
-		}
-		js= ('js/jquery.ui/jquery-ui.custom-min.js', 'js/calendarPreferences.js')
+#	class Media:
+#		css = {
+#			'all': ('/media/js/jquery.ui/themes/ui-lightness/ui.all.css', )
+#		}
+#		js= ('/media/js/jquery.ui/jquery-ui.custom-min.js', '/media/js/calendarPreferences.js')
 
 	def decompress(self, value):
 		if value:
