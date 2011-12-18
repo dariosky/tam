@@ -1,4 +1,4 @@
-from tam.models import *
+from tam.models import * #@UnusedWildImport
 from django.contrib import admin
 
 admin.site.register(Luogo)
@@ -6,7 +6,6 @@ admin.site.register(Bacino)
 admin.site.register(Tratta)
 admin.site.register(Viaggio)
 admin.site.register(Conducente)
-admin.site.register(Ferie)
 admin.site.register(Cliente)
 admin.site.register(Listino)
 admin.site.register(PrezzoListino)
