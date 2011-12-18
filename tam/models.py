@@ -157,8 +157,8 @@ class Viaggio(models.Model):
 	numero_pratica = models.CharField(max_length=20, null=True, blank=True)
 
 	padre = models.ForeignKey("Viaggio", null=True, blank=True) # l'eventuale viaggio padre nei raggruppamenti
-	data_padre = models.DateTimeField("Data e ora padre", db_index=True, null=True)
-	id_padre = models.PositiveIntegerField("ID Gruppo", db_index=True, null=True)
+	data_padre = models.DateTimeField("Data e ora padre", db_index=True, null=True, editable=False)
+	id_padre = models.PositiveIntegerField("ID Gruppo", db_index=True, null=True, editable=False)
 	
 	conducente_richiesto = models.BooleanField("Escluso dai supplementari", default=False)	# True quando il conducente è fissato
 	conducente = models.ForeignKey("Conducente", null=True, blank=True, db_index=True)	# conducente (proposto o fissato)
@@ -961,15 +961,6 @@ class Conducente(models.Model):
 		return reverse("tamConducenteIdDel", kwargs={"id":self.id})
 	def url(self):
 		return reverse("tamConducenteId", kwargs={"id":self.id})
-
-
-class Ferie(models.Model):
-	""" Modello che indica i periodi di ferie programmate dei conducenti """
-	conducente = models.ForeignKey(Conducente)
-	data_inizio = models.DateTimeField()
-	data_fine = models.DateTimeField()
-	class Meta:
-		verbose_name_plural = _("Ferie")
 
 class Cliente(models.Model):
 	""" Ogni cliente ha le sue caratteristiche, ed eventualmente un suo listino """
