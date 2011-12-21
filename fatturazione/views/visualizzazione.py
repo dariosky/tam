@@ -2,7 +2,7 @@
 
 from django.template.context import RequestContext
 from django.shortcuts import render_to_response
-from fatturazione.models import Fattura, RigaFattura, nomi_fatture
+from fatturazione.models import Fattura, RigaFattura
 import datetime
 from tam.views.tamviews import parseDateString
 from django.contrib.auth.decorators import permission_required
@@ -11,7 +11,7 @@ from django.db.models.aggregates import Max
 from fatturazione.views.util import ultimoProgressivoFattura
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from fatturazione.views.pdf import render_to_pdf
+from fatturazione.views.pdf import render_to_reportlab, render_with_pisa
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -156,11 +156,13 @@ def exportfattura(request, id_fattura, export_type='html'):
 		request.user.message_set.create(message="Fattura non trovata.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 	context = {"fattura":fattura, "readonly":True, 'export_type':export_type}
-	template_name = 'fat_model/fattura_1.djhtml'
+	template_name = 'fat_model/export_fattura_1.djhtml'
 #	tamFatturaPdf(fattura, response)	# popola la response con il file
-	if export_type == "pdf":
-		return render_to_pdf(template_name, context)
-	elif export_type == 'html':
+	if export_type == "pisa":
+		return render_with_pisa(template_name, context)
+	elif export_type == 'pdf':
+		return render_to_reportlab(context)
+	else:	# html output by default
 		return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 

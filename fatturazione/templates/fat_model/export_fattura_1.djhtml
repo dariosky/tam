@@ -4,22 +4,20 @@
 {% block title %}{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}{% endblock %}
 
 {% block css %}
+	{{ block.super }}
 	<link rel="stylesheet" type="text/css" href="/media/css/fatture.css" />
-	<style type="text/css">
-		body {background: white;}
-		.content { border: 0px; margin:0; padding:0; background:white;}
-		.navBar{display:none;}
-		#footer {display:none}
-		
-		@media print {
-			.noprint { display:none; }
-		}
-		
-{% if export_type == "pdf" %}
 
+<style type="text/css">
+	/*.navBar, #footer {display:none}*/
+	/*#fatturaHtml {font-size:8pt;}*/
+</style>
+
+{% if export_type == "pisa" %}
+<style type="text/css">
 @page {
 	size: a4 portrait;
-	margin: 6cm;
+	margin: 1cm;
+	margin-top: 5cm;
 	margin-bottom: 2.5cm;
 	font-size: 10pt;
 	-pdf-frame-border: 1;
@@ -39,12 +37,9 @@
 		-pdf-frame-border: 1;
 	}
 }
-   
+</style>
 {% endif %}
-
-		
-		
-	</style>
+	
 {% endblock css %}
 
 {% block content %}
