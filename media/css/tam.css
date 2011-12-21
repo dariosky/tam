@@ -1,5 +1,3 @@
-/* This file skins tableSorter */
-
 .morning{
 	float: left;
 	padding:0 3px;
@@ -12,14 +10,13 @@
 	font-family:arial;
 	background-color: #CDCDCD;
 	margin:10px 0pt 15px;
-	font-size: 8pt;
 	width: 100%;
+	font-size:8pt;
 	text-align: left;
 }
 .tablesorter th {
 	background-color: #fed587;
 	border: 1px solid #FFF;
-	font-size: 8pt;
 	padding: 4px;
 }
 .tablesorter td {
@@ -97,7 +94,6 @@ a:hover{ color:blue; }
 h1 .maintitle{
 	text-align:center;
 	color: #FF7800;
-	font-size: 2.2em;
     font-family: verdana;
     margin-bottom:0;
     padding:0;
@@ -197,7 +193,7 @@ td img {vertical-align: middle;}
 }
 
 .bighour {
-	font-size:2em;
+	font-size:200%;
 }
 .middlehour {
 	font-size:1.5em;
@@ -228,7 +224,7 @@ td img {vertical-align: middle;}
 
 .arrivo {
 	background:tomato !important;
-	border:1px solid red;
+	border:1px solid #b70000;
 	text-align:center;
 	font-size:larger;
 }
@@ -415,7 +411,10 @@ h2.fatturaTipo3 {
 }
 
 @media print {	/* print stylesheet */
-	body {background: white;}
+	* {font-size:8pt;}
+	body {
+		background: white;
+	}
 	.content { border: 0px; margin:0; padding:0; background:white;}
 	.noprint { display:none; }
 }

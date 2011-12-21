@@ -6,8 +6,6 @@
 }
 .editable, .editable * {
 	margin:0; padding:0;
-	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
-	font-size: 10pt;
 }
 div.editable, .pre {
 	white-space: pre-line;
@@ -39,22 +37,18 @@ td.editable input { width:100%; }
 	width: 300px;
 	padding: 20px;
 	margin:10px 0;
-	border: 1px solid black;
+	border: 1px solid silver;
 	border-radius: 20px;
 }
 #righe {
 	clear: both;
 	margin-top: 50px;
-	border: 2px solid black;
 	width: 100%;
-}
-#righe tr {
-	border: 1px solid silver;
+	border-collapse: collapse;
 }
 #righe td {
 	padding: 5px;
-	margin:0;
-	border: 1px solid;
+	border: 1px solid silver;
 }
 #totale {
 	float: right;
@@ -64,8 +58,11 @@ td.editable input { width:100%; }
 
 #fat_footer {
 }
+
 #fat_footer #privacy {
 	padding-top: 15px;
 	margin: 0 auto;
-	font-size: 8pt;
+	font-size: smaller;
+}
+
 }

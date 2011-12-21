@@ -15,10 +15,10 @@
 {% endblock css %}
 
 {% block content %}
-<a href="{% url tamVisualizzazioneFatture %}">Torna all'elenco fatture</a>
-<h1>{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}</h1>
+<a href="{% url tamVisualizzazioneFatture %}" class='noprint'>Torna all'elenco fatture</a>
+<h1 class='noprint'>{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}</h1>
 
-{% include "fat_model/_fattura.djhtml" %}	
+{% include "fat_model/_fattura.djhtml" %}
 
 <a href='html/' target='_blank' class='noprint'>
 	<div style="text-align: center">

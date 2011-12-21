@@ -249,7 +249,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 				riga_fattura.riga = riga	# progressivo riga
 				if tipo in ("1", "3"):
 					riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
-								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y %H:%M"),
+								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y"),
 									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
 					riga_fattura.qta = 1
 					riga_fattura.prezzo = viaggio.prezzo

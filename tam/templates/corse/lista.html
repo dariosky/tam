@@ -11,7 +11,7 @@
 {% block content %}
 	<br style="margin-top:1em">
 	{% if thisPage.has_other_pages %}
-	<div class="countblock">
+	<div class="countblock noprint">
 			{% include "paginator.inc.html" %}
 	</div>
 	<br style="clear:both" />
@@ -49,7 +49,7 @@
 			</tbody>
 		</table>
 		</form>
-        <div class="countblock">
+        <div class="countblock noprint">
 			{% if thisPage.has_other_pages %}
 				{% include "paginator.inc.html" %}
 			{% endif %}
