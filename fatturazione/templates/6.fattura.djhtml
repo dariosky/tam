@@ -20,7 +20,7 @@
 
 {% include "fat_model/_fattura.djhtml" %}
 
-<a href='html/' target='_blank' class='noprint'>
+<a href='pdf/' target='_blank' class='noprint'>
 	<div style="text-align: center">
 		<img src='/media/fatture/print_icon.png' title='Versione stampabile' alt='Versione stampabile' />
 	</div>	

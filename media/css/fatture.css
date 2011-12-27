@@ -25,6 +25,10 @@ td.editable input { width:100%; }
 	width: 500px;
 	max-width: 40%;
 }
+.fat_title{
+	font-size:12pt;
+	font-weight: bold;
+}
 #fat_mittente {
 	float: right;
 	padding: 20px;

@@ -2,9 +2,9 @@
 	<td style='{% if not readonly %}width:40px; {%endif%}border:0;'>
 		{% if not readonly %}
 		{% if perms.fatturazione.generate and not readonly %}
-			<img src="/media/delbtn.png" class='delrow actionButton' title='cancella riga' />
+			<img src="/media/delbtn.png" class='delrow actionButton noprint' title='cancella riga' />
 		{% endif %}	
-		{% if riga.viaggio %}<a href="{% url tamNuovaCorsa2Id riga.viaggio.id %}" target="_blank" title='Corsa collegata'><img src="/media/tam_16.png" /></a>{%endif%}
+		{% if riga.viaggio %}<a href="{% url tamNuovaCorsa2Id riga.viaggio.id %}" target="_blank" title='Corsa collegata'><img src="/media/tam_16.png" class='noprint'/></a>{%endif%}
 		<input name='row' type="hidden" value='{{riga.id}}'/>
 		{%endif%}
 	</td>

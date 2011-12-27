@@ -32,3 +32,8 @@ mentre la pagina senza corse diventa solo 88 elementi! Eureka :) 2,1kb
 	Per il futuro: Attenzione agli indici, che South li elimina durante i schemamigration
 					ho creato uno script che li cancella tutti, per poi ricrearli in automatico
 	Attenzione anche ai Select_related specificandoli si ottengono molte meno query
+	
+22/12/2011:
+	#TODO: Cambio la modifica dei campi delle fatture da "input text" a delle textarea.
+	Consentirei così di inserire gli a capo, e abbandonerei editable.
+	Va però controllato se si riesce a gestirne l'altezza in modo automatico. 

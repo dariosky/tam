@@ -20,8 +20,8 @@ class Fattura(models.Model):
 	tipo = models.CharField(max_length=1, db_index=True) # tipo fattura: 1.Consorzio (a cliente), 2.Conducente (a consorzio), 3.Ricevuta (a cliente)
 
 	data = models.DateField(db_index=True)
-	anno = models.IntegerField()
-	progressivo = models.IntegerField()
+	anno = models.IntegerField(db_index=True)
+	progressivo = models.IntegerField(db_index=True)
 
 	archiviata = models.BooleanField(default=False) # se true la fattura non è più modificabile
 
