@@ -98,6 +98,23 @@ $('.delrow').live("click",
 	}
 );
 
+$('.delfat').live("click",
+	function(){
+		if (!confirm('Sicuro di voler cancellare l\'intera fattura?')) return false;
+		$.post("",
+				{action:'delete-fat'}
+		)
+		.complete(function(xhr, data){
+			if (xhr.status==200) {
+				document.location=xhr.responseText;
+			}
+			else {
+				messageBox(xhr.responseText);
+			}
+		})
+	}
+);
+
 // creazione di una nuova riga
 $('#newRow').click(
 	function(){

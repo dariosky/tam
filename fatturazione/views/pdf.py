@@ -90,16 +90,16 @@ def moneyfmt(value, places=2, curr='', sep='.', dp=',',
 def render_to_reportlab(context):
 	fattura = context.get('fattura')
 	test = False
-	
+
 	class NumberedCanvas(canvas.Canvas):
 		def __init__(self, *args, **kwargs):
 			canvas.Canvas.__init__(self, *args, **kwargs)
 			self._saved_page_states = []
-	
+
 		def showPage(self):
 			self._saved_page_states.append(dict(self.__dict__))
 			self._startPage()
-	
+
 		def save(self):
 			"""add page info to each page (page x of y)"""
 			num_pages = len(self._saved_page_states)
@@ -108,10 +108,10 @@ def render_to_reportlab(context):
 				self.draw_page_number(num_pages)
 				canvas.Canvas.showPage(self)
 			canvas.Canvas.save(self)
-	
+
 		def draw_page_number(self, page_count):
 			self.setFont("Helvetica", 7)
-			self.drawRightString(width/2, 1*cm,
+			self.drawRightString(width / 2, 1 * cm,
 				"Pagina %d di %d" % (self._pageNumber, page_count))
 
 	def firstPageTemplate(canvas, doc):
@@ -127,12 +127,16 @@ def render_to_reportlab(context):
 		canvas.setCreator('TaM v.%s' % settings.TAM_VERSION)
 		canvas._doc.info.producer = ('TaM invoices')
 		canvas.setSubject(u"%s" % fattura.nome_fattura())
-		descrittoreFattura = u"%s %s/%s" % (fattura.nome_fattura(), fattura.anno, fattura.progressivo)
+		descrittoreFattura = u"%s %s" % (fattura.nome_fattura(), fattura.descrittore())
 		canvas.setTitle(descrittoreFattura)
 
 		# Header ***************
-		y = height - 4 * cm
-		logo_x, logo_y = canvas.drawImage(logoImage_path, x=1 * cm, y=y, width=7 * cm, height=2.5 * cm)
+
+		if fattura.tipo == "1":
+			y = height - 4 * cm
+			canvas.drawImage(logoImage_path, x=1 * cm, y=y, width=7 * cm, height=2.5 * cm)
+		else:
+			y = height - 1.5 * cm
 		descrittore = Paragraph('<font size="12"><b>%s</b></font> del %s' % (descrittoreFattura, localize(fattura.data)),
 								 a_style)
 		descrittore.wrapOn(canvas, width / 2, 2 * cm)
@@ -201,8 +205,10 @@ def render_to_reportlab(context):
 				]
 
 	for riga in fattura.righe.all():
+		descrizione = riga.descrizione
+		if riga.note: descrizione += " (%s)" % riga.note
 		righeFattura.append((
-							Paragraph(riga.descrizione, normalStyle),
+							Paragraph(descrizione, normalStyle),
 							Paragraph("%s" % riga.qta, normalStyle),
 							moneyfmt(riga.prezzo), riga.iva, moneyfmt(riga.val_totale())
 							))
@@ -242,10 +248,15 @@ def render_to_reportlab(context):
 	story = [ Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths) ]
 	story.append(KeepTogether(Table(righeTotali, style=totaliStyle, colWidths=(width - 2 * cm - 1.6 * cm, 1.6 * cm))))
 	story.append(Spacer(0, 2 * cm))
-	note_finali = Paragraph("Si prega di effettuare il pagamento sul conto Corrente:<br/>" +
-								"UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824<br/>" +
-								"<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>"
-								, normalStyle)
+	note_finali_lines = []
+	if fattura.tipo == "1":
+		note_finali_lines.append("Si prega di effettuare il pagamento sul conto Corrente:")
+		note_finali_lines.append("UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824")
+	if fattura.tipo in ("1", "3"):
+		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
+	if fattura.tipo in ("3"):
+		note_finali_lines.append("<font size='6'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.</font>")
+	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
 	note_finali.wrap(width - 4 * cm, 2 * cm)
 	story.append(note_finali)
 

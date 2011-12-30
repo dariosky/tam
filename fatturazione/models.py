@@ -3,6 +3,7 @@ from django.db import models
 from tam.models import Viaggio, Conducente, Cliente, Passeggero
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils.safestring import mark_safe
+from django.core.urlresolvers import reverse
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta"}
 nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute"}
@@ -40,6 +41,9 @@ class Fattura(models.Model):
 															self.righe.count()
 														  )
 
+	def mittente(self):
+		return self.emessa_da.replace('\r', '').split('\n')[0]
+
 	def destinatario(self):
 		return self.emessa_a.replace('\r', '').split('\n')[0]
 
@@ -53,13 +57,32 @@ class Fattura(models.Model):
 		return sum([riga.val_totale() for riga in self.righe.all()])
 
 	def nome_fattura(self):
+		""" Nome fattura (singolare) """
 		return nomi_fatture[self.tipo]
+
+	def url(self):
+		if self.tipo == "1":
+			return reverse("tamFatturaConsorzio",
+							kwargs={'anno': self.anno,
+									'progressivo':self.progressivo})
+		elif self.tipo=="2":
+			return reverse("tamFatturaConducente",
+							kwargs={'id_fattura': self.id})
+		elif self.tipo=="3":
+			return reverse("tamFatturaRicevuta",
+							kwargs={'id_fattura': self.id})	
 
 	def emessa_da_html(self):
 		result = self.emessa_da\
 					.replace("www.artetaxi.com", "<a target='_blank' href='http://www.artetaxi.com'>www.artetaxi.com</a>")\
 					.replace("info@artetaxi.com", "<a target='_blank' href='mailto:info@artetaxi.com'>info@artetaxi.com</a>")
 		return mark_safe(result)
+
+	def descrittore(self):
+		if self.anno and self.progressivo:
+			return "%s/%s" % (self.anno, self.progressivo)
+		return "%s%s" % (self.anno or "", self.progressivo or "")
+
 
 
 class RigaFattura(models.Model):
@@ -90,4 +113,4 @@ class RigaFattura(models.Model):
 		verbose_name_plural = "Righe Fattura"
 		ordering = ("fattura", "riga")
 	def __unicode__(self):
-		return u"riga %d. %.2f." % (self.riga, self.prezzo or 0)
+		return u"Fattura %d. Riga %d. %.2f." % (self.fattura.id, self.riga, self.prezzo or 0)
