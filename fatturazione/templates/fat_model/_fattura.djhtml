@@ -1,6 +1,8 @@
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='fat_header'>
-		{% if not tam_sstealth %}<img id='fat_logo' src='/media/fatture/logo.jpg'>{%endif%}
+		{% if fattura.tipo == "1" %}
+			{% if not tam_sstealth %}<img id='fat_logo' src='/media/fatture/logo.jpg'>{%endif%}
+		{% endif %}
 		<div id='fat_mittente' class='{% if not fattura.tipo = "1" %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
 		<div id='fat_destinatario' class='editable'>{{fattura.emessa_a}}</div>
 		<div id='fat_data' style='clear: both'>
@@ -34,8 +36,8 @@
 	</table>
 	
 	<div id='fat_footer' class='pre'>
-		Si prega di effettuare il pagamento sul conto Corrente:
-		UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824
-		<div id='privacy'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</div>{% if export_type == "pdf" %}<div><pdf:pagenumber /></div>{%endif%}
+		{% if fattura.tipo == "1" %}Si prega di effettuare il pagamento sul conto Corrente:
+		UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824{% endif %}
+		{%if fattura.tipo == "1" or fattura.tipo == "3" %}<div id='privacy'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</div>{%endif%}
 	</div>
 </div>

@@ -12,6 +12,8 @@ from fatturazione.views.util import ultimoProgressivoFattura
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from fatturazione.views.pdf import render_to_reportlab, render_with_pisa
+from tam.models import logAction
+from django.db import transaction
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -26,7 +28,10 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 
 	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
 #	lista_consorzio = lista_consorzio.annotate(valore=Sum(F('righe__prezzo')*(1+F('righe__iva')/100)))
-	#TODO: (Django 1.4) dovrei annotare prezzo*1+iva/100, non si può fare attualmente 
+	#TODO: (Django 1.4) dovrei annotare prezzo*1+iva/100, non si può fare attualmente
+	lista_conducente = Fattura.objects.filter(tipo='2', data__gte=data_start, data__lte=data_end)
+	lista_ricevute = Fattura.objects.filter(tipo='3', data__gte=data_start, data__lte=data_end)
+
 	return render_to_response(template_name,
                               {
 								"data_start":data_start,
@@ -36,18 +41,21 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 								"mediabundleCSS": ('tamUI.css',),
 
 								"lista_consorzio":lista_consorzio,
-#								"lista_conducente":lista_conducente,
-#								"lista_ricevute":lista_ricevute,
+								"lista_conducente":lista_conducente,
+								"lista_ricevute":lista_ricevute,
 
                               },
                               context_instance=RequestContext(request))
 
 
 @permission_required('fatturazione.view', '/')
-def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
+def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, template_name="6.fattura.djhtml"):
 	""" Vedo la fattura ed (eventualmente) ne consento la modifica """
 	try:
-		fattura = Fattura.objects.get(id=id_fattura)
+		if id_fattura:
+			fattura = Fattura.objects.get(id=id_fattura)
+		else:
+			fattura = Fattura.objects.get(tipo=tipo, anno=anno, progressivo=progressivo)
 	except Fattura.DoesNotExist:
 		request.user.message_set.create(message="Fattura non trovata.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
@@ -57,11 +65,24 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 		if not request.user.has_perm('fatturazione.generate'):
 			return HttpResponse('Non hai permessi sufficienti per modificare le fatture.', status=400)
 		action = request.POST.get('action')
+		if action == 'delete-fat':
+			# cancello l'intera fattura.
+			# se ho successo, restituisco l'url a cui andare
+			message = "%s eliminata." % fattura.nome_fattura()
+			try:
+				logAction('C', instance=fattura, description=message, user=request.user)
+				fattura.delete()
+			except:
+				return HttpResponse('Non sono riuscito a cancellare la fattura.', status=400)
+			request.user.message_set.create(message=message)
+			return HttpResponse(reverse('tamVisualizzazioneFatture'), status=200)
+
 		if action == 'delete-row':
 			try:
 				rowid = int(request.POST.get('row'))
 				#if rowid in fattura.righe.values_list('id', flat=True):
 				riga = fattura.righe.get(id=rowid)
+				logAction('C', instance=fattura, description="Riga eliminata.", user=request.user)
 				riga.delete()
 				return HttpResponse('Riga eliminata.', status=200)
 			except Exception, e:
@@ -73,6 +94,7 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 							prezzo=0,
 							iva=10 if fattura.tipo in ('1', '2') else 0,
 							riga=ultimaRiga + 10)
+			logAction('C', instance=fattura, description="Riga inserita manualmente.", user=request.user)
 			riga.save()
 			fattura.righe.add(riga)
 			return render_to_response('6.fattura-riga.inc.djhtml',
@@ -86,12 +108,13 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
 			header_ids = {'fat_mittente':'emessa_da', 'fat_note':'note', 'fat_destinatario':'emessa_a',
 							'fat_anno':'anno', 'fat_progressivo':'progressivo',
 						}
+			logAction('C', instance=fattura, description="Valore modificato.", user=request.user)
 			if object_id in header_ids.keys():
 #				print("cambio il valore di testata da %s a %s" % ( getattr(fattura, header_ids[object_id]),
 #																	object_value)
 #							)
 				if object_id == "fat_progressivo":
-					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value))
+					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value), tipo=fattura.tipo)
 					if esistenti.count() > 0:
 						return HttpResponse("Esiste già una fattura con questo progressivo.", status=500)
 				#print header_ids[object_id], "=",  object_value
@@ -128,21 +151,32 @@ def fattura(request, id_fattura, template_name="6.fattura.djhtml"):
                               },
                               context_instance=RequestContext(request))
 
+
 @permission_required('fatturazione.generate', '/')
+@transaction.commit_on_success
 def nuova_fattura(request, tipo):
-	anno = datetime.date.today().year
-	ultimo = ultimoProgressivoFattura(anno, tipo=tipo)
+	if tipo == "1":
+		anno = datetime.date.today().year
+		ultimo = ultimoProgressivoFattura(anno, tipo=tipo)
+		progressivo = ultimo + 1,
+	else:
+		anno = None
+		progressivo = None
 	fattura = Fattura(
 					anno=anno,
 					tipo=tipo,
-					progressivo=ultimo + 1,
+					progressivo=progressivo,
 					data=datetime.date.today()
 					)
 	if tipo == "1":
 		fattura.emessa_da = settings.DATI_CONSORZIO
+	elif tipo == "2":
+		fattura.emessa_a = settings.DATI_CONSORZIO
 	fattura.save()
-	request.user.message_set.create(message="Creata la fattura %s/%s." % (anno, fattura.progressivo))
-	return HttpResponseRedirect(reverse("tamFattura", kwargs={'id_fattura': fattura.id}))
+	message = "Creata la %s %s." % (fattura.nome_fattura(), fattura.descrittore())
+	request.user.message_set.create(message=message)
+	logAction('C', instance=fattura, description=message, user=request.user)
+	return HttpResponseRedirect(fattura.url())
 
 
 # *********************************** EXPORT IN PDF ******************************

@@ -30,7 +30,7 @@
 				</td>
 				<td>
 				<input type='hidden' name='id' value='{{viaggio.id}}' >
-				{% ifchanged rigafattura.conducente_id rigafattura.emessa_a %}
+				{% ifchanged rigafattura.conducente_id rigafattura.fattura.emessa_a %}
 					<div class='dati'>{{rigafattura.fattura.emessa_a}}</div>
 				{% endifchanged %}
 				</td>

@@ -31,10 +31,15 @@ urlpatterns = patterns ('fatturazione.views',
 	   		name="tamFattureGeneraRicevute"),
 
 	url(r'^genera/consorzio/manuale/$', 'nuova_fattura', {"tipo":"1"}, name="tam-nuova-fattura-consorzio"),
+	url(r'^genera/conducente/manuale/$', 'nuova_fattura', {"tipo":"2"}, name="tam-nuova-fattura-conducente"),
+	url(r'^genera/ricevuta/manuale/$', 'nuova_fattura', {"tipo":"3"}, name="tam-nuova-fattura-ricevuta"),
 	
 	url(r'^archivio/$', 'view_fatture', name="tamVisualizzazioneFatture"),
 	
-	url(r'archivio/(?P<id_fattura>\d*)/$', 'fattura', name='tamFattura'),
-	url(r'archivio/(?P<id_fattura>\d*)/(?P<export_type>pdf|html|pisa)/$', 'exportfattura', name='tamExportFattura'),
+	url(r'archivio/consorzio/(?P<anno>\d*)/(?P<progressivo>\d*)/$', 'fattura', {"tipo":"1"}, name='tamFatturaConsorzio'),
+	url(r'archivio/conducente/(?P<id_fattura>\d*)/$', 'fattura', {"tipo":"2"}, name='tamFatturaConducente'),
+	url(r'archivio/ricevute/(?P<id_fattura>\d*)/$', 'fattura', {"tipo":"3"}, name='tamFatturaRicevuta'),
+	
+	url(r'archivio/export/(?P<id_fattura>\d*)/(?P<export_type>pdf|html|pisa)/$', 'exportfattura', name='tamExportFattura'),
 	
 )

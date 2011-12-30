@@ -1,0 +1,27 @@
+<div style='display:none;'>
+	<table class='tablesorter' style='text-align: center'>
+		<tr><th>Fattura</th><th>conducente</th><th>righe</th><th>Importo</th></tr>
+	{% for fattura in lista %}
+		<tr>
+			<td>
+				{{fattura.descrittore}}
+				<a href='{% url tamFatturaConducente id_fattura=fattura.id %}' style='display:block'><img src='/media/fatture/invoice-icon2.png' /></a>
+				emessa il {{fattura.data|date:"l j F Y"}}
+			</td>
+			<td>
+				{{fattura.mittente}}
+			</td>
+			<td>{{fattura.righe.count}}</td>
+			<td class='prezzo'>{{fattura.val_totale|floatformat:"-2"}} €</td>
+		</tr>
+	{% endfor %}
+	</table>
+	{% if perms.fatturazione.generate %}
+	<div>
+		<a href='{% url tam-nuova-fattura-conducente %}'>
+		<img src='/media/addbtn.png' id='newFattura' class='actionButton' title='Nuova fattura conducente manuale' />
+		Nuova fattura conducente manuale.
+		</a>
+	</div>
+	{% endif %}
+</div>

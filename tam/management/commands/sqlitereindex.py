@@ -31,11 +31,12 @@ class Command(AppCommand):
 		missing_indexes = []
 		for index in all_suggested_indexes:
 			if index not in existing_indexes:
+				self.stdout.write(" %s\n" % index)
 				missing_indexes.append(index)
 		if missing_indexes:
 			create_input = raw_input("Create all missing suggested indexes in %s[y,N]? " % app.__name__)
 			if create_input.strip().lower() == "y":
-				self.stdout.write("Creating missing indexes.")
+				self.stdout.write("Creating missing indexes. ")
 				for index_creation_query in missing_indexes:
 					cursor.execute(index_creation_query)
 				transaction.commit_unless_managed()

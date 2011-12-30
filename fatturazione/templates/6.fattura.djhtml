@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}} &raquo; {{ block.super }} {% endblock %}
+{% block title %}{{fattura.nome_fattura}} {{fattura.descrittore}} &raquo; {{ block.super }} {% endblock %}
 
 {% block css %}
 {{ block.super }}
@@ -16,15 +16,21 @@
 
 {% block content %}
 <a href="{% url tamVisualizzazioneFatture %}" class='noprint'>Torna all'elenco fatture</a>
-<h1 class='noprint'>{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}</h1>
+<h1 class='noprint'>{{fattura.nome_fattura}} {{fattura.descrittore}}</h1>
 
 {% include "fat_model/_fattura.djhtml" %}
 
-<a href='pdf/' target='_blank' class='noprint'>
+<a href='{% url tamExportFattura id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
 	<div style="text-align: center">
 		<img src='/media/fatture/print_icon.png' title='Versione stampabile' alt='Versione stampabile' />
-	</div>	
+	</div>
 </a>
+{% if perms.fatturazione.generate %}
+	<div style="text-align: center">
+		<img src="/media/delbtn.png" class='delfat actionButton noprint' title='cancella fattura' />
+	</div>
+{% endif %}
+	
 {% endblock %}
 
 {% block bottom %}

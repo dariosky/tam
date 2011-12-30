@@ -5,7 +5,7 @@ Created on 11/set/2011
 @author: Dario
 '''
 import datetime
-from tam.models import Viaggio, ProfiloUtente, Conducente
+from tam.models import Viaggio, ProfiloUtente, Conducente, logAction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from fatturazione.models import Fattura, RigaFattura, nomi_fatture, nomi_plurale
@@ -14,6 +14,7 @@ from fatturazione.views.util import ultimoProgressivoFattura
 from django.db import transaction
 from django.db.models.aggregates import Max
 from django.contrib.auth.decorators import permission_required
+from decimal import Decimal
 
 """
 Generazione fatture:
@@ -65,7 +66,7 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 								)
 	# prendo i viaggi da fatturare
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
-	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lt=data_end+datetime.timedelta(days=1))
+	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
 	# FATTURE CONSORZIO ****************
 	lista_consorzio = viaggi.filter(filtro_consorzio)
 	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
@@ -185,7 +186,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 					ultima_data = precedenti[0][0]
 					for c in precedenti:
 						data, nick, id = c
-						if data>ultima_data: break
+						if data > ultima_data: break
 						conducenti_estraibili.append(id)
 #				print "Estraibili:", conducenti_estraibili
 				conducente = conducenti_estraibili[progressivo % len(conducenti_estraibili)]
@@ -221,7 +222,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 						else:
 							fattura.passeggero = viaggio.passeggero
 							fattura.emessa_a = viaggio.passeggero.dati or viaggio.passeggero.nome
-							
+
 					if tipo == "1":	# fattura consorzio: da consorzio a cliente
 						fattura.anno = anno
 						fattura.progressivo = viaggio.progressivo_fattura
@@ -232,15 +233,24 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
 						fattura.emessa_a = settings.DATI_CONSORZIO
 						if viaggio:
-							# nelle fatture conducente derivanti da un viaggio, il cliente non è il destinatario. Ma lo ricordo ugualmente.
-							if viaggio.cliente:	
-								fattura.cliente = viaggio.cliente
-							else:
-								fattura.passeggero = viaggio.passeggero
+							# nelle fatture conducente derivanti da un viaggio...
+							# il cliente non è il destinatario. E può essere diverso per ogni riga
+							pass
+							# lascio il cliente in testata a None
+							# il nome del cliente lo metto nelle note della riga.
+#							if viaggio.cliente:
+#								fattura.cliente = viaggio.cliente
+#							else:
+#								fattura.passeggero = viaggio.passeggero
 
 					fattura.save()
 					fatture_generate += 1
-					riga = 1
+					riga = 10
+					if tipo == "3":
+						# per le 
+						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("1.81"), riga=riga)
+						fattura.righe.add(riga_fattura)
+						riga += 10
 
 					lastKey = elemento.key
 
@@ -262,6 +272,10 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 					if viaggio:
 						# uso il prezzo del viaggio, non della fattura consorzio
 						riga_fattura.prezzo = viaggio.prezzo if viaggio else elemento.prezzo
+						if viaggio.cliente:
+							riga_fattura.note = viaggio.cliente.nome
+						elif viaggio.passeggero:
+							riga_fattura.note = viaggio.passeggero.nome
 					else:
 						riga_fattura.prezzo = elemento.prezzo	# ... a meno che il viaggio non manchi
 					riga_fattura.riga_fattura_consorzio = elemento
@@ -272,8 +286,9 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 				fattura.righe.add(riga_fattura)
 				riga += 10
 
-#			print "Genero le %s" % nomi_fatture[tipo]
-			request.user.message_set.create(message="Generate %d %s." % (fatture_generate, plurale))
+			message = "Generate %d %s." % (fatture_generate, plurale)
+			request.user.message_set.create(message=message)
+			logAction('C', instance=request.user, description=message, user=request.user)
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
 	return render_to_response(template_name,
