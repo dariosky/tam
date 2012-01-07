@@ -9,6 +9,7 @@
     <no-orphans/>
     <enable-threads/>
     <threads>10</threads>
+    <lazy/>
 
     <daemonize>/home/dariosky/logs/user/uwsgi.log</daemonize>
     <pidfile>/home/dariosky/webapps/uwsgi/var/uwsgi.pid</pidfile>
