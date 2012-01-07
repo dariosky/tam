@@ -45,13 +45,17 @@ from tam.views import parseDateString
 from django.conf import settings
 
 # Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
-filtro_consorzio = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None)
+filtro_consorzio = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
+					~ Q(conducente__nick__iexact='ANNUL') # tolgo le corse assegnate al conducente annullato
 
 # Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
-filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None, conducente__attivo=True) # applicato sulle righe fatture
+# applicato sulle righe fatture
+filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None, conducente__attivo=True) & \
+					~ Q(conducente__nick__iexact='ANNUL')
 
 # se un viaggio ha sia pagamento differito che fatturazione, faccio solo la fattura
-filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None)
+filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None)& \
+					~ Q(conducente__nick__iexact='ANNUL')
 
 
 @permission_required('fatturazione.generate', '/')

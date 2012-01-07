@@ -112,11 +112,15 @@ STATICFILES_FINDERS = (
 SECRET_KEY = '7@*a$hce=f6fhavob3i4lj*3h72wu73dw!trinyuz-87zqd^3e'
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
-#     'django.template.loaders.eggs.load_template_source',
-)
+if not DEBUG:
+	TEMPLATE_LOADERS = (
+		( 'django.template.loaders.cached.Loader', 	( # cache template loaders
+			'django.template.loaders.filesystem.Loader',
+			'django.template.loaders.app_directories.Loader',
+			)
+		),
+	)
+
 
 MIDDLEWARE_CLASSES = (
 	'mediagenerator.middleware.MediaMiddleware',
@@ -173,7 +177,6 @@ INSTALLED_APPS = (
 
 	'fatturazione',
 #	'license',
-#    'debug_toolbar',
 )
 
 LOGIN_URL = "/login/"

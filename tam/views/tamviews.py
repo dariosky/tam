@@ -494,6 +494,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	# ****************  VALIDAZIONE E CREAZIONE ********************
 	if form.is_valid():
 		if step == 1:		# Passo allo step2
+			if form.cleaned_data["data"] < datetime.datetime.now().replace(hour=0, minute=0):
+				if not user.has_perm('tam.change_oldviaggio'):
+					request.user.message_set.create(message="Non hai l'autorizzazione per inserire una corsa vecchia.")
+					return HttpResponseRedirect("/")
 			if id:
 				viaggio = form.save()	#commit=True
 				viaggio.updatePrecomp()
