@@ -158,15 +158,22 @@ def nuova_fattura(request, tipo):
 	if tipo == "1":
 		anno = datetime.date.today().year
 		ultimo = ultimoProgressivoFattura(anno, tipo=tipo)
-		progressivo = ultimo + 1,
+		progressivo = ultimo + 1
 	else:
 		anno = None
 		progressivo = None
+	if tipo == '3':
+		# le ricevute hanno sempre come data l'ultimo fine mese precedente
+		data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+	else:
+		data_fattura = datetime.date.today()
+
+
 	fattura = Fattura(
 					anno=anno,
 					tipo=tipo,
 					progressivo=progressivo,
-					data=datetime.date.today()
+					data=data_fattura
 					)
 	if tipo == "1":
 		fattura.emessa_da = settings.DATI_CONSORZIO

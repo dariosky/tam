@@ -54,7 +54,7 @@ filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None, cond
 					~ Q(conducente__nick__iexact='ANNUL')
 
 # se un viaggio ha sia pagamento differito che fatturazione, faccio solo la fattura
-filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None)& \
+filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
 					~ Q(conducente__nick__iexact='ANNUL')
 
 
@@ -218,7 +218,13 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 				if elemento.key <> lastKey:
 					# TESTATA
 					fattura = Fattura(tipo=tipo)
-					fattura.data = datetime.date.today()
+					if tipo == '3':
+						# le ricevute hanno sempre come data l'ultimo fine mese precedente
+						data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+					else:
+						data_fattura = datetime.date.today()
+
+					fattura.data = data_fattura
 					if tipo in ('1', '3'):	# popolo il destinatario della fattura
 						if viaggio.cliente:
 							fattura.cliente = viaggio.cliente
