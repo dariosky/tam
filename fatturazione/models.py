@@ -5,8 +5,8 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 
-nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta"}
-nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute"}
+nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi"}
+nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute taxi"}
 
 class Fattura(models.Model):
 	emessa_da = models.TextField()	# anagrafica emittente

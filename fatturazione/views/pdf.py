@@ -12,7 +12,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import * #@UnusedWildImport
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Image as FlowableImage
-from reportlab.lib.units import cm
+from reportlab.lib.units import cm, mm
 from reportlab.lib.pagesizes import A4, portrait, landscape
 from reportlab.lib import colors
 from decimal import Decimal
@@ -89,7 +89,7 @@ def moneyfmt(value, places=2, curr='', sep='.', dp=',',
 
 def render_to_reportlab(context):
 	fattura = context.get('fattura')
-	test = False
+	test = settings.DEBUG
 
 	class NumberedCanvas(canvas.Canvas):
 		def __init__(self, *args, **kwargs):
@@ -101,12 +101,15 @@ def render_to_reportlab(context):
 			self._startPage()
 
 		def save(self):
-			"""add page info to each page (page x of y)"""
+			"""add page info to each page (page x of y) if y>1"""
 			num_pages = len(self._saved_page_states)
+			
 			for state in self._saved_page_states:
 				self.__dict__.update(state)
-				self.draw_page_number(num_pages)
+				if num_pages>1:
+					self.draw_page_number(num_pages)
 				canvas.Canvas.showPage(self)
+
 			canvas.Canvas.save(self)
 
 		def draw_page_number(self, page_count):
@@ -149,8 +152,21 @@ def render_to_reportlab(context):
 			note.wrapOn(canvas, width / 2, 10 * cm)
 			y = y - note.height - 8
 			note.drawOn(canvas, 1 * cm, y=y)
-		left_y = y - 10
 
+		if fattura.tipo in ("3"):
+			y=y-10
+			testata_fissa = Paragraph("<font size='6'>Servizio trasporto emodializzato da Sua Abitazione al centro emodialisi assistito e viceversa come da distinta.</font>", a_style)
+			testata_fissa.wrapOn(canvas, width/2, 2 * cm)
+			y = y - testata_fissa.height
+			testata_fissa.drawOn(canvas, 1 * cm, y=y)
+
+		left_y = y - 8	# spacer finale
+
+		if test:
+			canvas.setLineWidth(4)
+			p = canvas.beginPath()
+			p.moveTo(0, y); p.lineTo(width / 2, y)
+			canvas.drawPath(p)
 
 		fattura_da = canvas.beginText()
 		fattura_da.setTextOrigin(width - 8 * cm, height - 2 * cm)
@@ -161,18 +177,19 @@ def render_to_reportlab(context):
 		fattura_a.wrapOn(canvas, 6.5 * cm, 10 * cm)
 		x, y = fattura_da.getCursor()
 
-		spacerMittenteDestinatario = 1 * cm
+		spacerMittenteDestinatario = 0.5 * cm
 		fattura_a.drawOn(canvas, x, y - fattura_a.height - spacerMittenteDestinatario)
 
-		y -= fattura_a.height + fattura_a.style.borderPadding * 2 + spacerMittenteDestinatario
+		y -= fattura_a.height + fattura_a.style.borderPadding + spacerMittenteDestinatario
 		right_y = y
 		lower_y = min(left_y, right_y)
 
 		y = lower_y
+
 		if test:
 			canvas.setLineWidth(4)
 			p = canvas.beginPath()
-			p.moveTo(0, y); p.lineTo(width, y)
+			p.moveTo(width / 2, y); p.lineTo(width, y)
 			canvas.drawPath(p)
 
 		doc.pageTemplate.frames = [
@@ -247,15 +264,16 @@ def render_to_reportlab(context):
 	colWidths = ((width - 2 * cm) - (1.6 * 4) * cm,) + (1.6 * cm,) * 4
 	story = [ Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths) ]
 	story.append(KeepTogether(Table(righeTotali, style=totaliStyle, colWidths=(width - 2 * cm - 1.6 * cm, 1.6 * cm))))
-	story.append(Spacer(0, 2 * cm))
+	story.append(Spacer(0, 0.5 * cm))
 	note_finali_lines = []
 	if fattura.tipo == "1":
 		note_finali_lines.append("Si prega di effettuare il pagamento sul conto Corrente:")
 		note_finali_lines.append("UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824")
-	if fattura.tipo in ("1", "3"):
-		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
 	if fattura.tipo in ("3"):
 		note_finali_lines.append("<font size='6'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.</font>")
+	if fattura.tipo in ("1", "3"):
+		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
+	
 	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
 	note_finali.wrap(width - 4 * cm, 2 * cm)
 	story.append(note_finali)
