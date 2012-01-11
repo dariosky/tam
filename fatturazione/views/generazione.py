@@ -115,9 +115,10 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, keys=["cliente"], order_by=None,
 					manager=Viaggio.objects,
 				):
-	ids = request.GET.getlist("id")
+	ids = request.POST.getlist("id")
 	plurale = nomi_plurale[tipo]
 	conducenti_ricevute = None
+	anno = 0	# usato solo con le fatture consorzio
 
 	if not ids:
 		request.user.message_set.create(message="Devi selezionare qualche corsa da fatturare.")
@@ -125,12 +126,12 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 
 	if tipo == "1":	# la generazione fatture consorzio richiede anno e progressivo - li controllo
 		try:
-			anno = int(request.GET.get("anno"))
+			anno = int(request.POST.get("anno"))
 		except:
 			request.user.message_set.create(message="Seleziona un anno numerico.")
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 		try:
-			progressivo = int(request.GET.get("progressivo", 1))
+			progressivo = int(request.POST.get("progressivo", 1))
 		except:
 			request.user.message_set.create(message="Ho bisogno di un progressivo iniziale numerico.")
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
@@ -140,6 +141,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 	else:
 		progressivo = 0 # nelle ricevute lo uso per ciclare
+	progressivo_iniziale = progressivo
 
 	lista = manager.filter(id__in=ids)
 	lista = lista.filter(filtro)
@@ -303,6 +305,10 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 
 	return render_to_response(template_name,
                               {
+								# riporto i valori che mi arrivano dalla selezione
+								"anno":anno,
+								"progressivo_iniziale":progressivo_iniziale,
+							
 								"lista":lista,
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),

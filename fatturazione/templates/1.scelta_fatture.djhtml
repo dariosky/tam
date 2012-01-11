@@ -19,41 +19,41 @@
 		<div id='gotoConsorzio' class='floatingBlock'>
 			<a href="#generaConsorzio"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
 		</div>
-		<form method="get" action="{% url tamFattureGeneraConsorzio %}">
 		<p>Le fatture che il consorzio fa ai clienti.<br>
 			Tutti i viaggi confermati con l'indicazione della fattura.
 		</p>
 		
-		<div>
-			Anno <input type='text' name='anno' maxlength="4" value="{{ anno_consorzio }}">
-			Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{progressivo_consorzio}}">
-		</div>
+		{% with lista_consorzio as lista %}
+			
+			{% if lista %}
+				<form method="post" action="{% url tamFattureGeneraConsorzio %}">
+					<div>
+						Anno <input type='text' name='anno' maxlength="4" value="{{ anno_consorzio }}">
+						Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{progressivo_consorzio}}">
+					</div>
+					<div class='fatturaTipo1'>
+						<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+							<thead>
+								<tr>
+									<th>Cliente</th>
+								    <th><input type="checkbox" id='check_consorzio'/></th>
+								    <th>Corsa</th>
+								    <th>Note</th>
+								    <th>Prezzo lordo</th>
+								    <th>Conducente</th>
+								</tr>
+							</thead>
+							{% for viaggio in lista %}
+								{% include "1-1.scelta_riga_consorzio.djhtml" %}
+							{% endfor %}
+						</table>
+						<a name="generaConsorzio"></a>
+						<input type="submit" name="preview" value="Genera le fatture consorzio"/>
+					</div>
+				</form>
+			{% endif %}
 		
-		<div class='fatturaTipo1'>
-			{% with lista_consorzio as lista %}
-				{% if lista %}
-					<table class='tablesorter' id='table_consorzio' style="text-align:center" >
-					<thead>
-						<tr>
-							<th>Cliente</th>
-						    <th><input type="checkbox" id='check_consorzio'/></th>
-						    <th>Corsa</th>
-						    <th>Note</th>
-						    <th>Prezzo lordo</th>
-						    <th>Conducente</th>
-						</tr>
-					</thead>
-					{% for viaggio in lista %}
-						{% include "1-1.scelta_riga_consorzio.djhtml" %}
-					{% endfor %}
-					</table>
-					<a name="generaConsorzio"></a>
-					<input type="submit" name="preview" value="Genera le fatture consorzio"/>
-				{% endif %}
-			{% endwith %}
-		</div>
-		
-		</form>
+		{% endwith %}
 	</div>
 	
 	
@@ -63,34 +63,32 @@
 		<div id='gotoConducente' class='floatingBlock'>
 			<a href="#generaConducente"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
 		</div>
-		<form method="get" action="{% url tamFattureGeneraConducente %}">
 		<p>Le fatture che il conducente fa al consorzio.</p>
 		
 		{% with lista_conducente as lista %}
 			{% if lista %}
-				<form method="get" action="{% url tamFattureGeneraConducente %}">
-				<table class='tablesorter' id='table_conducente' style="text-align:center" >
-				<thead>
-					<tr>
-						<th>Conducente</th>
-						<th>Cliente</th>
-					    <th><input type="checkbox" id='check_conducente'/></th>
-					    <th>Corsa</th>
-					    <th>Descrizione</th>
-					    <th>Prezzo lordo</th>
-					</tr>
-				</thead>
-				{% for rigafattura in lista %}
-					{% include "1-2.scelta_riga_conducente.djhtml" %}
-				{% endfor %}
-				</table>
-				<a name="generaConducente"></a>
-				<input type="submit" name="preview" value="Genera fatture conducente"/>
+				<form method="post" action="{% url tamFattureGeneraConducente %}">
+					<table class='tablesorter' id='table_conducente' style="text-align:center" >
+					<thead>
+						<tr>
+							<th>Conducente</th>
+							<th>Cliente</th>
+						    <th><input type="checkbox" id='check_conducente'/></th>
+						    <th>Corsa</th>
+						    <th>Descrizione</th>
+						    <th>Prezzo lordo</th>
+						</tr>
+					</thead>
+					{% for rigafattura in lista %}
+						{% include "1-2.scelta_riga_conducente.djhtml" %}
+					{% endfor %}
+					</table>
+					<a name="generaConducente"></a>
+					<input type="submit" name="preview" value="Genera fatture conducente"/>
 				</form>
 			{% endif %}
 		{% endwith %}
 		
-		</form>
 	</div>
 	
 
@@ -104,7 +102,7 @@
 		<div>
 			{% with lista_ricevute as lista %}
 				{% if lista %}
-					<form method="get" action="{% url tamFattureGeneraRicevute %}">
+					<form method="post" action="{% url tamFattureGeneraRicevute %}">
 					<table class='tablesorter' id='table_ricevute' style="text-align:center" >
 					<thead>
 						<tr>
