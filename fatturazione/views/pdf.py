@@ -103,10 +103,10 @@ def render_to_reportlab(context):
 		def save(self):
 			"""add page info to each page (page x of y) if y>1"""
 			num_pages = len(self._saved_page_states)
-			
+
 			for state in self._saved_page_states:
 				self.__dict__.update(state)
-				if num_pages>1:
+				if num_pages > 1:
 					self.draw_page_number(num_pages)
 				canvas.Canvas.showPage(self)
 
@@ -121,7 +121,6 @@ def render_to_reportlab(context):
 		canvas.saveState()
 		stondata_style = ParagraphStyle("IntestazioneStondata", fontName='Helvetica', fontSize=8, leading=10,
 									 borderRadius=10, borderWidth=1, borderColor=colors.silver, borderPadding=15)
-		title_style = ParagraphStyle("Titolo della fattura", fontName='Helvetica-Bold', fontSize=10, leading=10)
 		a_style = ParagraphStyle("Titolo della fattura", fontName='Helvetica', fontSize=8, leading=10)
 
 		# set PDF properties ***************
@@ -134,13 +133,13 @@ def render_to_reportlab(context):
 		canvas.setTitle(descrittoreFattura)
 
 		# Header ***************
-
+		topMargin = 1 * cm
 		if fattura.tipo == "1":
-			y = height - 4 * cm
+			y = height - 2 * cm - topMargin
 			canvas.drawImage(logoImage_path, x=1 * cm, y=y, width=7 * cm, height=2.5 * cm)
 		else:
-			y = height - 1.5 * cm
-		descrittore = Paragraph('<font size="12"><b>%s</b></font> del %s' % (descrittoreFattura, localize(fattura.data)),
+			y = height - topMargin
+		descrittore = Paragraph('<font size="14"><b>%s</b></font> del %s' % (descrittoreFattura, localize(fattura.data)),
 								 a_style)
 		descrittore.wrapOn(canvas, width / 2, 2 * cm)
 		y -= descrittore.height + 8
@@ -154,9 +153,9 @@ def render_to_reportlab(context):
 			note.drawOn(canvas, 1 * cm, y=y)
 
 		if fattura.tipo in ("3"):
-			y=y-10
+			y = y - 10
 			testata_fissa = Paragraph("<font size='6'>Servizio trasporto emodializzato da Sua Abitazione al centro emodialisi assistito e viceversa come da distinta.</font>", a_style)
-			testata_fissa.wrapOn(canvas, width/2, 2 * cm)
+			testata_fissa.wrapOn(canvas, width / 2, 2 * cm)
 			y = y - testata_fissa.height
 			testata_fissa.drawOn(canvas, 1 * cm, y=y)
 
@@ -169,7 +168,7 @@ def render_to_reportlab(context):
 			canvas.drawPath(p)
 
 		fattura_da = canvas.beginText()
-		fattura_da.setTextOrigin(width - 8 * cm, height - 2 * cm)
+		fattura_da.setTextOrigin(width - 8 * cm, height - topMargin - 0.5 * cm)
 		fattura_da.textLines(fattura.emessa_da)
 		canvas.drawText(fattura_da)
 
@@ -193,7 +192,7 @@ def render_to_reportlab(context):
 			canvas.drawPath(p)
 
 		doc.pageTemplate.frames = [
-				Frame(1 * cm, 1.7 * cm, width - 2 * cm, y - (2 * cm), showBoundary=test), #x,y, width, height
+				Frame(1 * cm, 1.5 * cm, width - 2 * cm, y - (1.8 * cm), showBoundary=test), #x,y, width, height
 			]
 
 		canvas.restoreState()
@@ -264,7 +263,7 @@ def render_to_reportlab(context):
 	colWidths = ((width - 2 * cm) - (1.6 * 4) * cm,) + (1.6 * cm,) * 4
 	story = [ Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths) ]
 	story.append(KeepTogether(Table(righeTotali, style=totaliStyle, colWidths=(width - 2 * cm - 1.6 * cm, 1.6 * cm))))
-	story.append(Spacer(0, 0.5 * cm))
+	#story.append(Spacer(0, 0.5 * cm))
 	note_finali_lines = []
 	if fattura.tipo == "1":
 		note_finali_lines.append("Si prega di effettuare il pagamento sul conto Corrente:")
@@ -273,7 +272,7 @@ def render_to_reportlab(context):
 		note_finali_lines.append("<font size='6'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.</font>")
 	if fattura.tipo in ("1", "3"):
 		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
-	
+
 	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
 	note_finali.wrap(width - 4 * cm, 2 * cm)
 	story.append(note_finali)
