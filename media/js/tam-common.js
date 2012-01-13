@@ -37,3 +37,22 @@ function messageBox(msg, classes) {
   	msgBox.append(message);
   }
 }
+
+function scrollableGoto(scroller) {
+	var scrollParent = scroller.parent();
+	//var deltaH = scroller.offset().top - scrollParent.scrollTop();
+	//console.log("deltaH:"+deltaH);
+	deltaH = 0;
+	//console.log("Scroll da "+scroller_min+" a "+scroller_max);
+	$(window).scroll(function(){
+		if (!scroller.is(":visible")) return;
+		var scroller_min = scrollParent.offset().top;
+		var scroller_max = scrollParent.offset().top+scrollParent.height();
+		//$(window).height()/2
+		var newTop = $(window).scrollTop()+deltaH;
+		if (newTop>scroller_max) newTop=scroller_max;
+		if (newTop<scroller_min) newTop=scroller_min;
+		//console.log("set to "+newTop+" ["+scroller_min+","+scroller_max+"]");
+		scroller.stop().animate({"top": newTop+"px"}, "fast");
+	});
+}

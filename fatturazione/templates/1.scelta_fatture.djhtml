@@ -47,8 +47,9 @@
 								{% include "1-1.scelta_riga_consorzio.djhtml" %}
 							{% endfor %}
 						</table>
-						<a name="generaConsorzio"></a>
-						<input type="submit" name="preview" value="Genera le fatture consorzio"/>
+						<a name="generaConsorzio">
+							<input type="submit" name="preview" value="Genera le fatture consorzio"/>
+						</a>
 					</div>
 				</form>
 			{% endif %}
@@ -83,8 +84,9 @@
 						{% include "1-2.scelta_riga_conducente.djhtml" %}
 					{% endfor %}
 					</table>
-					<a name="generaConducente"></a>
-					<input type="submit" name="preview" value="Genera fatture conducente"/>
+					<a name="generaConducente">
+						<input type="submit" name="preview" value="Genera fatture conducente"/>
+					</a>
 				</form>
 			{% endif %}
 		{% endwith %}
@@ -117,8 +119,9 @@
 						{% include "1-3.scelta_riga_ricevuta.djhtml" %}
 					{% endfor %}
 					</table>
-					<a name="generaRicevute"></a>
-					<input type="submit" name="preview" value="Genera ricevute"/>
+					<a name="generaRicevute">
+						<input type="submit" name="preview" value="Genera ricevute"/>
+					</a>
 					</form>
 				{% endif %}
 			{% endwith %}
