@@ -10,6 +10,9 @@
 		{{ fatture }} {{plurale}} / {{ lista.count }} corse.<br />
 		{% if lista %}
 		<form method="post" action="">
+		<div id='gotoRicevute' class='floatingBlock'>
+			<a href="#generaRicevute"><img src='/media/frecciagiu.png' title='genera ricevute taxi'></a>
+		</div>
 		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
 		<thead>
 			<tr>
@@ -45,12 +48,19 @@
 			</tr>
 		{% endfor %}
 		</table>
-		<input type="submit" name="generate" value="Genera {{plurale}}" />
+		<a name="generaRicevute">
+			<input type="submit" name="generate" value="Genera {{plurale}}" />
+		</a>
 		</form>
 		
 		{% endif %}
 </div>
 
 </div>
-
 {% endblock %}
+
+{% block bottom %}
+<script type="text/javascript">
+	scrollableGoto($('#gotoRicevute'));
+</script>
+{% endblock bottom %}

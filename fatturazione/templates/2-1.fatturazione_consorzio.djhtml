@@ -10,7 +10,9 @@
 		{{ fatture }} fatture / {{ lista.count }} corse.<br />
 		{% if lista %}
 		<form method="post" action="">
-			
+		<div id='gotoConsorzio' class='floatingBlock'>
+			<a href="#generaConsorzio"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+		</div>
 		<input type='hidden' name='anno' value='{{anno}}'>
 		<input type='hidden' name='progressivo' value='{{progressivo_iniziale}}'>
 		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
@@ -53,12 +55,19 @@
 			</tr>
 		{% endfor %}
 		</table>
-		<input type="submit" id="genera_consorzio" name="generate" value="Genera fatture consorzio"/>
+		<a name="generaConsorzio">
+			<input type="submit" id="genera_consorzio" name="generate" value="Genera fatture consorzio"/>
+		</a>
 		</form>
 		
 		{% endif %}
 </div>
 
 </div>
-
 {% endblock %}
+
+{% block bottom %}
+<script type="text/javascript">
+	scrollableGoto($('#gotoConsorzio'));
+</script>
+{% endblock bottom %}
