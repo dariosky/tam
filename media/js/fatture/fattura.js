@@ -9,9 +9,9 @@ function myParse(string) {
 }
 function rowProcess(row){
 	var id = row.find('input:hidden').val();
-	var price=myParse(row.find('#riga-prezzo-'+id).text());
-	var iva=myParse(row.find('#riga-iva-'+id).text());
-	var qta=myParse(row.find('#riga-qta-'+id).html());
+	var price=myParse(row.find('#riga-prezzo-'+id).text() || "0");
+	var iva=myParse(row.find('#riga-iva-'+id).text() || "0");
+	var qta=myParse(row.find('#riga-qta-'+id).html() || "0");
 	//console.log("Valori letti", qta, price, iva);
 	var val_imponibile = Math.round(price*qta*100)/100;
 	var val_iva = Math.round(price*qta*iva)/100;
