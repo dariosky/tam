@@ -199,9 +199,9 @@ def exportfattura(request, id_fattura, export_type='html'):
 	context = {"fattura":fattura, "readonly":True, 'export_type':export_type}
 	template_name = 'fat_model/export_fattura_1.djhtml'
 #	tamFatturaPdf(fattura, response)	# popola la response con il file
-	if export_type == "pisa":
-		return render_with_pisa(template_name, context)
-	elif export_type == 'pdf':
+#	if export_type == "pisa":
+#		return render_with_pisa(template_name, context)
+	if export_type == 'pdf':
 		return render_to_reportlab(context)
 	else:	# html output by default
 		return render_to_response(template_name, context,

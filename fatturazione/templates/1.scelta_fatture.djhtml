@@ -132,7 +132,7 @@
 {% endblock %}
 
 {% block bottom %}
-	<script type="text/javascript" src="/media/js/fatture/table_selector.js"></script>
+	{% include_media 'selFatture.js' %}
 	<script type="text/javascript">
 	    $(function() {
 			$(".accordhead").click(function(){
