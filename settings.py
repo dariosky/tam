@@ -31,6 +31,9 @@ if usaSqlite:
 				'NAME': os.path.join(PROJECT_PATH, 'tamarchive.db3')
 		}
 	}
+	DATABASE_OPTIONS = {
+	   "timeout": 20,	# Sqlite will wait some more
+	}
 else:
 	DATABASES = {	# DB di test
 		'default': {
@@ -282,6 +285,9 @@ MEDIA_BUNDLES = (
 		'js/jquery.min.js', 'js/jquery.hotkeys.js',
 		'jquery.ui/js/jquery-ui-1.8.16.custom.min.js', 'js/calendarPreferences.js',
 		'js/tam-common.js', 'js/jquery.scrollTo-min.js', 'js/listaCorse.js',
+	),
+	('selFatture.js',
+		'js/fatture/table_selector.js'
 	),
 )
 YUICOMPRESSOR_PATH = os.path.join(PROJECT_PATH, 'yuicompressor.jar')

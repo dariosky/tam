@@ -40,6 +40,6 @@ urlpatterns = patterns ('fatturazione.views',
 	url(r'archivio/conducente/(?P<id_fattura>\d*)/$', 'fattura', {"tipo":"2"}, name='tamFatturaConducente'),
 	url(r'archivio/ricevute/(?P<id_fattura>\d*)/$', 'fattura', {"tipo":"3"}, name='tamFatturaRicevuta'),
 	
-	url(r'archivio/export/(?P<id_fattura>\d*)/(?P<export_type>pdf|html|pisa)/$', 'exportfattura', name='tamExportFattura'),
+	url(r'archivio/export/(?P<id_fattura>\d*)/(?P<export_type>pdf|html)/$', 'exportfattura', name='tamExportFattura'),
 	
 )
