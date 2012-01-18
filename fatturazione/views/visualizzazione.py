@@ -11,7 +11,7 @@ from django.db.models.aggregates import Max
 from fatturazione.views.util import ultimoProgressivoFattura
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from fatturazione.views.pdf import render_to_reportlab, render_with_pisa
+from fatturazione.views.pdf import render_to_reportlab#, render_with_pisa
 from tam.models import logAction
 from django.db import transaction
 
@@ -135,7 +135,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 							print "converto il valore in un numerico"
 							# tolgo i punti delle migliaia e metto il punto come separatore decimali
 							object_value = object_value.replace(".", "").replace(",", ".")
-
+							if object_value=='':
+								object_value=0
 						print "cambio la riga %d" % riga_id
 						print "imposto il valore %s" % object_value
 						setattr(riga, row_ids[prefix], object_value)

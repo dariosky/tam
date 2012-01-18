@@ -106,7 +106,7 @@ def render_to_reportlab(context):
 
 			for state in self._saved_page_states:
 				self.__dict__.update(state)
-				if num_pages > 1:
+				if num_pages > 1 or test:
 					self.draw_page_number(num_pages)
 				canvas.Canvas.showPage(self)
 
@@ -190,9 +190,12 @@ def render_to_reportlab(context):
 			p = canvas.beginPath()
 			p.moveTo(width / 2, y); p.lineTo(width, y)
 			canvas.drawPath(p)
+		note_finali.drawOn(canvas, doc.leftMargin, doc.bottomMargin)
 
 		doc.pageTemplate.frames = [
-				Frame(1 * cm, 1.5 * cm, width - 2 * cm, y - (1.8 * cm), showBoundary=test), #x,y, width, height
+				Frame(doc.leftMargin, doc.bottomMargin + note_finali.height,
+					   width - (doc.leftMargin + doc.rightMargin), y - doc.bottomMargin - note_finali.height,
+					   showBoundary=test), #x,y, width, height
 			]
 
 		canvas.restoreState()
@@ -203,12 +206,15 @@ def render_to_reportlab(context):
 
 	doc = BaseDocTemplate(response,
 							pagesize=portrait(A4),
-							leftMargin=1.5 * cm,
-							rightMargin=1.5 * cm,
+							leftMargin=1 * cm,
+							rightMargin=1 * cm,
 							bottomMargin=1.5 * cm,
+							topMargin=1.5,
 							showBoundary=test,
 							pageTemplates=PageTemplate(onPage=firstPageTemplate),
 						)
+
+
 
 	logoImage_path = os.path.join(settings.MEDIA_ROOT, 'fatture/logo.jpg')
 
@@ -216,6 +222,19 @@ def render_to_reportlab(context):
 	normalStyle = copy.deepcopy(styles['Normal'])
 	normalStyle.fontSize = 8
 	normalStyle.fontName = 'Helvetica'
+
+	note_finali_lines = []
+	if fattura.tipo == "1":
+		note_finali_lines.append("Si prega di effettuare il pagamento sul conto Corrente:")
+		note_finali_lines.append("UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824")
+	if fattura.tipo in ("3"):
+		note_finali_lines.append("<font size='6'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.</font>")
+	if fattura.tipo in ("1", "3"):
+		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
+
+	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
+	note_finali.wrap(width - doc.rightMargin - doc.leftMargin, 5 * cm)
+
 	righeFattura = [
 					('Descrizione', 'Q.tà', 'Prezzo', 'IVA %', 'Importo'),
 				]
@@ -264,18 +283,7 @@ def render_to_reportlab(context):
 	story = [ Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths) ]
 	story.append(KeepTogether(Table(righeTotali, style=totaliStyle, colWidths=(width - 2 * cm - 1.6 * cm, 1.6 * cm))))
 	#story.append(Spacer(0, 0.5 * cm))
-	note_finali_lines = []
-	if fattura.tipo == "1":
-		note_finali_lines.append("Si prega di effettuare il pagamento sul conto Corrente:")
-		note_finali_lines.append("UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824")
-	if fattura.tipo in ("3"):
-		note_finali_lines.append("<font size='6'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.</font>")
-	if fattura.tipo in ("1", "3"):
-		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
-
-	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
-	note_finali.wrap(width - 4 * cm, 2 * cm)
-	story.append(note_finali)
+	#story.append(note_finali)
 
 	doc.build(story, canvasmaker=NumberedCanvas)
 	return response
