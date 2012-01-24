@@ -272,6 +272,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 	num_viaggi = len(viaggi)
 #	logging.debug("Ho caricato %d viaggi." % num_viaggi)
 	classifiche = None	# ottengo le classifiche globali
+	conducentiPerCapienza = {}
 
 	for viaggio in viaggi:
 		if not viaggio.conducente_confermato:	# se il viaggio non è confermato ottengo le classifiche (solo una volta)
@@ -279,7 +280,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 				classifiche = get_classifiche()
 #				for classi in classifiche[:2]:
 #					logging.debug("%(conducente_nick)s %(priceMedium)s %(priceLong)s %(pricyLong)s %(abbinate)s %(num_disturbi_diurni)s %(num_disturbi_notturni)s"%classi)
-			viaggio.classifica = viaggio.get_classifica(classifiche=classifiche) # ottengo la classifica di conducenti per questo viaggio
+			viaggio.classifica = viaggio.get_classifica(classifiche=classifiche, conducentiPerCapienza=conducentiPerCapienza) # ottengo la classifica di conducenti per questo viaggio
 
 
 #	if settings.DEBUG:

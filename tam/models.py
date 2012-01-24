@@ -9,25 +9,26 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
+from django.db.models import signals
+from tam.middleware import threadlocals
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
 TIPISERVIZIO = [("T", "Taxi"), ("C", "Collettivo")]
 
 kmPuntoAbbinate = Decimal(120)
-cache_conducentiPerPersona = {} # Tengo un dizionari con tutti i conducenti con più di key persone
+#cache_conducentiPerPersona = {} # Tengo un dizionari con tutti i conducenti con più di key persone
 		# per evitare di interrogare il DB ogni volta.
 		# quando cambio un conducente lo svuoto
 
 
 #invalidation of cache-template-tag cache
-from django.utils.hashcompat import md5_constructor
-from django.utils.http import urlquote
-
-def invalidate_template_cache(fragment_name, *variables):
-	args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
-	cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
-	cache.delete(cache_key)
+#from django.utils.hashcompat import md5_constructor
+#from django.utils.http import urlquote
+#def invalidate_template_cache(fragment_name, *variables):
+#	args = md5_constructor(u':'.join([urlquote(var) for var in variables]))
+#	cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
+#	cache.delete(cache_key)
 # ******************
 
 class Luogo(models.Model):
@@ -159,7 +160,7 @@ class Viaggio(models.Model):
 	padre = models.ForeignKey("Viaggio", null=True, blank=True) # l'eventuale viaggio padre nei raggruppamenti
 	data_padre = models.DateTimeField("Data e ora padre", db_index=True, null=True, editable=False)
 	id_padre = models.PositiveIntegerField("ID Gruppo", db_index=True, null=True, editable=False)
-	
+
 	conducente_richiesto = models.BooleanField("Escluso dai supplementari", default=False)	# True quando il conducente è fissato
 	conducente = models.ForeignKey("Conducente", null=True, blank=True, db_index=True)	# conducente (proposto o fissato)
 	conducente_confermato = models.BooleanField("Conducente confermato", default=False)	# True quando il conducente è fissato
@@ -547,7 +548,7 @@ class Viaggio(models.Model):
 		while dayMarker.date() <= date_end.date():
 			# fino alle 4:00 sono 2 punti notturni, ma assegnati con chiave al giorno precedente
 			aggiungi_fascia(0, 0, 4, 1, points=2,
-							fasciaKey=((dayMarker - datetime.timedelta(days=1)).strftime("%d/%m/%Y"), "night"))	
+							fasciaKey=((dayMarker - datetime.timedelta(days=1)).strftime("%d/%m/%Y"), "night"))
 			aggiungi_fascia(4, 1, 6, 1, points=2,
 							fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "morning")) # alle 6:00 sono 2 punto diurno
 			aggiungi_fascia(6, 1, 7, 46, points=1,
@@ -870,7 +871,7 @@ class Viaggio(models.Model):
 ##		logging.debug("Fine classifica")
 #		return result
 
-	def get_classifica(self, classifiche=None):
+	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
 		conducenti = []
 		inattivi = []
 
@@ -878,14 +879,34 @@ class Viaggio(models.Model):
 			classifiche = get_classifiche()
 		classid = {}
 		for classifica in classifiche:	# metto le classifiche in un dizionario
-			id = classifica["conducente_id"]
+			#id = classifica["conducente_id"]
 			classid[classifica["conducente_id"]] = classifica
 
-		conducentiConCapienza = cache_conducentiPerPersona.get(
-														 self.numero_passeggeri,
-														 Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
-														 )
-		cache_conducentiPerPersona[self.numero_passeggeri] = conducentiConCapienza
+		# cache conducenti per capienza ******************************************************
+		if self.numero_passeggeri in conducentiPerCapienza:
+			conducentiConCapienza = conducentiPerCapienza[self.numero_passeggeri]
+			#print "Uso la cache per conducenti con capienza %d" % self.numero_passeggeri
+		else:
+			# Metto in cache la lista dei clienti che possono portare almeno X persone
+			conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
+			print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
+			conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
+		# ************************************************************************************
+		
+#		# cache conducenti per capienza GLOBAL STYLE******************************************
+#		global cache_conducentiPerPersona
+#		if self.numero_passeggeri in cache_conducentiPerPersona:
+#			conducentiConCapienza = cache_conducentiPerPersona[self.numero_passeggeri]
+#			#print "Uso la cache per conducenti con capienza %d" % self.numero_passeggeri
+#		else:
+#			# Metto in cache la lista dei clienti che possono portare almeno X persone
+#			conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
+#			print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
+#			cache_conducentiPerPersona[self.numero_passeggeri] = conducentiConCapienza
+#		# ************************************************************************************
+
+
+
 		for conducente in conducentiConCapienza: # listo i conducenti attivi che parteciperanno
 			if conducente.attivo == False:
 				inattivi.append(conducente)
@@ -926,7 +947,7 @@ class Conducente(models.Model):
 	dati = models.TextField(null=True, blank=True)
 	nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
 	max_persone = models.IntegerField(default=4)
-	attivo = models.BooleanField(default=True)
+	attivo = models.BooleanField(default=True, db_index=True)
 	emette_ricevute = models.BooleanField(default=True)
 	assente = models.BooleanField(default=False)
 
@@ -939,14 +960,16 @@ class Conducente(models.Model):
 
 	classifica_iniziale_long = models.DecimalField("Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
 	classifica_iniziale_medium = models.DecimalField("Padova", max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
+
 	class Meta:
 		verbose_name_plural = _("Conducenti")
 		ordering = ["-attivo", "nick", "nome"]
 		permissions = (('change_classifiche_iniziali', 'Cambia classifiche iniziali'),)
 
 	def save(self, *args, **kwargs):
-		global cache_conducentiPerPersona
-		cache_conducentiPerPersona = {}	# cancello la cache dei conducenti con capienza
+		#global cache_conducentiPerPersona
+		#cache_conducentiPerPersona = {}	# cancello la cache dei conducenti con capienza
+		cache.delete('conducentiPerPersona')
 		super(Conducente, self).save(*args, **kwargs)
 
 	def __unicode__(self):
@@ -1130,7 +1153,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes import generic
 
 class ActionLog(models.Model):
-	data = models.DateTimeField()
+	data = models.DateTimeField(db_index=True)
 	user = models.ForeignKey(User, null=True, blank=True, default=None)
 	action_type = models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
 
@@ -1148,8 +1171,6 @@ class ActionLog(models.Model):
 		longName = {"A":"Creazione", "M":"Modifica", "D":"Cancellazione"}[self.action_type]
 		return "%s di un %s - %s.\n  %s" % (longName, self.content_type, self.user, self.description)
 
-from django.db.models import signals
-from tam.middleware import threadlocals
 
 def logAction(action, instance, description, user=None, log_date=None):
 	if instance:
