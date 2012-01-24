@@ -34,13 +34,13 @@ class Command(AppCommand):
 				self.stdout.write(" %s\n" % index)
 				missing_indexes.append(index)
 		if missing_indexes:
-			create_input = raw_input("Create all missing suggested indexes in %s[y,N]? " % app.__name__)
+			create_input = raw_input("Create all missing suggested indexes in %s [y,N]? " % app.__name__)
 			if create_input.strip().lower() == "y":
-				self.stdout.write("Creating missing indexes. ")
+				self.stdout.write("Creating missing indexes... ")
 				for index_creation_query in missing_indexes:
 					cursor.execute(index_creation_query)
 				transaction.commit_unless_managed()
-				self.stdout.write("Indexes created.")
+				self.stdout.write("Indexes created.\n")
 		else:
 			self.stdout.write("All indexes checked for %s.\n" % app.__name__)
 
