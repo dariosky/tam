@@ -76,11 +76,11 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
 						.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 	oggi = datetime.date.today()
-	anno_consorzio = oggi.year
+	anno_consorzio = data_end.year
 	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, tipo) + 1
 
 	# FATTURE CONDUCENTE ****************
-	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end)
+	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
 	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").all()\
 		.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
 						 'fattura', 'conducente')
@@ -124,6 +124,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 		request.user.message_set.create(message="Devi selezionare qualche corsa da fatturare.")
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
+	data_generazione = parseDateString(request.POST['data_generazione'])
 	if tipo == "1":	# la generazione fatture consorzio richiede anno e progressivo - li controllo
 		try:
 			anno = int(request.POST.get("anno"))
@@ -220,11 +221,12 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 				if elemento.key <> lastKey:
 					# TESTATA
 					fattura = Fattura(tipo=tipo)
-					if tipo == '3':
-						# le ricevute hanno sempre come data l'ultimo fine mese precedente
-						data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
-					else:
-						data_fattura = datetime.date.today()
+					data_fattura = data_generazione
+#					if tipo == '3':
+#						# le ricevute hanno sempre come data l'ultimo fine mese precedente
+#						data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+#					else:
+#						data_fattura = datetime.date.today()
 
 					fattura.data = data_fattura
 					if tipo in ('1', '3'):	# popolo il destinatario della fattura
@@ -308,7 +310,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 								# riporto i valori che mi arrivano dalla selezione
 								"anno":anno,
 								"progressivo_iniziale":progressivo_iniziale,
-							
+
 								"lista":lista,
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),
@@ -317,5 +319,6 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 								"plurale":plurale,
 #								"error_message":error_message,
 								'conducenti_ricevute':conducenti_ricevute,
+								'data_generazione':data_generazione,
                               },
                               context_instance=RequestContext(request))

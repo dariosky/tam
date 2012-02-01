@@ -28,6 +28,7 @@
 			{% if lista %}
 				<form method="post" action="{% url tamFattureGeneraConsorzio %}">
 					<div>
+						<input type='hidden' name='data_generazione' value='{{ data_end|date:"d/m/Y" }}' />
 						Anno <input type='text' name='anno' maxlength="4" value="{{ anno_consorzio }}">
 						Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{progressivo_consorzio}}">
 					</div>
@@ -69,6 +70,7 @@
 		{% with lista_conducente as lista %}
 			{% if lista %}
 				<form method="post" action="{% url tamFattureGeneraConducente %}">
+					<input type='hidden' name='data_generazione' value='{{ data_end|date:"d/m/Y" }}' />
 					<table class='tablesorter' id='table_conducente' style="text-align:center" >
 					<thead>
 						<tr>
@@ -105,6 +107,7 @@
 			{% with lista_ricevute as lista %}
 				{% if lista %}
 					<form method="post" action="{% url tamFattureGeneraRicevute %}">
+					<input type='hidden' name='data_generazione' value='{{ data_end|date:"d/m/Y" }}' />
 					<table class='tablesorter' id='table_ricevute' style="text-align:center" >
 					<thead>
 						<tr>
