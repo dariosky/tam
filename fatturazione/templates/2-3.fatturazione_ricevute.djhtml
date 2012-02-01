@@ -7,12 +7,13 @@
 
 {# {% if error_message %}<div class='errorlist'>{{error_message}}</div>{% endif %} #}
 <div class='fatturaTipo3'>
-		{{ fatture }} {{plurale}} / {{ lista.count }} corse.<br />
+		{{ fatture }} {{plurale}} / {{ lista.count }} corse. Data generazione: {{ data_generazione|date:"d/m/Y" }}<br />
 		{% if lista %}
 		<form method="post" action="">
 		<div id='gotoRicevute' class='floatingBlock'>
 			<a href="#generaRicevute"><img src='/media/frecciagiu.png' title='genera ricevute taxi'></a>
 		</div>
+		<input type='hidden' name='data_generazione' value='{{ data_generazione|date:"d/m/Y" }}' />
 		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
 		<thead>
 			<tr>

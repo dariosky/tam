@@ -19,7 +19,7 @@ from django.db import transaction
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 	data_start = parseDateString(# dal primo del mese scorso
 									request.GET.get("data_start"),
-									default=datetime.date.today().replace(day=1)
+									default=(datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 								)
 	data_end = parseDateString(# all'ultimo del mese scorso
 									request.GET.get("data_end"),
@@ -135,8 +135,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 							print "converto il valore in un numerico"
 							# tolgo i punti delle migliaia e metto il punto come separatore decimali
 							object_value = object_value.replace(".", "").replace(",", ".")
-							if object_value=='':
-								object_value=0
+							if object_value == '':
+								object_value = 0
 						print "cambio la riga %d" % riga_id
 						print "imposto il valore %s" % object_value
 						setattr(riga, row_ids[prefix], object_value)
