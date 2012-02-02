@@ -889,7 +889,7 @@ class Viaggio(models.Model):
 		else:
 			# Metto in cache la lista dei clienti che possono portare almeno X persone
 			conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
-			print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
+			#print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
 			conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
 		# ************************************************************************************
 		

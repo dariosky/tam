@@ -108,12 +108,21 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			header_ids = {'fat_mittente':'emessa_da', 'fat_note':'note', 'fat_destinatario':'emessa_a',
 							'fat_anno':'anno', 'fat_progressivo':'progressivo',
 						}
+			header_numerici = ['fat_anno', 'fat_progressivo']
 			logAction('C', instance=fattura, description="Valore modificato.", user=request.user)
-			if object_id in header_ids.keys():
+			if object_id in header_ids:
 #				print("cambio il valore di testata da %s a %s" % ( getattr(fattura, header_ids[object_id]),
 #																	object_value)
 #							)
-				if object_id == "fat_progressivo":
+				if object_id in header_numerici:
+					if object_value.strip() == '':	# converto, nei valori numerici, le stringhe vuote in None
+						object_value = None
+					else:	
+						try:
+							object_value = int(object_value)	# altrimenti richiedo un numerico
+						except:
+							return HttpResponse('Ho bisogno di un valore numerico.', status=500)
+				if object_id == "fat_progressivo" and fattura.tipo==1:
 					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value), tipo=fattura.tipo)
 					if esistenti.count() > 0:
 						return HttpResponse("Esiste già una fattura con questo progressivo.", status=500)
@@ -132,13 +141,18 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 						except:
 							return HttpResponse('Non ho trovato la riga corrispondente a %s.' % object_id, status=500)
 						if prefix in row_numerici:
-							print "converto il valore in un numerico"
+							#print "Converto il valore in un numerico"
 							# tolgo i punti delle migliaia e metto il punto come separatore decimali
 							object_value = object_value.replace(".", "").replace(",", ".")
 							if object_value == '':
 								object_value = 0
-						print "cambio la riga %d" % riga_id
-						print "imposto il valore %s" % object_value
+							else:
+								try:
+									object_value = int(object_value)
+								except:
+									return HttpResponse('Ho bisogno di un valore numerico.', status=500)		
+						#print "cambio la riga %d" % riga_id
+						#print "imposto il valore %s" % object_value
 						setattr(riga, row_ids[prefix], object_value)
 						riga.save()
 						return HttpResponse('OK.', status=200)

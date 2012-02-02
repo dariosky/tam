@@ -6,7 +6,9 @@
 		<div id='fat_mittente' class='{% if not fattura.tipo = "1" %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
 		<div id='fat_destinatario' class='editable'>{{fattura.emessa_a}}</div>
 		<div id='fat_data' style='clear: both'>
-			<span class='fat_title'>{{ fattura.nome_fattura }} <span class='editable' id='fat_anno'>{{fattura.anno}}</span>/<span class='editable' id='fat_progressivo'>{{fattura.progressivo}}</span></span>
+			<span class='fat_title'>{{ fattura.nome_fattura }}
+			<span class='editable nullable' id='fat_anno'>{{fattura.anno|default_if_none:" "}}</span> /
+			<span class='editable nullable' id='fat_progressivo'>{{fattura.progressivo|default_if_none:" "}}</span></span>
 			del <span>{{fattura.data}}</span>
 		</div>
 		<div id='fat_note' class='editable'>{{fattura.note}}
@@ -37,7 +39,8 @@
 	
 	<div id='fat_footer' class='pre'>
 		{% if fattura.tipo == "1" %}Si prega di effettuare il pagamento sul conto Corrente:
-		UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824{% endif %}
+		UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824</div>{% endif %}
+		{% if fattura.tipo == '3' %}<div id='privacy'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.{% endif %}
 		{%if fattura.tipo == "1" or fattura.tipo == "3" %}<div id='privacy'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</div>{%endif%}
 	</div>
 </div>

@@ -7,13 +7,21 @@
 .editable, .editable * {
 	margin:0; padding:0;
 }
+.editable.nullable{
+	display:inline-block;
+	min-width:50px;
+	white-space:pre;
+}
 div.editable, .pre {
 	white-space: pre-line;
 }
 .editable textarea {
 	width:100%;
 }
-td.editable input { width:100%; }
+td.editable input {
+	width:100%;
+}
+
 #fat_note {
 	padding:10px;
 	margin: 10px;
