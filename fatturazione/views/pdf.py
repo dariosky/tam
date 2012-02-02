@@ -129,7 +129,11 @@ def render_to_reportlab(context):
 		canvas.setCreator('TaM v.%s' % settings.TAM_VERSION)
 		canvas._doc.info.producer = ('TaM invoices')
 		canvas.setSubject(u"%s" % fattura.nome_fattura())
-		descrittoreFattura = u"%s %s" % (fattura.nome_fattura(), fattura.descrittore())
+		if fattura.tipo == '3':
+			nome = 'Ricevuta'
+		else:
+			nome = 'Fattura'	# Fatture consorzio e conducente si chiamano semplicemente FATTURA	
+		descrittoreFattura = u"%s %s" % (nome, fattura.descrittore())
 		canvas.setTitle(descrittoreFattura)
 
 		# Header ***************
@@ -150,7 +154,12 @@ def render_to_reportlab(context):
 		descrittore.drawOn(canvas, x=x, y=y - descrittore.height)
 		y -= descrittore.height + 10
 
-
+		if fattura.tipo == '2':	# nelle fatture conducente metto il mittente a sinistra
+			fattura_da = Paragraph(fattura.emessa_da.strip().replace('\n', '<br/>'), a_style)
+			fattura_da.wrapOn(canvas, 6.5 * cm, 10 * cm)
+			fattura_da.drawOn(canvas, x, y - fattura_da.height)
+			y -= fattura_da.height
+			y -= 0.2 * cm	# spacer tra mittente e destinatario
 
 		if fattura.note:
 			note = Preformatted(fattura.note, a_style)
@@ -160,7 +169,7 @@ def render_to_reportlab(context):
 
 		if fattura.tipo in ("3"):
 			y = y - 10
-			testata_fissa = Paragraph("<font size='6'>Servizio trasporto emodializzato da Sua Abitazione al centro emodialisi assistito e viceversa come da distinta.</font>", a_style)
+			testata_fissa = Paragraph("<font size='6'>Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta.</font>", a_style)
 			testata_fissa.wrapOn(canvas, width / 2, 2 * cm)
 			y = y - testata_fissa.height
 			testata_fissa.drawOn(canvas, x, y)
@@ -176,17 +185,18 @@ def render_to_reportlab(context):
 		y = height - doc.topMargin
 		x = width - 8 * cm
 
-		fattura_da = Paragraph(fattura.emessa_da.replace('\n', '<br/>'), a_style)
-		fattura_da.wrapOn(canvas, 6.5 * cm, 10 * cm)
-		fattura_da.drawOn(canvas, x, y - fattura_da.height)
-		y -= fattura_da.height
-		spacerMittenteDestinatario = 0.5 * cm
+		if fattura.tipo <> '2':	# nelle fatture conducente metto il mittente a sinistra
+			fattura_da = Paragraph(fattura.emessa_da.strip().replace('\n', '<br/>'), a_style)
+			fattura_da.wrapOn(canvas, 6.5 * cm, 10 * cm)
+			fattura_da.drawOn(canvas, x, y - fattura_da.height)
+			y -= fattura_da.height
+			y -= 0.2 * cm	# spacer tra mittente e destinatario
 
 		fattura_a = Paragraph(fattura.emessa_a.replace('\n', '<br/>'), stondata_style)
 		fattura_a.wrapOn(canvas, 6.5 * cm, 10 * cm)
-		fattura_a.drawOn(canvas, x, y - fattura_a.height - spacerMittenteDestinatario)
+		fattura_a.drawOn(canvas, x, y - fattura_a.height - fattura_a.style.borderPadding)
 
-		y -= fattura_a.height + fattura_a.style.borderPadding * 2 + spacerMittenteDestinatario
+		y -= fattura_a.height + fattura_a.style.borderPadding + 0.5 * cm # spazio finale
 		right_y = y
 		lower_y = min(left_y, right_y)
 
@@ -198,11 +208,24 @@ def render_to_reportlab(context):
 			canvas.drawPath(p)
 		note_finali.drawOn(canvas, doc.leftMargin, doc.bottomMargin)
 
+		# linea sotto l'intestazione
+		canvas.setLineWidth(1)
+		p = canvas.beginPath()
+		p.moveTo(doc.leftMargin, y)
+		p.lineTo(width - doc.rightMargin, y)
+		canvas.drawPath(p)
+
 		doc.pageTemplate.frames = [
 				Frame(doc.leftMargin, doc.bottomMargin + note_finali.height,
 					   width - (doc.leftMargin + doc.rightMargin), y - doc.bottomMargin - note_finali.height,
 					   showBoundary=test), #x,y, width, height
 			]
+		
+		canvas.setLineWidth(0.3)
+		p = canvas.beginPath()
+		p.moveTo(doc.leftMargin,doc.bottomMargin)
+		p.lineTo(width - doc.rightMargin, doc.bottomMargin)
+		canvas.drawPath(p)
 
 		canvas.restoreState()
 
