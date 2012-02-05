@@ -3,15 +3,15 @@
 		{% if fattura.tipo == "1" %}
 			{% if not tam_sstealth %}<img id='fat_logo' src='/media/fatture/logo.jpg'>{%endif%}
 		{% endif %}
-		<div id='fat_mittente' class='{% if not fattura.tipo = "1" %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
-		<div id='fat_destinatario' class='editable'>{{fattura.emessa_a}}</div>
+		<div id='fat_mittente' class='{% if not fattura.tipo = "1" and bigEdit %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
+		<div id='fat_destinatario' class='{% if not fattura.tipo = "2" and bigEdit %}editable{%else%}pre{%endif%}'>{{fattura.emessa_a}}</div>
 		<div id='fat_data' style='clear: both'>
 			<span class='fat_title'>{{ fattura.nome_fattura }}
-			<span class='editable nullable' id='fat_anno'>{{fattura.anno|default_if_none:" "}}</span> /
-			<span class='editable nullable' id='fat_progressivo'>{{fattura.progressivo|default_if_none:" "}}</span></span>
+			<span class='{% if bigEdit or smallEdit %}editable {%endif%}nullable' id='fat_anno'>{{fattura.anno|default_if_none:" "}}</span> /
+			<span class='{% if bigEdit or smallEdit %}editable {%endif%}nullable' id='fat_progressivo'>{{fattura.progressivo|default_if_none:" "}}</span></span>
 			del <span>{{fattura.data}}</span>
 		</div>
-		<div id='fat_note' class='editable'>{{fattura.note}}
+		<div id='fat_note' class='{% if bigEdit %}editable{%endif%}'>{{fattura.note}}
 		</div>
 	</div>
 	

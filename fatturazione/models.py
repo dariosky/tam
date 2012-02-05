@@ -30,6 +30,7 @@ class Fattura(models.Model):
 		verbose_name_plural = "Fatture"
 		ordering = ("anno", "progressivo")
 		permissions = (('generate', 'Genera le fatture'),
+						('smalledit', 'Smalledit: Modificare progressivo e descrizione delle fat.conducente'),
 						('view', 'Visualizzazione fatture'))
 	def __unicode__(self):
 		anno = self.anno or "-"
