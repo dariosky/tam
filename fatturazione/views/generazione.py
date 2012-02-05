@@ -277,6 +277,11 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
 					riga_fattura.qta = 1
 					riga_fattura.prezzo = viaggio.prezzo
+
+					if viaggio.prezzo_sosta > 0:	# se ho una sosta, aggiungo il prezzo della sosta in fattura
+						riga_fattura.prezzo += viaggio.prezzo_sosta
+						riga_fattura.descrizione += " + sosta"
+
 					riga_fattura.iva = 10 if tipo == "1" else 0
 					riga_fattura.viaggio = viaggio
 				else:
