@@ -472,8 +472,13 @@ class Viaggio(models.Model):
 			if the start place is the same time is the time of the travel
 		"""
 		tratta_start = self.tratta_start
-		if tratta_start and tratta_start.is_valid():
-			return self.data - datetime.timedelta(minutes=tratta_start.minuti)
+		anticipo = 0
+		if self.da.speciale == 'A':
+			anticipo += 30	# quando parto da un aeroporto
+		if tratta_start and tratta_start.is_valid():	# tratta iniziale
+			anticipo += tratta_start.minuti
+		if anticipo:
+			return self.data - datetime.timedelta(minutes=anticipo)
 		else:
 			return self.data
 
