@@ -241,6 +241,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 						fattura.anno = anno
 						fattura.progressivo = viaggio.progressivo_fattura
 						fattura.emessa_da = settings.DATI_CONSORZIO
+						fattura.note = 'Pagamento: Bonifico bancario 30 giorni data fattura'
 					elif tipo == "3": # ricevuta: da conducente a cliente
 						fattura.emessa_da = viaggio.conducente_ricevuta.dati or viaggio.conducente_ricevuta.nome
 					elif tipo == "2": #fattura conducente
