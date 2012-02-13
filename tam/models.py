@@ -892,7 +892,7 @@ class Viaggio(models.Model):
 			#print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
 			conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
 		# ************************************************************************************
-		
+
 #		# cache conducenti per capienza GLOBAL STYLE******************************************
 #		global cache_conducentiPerPersona
 #		if self.numero_passeggeri in cache_conducentiPerPersona:
@@ -944,7 +944,7 @@ class Conducente(models.Model):
 		Ogni conducente può essere in servizio o meno.
 	"""
 	nome = models.CharField("Nome", max_length=40, unique=True)
-	dati = models.TextField(null=True, blank=True)
+	dati = models.TextField(null=True, blank=True, help_text='Stampati nelle fattura conducente')
 	nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
 	max_persone = models.IntegerField(default=4)
 	attivo = models.BooleanField(default=True, db_index=True)
@@ -988,7 +988,7 @@ class Conducente(models.Model):
 class Cliente(models.Model):
 	""" Ogni cliente ha le sue caratteristiche, ed eventualmente un suo listino """
 	nome = models.CharField("Nome cliente", max_length=40, unique=True)
-	dati = models.TextField(null=True, blank=True)
+	dati = models.TextField(null=True, blank=True, help_text='Stampati nelle fattura conducente')
 	tipo = models.CharField("Tipo cliente", max_length=1, choices=TIPICLIENTE)
 	fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
 	pagamento_differito = models.BooleanField(default=False)
@@ -1066,6 +1066,16 @@ class PrezzoListino(models.Model):
 
 	tipo_servizio = models.CharField(choices=TIPISERVIZIO, max_length=1, default="T")	# Collettivo o Taxi
 	max_pax = models.IntegerField("Pax Massimi", default=4)
+
+	flag_fatturazione = models.CharField("Fatturazione forzata",
+											max_length=1,
+											choices=[('S', 'Fatturazione richiesta'),
+													 ('N', 'Fatturazione non richiesta'),
+													 ('-', 'Usa impostazioni del cliente'),
+													],
+											default='-',
+											blank=False, null=False,
+										)
 
 	class Meta:
 		verbose_name_plural = _("Prezzi Listino")

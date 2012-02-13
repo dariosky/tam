@@ -32,15 +32,16 @@
 	    <td> {% with priceForm.prezzo_notturno as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td>
 	</tr>
 	<tr>
-	    <td>{% with priceForm.commissione as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}
+	    <td colspan="2">{% with priceForm.commissione as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}
 		{{  priceForm.tipo_commissione }}</td>
 	</tr>
 	<tr>
 	    <td>{% with priceForm.tipo_servizio as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td>
 	    <td>{% with priceForm.max_pax as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td>
 	</tr>
+	<tr><td colspan='2'>{% with priceForm.flag_fatturazione as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}</td></tr>
 	<tr>
-	    <td>
+	    <td colspan='2'>
 		<input name="new_price" value="{% if prezzoid %}Modifica prezzo{% else %}Crea prezzo{% endif %}" type="submit" />
 		<input id="id_delprezzo" type="submit" name="deletePrezzo" value="Cancella prezzo" />
 	    </td>
@@ -66,12 +67,14 @@
 			    {% endif %}
 		    </td>
 		    <td>
-			{% ifequal prezzo.tipo_servizio "C" %}
-			    <img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />
-			{% else %}
-			    <img width="12px" height="12px" src="/media/t.ico" alt="taxi" />
-			{% endifequal %}
-			{{ prezzo.max_pax }}pax
+				{% ifequal prezzo.tipo_servizio "C" %}
+				    <img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />
+				{% else %}
+				    <img width="12px" height="12px" src="/media/t.ico" alt="taxi" />
+				{% endifequal %}
+				{{ prezzo.max_pax }}pax
+				{% if prezzo.flag_fatturazione = 'S' %}<img src='/media/flag/fat_on.png' title='Fatturazione forzata da listino' />{% endif %}
+				{% if prezzo.flag_fatturazione = 'N' %}<img src='/media/flag/fat_off.png' title='Fatturazione disattivata da listino'/>{% endif %}
 		    </td>
 		</tr>
 	    {% endfor %}
