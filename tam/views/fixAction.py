@@ -28,13 +28,13 @@ def fixAction(request, template_name="utils/fixAction.html"):
 			stazione.speciale = 'S'
 			stazione.save()
 			messageLines.append(stazione.nome)
-		aereoporti = Luogo.objects.filter(nome__icontains=' aer').exclude(speciale='A')
-		if len(aereoporti):
-			messageLines.append('%d aereoporti trovati:' % len(aereoporti))
-		for aereoporto in aereoporti:
-			aereoporto.speciale = 'A'
-			aereoporto.save()
-			messageLines.append(aereoporto.nome)
+		aeroporti = Luogo.objects.filter(nome__icontains=' aer').exclude(speciale='A')
+		if len(aeroporti):
+			messageLines.append('%d aeroporti trovati:' % len(aeroporti))
+		for aeroporto in aeroporti:
+			aeroporto.speciale = 'A'
+			aeroporto.save()
+			messageLines.append(aeroporto.nome)
 		
 		from django.contrib.auth.models import Group, Permission
 		gruppo_potenti = Group.objects.get(name='Potente')

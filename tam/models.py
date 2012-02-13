@@ -40,7 +40,7 @@ class Luogo(models.Model):
 	bacino = models.ForeignKey("Bacino", verbose_name="Bacino di appartenenza", null=True, blank=True)
 	speciale = models.CharField("Luogo particolare", max_length=1,
 							default="",
-							choices=(("-", "-"), ("A", "Aereoporto"), ("S", "Stazione")))
+							choices=(("-", "-"), ("A", "Aeroporto"), ("S", "Stazione")))
 	# una delle località sarà  la predefinita... tra le proprietà  dell'utente
 
 	class Meta:

@@ -452,7 +452,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 
 			default["costo_autostrada"] = viaggioStep1.costo_autostrada_default()
 
-			if da != profilo.luogo and da.speciale != "-":	# creando un viaggio di arrivo da una stazione/aereoporto
+			if da != profilo.luogo and da.speciale != "-":	# creando un viaggio di arrivo da una stazione/aeroporto
 				logging.debug("Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€")
 				if da.speciale == "A":
 					default["abbuono_fisso"] = 10
@@ -1049,19 +1049,19 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 
 		if assoType == 'unlink':
 			viaggio.padre = None
-			if viaggio.da.speciale != "-":	# tolgo l'associazione a un viaggio da stazione/aereoporto
+			if viaggio.da.speciale != "-":	# tolgo l'associazione a un viaggio da stazione/aeroporto
 				logging.debug("Deassocio da un luogo speciale, rimetto l'eventuale abbuono di 5/10€")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != 10:
-					request.user.message_set.create(message="Il %d° viaggio è da un aereoporto rimetto l'abbuono di 10€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
+					request.user.message_set.create(message="Il %d° viaggio è da un aeroporto rimetto l'abbuono di 10€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 10
 				elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso != 5:
 					request.user.message_set.create(message="Il %d° viaggio è da una stazione rimetto l'abbuono di 5€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 		elif assoType == 'link':
-			if viaggio.da.speciale != "-":	# associando un viaggio da stazione/aereoporto
+			if viaggio.da.speciale != "-":	# associando un viaggio da stazione/aeroporto
 				logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono di 5/10€")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == 10:
-					request.user.message_set.create(message="Il %d° viaggio è da un aereoporto tolgo l'abbuono di 10€." % contatore)
+					request.user.message_set.create(message="Il %d° viaggio è da un aeroporto tolgo l'abbuono di 10€." % contatore)
 					viaggio.abbuono_fisso = 0
 				elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso == 5:
 					request.user.message_set.create(message="Il %d° viaggio è da una stazione tolgo l'abbuono di 5€." % contatore)
