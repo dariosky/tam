@@ -229,7 +229,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggi = viaggi.filter(cliente__isnull=True)	# solo i privati
 		else:
 			viaggi = viaggi.filter(cliente__id=filterCliente)	# cliente specifico
-			clienteFiltrato = Cliente.objects.get(id=filterCliente) 
+			clienteFiltrato = Cliente.objects.get(id=filterCliente)
 
 	if data_inizio: viaggi = viaggi.filter(data__gt=data_inizio)
 	if data_fine: viaggi = viaggi.filter(data__lt=data_fine) # prossimi 15 giorni
@@ -440,7 +440,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					else:		# "Scelgo il prezzo notturno"
 						default["prezzo"] = prezzolistino.prezzo_notturno
 
-#						
+					if prezzolistino.flag_fatturazione == 'S':
+						default["fatturazione"] = True
+					elif prezzolistino.flag_fatturazione == 'N':
+						default["fatturazione"] = False
+					fatturazione_forzata = prezzolistino.flag_fatturazione
+
 					if prezzolistino.commissione is not None:
 						default["commissione"] = prezzolistino.commissione
 						default["tipo_commissione"] = prezzolistino.tipo_commissione
@@ -673,7 +678,6 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 				form.errors["nome"] = (u"Esiste già un listino con lo stesso nome.",)
 
 	class FormPrezzoListino(forms.ModelForm):
-#		da = forms.CharField(max_length=20)
 		da = forms.ModelChoiceField(Luogo.objects)
 		a = forms.ModelChoiceField(Luogo.objects)
 		class Meta:
@@ -715,13 +719,14 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 			prezzo.prezzo_notturno = priceForm.cleaned_data["prezzo_notturno"]
 			prezzo.commissione = priceForm.cleaned_data["commissione"]
 			prezzo.tipo_commissione = priceForm.cleaned_data["tipo_commissione"]
+			prezzo.flag_fatturazione = priceForm.cleaned_data["flag_fatturazione"]
 			prezzo.save()
 			request.user.message_set.create(message=u"Ho aggiunto il prezzo %s." % prezzo)
 			return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 
 	# tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
 	if listino:
-		prezziset = listino.prezzolistino_set.all()
+		prezziset = listino.prezzolistino_set.select_related().all()
 		dictDa = {}
 		for prezzo in prezziset:
 			listDa = dictDa.get("%s" % prezzo.tratta.da.nome, [])
