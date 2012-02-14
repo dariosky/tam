@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Changelog &raquo; {{ block.super }}{% endblock %}
+
 {% block content %}
 
 <h1>Cronologia revisioni</h1>
@@ -9,10 +11,11 @@
 	</tr>
 	<tr>
 		<td>13/2/2012</td>
-		<td><b>3.1</b></td>
+		<td>3.1</td>
 		<td>
-			<p>Quando parto da un aeroporto tengo conto di mezz'ora in più oltre al tempo necessario per arrivare.</p>
-			<p>Aggiunto un flag ai listini per forzare la fatturazione, per forzare la NON fatturazione o per lasciare l'impostazione del cliente.</p>
+			Quando parto da un aeroporto tengo conto di mezz'ora in più oltre al tempo necessario per arrivare.<br/>
+			Aggiunto un flag ai listini per forzare la fatturazione, per forzare la NON fatturazione o per lasciare l'impostazione del cliente.<br/>
+			I punti supplementari ora sono frazionari (a quarti) ottenuti in modo lineare (&frac14; di punto ogni &frac12; ora)
 		</td>
 	</tr>
 	
