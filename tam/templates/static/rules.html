@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Regole &raquo; {{ block.super }}{% endblock %}
+
 {% block css %}
 	{{ block.super }}
 	<link rel="stylesheet" href="/media/css/tamrules.css" type="text/css"/>
@@ -67,6 +69,6 @@
 	<tr> <td>04:00-06:00]</td> <td>2 punti diurno</td> </tr>
 	<tr> <td>06:00-07:45]</td> <td>1 punti diurno</td> </tr>
 	<tr> <td>[20:30-22:30] o [20:00-22:30] sabato e domenica</td> <td>1 punti notturno</td> </tr>
-	<tr> <td>[00:00-04:00]</td> <td>2 punti notturni</td> </tr>
+	<tr> <td>22:30-04:00]</td> <td>2 punti notturni</td> </tr>
 </table>
 {% endblock content %}
