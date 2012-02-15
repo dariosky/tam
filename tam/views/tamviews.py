@@ -247,9 +247,9 @@ def listaCorse(request, template_name="corse/lista.html"):
 	elif filterType == u"Padova":
 		viaggi = viaggi.filter(prezzoPadova__gt=0)
 	elif filterType == u"Doppi Padova":
-		viaggi = viaggi.filter(prezzoDoppioPadova__gt=0)
+		viaggi = viaggi.filter(prezzoDoppioPadova__gt=0) | viaggi.filter(padre__prezzoDoppioPadova__gt=0)
 	elif filterType == u"Doppi Venezia":
-		viaggi = viaggi.filter(punti_abbinata__gt=0)
+		viaggi = viaggi.filter(punti_abbinata__gt=0) | viaggi.filter(padre__punti_abbinata__gt=0)
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
