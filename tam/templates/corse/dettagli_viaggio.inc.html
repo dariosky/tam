@@ -1,38 +1,47 @@
-{% load utilTag %}
-{% load media %}
-{% spaceless %}
+{% load utilTag %}{% load media %}
+<div class="trip_detail">
 {% num_range viaggio.punti_diurni as range_diurni %}
 {% for i in range_diurni %}<img class='morning' src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
 {% num_range viaggio.punti_notturni as range_notturni %}
 {% for i in range_notturni %}<img class='evening' src="{% media_url "night.png" %}" alt="*" />{% endfor %}
-<div class="trip_detail">
-{% with viaggio.tratta_start as tratta_start %}
+
+{% with nextfratello=viaggio.nextfratello tratta_start=viaggio.tratta_start tratta_end=viaggio.tratta_end %}
+	{# *** TRATTA INIZIALE *** #}
     {% if tratta_start %}
     	{% if viaggio.prefratello %}{{ viaggio.prefratello.a }} <img src="{% media_url "arrow_right.png" %}" alt="..." />{% endif %}
-		{% if tratta_start.is_valid %}partenza alle {{ viaggio.date_start|date:"H:i" }},{% else %}<a href="{% url tamTrattaId tratta_start.id %}" class="errorlist">pretratta scononosciuta</a>{% endif %}
-	<br/>
+		{% if tratta_start.is_valid %}
+			partenza alle {{ viaggio.date_start|date:"H:i" }}
+		{% else %}
+			<a href="{% url tamTrattaId tratta_start.id %}" class="errorlist">tratta {{tratta_start.da}}-{{tratta_start.a}} scononosciuta</a>
+		{% endif %}
+		<br/>
     {% endif %}
-{% endwith %}
-{% if viaggio.tratta %}
-    {% if viaggio.tratta.is_valid %}
-        da {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='/media/flag/luogo-airport.png' />{% endif%} a {{ viaggio.a }} in {{ viaggio.tratta.minuti }}min.
-    {% else %}
-        <a href="{% url tamTrattaId viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>
-    {% endif %}
+
+	{# *** TRATTA CENTRALE *** #}
+	{% if viaggio.tratta %}
+	    {% if viaggio.tratta.is_valid %}
+	        {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='/media/flag/luogo-airport.png' /> (attendo 30 minuti){% endif%}
+	        - {% if nextfratello %}{{ nextfratello.da }}{% else %}{{ viaggio.a }}{% endif %}
+	    {% else %}
+        	<a href="{% url tamTrattaId viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>
+    	{% endif %}
     <br/>
-{% endif %}
-{% with viaggio.tratta_end as tratta_end %}
-    {% if tratta_end %}
-	{% if tratta_end.is_valid %}
-	    {% if viaggio.nextfratello %}continuo fino a {{ viaggio.nextfratello.da }}{% else %}ritorno alle{% endif %}
-	    {{ viaggio.date_end|date:"H:i" }}.
-	{% else %}<a href="{% url tamTrattaId tratta_end.id %}" class="errorlist">finetratta scononosciuta</a>
 	{% endif %}
+	
+	{# *** TRATTA FINALE *** #}
+    {% if tratta_end %}
+		{% if tratta_end.is_valid %}
+		    {% if nextfratello %}arrivo alle {{ viaggio.date_end|date:"H:i" }}{% endif %}
+		{% else %}
+			<a href="{% url tamTrattaId tratta_end.id %}" class="errorlist">tratta {{tratta_end.da}}-{{tratta_end.a}} scononosciuta</a>
+		{% endif %}
     {% endif %}
-{% endwith %}
-{% if viaggio.nextfratello %}
+{% if nextfratello %}
     {% with viaggio.sostaFinaleMinuti as minutifermo  %}{% ifnotequal minutifermo 0 %}sosta di {{ minutifermo }} m.{% endifnotequal %}{% endwith %}
 	<img src="{% media_url "arrow_right.png" %}" alt="..." />
+{% else %}
+	ritorno alle {{ viaggio.date_end|date:"H:i" }}
 {% endif %}
 </div>
-{% endspaceless %}
+
+{% endwith %}

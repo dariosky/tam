@@ -12,5 +12,8 @@
 {% endifequal %}
 {% if not viaggio.padre_id and not viaggio.conducente_confermato %}</a>{% endif %}
 <br/>
-{# {% include "corse/dettagli_viaggio.inc.html" %} #}
-{{ viaggio.html_tragitto|safe }}
+{% if tam_stealth %}
+	{{ viaggio.get_html_tragitto|safe }}
+{% else %}	
+	{{ viaggio.html_tragitto|safe }}
+{% endif %}
