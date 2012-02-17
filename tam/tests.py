@@ -1,3 +1,4 @@
+#coding: utf-8
 '''
 Created on 28/mar/2011
 
@@ -27,3 +28,13 @@ print sum(d.values())
 trattaMia.delete()
 inizio.delete()
 fine.delete()
+
+# Spaceless test
+from tam.models import reallySpaceless
+s = """ Questa è una prova
+				fatta da molti spazi
+		vorrei      ottimizzare un po' la cosa
+"""
+s = reallySpaceless(s)
+print s
+assert(s == "Questa è una prova fatta da molti spazi vorrei ottimizzare un po' la cosa")

@@ -19,6 +19,7 @@ from tamArchive.models import ViaggioArchive
 from tam.views import SmartPager
 from tam.models import logAction
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
+from tam.models import reallySpaceless
 
 archiveNotBefore_days = 365
 
@@ -59,6 +60,7 @@ def vacuum_db(using='default'):
 def archiveFromViaggio(viaggio):
 	""" Crea una voce di archivio dato un viaggio """
 	html_tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": viaggio})
+	html_tragitto = reallySpaceless(html_tragitto)
 	voceArchivio = ViaggioArchive(
 			data=viaggio.data,
 			da=viaggio.da,

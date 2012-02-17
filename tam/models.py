@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.db import connections
 from django.db.models import signals
 from tam.middleware import threadlocals
+import re
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -30,6 +31,11 @@ kmPuntoAbbinate = Decimal(120)
 #	cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
 #	cache.delete(cache_key)
 # ******************
+
+def reallySpaceless(s):
+	""" Given a string, removes all double spaces and tab """
+	s = re.sub('[\s\t][\s\t]+', " ", s, flags=re.DOTALL).strip()
+	return s
 
 class Luogo(models.Model):
 	""" Indica un luogo, una destinazione conosciuta.
@@ -311,8 +317,7 @@ class Viaggio(models.Model):
 				else:
 					self.punti_diurni += points
 
-		tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": self})
-		self.html_tragitto = tragitto
+		self.html_tragitto = self.get_html_tragitto()
 
 		for field in fields:
 			if oldValues[field] != getattr(self, field):
@@ -326,6 +331,12 @@ class Viaggio(models.Model):
 			for figlio in self.viaggio_set.all():
 				figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave)
 
+	def get_html_tragitto(self):
+		""" Ritorna il tragitto da template togliendogli tutti gli spazi """
+		tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": self})
+		tragitto = reallySpaceless(tragitto)
+		return tragitto
+		
 	def save(self, *args, **kwargs):
 		"""Ridefinisco il salvataggio dei VIAGGI per popolarmi i campi calcolati"""
 		if not self.conducente:	# quando confermo o richiedo un conducente DEVO avere un conducente
@@ -467,14 +478,13 @@ class Viaggio(models.Model):
 		else:
 			return 0
 
+
 	def _date_start(self):
 		""" Return the time to start to be there in time, looking Tratte
 			if the start place is the same time is the time of the travel
 		"""
 		tratta_start = self.tratta_start
 		anticipo = 0
-		if self.da.speciale == 'A':
-			anticipo += 30	# quando parto da un aeroporto
 		if tratta_start and tratta_start.is_valid():	# tratta iniziale
 			anticipo += tratta_start.minuti
 		if anticipo:
@@ -494,6 +504,10 @@ class Viaggio(models.Model):
 		tratta_end = ultimaCorsa.tratta_end
 		end_time = ultimaCorsa.data
 #		logging.debug("Partiamo da %s"%end_time)
+
+		if self.da.speciale == 'A':
+			end_time += datetime.timedelta(minutes=30)	# quando parto da un aeroporto aspetto 30 minuti
+
 		if tratta and tratta.is_valid():	 # add the runtime of this tratta
 #			logging.debug("Aggiungo %s per la tratta %s" %(tratta.minuti, tratta))
 			end_time += datetime.timedelta(minutes=tratta.minuti)
@@ -520,10 +534,11 @@ class Viaggio(models.Model):
 #		if start.hour> and end.hour>22: return result
 		return result
 
-	def disturbi(self):
+
+	def disturbi(self, date_start=None, date_end=None):
 		""" Restituisce un dizionario di "codiceFascia":punti con le fasce e i punti disturbo relativi.
-			Ho due fasce mattutine 4-6, 6-8 di due e un punto
-			due fasce serali 20-22, 22-4
+			Ho due fasce mattutine 4-6, 6-7:45 di due e un punto
+			due fasce serali 20-22:30, 22:30-4
 			a due a due hanno lo stesso codice prefissato con la data in cui la fascia comincia
 			Il disturbo finale per una fascia è il massimo del valore di tutte le se sottofascie componenti
 		"""
@@ -541,12 +556,12 @@ class Viaggio(models.Model):
 			if fascia_start <= date_start < fascia_end or \
 			fascia_start < date_end <= fascia_end or \
 			(date_start < fascia_start and date_end > fascia_end):
-				logging.debug("mi disturba [%d] la fascia %s" % (points, fasciaKey))
+				#print "mi disturba [%d] la fascia %s" % (points, fasciaKey)
 				result[fasciaKey] = max(result.get(fasciaKey), points)
 
-		date_start = self.date_start
-		date_end = self.date_end(recurse=True)
-		logging.debug("Disturbo dalle %s alle %s" % (date_start, date_end))
+		if date_start is None: date_start = self.date_start
+		if date_end is None: date_end = self.date_end(recurse=True)
+		#print "Disturbo dalle %s alle %s" % (date_start, date_end)
 		dayMarker = date_start.replace()   # creo una copia
 		#daymaker mi serve per scorrere tra i giorni, partendo da quello di date_start al giorno di arrivo
 		result = {}
@@ -596,7 +611,9 @@ class Viaggio(models.Model):
 		nextbro = self.nextfratello
 		if nextbro and nextbro.da == self.a:	# se il successivo parte da dove arrivo è sicuramente un collettivo in successione
 			return False
-		if nextbro and nextbro.data < self.data + datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti):
+		if nextbro and nextbro.data < \
+			self.data + datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti + (30 if self.da.speciale == "A" else 0)):
+			# tengo conto che questa corsa dura 30 minuti in più se parte da un aereoporto
 #			logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
 			return True
 		else:
