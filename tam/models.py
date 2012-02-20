@@ -305,7 +305,7 @@ class Viaggio(models.Model):
 			# i figli non prendono nulla
 
 		if self.padre is None:
-			for (key, fascia), points in self.disturbi().items(): #@UnusedVariable
+			for (key, fascia), points in self.disturbiUnaDuePalline().items(): #@UnusedVariable
 				if fascia == "night":
 					self.punti_notturni += points
 				else:
@@ -520,7 +520,7 @@ class Viaggio(models.Model):
 #		if start.hour> and end.hour>22: return result
 		return result
 
-	def disturbi(self):
+	def disturbiUnaDuePalline(self):
 		""" Restituisce un dizionario di "codiceFascia":punti con le fasce e i punti disturbo relativi.
 			Ho due fasce mattutine 4-6, 6-8 di due e un punto
 			due fasce serali 20-22, 22-4
