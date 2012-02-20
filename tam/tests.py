@@ -21,7 +21,7 @@ v = Viaggio(da=inizio, a=fine, data=datetime.datetime(2011, 03, 28, 12, 15, 00))
 v.luogoDiRiferimento = inizio
 v.updatePrecomp()
 
-d = v.disturbi()
+d = v.disturbiLineari()
 print "Disturbi: %s" % d
 print sum(d.values())
 trattaMia.delete()
