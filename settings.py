@@ -2,7 +2,7 @@
 import os
 from socket import gethostname
 
-TAM_VERSION = "3.1"
+TAM_VERSION = "3.2"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 host = gethostname().lower()
@@ -258,15 +258,9 @@ PRODUCTION_MEDIA_URL = '/mediaprod/'
 GLOBAL_MEDIA_DIRS = (os.path.join(os.path.dirname(__file__), 'media'),)
 MEDIA_BUNDLES = (
 	# CSS *************
-	('tam.css',
-		'css/tam.css',
-	),
-	('tam-stealth.css',
-		'css/tam-stealth.css',
-	),
-	('fatturaHtml.css',
-		'css/fatture.css',
-	),
+	('tam.css', 'css/tam.css',),
+	('tam-stealth.css', 'css/tam-stealth.css',),
+	('fatturaHtml.css', 'css/fatture.css',),
 	('tamUI.css',
 		'jquery.ui/css/ui-lightness/jquery-ui-1.8.16.custom.css',
 		'css/tam.css',
@@ -286,9 +280,8 @@ MEDIA_BUNDLES = (
 		'jquery.ui/js/jquery-ui-1.8.16.custom.min.js', 'js/calendarPreferences.js',
 		'js/tam-common.js', 'js/jquery.scrollTo-min.js', 'js/listaCorse.js',
 	),
-	('selFatture.js',
-		'js/fatture/table_selector.js'
-	),
+	('selFatture.js', 'js/fatture/table_selector.js'),
+	('tamRules.css', 'css/tamrules.css')	,		
 )
 YUICOMPRESSOR_PATH = os.path.join(PROJECT_PATH, 'yuicompressor.jar')
 if os.path.exists(YUICOMPRESSOR_PATH):

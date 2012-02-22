@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load media %}
 
 {% block title %}Nuova corsa &raquo; {{ block.super }}{% endblock %}
 
@@ -50,8 +50,8 @@
 		{% else %}
 			{% if prezzoDaListinoDiurno %}Prezzo diurno{% endif %}
 			{% if prezzoDaListinoNotturno %}Prezzo notturno{% endif %}
-			{% if fatturazione_forzata = 'S' %}<img src='/media/flag/fat_on.png' title='Fatturazione forzata da listino' />{% endif %}
-			{% if fatturazione_forzata = 'N' %}<img src='/media/flag/fat_off.png' title='Fatturazione disattivata da listino'/>{% endif %}
+			{% if fatturazione_forzata = 'S' %}<img src='{% media_url "flag/fat_on.png" %}' title='Fatturazione forzata da listino' />{% endif %}
+			{% if fatturazione_forzata = 'N' %}<img src='{% media_url "flag/fat_off.png" %}' title='Fatturazione disattivata da listino'/>{% endif %}
 			<table style='text-align:left; margin:auto;'>
 				{{ form }}
 				{% if viaggio.passeggero %}
@@ -94,7 +94,7 @@
                     {% if deleteUrl %}
 							<br/>
 							<a href="{{ deleteUrl }}">
-								<img src="/media/delbtn.png" alt="Cancella corsa" />
+								<img src="{% media_url "delbtn.png" %}" alt="Cancella corsa" />
 		                    </a>
 					{% endif %}
                 {% endwith %}
@@ -135,10 +135,10 @@
 		}
 		window.onbeforeunload=askConfirm;
 		{% if da_speciale = "A" %}
-			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-airport.png" />');
+			$("#id_abbuono_fisso").parent().append('<img src="{% media_url "flag/luogo-airport.png" %}" />');
 		{% endif%}
 		{% if da_speciale = "S" %}
-			$("#id_abbuono_fisso").parent().append('<img src="/media/flag/luogo-train.png" />');
+			$("#id_abbuono_fisso").parent().append('<img src="{% media_url "flag/luogo-train.png" %}" />');
 		{% endif%}
 	} );
 </script>
