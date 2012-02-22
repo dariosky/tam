@@ -1,4 +1,4 @@
-{% load utilTag %}
+{% load utilTag %}{% load media %}
 <div>
 <h2><a href="#">Supplementari mattutini</a></h2>
 <div>
@@ -16,7 +16,7 @@
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td>{{ classifica.conducente }}</td>
 		<td>
-			<img src="/media/morning.png" alt="*" /> x {{ punti }}
+			<img src="{% media_url "morning.png" %}" alt="*" /> x {{ punti }}
 		</td>
 	    </tr>
 	{% endfor %}
@@ -41,7 +41,7 @@
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td>{{ classifica.conducente }}</td>
 		<td>
-			<img src="/media/night.png" alt="*" /> x {{ punti }}
+			<img src="{% media_url "night.png" %}" alt="*" /> x {{ punti }}
 		</td>
 	    </tr>
 	{% endfor %}

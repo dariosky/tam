@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.db import connections
 from django.db.models import signals
 from tam.middleware import threadlocals
+from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -96,6 +97,7 @@ class Tratta(models.Model):
 		return reverse("tamTrattaIdDel", kwargs={"id":self.id})
 
 	def save(self, *args, **kwargs):
+		""" Salvo la tratta """
 		super(Tratta, self).save(*args, **kwargs)
 		# aggiorno tutte le corse precalcolate con questa tratta
 		viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
@@ -176,8 +178,8 @@ class Viaggio(models.Model):
 	tratta_start = models.ForeignKey(Tratta, null=True, blank=True, related_name='viaggio_start_set', editable=False)
 	tratta_end = models.ForeignKey(Tratta, null=True, blank=True, related_name='viaggio_end_set', editable=False)
 	is_abbinata = models.CharField(max_length=1, null=True, blank=True, editable=False)	# tipo di abbinata (null: non è abbinata, P: partenza, successiva altrimenti)
-	punti_notturni = models.IntegerField(default=0, editable=False)
-	punti_diurni = models.IntegerField(default=0, editable=False)
+	punti_notturni = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False) # float con 2 decimali
+	punti_diurni = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False) # float
 	km = models.IntegerField(default=0, editable=False)	# numero di chilometri per la riga (le 3 tratte)
 	arrivo = models.BooleanField(default=True, editable=False)	# tipo di viaggio True se è un arrivo
 	is_valid = models.BooleanField(default=True, editable=False)	# True se il viaggio ha tutte le tratte definite
@@ -270,7 +272,7 @@ class Viaggio(models.Model):
 		forzaSingolo = (numDoppi is 0)
 		self.prezzo_finale = self.get_value(forzaSingolo=forzaSingolo)	# richiede le tratte
 
-		self.punti_diurni = self.punti_notturni = 0	# Precalcolo i punti disturbo della corsa
+		self.punti_diurni = self.punti_notturni = 0.0	# Precalcolo i punti disturbo della corsa
 		self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
 		self.punti_abbinata = self.prezzoPunti = 0
 
@@ -305,7 +307,7 @@ class Viaggio(models.Model):
 			# i figli non prendono nulla
 
 		if self.padre is None:
-			for (key, fascia), points in self.disturbiUnaDuePalline().items(): #@UnusedVariable
+			for fascia, points in self.disturbi().items():
 				if fascia == "night":
 					self.punti_notturni += points
 				else:
@@ -520,7 +522,7 @@ class Viaggio(models.Model):
 #		if start.hour> and end.hour>22: return result
 		return result
 
-	def disturbiUnaDuePalline(self):
+	def disturbi(self):
 		""" Restituisce un dizionario di "codiceFascia":punti con le fasce e i punti disturbo relativi.
 			Ho due fasce mattutine 4-6, 6-8 di due e un punto
 			due fasce serali 20-22, 22-4
@@ -529,6 +531,12 @@ class Viaggio(models.Model):
 		"""
 		if self.conducente_richiesto:
 			return {}
+		if self.date_start < datetime.datetime(2012, 3, 1):
+			metodo = fasce_uno_due
+		else:
+			metodo = fasce_semilineari
+		return trovaDisturbi(self.date_start, self.date_end(recurse=True), metodo=metodo)
+
 		def aggiungi_fascia(h_start, min_start, h_end, m_end, points, fasciaKey):
 			""" Aggiungo a result il codice della fascia con la data prefissata e i punti indicati se
 				la corsa tra date_start e date_end tocca nel giorno indicato da dayMarker tra le ore h_start:m_start e h_end:m_end
@@ -568,6 +576,7 @@ class Viaggio(models.Model):
 							fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "night"))
 			dayMarker = dayMarker + datetime.timedelta(days=1)	# passa il giorno
 		return result
+
 
 	def get_kmrow(self):
 		""" Restituisce il N° di KM totali di corsa con andata, corsa e ritorno """
@@ -943,6 +952,19 @@ class Viaggio(models.Model):
 		conducenti.sort()
 		return [c[1] for c in conducenti] + inattivi
 
+	def punti_notturni_interi_list(self):
+		return  range(int(self.punti_notturni))
+	def punti_notturni_quarti(self):
+		""" Restituisce la parte frazionaria dei notturni """
+		return  self.punti_notturni % 1
+
+	def punti_diurni_interi_list(self):
+		return  range(int(self.punti_diurni))
+	def punti_diurni_quarti(self):
+		""" Restituisce la parte frazionaria dei notturni """
+		return  self.punti_diurni % 1
+
+
 
 class Conducente(models.Model):
 	""" I conducuenti, ogni conducente avrà la propria classifica, ed una propria vettura.
@@ -956,8 +978,8 @@ class Conducente(models.Model):
 	emette_ricevute = models.BooleanField(default=True)
 	assente = models.BooleanField(default=False)
 
-	classifica_iniziale_diurni = models.IntegerField("Supplementari diurni", default=0)
-	classifica_iniziale_notturni = models.IntegerField("Supplementari notturni", default=0)
+	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=9, decimal_places=2, default=0)
+	classifica_iniziale_notturni = models.DecimalField("Supplementari notturni", max_digits=9, decimal_places=2, default=0)
 
 	classifica_iniziale_puntiDoppiVenezia = models.IntegerField("Punti Doppi Venezia", default=0)
 	classifica_iniziale_prezzoDoppiVenezia = models.DecimalField("Valore Doppi Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
