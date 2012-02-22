@@ -1,10 +1,21 @@
 {% load utilTag %}
 {% load media %}
-{% spaceless %}
-{% num_range viaggio.punti_diurni as range_diurni %}
-{% for i in range_diurni %}<img class='morning' src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
-{% num_range viaggio.punti_notturni as range_notturni %}
-{% for i in range_notturni %}<img class='evening' src="{% media_url "night.png" %}" alt="*" />{% endfor %}
+{% if viaggio.punti_diurni or viaggio.punti_notturni %}
+<div class='supplementari'>
+	{%if viaggio.punti_diurni %}
+		{% for i in viaggio.punti_diurni_interi_list %}<img src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
+		{% if viaggio.punti_diurni_quarti = 0.25 %}<img src="{% media_url "morning14.png" %}" alt="1/4" />{% endif %}
+		{% if viaggio.punti_diurni_quarti = 0.50 %}<img src="{% media_url "morning24.png" %}" alt="2/4" />{% endif %}
+		{% if viaggio.punti_diurni_quarti = 0.75 %}<img src="{% media_url "morning34.png" %}" alt="3/4" />{% endif %}
+	{% endif %}
+	{%if viaggio.punti_notturni %}
+		{% for i in viaggio.punti_notturni_interi_list %}<img src="{% media_url "night.png" %}" alt="*" />{% endfor %}
+		{% if viaggio.punti_notturni_quarti = 0.25 %}<img src="{% media_url "night14.png" %}" alt="1/4" />{% endif %}
+		{% if viaggio.punti_notturni_quarti = 0.50 %}<img src="{% media_url "night24.png" %}" alt="2/4" />{% endif %}
+		{% if viaggio.punti_notturni_quarti = 0.75 %}<img src="{% media_url "night34.png" %}" alt="3/4" />{% endif %}
+	{% endif %}
+</div>
+{% endif %}
 <div class="trip_detail">
 {% with viaggio.tratta_start as tratta_start %}
     {% if tratta_start %}
@@ -15,7 +26,7 @@
 {% endwith %}
 {% if viaggio.tratta %}
     {% if viaggio.tratta.is_valid %}
-        da {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='/media/flag/luogo-airport.png' />{% endif%} a {{ viaggio.a }} in {{ viaggio.tratta.minuti }}min.
+        da {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='{% media_url "flag/luogo-airport.png" %}' />{% endif%} a {{ viaggio.a }} in {{ viaggio.tratta.minuti }}min.
     {% else %}
         <a href="{% url tamTrattaId viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>
     {% endif %}
@@ -35,4 +46,3 @@
 	<img src="{% media_url "arrow_right.png" %}" alt="..." />
 {% endif %}
 </div>
-{% endspaceless %}
