@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load media %}
 
 {% block title %}Regole &raquo; {{ block.super }}{% endblock %}
 
 {% block css %}
 	{{ block.super }}
-	<link rel="stylesheet" href="/media/css/tamrules.css" type="text/css"/>
+	<link rel="stylesheet" href="{% media_url 'tamRules.css' %}" type="text/css"/>
 {% endblock css %}
 
 {% block content %}
@@ -64,8 +64,15 @@
 	</li>
 </ul>
 
+<div>
+	La classifica supplementari divide le fasce notturne e mattutine in fasce di mezz'ora ognuna.<br/>
+	I punti supplementari di una corsa sono ottenuti guardando il valore della fascia più alta incontrata.<br/>
+	Qui il PDF con i valori delle fasce, notturni e diurni, per i giorni feriali e per quelli festivi.<br/>
+	<a href='/media/fasce_supplementari_semilineari.pdf' target="_blank">Fasce supplementari [PDF].</a>
+</div>
+
 <table class="manu-table">
-	<tr> <th colspan="2">Fasce orarie supplementari</th> </tr>
+	<tr> <th colspan="2">Fasce orarie supplementari (prima del 1/3/2012)</th> </tr>
 	<tr> <td>04:00-06:00]</td> <td>2 punti diurno</td> </tr>
 	<tr> <td>06:00-07:45]</td> <td>1 punti diurno</td> </tr>
 	<tr> <td>[20:30-22:30] o [20:00-22:30] sabato e domenica</td> <td>1 punti notturno</td> </tr>

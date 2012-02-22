@@ -1,9 +1,21 @@
 {% load utilTag %}{% load media %}
 <div class="trip_detail">
-{% num_range viaggio.punti_diurni as range_diurni %}
-{% for i in range_diurni %}<img class='morning' src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
-{% num_range viaggio.punti_notturni as range_notturni %}
-{% for i in range_notturni %}<img class='evening' src="{% media_url "night.png" %}" alt="*" />{% endfor %}
+{% if viaggio.punti_diurni or viaggio.punti_notturni %}
+<div class='supplementari'>
+	{%if viaggio.punti_diurni %}
+		{% for i in viaggio.punti_diurni_interi_list %}<img src="{% media_url "morning.png" %}" alt="*" />{% endfor %}
+		{% if viaggio.punti_diurni_quarti = 0.25 %}<img src="{% media_url "morning14.png" %}" alt="1/4" />{% endif %}
+		{% if viaggio.punti_diurni_quarti = 0.50 %}<img src="{% media_url "morning24.png" %}" alt="2/4" />{% endif %}
+		{% if viaggio.punti_diurni_quarti = 0.75 %}<img src="{% media_url "morning34.png" %}" alt="3/4" />{% endif %}
+	{% endif %}
+	{%if viaggio.punti_notturni %}
+		{% for i in viaggio.punti_notturni_interi_list %}<img src="{% media_url "night.png" %}" alt="*" />{% endfor %}
+		{% if viaggio.punti_notturni_quarti = 0.25 %}<img src="{% media_url "night14.png" %}" alt="1/4" />{% endif %}
+		{% if viaggio.punti_notturni_quarti = 0.50 %}<img src="{% media_url "night24.png" %}" alt="2/4" />{% endif %}
+		{% if viaggio.punti_notturni_quarti = 0.75 %}<img src="{% media_url "night34.png" %}" alt="3/4" />{% endif %}
+	{% endif %}
+</div>
+{% endif %}
 
 {% with nextfratello=viaggio.nextfratello tratta_start=viaggio.tratta_start tratta_end=viaggio.tratta_end %}
 	{# *** TRATTA INIZIALE *** #}

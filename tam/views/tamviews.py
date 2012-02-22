@@ -2,16 +2,20 @@
 from django.shortcuts import render_to_response, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect	#use the redirects
 #from django.contrib import auth	# I'll use authentication
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
 from django import forms
 from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
-from tam.models import * #@UnusedWildImport
+import datetime
+from tam.models import Luogo, get_classifiche, logAction, Cliente, \
+	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, kmPuntoAbbinate, Listino, \
+	ProfiloUtente, Viaggio, Passeggero
 import time
 from django.db import IntegrityError
 #from django.db import connection
 from django.core.paginator import Paginator
 from genericUtils import *
+from django.db import models
 
 # Creo gli eventuali permessi mancanti
 from django.contrib.auth.management import create_permissions
@@ -19,8 +23,12 @@ from django.db.models import get_apps
 from django.db.models.aggregates import Count
 from django.views.decorators.cache import cache_page #@UnusedImport
 from django.utils import simplejson
+from django.core.urlresolvers import reverse
+import logging
+from decimal import Decimal
 for app in get_apps():
 	create_permissions(app, None, 2)
+from django.db import connections
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -387,8 +395,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		else:
 			form.initial["esclusivo"] = "c"
 
-		if step == 1 and viaggio.padre:
-			return HttpResponseRedirect(destination2)	# ai figli non si può cambiare lo step1
+		if step == 1:
+			if viaggio.is_abbinata: # ai figli non si può cambiare lo step1
+				# 21/2/2012 ... anche ai padri non lascio cambiare la prima pagina. Non voglio che cambi la data.
+				return HttpResponseRedirect(destination2)	
+				#form.fields['data'].widget.attrs['readonly'] = True
+
 	else:  # new form
 		cliente = step1.get("cliente", None)
 #		form.initial["data"]=datetime.datetime.now()	# 5/10/2009 tolgo il default per la data
