@@ -1028,6 +1028,12 @@ class Conducente(models.Model):
 		return reverse("tamConducenteIdDel", kwargs={"id":self.id})
 	def url(self):
 		return reverse("tamConducenteId", kwargs={"id":self.id})
+	
+	def ricevute(self):
+		""" Ritorno le ricevute emesse da questo conducente """
+		from fatturazione.models import Fattura
+		ricevute = Fattura.objects.filter(tipo='3', righe__conducente=self)
+		return ricevute.distinct()
 
 class Cliente(models.Model):
 	""" Ogni cliente ha le sue caratteristiche, ed eventualmente un suo listino """
