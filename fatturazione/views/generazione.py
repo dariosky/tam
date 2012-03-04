@@ -15,6 +15,7 @@ from django.db import transaction
 from django.db.models.aggregates import Max
 from django.contrib.auth.decorators import permission_required
 from decimal import Decimal
+import random
 
 """
 Generazione fatture:
@@ -184,6 +185,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 #				print "precedenti\n", precedenti
 				conducenti_estraibili = [c.id for c in conducenti_ricevute]
 				for c in precedenti:
+					print "elimino %d che ha già fatturato" % c[2]
 					del conducenti_estraibili[conducenti_estraibili.index(c[2])]	# tolgo quelli che hanno già fatturato
 				if conducenti_estraibili:
 #					print "Ho conducenti che non hanno mai fatturato."
@@ -195,9 +197,10 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 						data, nick, id = c
 						if data > ultima_data: break
 						conducenti_estraibili.append(id)
-#				print "Estraibili:", conducenti_estraibili
+				random.shuffle(conducenti_estraibili)		
+				print "Estraibili:", conducenti_estraibili
 				conducente = conducenti_estraibili[progressivo % len(conducenti_estraibili)]
-#				print "Pesco con progressivo %d: %s" % (progressivo, conducente)
+				print "Pesco con progressivo %d: %s" % (progressivo, conducente)
 				conducenteRicevuta = Conducente.objects.get(id=conducente)
 			lastKey = key
 			fatture += 1
