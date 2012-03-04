@@ -14,6 +14,7 @@ from django.core.urlresolvers import reverse
 from fatturazione.views.pdf import render_to_reportlab#, render_with_pisa
 from tam.models import logAction
 from django.db import transaction
+from decimal import Decimal
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -60,6 +61,10 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 		request.user.message_set.create(message="Fattura non trovata.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
+	bigEdit = request.user.has_perm('fatturazione.generate')
+	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
+	editable = bigEdit or smallEdit
+	readonly = not editable
 
 	if request.is_ajax():
 		action = request.POST.get('action')
@@ -105,6 +110,9 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			return render_to_response('6.fattura-riga.inc.djhtml',
 									{
 										"riga":riga,
+										'readonly': readonly,
+										'bigEdit': bigEdit,
+										'smallEdit': smallEdit,
 		                            },
 		                            context_instance=RequestContext(request))
 
@@ -136,8 +144,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 						object_value = None
 					else:
 						try:
-							object_value = int(object_value)	# altrimenti richiedo un numerico
-						except:
+							object_value = int(object_value.replace(',', '.'))	# altrimenti richiedo un numerico
+						except Exception, e:
 							return HttpResponse('Ho bisogno di un valore numerico.', status=500)
 				if object_id == "fat_progressivo" and fattura.tipo == 1:
 					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value), tipo=fattura.tipo)
@@ -165,8 +173,15 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 								object_value = 0
 							else:
 								try:
-									object_value = int(object_value)
-								except:
+									object_value = object_value.replace(',', '.')
+									if object_id.startswith('riga-prezzo-'):
+										print "Converto in Decimal:", object_value
+										object_value = Decimal(object_value)
+									else:	# converto in int
+										print "Converto in int:", object_value
+										object_value = int(object_value)
+								except Exception, e:
+									print e
 									return HttpResponse('Ho bisogno di un valore numerico.', status=500)
 						#print "cambio la riga %d" % riga_id
 						#print "imposto il valore %s" % object_value
@@ -177,15 +192,11 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			return HttpResponse('OK.', status=200)
 		return HttpResponse('Azione sconosciuta.', status=500)
 
-	
+
 #	print "generate: ", request.user.has_perm('fatturazione.generate')
 #	print "smalledit: ", request.user.has_perm('fatturazione.smalledit')
 #	print "tipo: ", fattura.tipo
 #	print "readonly: ", readonly
-	bigEdit = request.user.has_perm('fatturazione.generate')
-	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
-	editable = bigEdit or smallEdit
-	readonly = not editable
 	return render_to_response(template_name,
                               {
 								"fattura":fattura,

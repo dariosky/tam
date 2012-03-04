@@ -171,7 +171,6 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 			# mi annoto il n° di fatture emesse per ogni conducente, lo cambierò sotto contando il conducente scelto come se avesse già emesso
 			conducente._ricevute = len(conducente.ricevute())
 			dati_conducenti_ricevute[conducente.id] = conducente	# tengo i conducenti in un dizionario
-			print conducente.nome, conducente._ricevute #TMP:
 
 	lastKey = None
 	conducenteRicevuta = None
