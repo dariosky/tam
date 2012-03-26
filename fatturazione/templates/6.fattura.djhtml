@@ -22,12 +22,12 @@
 
 <a href='{% url tamExportFattura id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
 	<div style="text-align: center">
-		<img src='/media/fatture/print_icon.png' title='Versione stampabile' alt='Versione stampabile' />
+		<img src='{% media_url 'fatture/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
 	</div>
 </a>
 {% if perms.fatturazione.generate %}
 	<div style="text-align: center">
-		<img src="/media/delbtn.png" class='delfat actionButton noprint' title='cancella fattura' />
+		<img src="{% media_url 'delbtn.png' %}" class='delfat actionButton noprint' title='cancella fattura' />
 	</div>
 {% endif %}
 	
@@ -35,8 +35,8 @@
 
 {% block bottom %}
 {% if not readonly %}
-	<script type="text/javascript" src='/media/js/jquery.editable-1.3.3.js'></script>
-	<script type="text/javascript" src='/media/js/fatture/fattura.js'></script>
+	{% include_media 'jquery.editable-1.3.3.js' %}
+	{% include_media 'fattura.js' %}
 {% else %}
 	<script type="text/javascript">
 		$('.editable').removeClass('editable');

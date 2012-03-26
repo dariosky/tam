@@ -5,7 +5,7 @@
 
 {% block css %}
 	{{ block.super }}
-	<link rel="stylesheet" type="text/css" href="/media/css/fatture.css" />
+	<link rel="stylesheet" type="text/css" href="{% media_url 'css/fatture.css' %}" />
 
 <style type="text/css">
 	/*.navBar, #footer {display:none}*/
@@ -48,7 +48,7 @@
 
 <div style="text-align: center" class='noprint'>
 	<a href='javascript:window.print()' target='_blank'>
-		<img src='/media/fatture/print_icon.png' title='Stampa' alt='Stampa' />
+		<img src='{% media_url 'fatture/print_icon.png' %}' title='Stampa' alt='Stampa' />
 	</a>
 </div>	
 

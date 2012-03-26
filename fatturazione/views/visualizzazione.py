@@ -175,10 +175,10 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 								try:
 									object_value = object_value.replace(',', '.')
 									if object_id.startswith('riga-prezzo-'):
-										print "Converto in Decimal:", object_value
+										#print "Converto in Decimal:", object_value
 										object_value = Decimal(object_value)
 									else:	# converto in int
-										print "Converto in int:", object_value
+										#print "Converto in int:", object_value
 										object_value = int(object_value)
 								except Exception, e:
 									print e

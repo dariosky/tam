@@ -5,7 +5,7 @@
 		<tr>
 			<td>
 				{{fattura.descrittore}}
-				<a href='{% url tamFatturaConsorzio anno=fattura.anno progressivo=fattura.progressivo %}' style='display:block'><img src='/media/fatture/invoice-icon1.png' /></a>
+				<a href='{% url tamFatturaConsorzio anno=fattura.anno progressivo=fattura.progressivo %}' style='display:block'><img src='{% media_url 'fatture/invoice-icon1.png' %}' /></a>
 				emessa il {{fattura.data|date:"l j F Y"}}
 			</td>
 			<td>
@@ -29,7 +29,7 @@
 	{% if perms.fatturazione.generate %}
 	<div>
 		<a href='{% url tam-nuova-fattura-consorzio %}'>
-		<img src='/media/addbtn.png' id='newFattura' class='actionButton' title='Nuova fattura consorzio manuale' />
+		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova fattura consorzio manuale' />
 		Nuova fattura consorzio manuale.
 		</a>
 	</div>

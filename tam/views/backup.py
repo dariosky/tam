@@ -31,7 +31,7 @@ def getBackupInfo(doCleanup=False):
     backcount = 20    # numero di backup da tenere
     dbname = os.path.join(settings.PROJECT_PATH, "tam.db3")
     if not os.path.isfile(dbname):
-        raise Exception("Impossibilie trovare il DB %s." % dbname)
+        raise Exception("Impossibile trovare il DB %s." % dbname)
     backupdir = os.path.join(settings.PROJECT_PATH, 'backup')    # backup subfolder
     if not os.path.isdir(backupdir):
         os.makedirs(backupdir)

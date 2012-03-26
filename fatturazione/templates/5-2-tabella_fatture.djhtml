@@ -5,7 +5,7 @@
 		<tr>
 			<td>
 				{{fattura.descrittore}}
-				<a href='{% url tamFatturaConducente id_fattura=fattura.id %}' style='display:block'><img src='/media/fatture/invoice-icon2.png' /></a>
+				<a href='{% url tamFatturaConducente id_fattura=fattura.id %}' style='display:block'><img src='{% media_url 'fatture/invoice-icon2.png' %}' /></a>
 				emessa il {{fattura.data|date:"l j F Y"}}
 			</td>
 			<td>
@@ -19,7 +19,7 @@
 	{% if perms.fatturazione.generate %}
 	<div>
 		<a href='{% url tam-nuova-fattura-conducente %}'>
-		<img src='/media/addbtn.png' id='newFattura' class='actionButton' title='Nuova fattura conducente manuale' />
+		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova fattura conducente manuale' />
 		Nuova fattura conducente manuale.
 		</a>
 	</div>

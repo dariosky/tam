@@ -14,4 +14,4 @@ from tam.models import Conducente
 conducenti = Conducente.objects.filter(emette_ricevute=True)
 
 for conducente in conducenti:
-	print "%5d %30s" % (conducente.id, conducente.nome), len(conducente.ricevute())
+	print "%30s" % (conducente.nome), len(conducente.ricevute())

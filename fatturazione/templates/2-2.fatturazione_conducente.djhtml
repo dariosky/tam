@@ -11,7 +11,7 @@
 		{% if lista %}
 		<form method="post" action="">
 		<div id='gotoConducente' class='floatingBlock'>
-			<a href="#generaConducente"><img src='/media/frecciagiu.png' title='genera fatture conducente'></a>
+			<a href="#generaConducente"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture conducente'></a>
 		</div>
 		<input type='hidden' name='data_generazione' value='{{ data_generazione|date:"d/m/Y" }}' />
 		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
