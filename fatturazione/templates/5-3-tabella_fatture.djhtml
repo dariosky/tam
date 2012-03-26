@@ -5,7 +5,7 @@
 		<tr>
 			<td>
 				{{fattura.descrittore}}
-				<a href='{% url tamFatturaRicevuta id_fattura=fattura.id %}' style='display:block'><img src='/media/fatture/invoice-icon3.png' /></a>
+				<a href='{% url tamFatturaRicevuta id_fattura=fattura.id %}' style='display:block'><img src='{% media_url 'fatture/invoice-icon3.png' %}' /></a>
 				emessa il {{fattura.data|date:"l j F Y"}}
 			</td>
 			<td>
@@ -32,7 +32,7 @@
 	{% if perms.fatturazione.generate %}
 	<div>
 		<a href='{% url tam-nuova-fattura-ricevuta %}'>
-		<img src='/media/addbtn.png' id='newFattura' class='actionButton' title='Nuova ricevuta manuale' />
+		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova ricevuta manuale' />
 		Nuova ricevuta manuale.
 		</a>
 	</div>

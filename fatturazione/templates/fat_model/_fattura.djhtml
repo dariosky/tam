@@ -1,7 +1,7 @@
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='fat_header'>
 		{% if fattura.tipo == "1" %}
-			{% if not tam_sstealth %}<img id='fat_logo' src='/media/fatture/logo.jpg'>{%endif%}
+			{% if not tam_sstealth %}<img id='fat_logo' src='{% media_url 'fatture/logo.png' %}'>{%endif%}
 		{% endif %}
 		<div id='fat_mittente' class='{% if not fattura.tipo = "1" and bigEdit %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
 		<div id='fat_destinatario' class='{% if not fattura.tipo = "2" and bigEdit %}editable{%else%}pre{%endif%}'>{{fattura.emessa_a}}</div>
@@ -28,7 +28,7 @@
 			{% endfor %}
 			{% if perms.fatturazione.generate and not readonly %}
 			<tr class='noprint'><td style='border:0'>
-				<img src='/media/addbtn.png' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
+				<img src='{% media_url 'addbtn.png' %}' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
 			</td></tr>
 			{% endif %}
 			<tr style='text-align:right;'><td colspan=5 style='border:0'>Imponibile</td><td id='tot_imponibile'>{{fattura.val_imponibile|floatformat:"2"}}</td></tr>

@@ -11,7 +11,7 @@
 		{% if lista %}
 		<form method="post" action="">
 		<div id='gotoConsorzio' class='floatingBlock'>
-			<a href="#generaConsorzio"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+			<a href="#generaConsorzio"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
 		</div>
 		<input type='hidden' name='anno' value='{{anno}}'>
 		<input type='hidden' name='progressivo' value='{{progressivo_iniziale}}'>

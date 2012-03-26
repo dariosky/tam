@@ -32,7 +32,7 @@
 	{# *** TRATTA CENTRALE *** #}
 	{% if viaggio.tratta %}
 	    {% if viaggio.tratta.is_valid %}
-	        {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='/media/flag/luogo-airport.png' /> (attendo 30 minuti){% endif%}
+	        {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='{% media_url "flag/luogo-airport.png" %}' /> (attendo 30 minuti){% endif%}
 	        - {% if nextfratello %}{{ nextfratello.da }}{% else %}{{ viaggio.a }}{% endif %}
 	    {% else %}
         	<a href="{% url tamTrattaId viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>

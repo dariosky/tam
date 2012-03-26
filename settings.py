@@ -281,7 +281,10 @@ MEDIA_BUNDLES = (
 		'js/tam-common.js', 'js/jquery.scrollTo-min.js', 'js/listaCorse.js',
 	),
 	('selFatture.js', 'js/fatture/table_selector.js'),
-	('tamRules.css', 'css/tamrules.css')	,		
+	('tamRules.css', 'css/tamrules.css'),
+	('jquery.editable-1.3.3.js', 'js/jquery.editable-1.3.3.js'),
+	('fattura.js', 'js/fatture/fattura.js'),
+			
 )
 YUICOMPRESSOR_PATH = os.path.join(PROJECT_PATH, 'yuicompressor.jar')
 if os.path.exists(YUICOMPRESSOR_PATH):

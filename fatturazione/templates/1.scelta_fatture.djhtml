@@ -17,7 +17,7 @@
 	{{ lista_consorzio.count }} corse.
 	<div style='display:none;'>
 		<div id='gotoConsorzio' class='floatingBlock'>
-			<a href="#generaConsorzio"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+			<a href="#generaConsorzio"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
 		</div>
 		<p>Le fatture che il consorzio fa ai clienti.<br>
 			Tutti i viaggi confermati con l'indicazione della fattura.
@@ -63,7 +63,7 @@
 	{{ lista_conducente.count }} corse.
 	<div style='display:none;' class='fatturaTipo2'>
 		<div id='gotoConducente' class='floatingBlock'>
-			<a href="#generaConducente"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+			<a href="#generaConducente"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
 		</div>
 		<p>Le fatture che il conducente fa al consorzio.</p>
 		
@@ -100,7 +100,7 @@
 	{{ lista_ricevute.count }} corse.
 	<div style='display:none;' class='fatturaTipo3'>
 		<div id='gotoRicevute' class='floatingBlock'>
-			<a href="#generaRicevute"><img src='/media/frecciagiu.png' title='genera fatture consorzio'></a>
+			<a href="#generaRicevute"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
 		</div>
 		<p>I viaggi con pagamento posticipato (e non fatturabili) vengono pagati con ricevuta.</p>
 		<div>
