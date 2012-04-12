@@ -1,3 +1,4 @@
+{% load media %}
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='fat_header'>
 		{% if fattura.tipo == "1" %}

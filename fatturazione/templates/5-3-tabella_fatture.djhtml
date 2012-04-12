@@ -1,3 +1,4 @@
+{% load media %}
 <div style='display:none;'>
 	<table class='tablesorter' style='text-align: center'>
 		<tr><th>Fattura</th><th>conducente</th><th>cliente</th><th>righe</th><th>Importo</th></tr>

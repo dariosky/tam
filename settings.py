@@ -1,7 +1,6 @@
 # coding: utf-8
 import os
 from socket import gethostname
-
 TAM_VERSION = "3.2"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
@@ -161,47 +160,6 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	"license.context_processors.license_details",
 	)
 
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-#    'django.contrib.sites',
-	'django.contrib.messages',
-	'django.contrib.staticfiles',
-
-    'django.contrib.admin',
-    'django.contrib.admindocs',
-    'django.contrib.humanize',
-	'mediagenerator',
-
-    'tam',
-	'south',
-	'tamArchive',
-
-	'fatturazione',
-#	'license',
-)
-
-LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/"
-
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'info@dariosky.it'
-EMAIL_HOST_PASSWORD = 'bangbangD'
-EMAIL_PORT = 587
-
-#if DEBUG:
-#	import logging
-#	logging.basicConfig(
-#				level=logging.DEBUG,
-#				format='%(asctime)s %(levelname)s %(message)s'
-#			)
-
-if DEBUG:
-	SESSION_COOKIE_AGE = 60*60*24*14	# 14 giorni in debug
-else:
-	SESSION_COOKIE_AGE = 30 * 60	# cookie age in seconds (30 minutes)
 
 LICENSE_OWNER = 'ARTE Taxi'
 DATI_CONSORZIO = """ARTE Taxi
@@ -211,47 +169,8 @@ Partita IVA e CF: 01106280280
 Tel: 049 667842 Fax: 049 667845
 www.artetaxi.com  -  info@artetaxi.com"""
 
-#import datetime
-#LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
-
-# RabbitMQ info
-rmquser = "tam"
-rmqpass = "tamRMQ"
-tmqhost = "tam"
-""" To configure RMQ:
-$ rabbitmqctl add_user tam tamRMQ
-$ rabbitmqctl add_vhost tam
-$ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
-"""
-
-#===============================================================================
-# Set to True to use the debug_toolbar
-use_debug_toolbar = DEBUG and False
-if use_debug_toolbar :
-	# put the debug toolbar middleware right after the Gzip middleware
-	try:
-		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
-		middleware_split_position = 0 #  put the toolbar middleware at the start
-		MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES[:middleware_split_position] + \
-						('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
-						MIDDLEWARE_CLASSES
-	except:
-		pass
-#	MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-	DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS":False}
-	INTERNAL_IPS = ('127.0.0.1',)
-	INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
-#===============================================================================
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'TaM',
-    }
-}
 
 # MEDIA GENERATOR **********
-
 MEDIA_DEV_MODE = DEBUG
 DEV_MEDIA_URL = '/mediadev/'
 PRODUCTION_MEDIA_URL = '/mediaprod/'
@@ -293,3 +212,94 @@ if os.path.exists(YUICOMPRESSOR_PATH):
 		'css': 'mediagenerator.filters.yuicompressor.YUICompressor',
 	}
 # **************************
+
+INSTALLED_APPS = (
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+#    'django.contrib.sites',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+
+    'django.contrib.admin',
+    'django.contrib.admindocs',
+    'django.contrib.humanize',
+	'mediagenerator',
+
+    'tam',
+	'south',
+	'tamArchive',
+
+	'fatturazione',
+#	'license',
+)
+
+
+LOGIN_URL = "/login/"
+LOGIN_REDIRECT_URL = "/"
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'info@dariosky.it'
+EMAIL_HOST_PASSWORD = 'bangbangD'
+EMAIL_PORT = 587
+
+#if DEBUG:
+#	import logging
+#	logging.basicConfig(
+#				level=logging.DEBUG,
+#				format='%(asctime)s %(levelname)s %(message)s'
+#			)
+
+if DEBUG:
+	SESSION_COOKIE_AGE = 60*60*24*14	# 14 giorni in debug
+else:
+	SESSION_COOKIE_AGE = 30 * 60	# cookie age in seconds (30 minutes)
+
+#import datetime
+#LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
+
+# RabbitMQ info
+rmquser = "tam"
+rmqpass = "tamRMQ"
+tmqhost = "tam"
+""" To configure RMQ:
+$ rabbitmqctl add_user tam tamRMQ
+$ rabbitmqctl add_vhost tam
+$ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
+"""
+
+#===============================================================================
+# Set to True to use the debug_toolbar
+use_debug_toolbar = DEBUG and False
+if use_debug_toolbar :
+	# put the debug toolbar middleware right after the Gzip middleware
+	try:
+		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
+		middleware_split_position = 0 #  put the toolbar middleware at the start
+		MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES[:middleware_split_position] + \
+						('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
+						MIDDLEWARE_CLASSES
+	except:
+		pass
+#	MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+	DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS":False}
+	INTERNAL_IPS = ('127.0.0.1',)
+	INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
+#===============================================================================
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'TaM',
+    }
+}
+
+PASSWORD_HASHERS = (
+	'django.contrib.auth.hashers.SHA1PasswordHasher',	# Still use the old hashing until I pass to 1.4
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.CryptPasswordHasher',
+)
