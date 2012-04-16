@@ -507,7 +507,7 @@ class Viaggio(models.Model):
 		end_time = ultimaCorsa.data
 #		logging.debug("Partiamo da %s"%end_time)
 
-		if self.da.speciale == 'A':
+		if ultimaCorsa.da.speciale == 'A':
 			end_time += datetime.timedelta(minutes=30)	# quando parto da un aeroporto aspetto 30 minuti
 
 		if tratta and tratta.is_valid():	 # add the runtime of this tratta
