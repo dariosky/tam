@@ -21,7 +21,7 @@ from tam.models import logAction
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
 from tam.models import reallySpaceless
 
-archiveNotBefore_days = 365
+archiveNotBefore_days = 90
 
 def menu(request, template_name="archive/menu.html"):
 	dontHilightFirst = True
@@ -109,8 +109,12 @@ def action(request, template_name="archive/action.html"):
 		end_date = datetime.date(timetuple.tm_year, timetuple.tm_mon, timetuple.tm_mday)
 	except:
 		end_date = None
-	if (end_date is None) or end_date > (datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)):
+	if (end_date is None):
 		request.user.message_set.create(message=u"Devi specificare una data valida per archiviare.")
+		return HttpResponseRedirect(reverse("tamArchiveUtil"))
+	max_date = datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)
+	if end_date > max_date:
+		request.user.message_set.create(message=u"La data che hai scelto è troppo recente. Deve essere al massimo il %s." % max_date)
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	# non archivio le non confermate
@@ -120,7 +124,7 @@ def action(request, template_name="archive/action.html"):
 
 	logDaEliminare = ActionLog.objects.filter(data__lt=end_date)
 	logCount = logDaEliminare.count()
-	archive_needed = archiveCount and logCount
+	archive_needed = archiveCount or logCount
 
 	if "archive" in request.POST:
 		viaggiDaArchiviare = Viaggio.objects.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().filter(filtroViaggi)
@@ -149,6 +153,8 @@ def action(request, template_name="archive/action.html"):
 				daRicordareDelViaggio(ricordi, figlio)
 				viaggioArchiviatoFiglio.save()
 				archiviati += 1
+			viaggio.delete()	
+				
 
 			if archiviati > 400:
 #				transaction.commit(using='archive')
@@ -170,14 +176,15 @@ def action(request, template_name="archive/action.html"):
 				logging.debug("Effettuo il commit [%d]" % archiviati)
 				lastArchiveNotify = archiviati
 				transaction.commit(using='archive')
+				transaction.commit()
 #				assert(False)	#TMP
 
 		if lastArchiveNotify != archiviati:
 			logging.debug("Effettuo il commit [%d]" % archiviati)
 			transaction.commit(using='archive')
 
-		logging.debug("Cancello tutti i viaggi appena archiviati")
-		viaggiDaArchiviare.delete()
+		#logging.debug("Cancello tutti i viaggi appena archiviati")
+		#viaggiDaArchiviare.delete()
 
 		logging.debug("Ora cancello tutti i record di LOG.")
 		logDaEliminare.delete()
