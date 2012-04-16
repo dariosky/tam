@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 import datetime
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
+from tam.disturbi import trovaDisturbi, fasce_semilineari
 
 def fixAction(request, template_name="utils/fixAction.html"):
 	if not request.user.is_superuser:
@@ -35,14 +36,14 @@ def fixAction(request, template_name="utils/fixAction.html"):
 			aeroporto.speciale = 'A'
 			aeroporto.save()
 			messageLines.append(aeroporto.nome)
-		
+
 		from django.contrib.auth.models import Group, Permission
 		gruppo_potenti = Group.objects.get(name='Potente')
 		permessiDaAggiungere = ('get_backup', 'can_backup', 'archive', 'flat')
 		for nomePermesso in permessiDaAggiungere:
 			p = Permission.objects.get(codename=nomePermesso)
 			gruppo_potenti.permissions.add(p)
-			messageLines.append('Do agli utenti potenti: %s'%nomePermesso)
+			messageLines.append('Do agli utenti potenti: %s' % nomePermesso)
 		messageLines.append('Vacuum DB.')
 		vacuum_db()
 		#===========================================================================
@@ -98,6 +99,32 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		corsa.updatePrecomp() # salvo perché mi toglierà i punti
 
 		status()
+
+	if request.POST.get('fixDisturbi'):
+		""" Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi """
+		print "Refixo"
+		viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'), date_start__gt=datetime.datetime(2012, 3, 1), padre=None)
+		sistemati = 0
+		for viaggio in viaggi:
+			ultimaCorsa = viaggio.lastfratello()
+			if ultimaCorsa.da.speciale == 'A':
+
+				disturbiGiusti = trovaDisturbi(viaggio.date_start, viaggio.date_end(recurse=True), metodo=fasce_semilineari)
+				notturniGiusti = disturbiGiusti.get('night', 0)
+				diurniGiusti = disturbiGiusti.get('morning', 0)
+				if diurniGiusti <> viaggio.punti_diurni or notturniGiusti <> viaggio.punti_notturni:
+					messageLines.append(viaggio)
+					messageLines.append(ultimaCorsa)
+					messageLines.append("prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni))
+					messageLines.append("dopo %s/%s" % (diurniGiusti, notturniGiusti))
+					messageLines.append(" ");
+					viaggio.punti_diurni=diurniGiusti
+					viaggio.punti_notturni=notturniGiusti
+					viaggio.save()
+					sistemati += 1
+
+		messageLines.append("Errati (e corretti) %d/%d" % (sistemati, len(viaggi)))
+
 
 	return render_to_response(template_name, {"messageLines":messageLines, "error":error},
 							context_instance=RequestContext(request))
