@@ -29,6 +29,7 @@ from decimal import Decimal
 for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
+from django.contrib import messages
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -60,7 +61,11 @@ def listaCorse(request, template_name="corse/lista.html"):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 	dontHilightFirst = True
-#	request.user.message_set.create(message="Messaggio di test.")
+#	messages.debug(request, "Messaggio di debug.")
+#	messages.info(request, "Messaggio di info.")
+#	messages.success(request, "Messaggio di success.")
+#	messages.warning(request, "Messaggio di warning.")
+#	messages.error(request, "Messaggio di error.")
 
 	outputFormat = request.GET.get('format', None)
 
@@ -83,7 +88,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	if request.method == "POST":
 		if not user.has_perm('tam.change_viaggio'):
-			request.user.message_set.create(message=u"Non hai il permesso di modificare le corse.")
+			messages.error(request, "Non hai il permesso di modificare le corse.")
 			return HttpResponseRedirect(reverse("tamCorse"))
 
 		if 'assoType' in request.POST and request.POST['assoType']:
@@ -93,10 +98,10 @@ def listaCorse(request, template_name="corse/lista.html"):
 			try:
 				viaggio = Viaggio.objects.get(pk=request.POST["viaggio"])
 			except Viaggio.DoesNotExist:
-				request.user.message_set.create(message=u"Il viaggio che cerchi di confermare non esiste più.")
+				messages.error(request, "Il viaggio che cerchi di confermare non esiste più.")
 				return HttpResponseRedirect(reverse("tamCorse"))
 			if viaggio.confirmed():
-				request.user.message_set.create(message=u"Il viaggio è già stato confermato.")
+				messages.error(request, "Il viaggio è già stato confermato.")
 				return HttpResponseRedirect(reverse("tamCorse"))
 			conducente = Conducente.objects.get(pk=request.POST["conducente"])
 			viaggio.conducente = conducente
@@ -107,7 +112,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 	if profilo:
 		luogoRiferimento = profilo.luogo
 		if not luogoRiferimento:
-			user.message_set.create(message=u"Non hai ancora definito un luogo preferito.")
+			messages.warning(request, "Non hai ancora definito un luogo preferito.")
 
 #	logging.debug("Comincio a caricare la lista corse")
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
@@ -272,7 +277,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		thisPage = paginator.page(page)
 		viaggi = thisPage.object_list
 	except:
-		user.message_set.create(message=u"Pagina %d è vuota." % page)
+		messages.warning(request, "Pagina %d è vuota." % page)
 		thisPage = None
 		viaggi = []
 
@@ -323,14 +328,14 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	mediabundleJS = ('tamCorse.js',)
 	mediabundleCSS = ('tamUI.css',)
 	if id and not user.has_perm('tam.change_viaggio'):
-		user.message_set.create(message=u"Non hai il permesso di modificare le corse.")
+		messages.error(request, "Non hai il permesso di modificare le corse.")
 		return HttpResponseRedirect("/")
 	if not user.has_perm('tam.add_viaggio'):
-		user.message_set.create(message=u"Non hai il permesso di creare nuove corse.")
+		messages.error(request, "Non hai il permesso di creare nuove corse.")
 		return HttpResponseRedirect("/")
 
 	if not profilo.luogo:
-		user.message_set.create(message=u"Non hai ancora definito un luogo preferito.")
+		messages.warning(request, "Non hai ancora definito un luogo preferito.")
 	new = id is None
 	step1 = request.session.get("step1") or {}
 	dontHilightFirst = id or request.POST or "data" in step1	# non evidenziare il primo input se in modifica o se ho un POST
@@ -343,24 +348,24 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		try:
 			viaggio = Viaggio.objects.get(id=id)
 		except Viaggio.DoesNotExist:
-			request.user.message_set.create(message=u"Il viaggio indicato non esiste.")
+			messages.error(request, "Il viaggio indicato non esiste.")
 			return HttpResponseRedirect(redirectOk)
 
 		destination1 = reverse("tamNuovaCorsaId", kwargs={"id":id})
 		destination2 = reverse("tamNuovaCorsa2Id", kwargs={"id":id})
 	if viaggio and viaggio.vecchioConfermato() and not user.has_perm('tam.change_oldviaggio'):
-		user.message_set.create(message=u"Non puoi cambiare i vecchi viaggi confermati.")
+		messages.error(request, "Non puoi cambiare i vecchi viaggi confermati.")
 		return HttpResponseRedirect("/")
 
 	if delete:
 		if not id:
-			request.user.message_set.create(message=u"Indicare la corsa da cancellare.")
+			messages.error(request, "Indicare la corsa da cancellare.")
 			return HttpResponseRedirect(redirectOk)
 		else:
 			if request.method == "POST":
 				if u"OK" in request.POST:
 					viaggio.delete()
-					request.user.message_set.create(message=u"Cancellata la corsa %s." % viaggio)
+					messages.success(request, "Cancellata la corsa %s." % viaggio)
 					return HttpResponseRedirect(redirectOk)
 				else:
 					return HttpResponseRedirect(redirectOk)
@@ -514,7 +519,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		if step == 1:		# Passo allo step2
 			if form.cleaned_data["data"] < datetime.datetime.now().replace(hour=0, minute=0):
 				if not user.has_perm('tam.change_oldviaggio'):
-					request.user.message_set.create(message="Non hai l'autorizzazione per inserire una corsa vecchia.")
+					messages.error(request, "Non hai l'autorizzazione per inserire una corsa vecchia.")
 					return HttpResponseRedirect("/")
 			if id:
 				viaggio = form.save()	#commit=True
@@ -567,7 +572,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				if nuoviDati != viaggio.passeggero.dati:
 					viaggio.passeggero.dati = nuoviDati
 					viaggio.passeggero.save();
-					request.user.message_set.create(message="Modificati i dati del privato.")
+					messages.success(request, "Modificati i dati del privato.")
 
 			return HttpResponseRedirect(reverse("tamCorse"))
 	#raise Exception("Sgnaps")
@@ -606,7 +611,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 	user = request.user
 	actionName = getActionName(delete=False, nuovo=nuovo)
 	if not user.has_perm('tam.%s_cliente' % actionName):
-		request.user.message_set.create(message=u"Non hai il permesso di modificare i clienti.")
+		messages.error(request, "Non hai il permesso di modificare i clienti.")
 		return HttpResponseRedirect(reverse("tamListini"))
 
 	class ClientForm(forms.ModelForm):
@@ -619,7 +624,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 			cliente = Cliente.objects.get(id=id_cliente)		# modifying an existing Client
 			logging.debug("Modifica di %s" % cliente)
 		except:
-			request.user.message_set.create(message="Cliente inesistente.")
+			messages.error(request, "Cliente inesistente.")
 			return HttpResponseRedirect(reverse("tamListini"))
 	if nomeCliente:
 		try:
@@ -633,7 +638,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 
 	if form.is_valid():
 		cliente = form.save()
-		request.user.message_set.create(message=u"%s il cliente %s." % (nuovo and "Creato" or "Aggiornato", cliente))
+		messages.success(request, "%s il cliente %s." % (nuovo and "Creato" or "Aggiornato", cliente))
 		if "next" in request.GET:
 			redirectOk = request.GET["next"]
 		else:
@@ -669,22 +674,22 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 			prezzoL = None
 		if prezzoL:
 			if not user.has_perm('tam.delete_prezzolistino'):
-				request.user.message_set.create(message=u"Non hai il permesso di cancellare i prezzi dal listino.")
+				messages.error(request, "Non hai il permesso di cancellare i prezzi dal listino.")
 				return HttpResponseRedirect(reverse("tamListini"))
 			prezzoL[0].delete()
-			request.user.message_set.create(message=u"Cancellato il prezzo %s." % prezzoL[0])
+			messages.success(request, "Cancellato il prezzo %s." % prezzoL[0])
 			return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 		else:
-			request.user.message_set.create(message=u"Non esiste una tratta da %s a %s." % (da, a))
+			messages.error(request, "Non esiste una tratta da %s a %s." % (da, a))
 	if form.is_valid():
 		if u"new_name" in request.POST:
 			try:
 				actionName = getActionName(delete=False, nuovo=nuovo)
 				if not user.has_perm('tam.%s_listino' % actionName):
-					request.user.message_set.create(message=u"Non hai il permesso di %s i listini." % (nuovo and "creare" or "modificare"))
+					messages.error(request, "Non hai il permesso di %s i listini." % (nuovo and "creare" or "modificare"))
 					return HttpResponseRedirect(reverse("tamListini"))
 				listino = form.save()
-				request.user.message_set.create(message=u"%s il listino %s." % (nuovo and "Creato" or "Aggiornato", listino))
+				messages.success(request, "%s il listino %s." % (nuovo and "Creato" or "Aggiornato", listino))
 				return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 			except IntegrityError:
 				form.errors["nome"] = (u"Esiste già un listino con lo stesso nome.",)
@@ -700,7 +705,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 		try:
 			prezzoListino = listino.prezzolistino_set.get(pk=prezzoid)
 		except PrezzoListino.DoesNotExist:
-			request.user.message_set.create(message=u"Il prezzo a cui provi ad accedere non esiste più.")
+			messages.error(request, "Il prezzo a cui provi ad accedere non esiste più.")
 			return HttpResponseRedirect(reverse("tamListini"))
 
 	else:
@@ -718,7 +723,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 		if u"new_price" in request.POST:
 			actionName = getActionName(delete=False, nuovo=nuovoPrezzo)
 			if not user.has_perm('tam.%s_prezzolistino' % actionName):
-				request.user.message_set.create(message=u"Non hai il permesso di %s i prezzi di listino." % (nuovoPrezzo and "creare" or "modificare"))
+				messages.error(request, "Non hai il permesso di %s i prezzi di listino." % (nuovoPrezzo and "creare" or "modificare"))
 				return HttpResponseRedirect(reverse("tamListini"))
 
 			da = priceForm.cleaned_data["da"]
@@ -733,7 +738,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 			prezzo.tipo_commissione = priceForm.cleaned_data["tipo_commissione"]
 			prezzo.flag_fatturazione = priceForm.cleaned_data["flag_fatturazione"]
 			prezzo.save()
-			request.user.message_set.create(message=u"Ho aggiunto il prezzo %s." % prezzo)
+			messages.success(request, "Ho aggiunto il prezzo %s." % prezzo)
 			return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 
 	# tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
@@ -778,7 +783,7 @@ def conducente(*args, **kwargs):
 									"attivo"
 								]
 		if delete:
-			request.user.message_set.create(message=u'Devi avere i superpoteri per cancellare un conducente.')
+			messages.error(request, 'Devi avere i superpoteri per cancellare un conducente.')
 			return HttpResponseRedirect("/")
 	return bacino(*args, **kwargs)
 
@@ -796,7 +801,7 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 	permissionName = "tam.%(action)s_%(module)s" % {"action":actionName, "module":Model._meta.module_name}
 	allowed = user.has_perm(permissionName)
 	if not allowed:
-		request.user.message_set.create(message=u"Operazione non concessa.")
+		messages.error(request, "Operazione non concessa.")
 		return HttpResponseRedirect(redirectOk)
 
 	class GenericModelForm(forms.ModelForm):
@@ -825,16 +830,16 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 		form = GenericModelForm(request.POST or None, instance=instance)
 		if form.is_valid():
 			instance = form.save()
-			request.user.message_set.create(message=u"%s %s: %s." % (nuovo and "Creato" or "Aggiornato", verbose_name, instance))
+			messages.success(request, "%s %s: %s." % (nuovo and "Creato" or "Aggiornato", verbose_name, instance))
 			return HttpResponseRedirect(redirectOk)
 	else:
 		if not instance:
-			request.user.message_set.create(message=u"Impossibile trovare l'oggetto da cancellare.")
+			messages.error(request, "Impossibile trovare l'oggetto da cancellare.")
 			return HttpResponseRedirect(redirectOk)
 		if request.method == "POST":
 			if "OK" in request.POST:
 				instance.delete()
-				request.user.message_set.create(message=u"Cancellato il %s %s." % (verbose_name, instance))
+				messages.success(request, "Cancellato il %s %s." % (verbose_name, instance))
 				return HttpResponseRedirect(redirectOk)
 			else:
 				return HttpResponseRedirect(redirectOk)
@@ -859,7 +864,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 
 	conducenti = Conducente.objects.filter(attivo=True)
 	if not profilo.luogo:
-		user.message_set.create(message=u"Devi inserire il luogo preferito per poter calcolare i disturbi.")
+		messages.error(request, "Devi inserire il luogo preferito per poter calcolare i disturbi.")
 
 	classificheViaggi = get_classifiche()
 	classifiche = []
@@ -916,7 +921,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 			else: c["debitoAssoluto"] = -c["debitoAbbinate"]
 
 	if confirmConguaglio and not user.has_perm('tam.add_conguaglio'):
-		request.user.message_set.create(message=u"Non hai il permesso di effettuare conguagli.")
+		messages.error(request, "Non hai il permesso di effettuare conguagli.")
 		return HttpResponseRedirect(reverse("tamConducenti"))
 
 	# TMP
@@ -956,7 +961,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 
 			conguaglio = Conguaglio(conducente=conducente, dare=c["debitoAbbinate"])
 			conguaglio.save()
-		user.message_set.create(message=u"Conguaglio memorizzato.")
+		messages.success(request, "Conguaglio memorizzato.")
 		return HttpResponseRedirect(reverse("tamConducenti"))
 
 	tuttiConducenti = Conducente.objects.filter()
@@ -966,7 +971,7 @@ def conducenti(request, template_name="conducenti.html", confirmConguaglio=False
 def clonaListino(request, id, template_name="listino-clona.html"):
 	user = request.user
 	if not user.has_perm('tam.add_listino'):
-		request.user.message_set.create(message=u"Non hai il permesso di creare un nuovo listino.")
+		messages.error(request, "Non hai il permesso di creare un nuovo listino.")
 		return HttpResponseRedirect(reverse("tamListini"))
 	listino = get_object_or_404(Listino, pk=id)
 	num_prezzi = listino.prezzolistino_set.count()
@@ -997,7 +1002,7 @@ def clonaListino(request, id, template_name="listino-clona.html"):
 def listinoDelete(request, id, template_name="listino-delete.html"):
 	user = request.user
 	if not user.has_perm('tam.delete_listino'):
-		request.user.message_set.create(message=u"Non hai il permesso di cancellare i listini.")
+		messages.error(request, "Non hai il permesso di cancellare i listini.")
 		return HttpResponseRedirect(reverse("tamListini"))
 	listino = get_object_or_404(Listino, pk=id)
 	if request.method == "POST":
@@ -1042,7 +1047,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 	logging.debug("Gestisco le associazioni [%s] %s" % (assoType, viaggiIds))
 	user = request.user
 	if not user.has_perm('tam.change_viaggio'):
-		request.user.message_set.create(message=u"Non hai il permesso di modificare i viaggi.")
+		messages.error(request, "Non hai il permesso di modificare i viaggi.")
 		return HttpResponseRedirect(reverse("tamCorse"))
 	viaggi = Viaggio.objects.filter(pk__in=viaggiIds)
 	toUpdate = []
@@ -1064,26 +1069,26 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 			if viaggio.da.speciale != "-":	# tolgo l'associazione a un viaggio da stazione/aeroporto
 				logging.debug("Deassocio da un luogo speciale, rimetto l'eventuale abbuono di 5/10€")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != 10:
-					request.user.message_set.create(message="Il %d° viaggio è da un aeroporto rimetto l'abbuono di 10€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
+					messages.info(request, "Il %d° viaggio è da un aeroporto rimetto l'abbuono di 10€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 10
 				elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso != 5:
-					request.user.message_set.create(message="Il %d° viaggio è da una stazione rimetto l'abbuono di 5€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
+					messages.info(request, "Il %d° viaggio è da una stazione rimetto l'abbuono di 5€. Era di %d€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 		elif assoType == 'link':
 			if viaggio.da.speciale != "-":	# associando un viaggio da stazione/aeroporto
 				logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono di 5/10€")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == 10:
-					request.user.message_set.create(message="Il %d° viaggio è da un aeroporto tolgo l'abbuono di 10€." % contatore)
+					messages.info(request, "Il %d° viaggio è da un aeroporto tolgo l'abbuono di 10€." % contatore)
 					viaggio.abbuono_fisso = 0
 				elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso == 5:
-					request.user.message_set.create(message="Il %d° viaggio è da una stazione tolgo l'abbuono di 5€." % contatore)
+					messages.info(request, "Il %d° viaggio è da una stazione tolgo l'abbuono di 5€." % contatore)
 					viaggio.abbuono_fisso = 0
 
 			if viaggio != primo:
 				viaggio.padre = primo
 			if contatore > 2:
 				if viaggio.abbuono_fisso <> 5:
-					request.user.message_set.create(message="Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (contatore, viaggio.abbuono_fisso))
+					messages.info(request, "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 
 
@@ -1100,7 +1105,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 def corsaCopy(request, id, template_name="corsa-copia.html"):
 	user = request.user
 	if not user.has_perm('tam.add_viaggio'):
-		request.user.message_set.create(message=u"Non hai il permesso di creare i viaggi.")
+		messages.error(request, "Non hai il permesso di creare i viaggi.")
 		return HttpResponseRedirect(reverse("tamCorse"))
 	corsa = get_object_or_404(Viaggio, pk=id)
 	if corsa.padre: corsa = corsa.padre
@@ -1144,11 +1149,11 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 					try:
 						day = day.replace(month=newMonth)
 					except ValueError:
-						request.user.message_set.create(message=u"Nel mese %d non c'è il giorno %d, mi fermo. Usa la copia per giorno se necessario." % (newMonth, day.day))
+						messages.warning(request, "Nel mese %d non c'è il giorno %d, mi fermo. Usa la copia per giorno se necessario." % (newMonth, day.day))
 						break
 				occorrenze += 1
 				if occorrenze > 20:
-					request.user.message_set.create(message=u"Non puoi creare più di 20 copie in una volta sola (per evitarti di fare danni accidentali).")
+					messages.error(request, "Non puoi creare più di 20 copie in una volta sola (per evitarti di fare danni accidentali).")
 					break
 
 			if "conferma" in request.POST:
@@ -1185,7 +1190,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 						nuovoPadre.updatePrecomp() # aggiorno tutto alla fine
 
 
-				request.user.message_set.create(message=u"Ho creato %s copie della corsa (%d corse in tutto)." % (len(nuoviPadri), corseCreate))
+				messages.success(request, "Ho creato %s copie della corsa (%d corse in tutto)." % (len(nuoviPadri), corseCreate))
 				return HttpResponseRedirect(reverse("tamCorse"))
 
 			for field in form.fields:
@@ -1202,7 +1207,7 @@ def util(request, template_name="utils/util.html"):
 def resetSessions(request, template_name="utils/resetSessions.html"):
 	user = request.user
 	if not user.is_superuser:
-		request.user.message_set.create(message=u"Devi essere il superuser per cancellare le sessioni.")
+		messages.error(request, "Devi essere il superuser per cancellare le sessioni.")
 		return HttpResponseRedirect("/")
 	if request.method == "POST":
 		if "reset" in request.POST:
@@ -1231,7 +1236,7 @@ def resetUserSession(selectedUser):
 def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	user = request.user
 	if not user.has_perm('auth.change_user'):
-			request.user.message_set.create(message=u"Non hai l'autorizzazione a modificare i permessi.")
+			messages.error(request, "Non hai l'autorizzazione a modificare i permessi.")
 			return HttpResponseRedirect("/")
 	users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
 
@@ -1241,7 +1246,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	if username:
 		selectedUser = User.objects.get(username=username)
 		if user == selectedUser:
-			request.user.message_set.create(message=u"Non puoi modificare te stesso.")
+			messages.error(request, "Non puoi modificare te stesso.")
 			return HttpResponseRedirect(reverse("tamManage"))
 		selectedGroups = selectedUser.groups.all()
 		groups = Group.objects.all()
@@ -1255,7 +1260,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 				# @type selectedUser auth.User
 				selectedUser.set_password(password)
 				selectedUser.save()
-				user.message_set.create(message=u"Modificata la password all'utente %s." % selectedUser.username)
+				messages.success(request, "Modificata la password all'utente %s." % selectedUser.username)
 				resetUserSession(selectedUser)
 
 			newGroups = request.POST.getlist("selectedGroup")
@@ -1274,7 +1279,7 @@ def newUser(request, template_name="utils/newUser.html"):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 	if not user.has_perm('auth.add_user'):
-			request.user.message_set.create(message=u"Non hai l'autorizzazione a creare nuovi utenti.")
+			messages.error(request, "Non hai l'autorizzazione a creare nuovi utenti.")
 			return HttpResponseRedirect(reverse("tamUtil"))
 
 	from django.contrib.auth.forms import UserCreationForm
@@ -1286,7 +1291,7 @@ def newUser(request, template_name="utils/newUser.html"):
 		# @type profilo tam.models.ProfiloUtente
 		nuovoProfilo.luogo = profilo.luogo # prendo il luogo predefinito del creatore
 		nuovoProfilo.save()
-		user.message_set.create(message=u"Creato il nuovo utente in sola lettura %s." % newUser.username)
+		messages.success(request, "Creato il nuovo utente in sola lettura %s." % newUser.username)
 		return HttpResponseRedirect(reverse("tamManage", kwargs={"username":newUser.username}))
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
@@ -1294,15 +1299,15 @@ def newUser(request, template_name="utils/newUser.html"):
 def delUser(request, username, template_name="utils/delUser.html"):
 	user = request.user
 	if not user.has_perm('auth.del_user'):
-			request.user.message_set.create(message=u"Non hai l'autorizzazione per cancellare gli utenti.")
+			messages.error(request, "Non hai l'autorizzazione per cancellare gli utenti.")
 			return HttpResponseRedirect(reverse("tamUtil"))
 	userToDelete = User.objects.get(username=username)
 	if user == userToDelete:
-		request.user.message_set.create(message=u"Non puoi cancellare te stesso.")
+		messages.error(request, "Non puoi cancellare te stesso.")
 		return HttpResponseRedirect(reverse("tamManage"))
 	if "sure" in request.POST:
 		userToDelete.delete()
-		user.message_set.create(message=u"Eliminato l'utente %s." % userToDelete.username)
+		messages.success(request, "Eliminato l'utente %s." % userToDelete.username)
 		return HttpResponseRedirect(reverse("tamManage"))
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
