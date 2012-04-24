@@ -306,7 +306,7 @@ PASSWORD_HASHERS = (
 )
 
 try:
-	import settings_local
+	from settings_local import *
 except ImportError:
 	logging.warning("Local settings file 'settings_local.py' has not been found. Use this to out of VC secret settings.")
 	pass
