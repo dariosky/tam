@@ -112,7 +112,7 @@ from django.template.context import RequestContext
 def notLicensed(request, template_name="registration/license.html"):
 #	if request.method=="POST":
 #		if not request.user.has_perm('tam.change_tamlicense'):
-#			request.user.message_set.create(message=u"Devi avere i superpoteri per cambiare la licenza.")
+#			messages.error(request, "Devi avere i superpoteri per cambiare la licenza.")
 #			return HttpResponseRedirect("/")
 #		for license in TamLicense.objects.all():
 #			license.delete()
@@ -128,7 +128,7 @@ def notLicensed(request, template_name="registration/license.html"):
 #def activation(request, template_name="registration/activation.html"):
 #	user=request.user
 #	if not user.is_superuser:
-#		request.user.message_set.create(message=u"Devi essere il superuser per accedere all'attivazione.")
+#		messages.error(request, "Devi essere il superuser per accedere all'attivazione.")
 #		return HttpResponseRedirect("/")
 #	lic=get_license_detail()
 #	ininame=lic.get("tam_registred_user","")

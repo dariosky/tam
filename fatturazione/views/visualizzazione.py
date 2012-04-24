@@ -15,6 +15,7 @@ from fatturazione.views.pdf import render_to_reportlab#, render_with_pisa
 from tam.models import logAction
 from django.db import transaction
 from decimal import Decimal
+from django.contrib import messages
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -58,7 +59,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 		else:
 			fattura = Fattura.objects.get(tipo=tipo, anno=anno, progressivo=progressivo)
 	except Fattura.DoesNotExist:
-		request.user.message_set.create(message="Fattura non trovata.")
+		messages.error(request, "Fattura non trovata.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
 	bigEdit = request.user.has_perm('fatturazione.generate')
@@ -79,7 +80,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 				fattura.delete()
 			except:
 				return HttpResponse('Non sono riuscito a cancellare la fattura.', status=400)
-			request.user.message_set.create(message=message)
+			messages.error(request, message)
 			return HttpResponse(reverse('tamVisualizzazioneFatture'), status=200)
 
 		if action == 'delete-row':
@@ -236,7 +237,7 @@ def nuova_fattura(request, tipo):
 		fattura.emessa_a = settings.DATI_CONSORZIO
 	fattura.save()
 	message = "Creata la %s %s." % (fattura.nome_fattura(), fattura.descrittore())
-	request.user.message_set.create(message=message)
+	messages.success(request, message)
 	logAction('C', instance=fattura, description=message, user=request.user)
 	return HttpResponseRedirect(fattura.url())
 
@@ -249,7 +250,7 @@ def exportfattura(request, id_fattura, export_type='html'):
 	try:
 		fattura = Fattura.objects.get(id=id_fattura)
 	except Fattura.DoesNotExist:
-		request.user.message_set.create(message="Fattura non trovata.")
+		messages.error(request, "Fattura non trovata.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 	context = {"fattura":fattura, "readonly":True, 'export_type':export_type}
 	template_name = 'fat_model/export_fattura_1.djhtml'

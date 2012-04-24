@@ -6,10 +6,11 @@ import datetime
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from tam.disturbi import trovaDisturbi, fasce_semilineari
+from django.contrib import messages
 
 def fixAction(request, template_name="utils/fixAction.html"):
 	if not request.user.is_superuser:
-		request.user.message_set.create(message=u"Devi avere i superpoteri per eseguire le azioni correttive.")
+		messages.error(request, "Devi avere i superpoteri per eseguire le azioni correttive.")
 		return HttpResponseRedirect(reverse("tamUtil"))
 
 	messageLines = []
