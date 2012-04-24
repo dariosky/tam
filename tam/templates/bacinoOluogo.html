@@ -14,8 +14,8 @@
 			<table>
 				{{ form.as_table }}	
 				<tr>
-					<td>
-						<input type="submit" value="{% if nuovo %}Crea{% else %}Modifica{% endif %} {{ verbose_name }}" />
+					<td colspan="2">
+						<input type="submit" style='width: 100%' value="{% if nuovo %}Crea{% else %}Modifica{% endif %} {{ verbose_name }}" />
 						{% if not nuovo and can_delete %}
 						    {% with instance.delete_url as deleteUrl %}
 						        {% if deleteUrl %}
