@@ -303,3 +303,9 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.MD5PasswordHasher',
     'django.contrib.auth.hashers.CryptPasswordHasher',
 )
+
+try:
+	import settings_local
+except ImportError:
+	logging.warning("Local settings file 'settings_local.py' has not been found. Use this to out of VC secret settings.")
+	pass
