@@ -165,24 +165,47 @@ form {
 	width: 3em;
 }
 
-.messagebox{
+.messages{
 	margin:0 auto;
 	padding:0;
 	position:fixed;
 	right:150px; left:150px;
 	font-size:smaller;
 	text-align:center;
-	background:#ffffcc;
-	border:1px #5D7671 solid;
-	list-style:none;
 	cursor: pointer;
-	color:#5D7671;
 	font-weight:bolder;
 	z-index: 1000;
 }
 
-.messagebox li{
+.messages div{
 	padding:3px;
+	margin:2px;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+	background-color: #fcf8e3;
+	border: 2px solid #fbeed5;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+}
+.messages div.success{
+	background-color: #dff0d8;
+	border-color: #d6e9c6;
+	color: #468847;
+}
+.messages div.error{
+	background-color: #f2dede;
+	border-color: #eed3d7;
+	color: #b94a48;
+}
+.messages div.debug{
+	background-color: #ccc;
+	border-color: #aaa;
+	color: #666;
+}
+.messages div.info{
+	background-color: #d9edf7;
+	border-color: #bce8f1;
+	color: #3a87ad;
 }
 
 td img {vertical-align: middle;}

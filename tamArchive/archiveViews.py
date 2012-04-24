@@ -20,13 +20,14 @@ from tam.views import SmartPager
 from tam.models import logAction
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
 from tam.models import reallySpaceless
+from django.contrib import messages
 
 archiveNotBefore_days = 90
 
 def menu(request, template_name="archive/menu.html"):
 	dontHilightFirst = True
 	if not request.user.has_perm('tamArchive.archive') and not request.user.has_perm('tamArchive.flat'):
-		request.user.message_set.create(message=u"Devi avere accesso o all'archiviazione o all'appianamento.")
+		messages.error(request, "Devi avere accesso o all'archiviazione o all'appianamento.")
 		return HttpResponseRedirect(reverse("tamUtil"))
 
 	class ArchiveForm(forms.Form):
@@ -100,7 +101,7 @@ def daRicordareDelViaggio(ricordi, viaggio):
 def action(request, template_name="archive/action.html"):
 	""" Archivia le corse, mantenendo le classifiche inalterate """
 	if not request.user.has_perm('tamArchive.archive'):
-		request.user.message_set.create(message=u"Devi avere accesso all'archiviazione.")
+		messages.error(request, "Devi avere accesso all'archiviazione.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	end_date_string = request.POST.get("end_date")
@@ -110,11 +111,11 @@ def action(request, template_name="archive/action.html"):
 	except:
 		end_date = None
 	if (end_date is None):
-		request.user.message_set.create(message=u"Devi specificare una data valida per archiviare.")
+		messages.error(request, "Devi specificare una data valida per archiviare.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 	max_date = datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)
 	if end_date > max_date:
-		request.user.message_set.create(message=u"La data che hai scelto è troppo recente. Deve essere al massimo il %s." % max_date)
+		messages.error(request, "La data che hai scelto è troppo recente. Deve essere al massimo il %s." % max_date)
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	# non archivio le non confermate
@@ -192,7 +193,7 @@ def action(request, template_name="archive/action.html"):
 		startLog(Conducente)
 		startLog(Viaggio)	# riabilita il log delle operazioni sul Viaggio
 
-		request.user.message_set.create(message=u"Archiviazione effettuata.")
+		messages.success(request, "Archiviazione effettuata.")
 		vacuum_db()
 		transaction.commit()
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
@@ -222,7 +223,7 @@ def view(request, template_name="archive/view.html"):
 		thisPage = paginator.page(page)
 		list = thisPage.object_list
 	except:
-		request.user.message_set.create(message=u"Pagina %d vuota." % page)
+		messages.warning(request, "Pagina %d vuota." % page)
 		thisPage = None
 		list = []
 
@@ -237,7 +238,7 @@ def view(request, template_name="archive/view.html"):
 def flat(request, template_name="archive/flat.html"):
 	""" Livella le classifiche, in modo che gli ultimi abbiano zero """
 	if not request.user.has_perm('tamArchive.flat'):
-		request.user.message_set.create(message=u"Devi avere accesso all'appianamento.")
+		messages.error(request, "Devi avere accesso all'appianamento.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	classificheViaggi = get_classifiche()
@@ -272,7 +273,7 @@ def flat(request, template_name="archive/flat.html"):
 			conducente.save()
 
 		startLog(Conducente)
-		request.user.message_set.create(message=u"Appianamento effettuato.")
+		messages.success(request, "Appianamento effettuato.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	return render_to_response(template_name, {"minimi":minimi, 'flat_needed':flat_needed},

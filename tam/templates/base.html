@@ -44,11 +44,13 @@
 {% endblock superNavBar %}
 <div class="content">
     {% if messages %}
-		<ul class="messagebox">
+		<div class="messages">
 			{% for message in messages %}
-				<li>{{ message }}</li>
+				<div class="alert{% if message.tags %} {{ message.tags }}{% endif %}">
+					{{ message }}
+				</div>
 			{% endfor %}
-		</ul>
+		</div>
 	{% endif %}
 	{% block content %}{% endblock %}
 </div>
