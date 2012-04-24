@@ -1,6 +1,8 @@
 # coding: utf-8
 import os
+import logging
 from socket import gethostname
+
 TAM_VERSION = "3.2"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
@@ -245,7 +247,6 @@ EMAIL_HOST_PASSWORD = 'bangbangD'
 EMAIL_PORT = 587
 
 #if DEBUG:
-#	import logging
 #	logging.basicConfig(
 #				level=logging.DEBUG,
 #				format='%(asctime)s %(levelname)s %(message)s'
