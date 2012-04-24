@@ -11,6 +11,7 @@ import gzip
 import logging
 import os
 import time
+from django.contrib import messages
 
 def humanizeSize(size):
     size = float(size)
@@ -64,7 +65,7 @@ def getBackupInfo(doCleanup=False):
 
 def getbackup(request, backupdate):
     if not request.user.has_perm('tam.get_backup'):
-        request.user.message_set.create(message=u"Non hai accesso al download dei backup.")
+        messages.error(request, "Non hai accesso al download dei backup.")
         return HttpResponseRedirect(reverse("tamBackup"))
     t = time.strptime(backupdate, '%d-%m-%Y-%H%M')
     dataScelta = datetime.datetime(t.tm_year, t.tm_mon, t.tm_mday, t.tm_hour, t.tm_min)
@@ -79,7 +80,7 @@ def getbackup(request, backupdate):
             response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(backup_filename)
             return response
     else:
-        request.user.message_set.create(message=u"Backup del %s non trovato." % dataScelta)
+        messages.error(request, "Backup del %s non trovato." % dataScelta)
         return HttpResponseRedirect(reverse("tamBackup"))
 
 
@@ -101,13 +102,13 @@ def doBackup(username):
 
 def backup(request, template_name="utils/backup.html"):
     if not request.user.has_perm('tam.can_backup'):
-        request.user.message_set.create(message=u"Non hai accesso alla gestione dei backup.")
+        messages.error(request, "Non hai accesso alla gestione dei backup.")
         return HttpResponseRedirect("/")
     if "backup" in request.POST:
         username = request.user.username
         logAction('B', instance=request.user, description='Backup richiesto', user=request.user)
         backupFile = doBackup(username)
-        request.user.message_set.create(message=u"Backup del database effettuato.")
+        messages.success(request, "Backup del database effettuato.")
         return backupFile
     backupInfo = getBackupInfo()
     return render_to_response(template_name, {"backupInfo":backupInfo}, context_instance=RequestContext(request))

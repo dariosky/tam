@@ -1,7 +1,7 @@
 /* funzioni JS comuni ovunque in tam */
 if( typeof $ != "undefined") {
 	$(document).ready(function() {
-		$('.messagebox').live("click", function() {
+		$('.messages').live("click", function() {
 			$(this).fadeOut('slow', function(){$(this).remove()});
 			return false;
 		})
@@ -27,10 +27,10 @@ if( typeof $ != "undefined") {
 }
 
 function messageBox(msg, classes) {
-  var msgBox = $('.messagebox');
-  var message = $('<li />').html(msg);
+  var msgBox = $('.messages');
+  var message = $('<div class="alert"/>').html(msg);
   if (msgBox.length === 0) {
-      msgBox = $('<div />', { "id":'msg-box', "class":'messagebox '+classes}).hide().prependTo('body');
+      msgBox = $('<div />', { "id":'msg-box', "class":'messages '+classes}).hide().prependTo('body');
       msgBox.append(message).fadeIn('slow');
   }
   else {

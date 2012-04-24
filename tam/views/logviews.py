@@ -10,6 +10,7 @@ from tam.views.tamviews import SmartPager
 import datetime
 import logging
 from django.contrib.sessions.models import Session
+from django.contrib import messages
 
 def logAndCleanExpiredSessions():
     """ Clear all the expired sessions and log the disconnection of the users """
@@ -35,20 +36,20 @@ def actionLog(request, template_name="utils/actionLog.html"):
         try:
             content_type = ContentType.objects.get(app_label="tam", model=filterType)
         except:
-            user.message_set.create(message=u"Tipo di oggetto non valido %s." % filterType)
+            messages.error(request, "Tipo di oggetto da loggare non valido %s." % filterType)
 
     actions = ActionLog.objects.all()
     if filterUtente:        # rendo filterUtente un intero
         try:
             filterUtente = int(filterUtente)
         except:
-            user.message_set.create(message=u"Utente %s non valido." % filterUtente)
+            messages.error(request, "Utente %s non valido." % filterUtente)
             filterUtente = ""
     if filterId and content_type:        # rendo filterUtente un intero
         try:
             filterId = int(filterId)
         except:
-            user.message_set.create(message=u"ID %s non valido." % filterId)
+            messages.error(request, "ID %s non valido." % filterId)
             filterId = ""
 
 
@@ -93,7 +94,7 @@ def actionLog(request, template_name="utils/actionLog.html"):
                                     and action.content_object
                                     and action.content_object.data < action.data.replace(hour=0, minute=0))
     except Exception:
-        user.message_set.create(message=u"La pagina %d è vuota." % page)
+        messages.warning(request, "La pagina %d è vuota." % page)
         thisPage = None
         actions = []
 

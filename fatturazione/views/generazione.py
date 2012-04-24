@@ -17,6 +17,7 @@ from django.contrib.auth.decorators import permission_required
 from decimal import Decimal
 import random
 import logging
+from django.contrib import messages
 
 """
 Generazione fatture:
@@ -123,7 +124,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 	anno = 0	# usato solo con le fatture consorzio
 
 	if not ids:
-		request.user.message_set.create(message="Devi selezionare qualche corsa da fatturare.")
+		messages.error(request, "Devi selezionare qualche corsa da fatturare.")
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
 	data_generazione = parseDateString(request.POST['data_generazione'])
@@ -131,16 +132,16 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 		try:
 			anno = int(request.POST.get("anno"))
 		except:
-			request.user.message_set.create(message="Seleziona un anno numerico.")
+			messages.error(request, "Seleziona un anno numerico.")
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 		try:
 			progressivo = int(request.POST.get("progressivo", 1))
 		except:
-			request.user.message_set.create(message="Ho bisogno di un progressivo iniziale numerico.")
+			messages.error(request, "Ho bisogno di un progressivo iniziale numerico.")
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 		ultimo_progressivo = ultimoProgressivoFattura(anno, tipo)
 		if ultimo_progressivo >= progressivo:
-			request.user.message_set.create(message="Il progressivo è troppo piccolo, ho già la %s %s/%s." % (nomi_fatture[tipo], anno, ultimo_progressivo))
+			messages.error(request, "Il progressivo è troppo piccolo, ho già la %s %s/%s." % (nomi_fatture[tipo], anno, ultimo_progressivo))
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 	else:
 		progressivo = 0 # nelle ricevute lo uso per ciclare
@@ -157,14 +158,14 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 		order_by = keys + ["data"]	# ordino per chiave - quindi per data
 	lista = lista.order_by(*order_by).all()
 	if not lista:
-		request.user.message_set.create(message="Tutte le %s selezionate sono già state fatturate." % plurale)
+		messages.error(request, "Tutte le %s selezionate sono già state fatturate." % plurale)
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 	fatture = 0
 
 	if tipo == "3":	# ricevuto mi preparo una lista entro la quale ciclare di conducenti che emettono ricevuti
 		conducenti_ricevute = Conducente.objects.filter(emette_ricevute=True)
 		if conducenti_ricevute.count() == 0:
-			request.user.message_set.create(message="Nessun conducente emette ricevute. Deve essercene almeno uno.")
+			messages.error(request, "Nessun conducente emette ricevute. Deve essercene almeno uno.")
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 		dati_conducenti_ricevute = {}
 		for conducente in conducenti_ricevute:
@@ -326,7 +327,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 				riga += 10
 
 			message = "Generate %d %s." % (fatture_generate, plurale)
-			request.user.message_set.create(message=message)
+			messages.success(request, message)
 			logAction('C', instance=request.user, description=message, user=request.user)
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 

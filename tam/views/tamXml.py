@@ -4,6 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 import logging
 import StringIO
 from django.utils.datastructures import SortedDict
+from django.contrib import messages
 
 corseField = SortedDict()
 corseField['data'] = 'Data'
@@ -55,7 +56,7 @@ def xlsResponse(request, querySet):
 	logging.debug("Export to EXCEL %d viaggi." % numViaggi)
 	maxViaggi = 3000
 	if numViaggi > maxViaggi:
-		request.user.message_set.create(message=u"Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
+		messages.error(request, "Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
 		return HttpResponseRedirect("/")	# back home
 
 	querySet = querySet.select_related("da", "a", "cliente", "conducente", "passeggero")
@@ -80,6 +81,6 @@ def xlsResponse(request, querySet):
 		response['Content-Disposition'] = 'attachment; filename="%s"' % 'tamExport.xls'
 		return response
 	else:
-		request.user.message_set.create(message=u"Non ho alcun viaggio da mettere in Excel, cambia i filtri per selezionarne qualcuno.")
+		messages.error(request, "Non ho alcun viaggio da mettere in Excel, cambia i filtri per selezionarne qualcuno.")
 		del generatore
 		return HttpResponseRedirect("/")	# back home
