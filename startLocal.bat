@@ -1,4 +1,4 @@
 call ..\environment\scripts\activate.bat
-start python manage.py runserver 127.0.0.1:81111 --nothreading
-ping localhost -n 8
-start http://localhost:81111
+start python manage.py runserver 127.0.0.1:8111 --nothreading
+sleep 5
+start http://localhost:8111
