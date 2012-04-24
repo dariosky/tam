@@ -3,7 +3,6 @@
 # Escludo i file DB e estensioni di supporto
 *.pyc
 *.db3
-*.bat
 *.bak
 Desktop.ini
 
@@ -17,6 +16,7 @@ Desktop.ini
 /.pydevproject
 .settings/
 /nbproject/
+
 /querylog.sql
 _generated_media
 _generated_media_names.py
