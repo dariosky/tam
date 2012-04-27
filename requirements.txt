@@ -4,3 +4,4 @@ distribute
 django-mediagenerator
 xlrd
 xlwt
+reportlab
