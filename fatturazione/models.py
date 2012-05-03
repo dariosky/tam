@@ -49,13 +49,13 @@ class Fattura(models.Model):
 		return self.emessa_a.replace('\r', '').split('\n')[0]
 
 	def val_imponibile(self):
-		return sum([riga.val_imponibile() for riga in self.righe.all()])
+		return Decimal(sum([riga.val_imponibile() for riga in self.righe.all()]))
 
 	def val_iva(self):
-		return sum([riga.val_iva() for riga in self.righe.all()])
+		return Decimal(sum([riga.val_iva() for riga in self.righe.all()]))
 
 	def val_totale(self):
-		return sum([riga.val_totale() for riga in self.righe.all()])
+		return Decimal(sum([riga.val_totale() for riga in self.righe.all()]))
 
 	def nome_fattura(self):
 		""" Nome fattura (singolare) """
