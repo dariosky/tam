@@ -69,7 +69,7 @@ function editableSubmit(content) {
 				messageBox(xhr.responseText);
 				$this.html(pre);
 			}
-		})
+		});
 	}
 }
 

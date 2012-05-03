@@ -156,14 +156,10 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 	)
 
 
-LICENSE_OWNER = 'ARTE Taxi'
-DATI_CONSORZIO = """ARTE Taxi
-via P.Abano, 14
-35031 Abano Terme (PD)
-Partita IVA e CF: 01106280280
-Tel: 049 667842 Fax: 049 667845
-www.artetaxi.com  -  info@artetaxi.com"""
-
+LICENSE_OWNER = ''		# to be shown on the footer
+DATI_CONSORZIO = """""" # to be printed on the invoices
+OWNER_LOGO = 'fatture/logo.jpg'	# relative to media folder
+INVOICES_FOOTERS = {} # a dictionary with <invoinces type>:<list of footers>
 
 # MEDIA GENERATOR **********
 MEDIA_DEV_MODE = DEBUG
