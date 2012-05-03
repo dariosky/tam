@@ -220,10 +220,10 @@ def render_to_reportlab(context):
 					   width - (doc.leftMargin + doc.rightMargin), y - doc.bottomMargin - note_finali.height,
 					   showBoundary=test), #x,y, width, height
 			]
-		
+
 		canvas.setLineWidth(0.3)
 		p = canvas.beginPath()
-		p.moveTo(doc.leftMargin,doc.bottomMargin)
+		p.moveTo(doc.leftMargin, doc.bottomMargin)
 		p.lineTo(width - doc.rightMargin, doc.bottomMargin)
 		canvas.drawPath(p)
 
@@ -245,7 +245,7 @@ def render_to_reportlab(context):
 
 
 
-	logoImage_path = os.path.join(settings.MEDIA_ROOT, 'fatture/logo.jpg')
+	logoImage_path = os.path.join(settings.MEDIA_ROOT, settings.OWNER_LOGO)
 
 	styles = getSampleStyleSheet()
 	normalStyle = copy.deepcopy(styles['Normal'])
@@ -253,13 +253,8 @@ def render_to_reportlab(context):
 	normalStyle.fontName = 'Helvetica'
 
 	note_finali_lines = []
-	if fattura.tipo == "1":
-		note_finali_lines.append("Si prega di effettuare il pagamento sul conto Corrente:")
-		note_finali_lines.append("UNICREDIT BANCA SPA - Agenzia di Montegrotto Terme IBAN: IT94 x 02008 62680 000040451824")
-	if fattura.tipo in ("3"):
-		note_finali_lines.append("<font size='6'>Esente iva art. 10 comma 14 del DPR.633/72 integrato art. 10 comma 12 bis del 18/01/93 n°8.</font>")
-	if fattura.tipo in ("1", "3"):
-		note_finali_lines.append("<font size='6'>Ai sensi dell'art. 13 del D.L. 196/2003 sulla tutela della privacy, vi informiamo di aver inserito i dati anagrafici e fiscali che ci avete fornito nei nostri archivi informatici.</font>")
+	for footer_row in settings.INVOICES_FOOTERS.get(fattura.tipo, []):
+		note_finali_lines.append(footer_row)
 
 	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
 	note_finali.wrap(width - doc.rightMargin - doc.leftMargin, 5 * cm)

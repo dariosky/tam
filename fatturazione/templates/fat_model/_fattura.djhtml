@@ -2,7 +2,7 @@
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='fat_header'>
 		{% if fattura.tipo == "1" %}
-			{% if not tam_sstealth %}<img id='fat_logo' src='{% media_url 'fatture/logo.png' %}'>{%endif%}
+			{% if not tam_sstealth %}<img id='fat_logo' src='{% media_url logo_url %}'>{%endif%}
 		{% endif %}
 		<div id='fat_mittente' class='{% if not fattura.tipo = "1" and bigEdit %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
 		<div id='fat_destinatario' class='{% if not fattura.tipo = "2" and bigEdit %}editable{%else%}pre{%endif%}'>{{fattura.emessa_a}}</div>

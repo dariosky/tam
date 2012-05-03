@@ -59,8 +59,11 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 		else:
 			fattura = Fattura.objects.get(tipo=tipo, anno=anno, progressivo=progressivo)
 	except Fattura.DoesNotExist:
-		messages.error(request, "Fattura non trovata.")
-		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
+		if request.is_ajax():
+			return HttpResponse('Questa fattura non esiste più.', status=400)
+		else:
+			messages.error(request, "Fattura non trovata.")	
+			return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
 	bigEdit = request.user.has_perm('fatturazione.generate')
 	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
@@ -129,7 +132,6 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 				if not request.user.has_perm('fatturazione.generate'):
 					return HttpResponse('Non hai permessi sufficienti per modificare le fatture.', status=400)
 
-
 			object_value = request.POST.get('value')
 			header_ids = {'fat_mittente':'emessa_da', 'fat_note':'note', 'fat_destinatario':'emessa_a',
 							'fat_anno':'anno', 'fat_progressivo':'progressivo',
@@ -148,7 +150,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 							object_value = int(object_value.replace(',', '.'))	# altrimenti richiedo un numerico
 						except Exception, e:
 							return HttpResponse('Ho bisogno di un valore numerico.', status=500)
-				if object_id == "fat_progressivo" and fattura.tipo == 1:
+				if object_id == "fat_progressivo" and fattura.tipo == "1":
 					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value), tipo=fattura.tipo)
 					if esistenti.count() > 0:
 						return HttpResponse("Esiste già una fattura con questo progressivo.", status=500)
@@ -204,6 +206,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 								'readonly': readonly,
 								'bigEdit': bigEdit,
 								'smallEdit': smallEdit,
+								'logo_url': settings.OWNER_LOGO,
                               },
                               context_instance=RequestContext(request))
 
@@ -252,7 +255,10 @@ def exportfattura(request, id_fattura, export_type='html'):
 	except Fattura.DoesNotExist:
 		messages.error(request, "Fattura non trovata.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
-	context = {"fattura":fattura, "readonly":True, 'export_type':export_type}
+	context = {	"fattura":fattura,
+				"readonly":True,
+				'export_type':export_type,
+				'logo_url': settings.OWNER_LOGO, }
 	template_name = 'fat_model/export_fattura_1.djhtml'
 #	tamFatturaPdf(fattura, response)	# popola la response con il file
 #	if export_type == "pisa":
