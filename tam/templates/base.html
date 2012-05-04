@@ -55,6 +55,7 @@
 	{% block content %}{% endblock %}
 </div>
 
+{% block footer %}
 <div id="footer" class='noprint'>
 	{% block authblock %}
     {% if request.user.is_authenticated %}
@@ -78,6 +79,8 @@
 		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>
 	</p>
 </div>
+{% endblock footer %}
+
 	{% if mediabundleJS %}
 		{% for bundle in mediabundleJS %}{%include_media bundle %}{% endfor %}
 	{% else %}
