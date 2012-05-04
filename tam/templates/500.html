@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% block title %}Errore &raquo; {{ block.super }}{% endblock %}
+
 {% block content %}
+	<center>
     <h1>Si è verificato un errore.</h1>
 
     <p>Il supporto tecnico è stato avvisato del problema e lo risolverà il prima possibile.</p>
     
     <img src='/media/quick-pit-stop.png' alt='' />
+	</center>
 {% endblock %}
+
+{% block superNavBar %}{% endblock %}
+{% block footer %}{% endblock %}
