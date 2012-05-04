@@ -253,7 +253,7 @@ def render_to_reportlab(context):
 	normalStyle.fontName = 'Helvetica'
 
 	note_finali_lines = []
-	for footer_row in settings.INVOICES_FOOTERS.get(fattura.tipo, []):
+	for footer_row in context['invoices_footer']:
 		note_finali_lines.append(footer_row)
 
 	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
