@@ -30,6 +30,7 @@ for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
 from django.contrib import messages
+from django.conf import settings
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -266,7 +267,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
-	paginator = Paginator(viaggi, 80, orphans=10)	# pagine da tot viaggi
+	paginator = Paginator(viaggi, settings.TAM_VIAGGI_PAGINA, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
 	page = request.GET.get("page", 1)
 	try:page = int(page)
