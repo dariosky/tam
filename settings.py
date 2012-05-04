@@ -294,6 +294,8 @@ PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.CryptPasswordHasher',
 )
 
+TAM_VIAGGI_PAGINA = 100
+
 try:
 	from settings_local import *
 except ImportError:
