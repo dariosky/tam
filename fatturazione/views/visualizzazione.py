@@ -62,7 +62,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 		if request.is_ajax():
 			return HttpResponse('Questa fattura non esiste più.', status=400)
 		else:
-			messages.error(request, "Fattura non trovata.")	
+			messages.error(request, "Fattura non trovata.")
 			return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
 	bigEdit = request.user.has_perm('fatturazione.generate')
@@ -207,6 +207,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 								'bigEdit': bigEdit,
 								'smallEdit': smallEdit,
 								'logo_url': settings.OWNER_LOGO,
+								'invoices_footer': settings.INVOICES_FOOTERS.get(fattura.tipo, []),
                               },
                               context_instance=RequestContext(request))
 
@@ -258,7 +259,9 @@ def exportfattura(request, id_fattura, export_type='html'):
 	context = {	"fattura":fattura,
 				"readonly":True,
 				'export_type':export_type,
-				'logo_url': settings.OWNER_LOGO, }
+				'logo_url': settings.OWNER_LOGO,
+				'invoices_footer': settings.INVOICES_FOOTERS.get(fattura.tipo, []),
+				}
 	template_name = 'fat_model/export_fattura_1.djhtml'
 #	tamFatturaPdf(fattura, response)	# popola la response con il file
 #	if export_type == "pisa":

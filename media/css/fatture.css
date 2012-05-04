@@ -71,7 +71,7 @@ td.editable input {
 #fat_footer {
 }
 
-#fat_footer #privacy {
+#fat_footer.privacy {
 	padding-top: 15px;
 	margin: 0 auto;
 	font-size: smaller;
