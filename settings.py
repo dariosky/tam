@@ -297,7 +297,7 @@ PASSWORD_HASHERS = (
 TAM_VIAGGI_PAGINA = 100
 
 try:
-	from settings_local import *
+	from settings_local import * #@UnusedWildImport
 except ImportError:
 	logging.warning("Local settings file 'settings_local.py' has not been found. Use this to out of VC secret settings.")
 	pass
