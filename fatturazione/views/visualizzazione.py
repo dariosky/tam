@@ -66,6 +66,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
 	bigEdit = request.user.has_perm('fatturazione.generate')
+	
+	# gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
 	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
 	editable = bigEdit or smallEdit
 	readonly = not editable
@@ -122,7 +124,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
 		if action == 'set':
 			object_id = request.POST.get('id')
-			smallcampi_modificabili = ('fat_anno', 'fat_progressivo')
+			smallcampi_modificabili = ('fat_anno', 'fat_progressivo', 'fat_note') # modificabili in testata
 			if request.user.has_perm('fatturazione.smalledit') \
 					and fattura.tipo == '2'  \
 					and (object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
