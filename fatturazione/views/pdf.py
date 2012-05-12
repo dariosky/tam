@@ -120,7 +120,7 @@ def render_to_reportlab(context):
 	def firstPageTemplate(canvas, doc):
 		canvas.saveState()
 		stondata_style = ParagraphStyle("IntestazioneStondata", fontName='Helvetica', fontSize=8, leading=10,
-									 borderRadius=10, borderWidth=1, borderColor=colors.silver, borderPadding=10)
+									 borderRadius=5, borderWidth=1, borderColor=colors.silver, borderPadding=5)
 		a_style = ParagraphStyle("Titolo della fattura", fontName='Helvetica', fontSize=8, leading=10)
 
 		# set PDF properties ***************
@@ -190,13 +190,13 @@ def render_to_reportlab(context):
 			fattura_da.wrapOn(canvas, 6.5 * cm, 10 * cm)
 			fattura_da.drawOn(canvas, x, y - fattura_da.height)
 			y -= fattura_da.height
-			y -= 0.2 * cm	# spacer tra mittente e destinatario
+			y -= 0.1 * cm	# spacer tra mittente e destinatario
 
 		fattura_a = Paragraph(fattura.emessa_a.replace('\n', '<br/>'), stondata_style)
 		fattura_a.wrapOn(canvas, 6.5 * cm, 10 * cm)
 		fattura_a.drawOn(canvas, x, y - fattura_a.height - fattura_a.style.borderPadding)
 
-		y -= fattura_a.height + fattura_a.style.borderPadding + 0.5 * cm # spazio finale
+		y -= fattura_a.height + fattura_a.style.borderPadding + 0.4 * cm # spazio finale
 		right_y = y
 		lower_y = min(left_y, right_y)
 
