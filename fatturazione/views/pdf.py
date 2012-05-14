@@ -13,6 +13,7 @@ from reportlab.lib.pagesizes import A4, portrait, landscape #@UnusedImport
 from reportlab.lib import colors
 from django.templatetags.l10n import localize
 from fatturazione.views.money_util import moneyfmt, NumberedCanvas
+import datetime
 
 logoImage_path = os.path.join(settings.MEDIA_ROOT, settings.OWNER_LOGO)
 test = settings.DEBUG
@@ -26,22 +27,23 @@ normalStyle.fontName = 'Helvetica'
 def onPage(canvas, doc, da, a):
 	width, height = canvas._doctemplate.pagesize
 	canvas.saveState()
+	fattura = doc.fattura
 	stondata_style = ParagraphStyle("IntestazioneStondata", fontName='Helvetica', fontSize=8, leading=10,
 								 borderRadius=5, borderWidth=1, borderColor=colors.silver, borderPadding=5)
 	a_style = ParagraphStyle("Titolo della fattura", fontName='Helvetica', fontSize=8, leading=10)
-	tipo = doc.fattura.tipo
+	tipo = fattura.tipo
 
 	# set PDF properties ***************
 	canvas.setFont('Helvetica', 8)
 	canvas.setAuthor(settings.LICENSE_OWNER)
 	canvas.setCreator('TaM v.%s' % settings.TAM_VERSION)
 	canvas._doc.info.producer = ('TaM invoices')
-	canvas.setSubject(u"%s" % doc.fattura.nome_fattura())
+	canvas.setSubject(u"%s" % fattura.nome_fattura())
 	if tipo == '3':
 		nome = 'Ricevuta'
 	else:
 		nome = 'Fattura'	# Fatture consorzio e conducente si chiamano semplicemente FATTURA	
-	descrittoreFattura = u"%s %s" % (nome, doc.fattura.descrittore())
+	descrittoreFattura = u"%s %s" % (nome, fattura.descrittore())
 	canvas.setTitle(descrittoreFattura)
 
 	# Header ***************
@@ -56,7 +58,7 @@ def onPage(canvas, doc, da, a):
 		logo_height = 2.5 * cm
 		y -= logo_height
 		canvas.drawImage(logoImage_path, x=x, y=y, width=7 * cm, height=logo_height)
-	descrittore = Paragraph('<font size="14"><b>%s</b></font> del %s' % (descrittoreFattura, localize(doc.fattura.data)),
+	descrittore = Paragraph('<font size="14"><b>%s</b></font> del %s' % (descrittoreFattura, localize(fattura.data)),
 							 a_style)
 	descrittore.wrapOn(canvas, width / 2, y)
 	descrittore.drawOn(canvas, x=x, y=y - descrittore.height)
@@ -69,15 +71,20 @@ def onPage(canvas, doc, da, a):
 		y -= fattura_da.height
 		y -= 0.2 * cm	# spacer tra mittente e destinatario
 
-	if doc.fattura.note:
-		note = Preformatted(doc.fattura.note, a_style)
+	if fattura.note:
+		note = Preformatted(fattura.note, a_style)
 		note.wrapOn(canvas, width / 2, 10 * cm)
 		y = y - note.height - 8
 		note.drawOn(canvas, 1 * cm, y=y)
 
 	if tipo in ("3"):
 		y = y - 10
-		testata_fissa = Paragraph("<font size='6'>Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta.</font>", a_style)
+		ricevutaMultipla = (fattura.tipo == "3") and fattura.data > datetime.date(2012, 05, 13)
+		testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
+		if ricevutaMultipla:
+			testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
+
+		testata_fissa = Paragraph("<font size='6'>%s</font>" % testo_fisso, a_style)
 		testata_fissa.wrapOn(canvas, width / 2, 2 * cm)
 		y = y - testata_fissa.height
 		testata_fissa.drawOn(canvas, x, y)
@@ -116,7 +123,7 @@ def onPage(canvas, doc, da, a):
 		canvas.drawPath(p)
 
 	note_finali_lines = []
-	for footer_row in doc.fattura.footer:
+	for footer_row in fattura.footer:
 		note_finali_lines.append(footer_row)
 
 	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
@@ -180,16 +187,14 @@ def render_to_reportlab(context):
 	fattura.footer = context['invoices_footer']
 
 	response = http.HttpResponse(mimetype='application/pdf')
+	ricevutaMultipla = (fattura.tipo == "3") and fattura.data > datetime.date(2012, 05, 13)
 
-	frameT = Frame(1,1,100,100, id='normal')
-#	pageTemplates = [TemplateFattura(frames = [frameT])]
-
-	if fattura.tipo == "3":
+	if ricevutaMultipla:
 		pageTemplates = [PageTemplate(id='ConducenteConsorzio', onPage=onPageConducenteConsorzio),
 						 PageTemplate(id='ConsorzioConducente', onPage=onPageConsorzioConducente)
 						]
 	else:
-		pageTemplates = [PageTemplate(id='Normale', onPage=onPageNormal, frames=frameT)]
+		pageTemplates = [PageTemplate(id='Normale', onPage=onPageNormal)]
 
 	width, height = portrait(A4)
 
@@ -253,7 +258,7 @@ def render_to_reportlab(context):
 	story.append(KeepTogether(Table(righeTotali, style=totaliStyle,
 									colWidths=(width - doc.leftMargin - doc.rightMargin - 1.6 * cm, 1.6 * cm))))
 
-	if fattura.tipo == "3":	# le ricevute si raddoppiano con 2 template diversi
+	if ricevutaMultipla:	# le ricevute si raddoppiano con 2 template diversi
 		story = story + [NextPageTemplate("ConsorzioConducente"), PageBreak()] + story
 	doc.build(story, canvasmaker=NumberedCanvas)
 	return response
