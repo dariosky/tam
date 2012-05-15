@@ -22,7 +22,7 @@ styles = getSampleStyleSheet()
 normalStyle = copy.deepcopy(styles['Normal'])
 normalStyle.fontSize = 8
 normalStyle.fontName = 'Helvetica'
-
+data_ricevute_sdoppiate = datetime.date(2012, 4, 29)	# da questa data le ricevute create sono sdoppiate
 
 def onPage(canvas, doc, da, a):
 	width, height = canvas._doctemplate.pagesize
@@ -79,7 +79,7 @@ def onPage(canvas, doc, da, a):
 
 	if tipo in ("3"):
 		y = y - 10
-		ricevutaMultipla = (fattura.tipo == "3") and fattura.data > datetime.date(2012, 05, 13)
+		ricevutaMultipla = (fattura.tipo == "3") and fattura.data >= data_ricevute_sdoppiate
 		testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
 		if ricevutaMultipla:
 			testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
@@ -187,7 +187,7 @@ def render_to_reportlab(context):
 	fattura.footer = context['invoices_footer']
 
 	response = http.HttpResponse(mimetype='application/pdf')
-	ricevutaMultipla = (fattura.tipo == "3") and fattura.data > datetime.date(2012, 05, 13)
+	ricevutaMultipla = (fattura.tipo == "3") and fattura.data >= data_ricevute_sdoppiate
 
 	if ricevutaMultipla:
 		pageTemplates = [PageTemplate(id='ConducenteConsorzio', onPage=onPageConducenteConsorzio),
