@@ -40,7 +40,7 @@ def onPage(canvas, doc, da, a):
 	canvas._doc.info.producer = ('TaM invoices')
 	canvas.setSubject(u"%s" % fattura.nome_fattura())
 	if tipo == '3':
-		nome = 'Ricevuta'
+		nome = 'Ricevuta servizio TAXI'
 	else:
 		nome = 'Fattura'	# Fatture consorzio e conducente si chiamano semplicemente FATTURA	
 	descrittoreFattura = u"%s %s" % (nome, fattura.descrittore())
@@ -164,7 +164,7 @@ def onPageConducenteConsorzio(canvas, doc):
 
 	#print "Conducente consorzio"
 	descrittore_fattura = doc.fattura.descrittore
-	doc.fattura.descrittore = lambda:"conducente"
+	doc.fattura.descrittore = lambda:""	# non specifico conducente
 	onPage(canvas, doc, da=doc.fattura.emessa_da, a=settings.DATI_CONSORZIO)
 	doc.fattura.descrittore = descrittore_fattura
 
@@ -177,7 +177,7 @@ def onPageConsorzioConducente(canvas, doc):
 		doc.lastTemplateID = templateID
 
 	descrittore_fattura = doc.fattura.descrittore
-	doc.fattura.descrittore = lambda:"consorzio"
+	doc.fattura.descrittore = lambda:""	# non specifico consorzio
 	onPage(canvas, doc, da=settings.DATI_CONSORZIO, a=doc.fattura.emessa_a)
 	doc.fattura.descrittore = descrittore_fattura
 
