@@ -11,13 +11,13 @@
     {% else %}
 
 	{% if confirmConguaglio %}
-	    {% include "classifica-doppi.html" %}
+	    {% include "classifiche/classifica-doppi.html" %}
 	{% else %}
 	    <div id="accordion">
-		{% include "classifica-supplementari.html" %}
-		{% include "classifica-doppi.html" %}
-		{% include "classifica-doppipadova.html" %}
-		{% include "classifica-prezzi.html" %}
+		{% include "classifiche/classifica-supplementari.html" %}
+		{% include "classifiche/classifica-doppi.html" %}
+		{% include "classifiche/classifica-doppipadova.html" %}
+		{% include "classifiche/classifica-prezzi.html" %}
 		{% include "elenco-conducenti.html" %}
 	    </div>
 	{% endif %}

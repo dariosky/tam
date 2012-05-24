@@ -29,15 +29,7 @@
 	<td>{% include "corse/cella_note.inc.html" %}</td>
 
 	<td class='cellaPrezzo'>
-			{% if viaggio.punti_abbinata %}
-				{% num_range viaggio.punti_abbinata as punti_abbinata %}
-				{% for punto in punti_abbinata %}<img src="{% media_url "casina.png" %}" alt='DV' />{% endfor %}
-				<br/>
-				{{viaggio.punti_abbinata}} x {{viaggio.prezzoPunti}} nei doppi Venezia.<br/>
-			{% endif %}
-			{% if  viaggio.prezzoVenezia %}{{viaggio.prezzoVenezia}} nei Venezia.{% endif %}
-			{% if  viaggio.prezzoPadova %}{{viaggio.prezzoPadova}} nei Padova.{% endif %}
-			{% if  viaggio.prezzoDoppioPadova %}{{viaggio.prezzoDoppioPadova}} nei doppi Padova.{% endif %}
+		{% include "classifiche/descrizione-classifica-viaggio.inc.html" %}
 	
 		{% if viaggio.is_valid %}
 			{{ viaggio.km }} km.
