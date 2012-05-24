@@ -62,15 +62,14 @@ urlpatterns = patterns('tam.views',
     url(r'^privato/(?P<id>\d*)/$', 'bacino', {"Model": Passeggero, "redirectOk":"/privati/" }, name="tamPrivatoId"),
     url(r'^privato/(?P<id>\d*)/delete/$', 'bacino', {"Model": Passeggero, "redirectOk":"/privati/", "delete":True, "note":"Verranno eliminate tutte le corse con questo privato." }, name="tamPrivatoIdDel"),
     
-    url(r'^CC/$', 'conducenti', name="tamConducenti"),
+    url(r'^CC/$', 'classificheconducenti', name="tamConducenti"),
+	url(r'^conguaglio/$', 'classificheconducenti', {"confirmConguaglio":True}, name="tamConguaglio" ),
 
     url(r'^conducente/$', 'conducente', {"Model": Conducente, "redirectOk":"/CC/" }, name="tamNuovoConducente"),
     url(r'^conducente/(?P<id>\d*)/$', 'conducente', {"Model": Conducente, "redirectOk":"/CC/" }, name="tamConducenteId"),
     url(r'^conducente/(?P<id>\d*)/delete/$', 'conducente', {"Model": Conducente, "redirectOk":"/CC/", "delete":True, "note":"Verranno eliminate tutte le corse di questo conducente." }, name="tamConducenteIdDel"),
     
     url(r'^profilo/$', 'profilo', {"Model": ProfiloUtente, "unique":[] }, name="tamUserProfile" ),
-
-    url(r'^conguaglio/$', 'conducenti', {"confirmConguaglio":True}, name="tamConguaglio" ),
     
 	url(r"^util/$", "util", name="tamUtil"),
 	url(r"^backup/$", "backup", name="tamBackup"),
