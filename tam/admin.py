@@ -11,5 +11,3 @@ admin.site.register(Listino)
 admin.site.register(PrezzoListino)
 admin.site.register(ProfiloUtente)
 admin.site.register(Conguaglio)
-
-admin.site.register(ActionLog)

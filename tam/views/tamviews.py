@@ -7,9 +7,10 @@ from django import forms
 from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
 import datetime
-from tam.models import Luogo, get_classifiche, logAction, Cliente, \
+from tam.models import Luogo, get_classifiche, Cliente, \
 	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, kmPuntoAbbinate, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
+from modellog.actions import logAction
 import time
 from django.db import IntegrityError
 #from django.db import connection
@@ -308,7 +309,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	if outputFormat == 'xls':
 		from tamXml import xlsResponse
-		logAction(action='X', instance=request.user, description="Export in Excel.", user=request.user, log_date=None)
+		logAction(action='X', description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
 	mediabundleJS = ('tamCorse.js',)
 	mediabundleCSS = ('tamUI.css',)

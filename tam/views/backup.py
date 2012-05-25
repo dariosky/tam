@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response, HttpResponse
 from django.template.context import RequestContext
 from glob import glob
-from tam.models import logAction
+from modellog.actions import logAction
 import datetime
 import gzip
 import logging
@@ -72,7 +72,7 @@ def getbackup(request, backupdate):
     backupInfo = getBackupInfo(doCleanup=True)
     for backup in backupInfo["backups"]:
         if backup["date"].timetuple()[:5] == dataScelta.timetuple()[:5]:
-            logAction('G', instance=request.user, description='Backup del %s scaricato' % backupdate, user=request.user)
+            logAction('G', description='Backup del %s scaricato' % backupdate, user=request.user)
             backup_filename = backup["filename"]
             backupPath = os.path.join(backupInfo["backupdir"], backup_filename)
             responseFile = file(backupPath, 'rb')
@@ -106,7 +106,7 @@ def backup(request, template_name="utils/backup.html"):
         return HttpResponseRedirect("/")
     if "backup" in request.POST:
         username = request.user.username
-        logAction('B', instance=request.user, description='Backup richiesto', user=request.user)
+        logAction('B', description='Backup richiesto', user=request.user)
         backupFile = doBackup(username)
         messages.success(request, "Backup del database effettuato.")
         return backupFile

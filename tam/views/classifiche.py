@@ -1,5 +1,5 @@
 #coding: utf-8
-from tam.models import Luogo, get_classifiche, logAction, Cliente, \
+from tam.models import Luogo, get_classifiche, Cliente, \
 	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, kmPuntoAbbinate, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
 from django.shortcuts import render_to_response, HttpResponse, get_object_or_404

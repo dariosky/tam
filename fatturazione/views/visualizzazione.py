@@ -12,7 +12,7 @@ from fatturazione.views.util import ultimoProgressivoFattura
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from fatturazione.views.pdf import render_to_reportlab#, render_with_pisa
-from tam.models import logAction
+from modellog.actions import logAction
 from django.db import transaction
 from decimal import Decimal
 from django.contrib import messages

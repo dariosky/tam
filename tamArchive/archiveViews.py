@@ -13,14 +13,16 @@ import logging
 from django.db import transaction
 #from django.db import connection
 from django.db.models import Q
-from tam.models import Viaggio, ActionLog, ProfiloUtente, stopLog, startLog, Conducente, \
+from tam.models import Viaggio, ProfiloUtente, Conducente, \
 	get_classifiche
 from tamArchive.models import ViaggioArchive
 from tam.views import SmartPager
-from tam.models import logAction
+
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
 from tam.models import reallySpaceless
 from django.contrib import messages
+from modellog.models import ActionLog
+from modellog.actions import logAction, stopLog, startLog
 
 archiveNotBefore_days = 90
 

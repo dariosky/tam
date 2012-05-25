@@ -5,7 +5,8 @@ Created on 11/set/2011
 @author: Dario
 '''
 import datetime
-from tam.models import Viaggio, ProfiloUtente, Conducente, logAction
+from tam.models import Viaggio, ProfiloUtente, Conducente
+from modellog.actions import logAction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from fatturazione.models import Fattura, RigaFattura, nomi_fatture, nomi_plurale
@@ -328,7 +329,7 @@ def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, ke
 
 			message = "Generate %d %s." % (fatture_generate, plurale)
 			messages.success(request, message)
-			logAction('C', instance=request.user, description=message, user=request.user)
+			logAction('C', description=message, user=request.user)
 			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
 	return render_to_response(template_name,
