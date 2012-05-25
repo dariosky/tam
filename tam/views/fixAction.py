@@ -7,6 +7,9 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from tam.disturbi import trovaDisturbi, fasce_semilineari
 from django.contrib import messages
+from modellog.actions import logAction
+from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 
 def fixAction(request, template_name="utils/fixAction.html"):
 	if not request.user.is_superuser:
@@ -119,12 +122,35 @@ def fixAction(request, template_name="utils/fixAction.html"):
 					messageLines.append("prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni))
 					messageLines.append("dopo %s/%s" % (diurniGiusti, notturniGiusti))
 					messageLines.append(" ");
-					viaggio.punti_diurni=diurniGiusti
-					viaggio.punti_notturni=notturniGiusti
+					viaggio.punti_diurni = diurniGiusti
+					viaggio.punti_notturni = notturniGiusti
 					viaggio.save()
 					sistemati += 1
 
 		messageLines.append("Errati (e corretti) %d/%d" % (sistemati, len(viaggi)))
+	if request.POST.get("spostaILog"):
+		from django.db import connections
+		con = connections['default']
+		cursor = con.cursor()
+		cursor.execute("SELECT * from tam_actionlog")
+		logs = cursor.fetchall()
+		messageLines.append("Sposto %d log nel DB separato" % len(logs))
+		for oldlog in logs:
+			user_id, content_type_id, object_id, action_type, data, pk, description = oldlog #@UnusedVariable
+			user = User.objects.get(pk=user_id)
+			ct = ContentType.objects.get(id=content_type_id)
+			ct_class = ct.model_class()
+			try:
+				instance = ct_class.objects.get(id=object_id)
+			except ct_class.DoesNotExist:
+				instance = None
+			messageLines.append("%s fatta da %s" % (action_type, user))
+			logAction(action=action_type, instance=instance, description=description, user=user, log_date=data)
+		messageLines.append("Cancello la vecchia tabella di LOG")
+		cursor.execute("drop table tam_actionlog")
+		con.commit()
+		from tamArchive.archiveViews import vacuum_db #@Reimport
+		vacuum_db()
 
 
 	return render_to_response(template_name, {"messageLines":messageLines, "error":error},

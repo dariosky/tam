@@ -9,8 +9,7 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
-from django.db.models import signals
-from tam.middleware import threadlocals
+
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
@@ -1203,131 +1202,9 @@ def get_classifiche():
 	return classifiche
 
 
-LOG_ACTION_TYPE = [
-					("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
-					('L', "Login"), ("O", "Logout"),
-					("K", "Archiviazione"), ("F", "Appianamento"),
-					('X', "Export Excel"),
-				  ]
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes import generic
-
-class ActionLog(models.Model):
-	data = models.DateTimeField(db_index=True)
-	user = models.ForeignKey(User, null=True, blank=True, default=None)
-	action_type = models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
-
-	content_type = models.ForeignKey(ContentType)
-	object_id = models.PositiveIntegerField()
-	content_object = generic.GenericForeignKey('content_type', 'object_id')
-
-	description = models.TextField(blank=True)
-
-	class Meta:
-		verbose_name_plural = _("Azioni")
-		ordering = ["-data"]
-
-	def __unicode__(self):
-		longName = {"A":"Creazione", "M":"Modifica", "D":"Cancellazione"}[self.action_type]
-		return "%s di un %s - %s.\n  %s" % (longName, self.content_type, self.user, self.description)
-
-
-def logAction(action, instance, description, user=None, log_date=None):
-	if instance:
-		content_type = ContentType.objects.get_for_model(instance)
-		object_id = instance.pk
-	else:
-		content_type = None
-		object_id = None
-	if user is None:
-		user = threadlocals.get_current_user()
-	if log_date is None: log_date = datetime.datetime.now()
-	modification = ActionLog (
-							  data=log_date,
-							  user=user,
-							  action_type=action,
-							  description=description,
-							  content_type=content_type,
-							  object_id=object_id,
-							  )
-	modification.save()
-#	logging.debug("LOG: %s" % modification)
-
-
-def traduci(v):
-	if v is True: return "Vero"
-	if v is False: return "Falso"
-	if v is None: return "Nulla"
-	return v
-
-def presave_logger(sender, instance, signal, **kwargs):
-	""" Log actions to db """
-#	logging.debug( "PRESAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
-#	logging.debug("********** ID: %s ********** "%instance.id)
-	try:
-		pre_instance = sender.objects.get(id=instance.id)
-	except sender.DoesNotExist:
-		instance._changeList = None
-		return	# creation time
-
-	instance._changeList = []
-	for field in sender._meta.fields:
-		fieldname = field.name
-		prevalue = getattr(pre_instance, fieldname)
-		newvalue = getattr(instance, fieldname)
-		if not field.editable:
-			continue
-		if prevalue != newvalue:
-			prevalue = traduci(prevalue)
-			newvalue = traduci(newvalue)
-
-			instance._changeList.append(u"%s: da '%s' a '%s'" % (fieldname, prevalue, newvalue))
-
-
-def postsave_logger(sender, instance, signal, **kwargs):
-#	logging.debug( "POSTSAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
-	if instance._changeList is None:
-		logAction('A', instance, u"%s" % instance)
-	else:
-		if instance._changeList:
-			logAction('M', instance, u"; ".join(instance._changeList))
-
-def predelete_logger(sender, instance, signal, **kwargs):
-#	logging.debug( "DELETE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
-	logAction('D', instance, u"%s" % instance)
-
-def startLog(ModelClass):
-	signals.pre_save.connect(
-								 presave_logger,
-								 sender=ModelClass,
-								 dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_save')
-							 )
-	signals.post_save.connect(
-								 postsave_logger,
-								 sender=ModelClass,
-								 dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'post_save')
-							 )
-	signals.pre_delete.connect(
-								 predelete_logger,
-								 sender=ModelClass,
-								 dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_delete')
-							 )
-
-def stopLog(ModelClass):
-	signals.pre_save.disconnect(
-		sender=ModelClass,
-		dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_save')
-	)
-	signals.post_save.disconnect(
-		sender=ModelClass,
-		dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'post_save')
-	)
-	signals.pre_delete.disconnect(
-		sender=ModelClass,
-		dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_delete')
-	)
 
 # Comincia a loggare i cambiamenti a questi Modelli
+from modellog.actions import startLog
 startLog(Viaggio)
 startLog(Cliente)
 startLog(Passeggero)

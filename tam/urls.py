@@ -79,7 +79,6 @@ urlpatterns = patterns('tam.views',
 	url(r"^permissions/(?P<username>.*)/$", "permissions", name="tamManage"),
     url(r"^newuser/$", "newUser", name="newUser"),
 	url(r"^deluser/(?P<username>.*)/$", "delUser", name="delUser"),
-	url(r"^log/$", "actionLog", name="actionLog"),
 
 	url(r'^password/$', 'passwordChangeAndReset', name='change_password'),
 

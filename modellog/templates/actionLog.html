@@ -46,12 +46,12 @@
 {% endif %}
 <table class="tablesorter">
 	<tr>
-		<th>Ora modifica</th><th>Utente</th><th>Oggetto</th><th>Azione</th><th>Dettagli</th>
+		<th>Ora modifica</th><th>Utente</th><th>Oggetto</th><th>Azione</th>
 	</tr>
 
 {% for action in actions %}
 	<tr>
-		<td {% ifequal action.content_type viaggioType%}{% if action.preInsert %}style="background-color:orange;"{% endif %}{% endifequal %}>
+		<td {% ifequal action.modelName "viaggio" %}{% if action.hilight %}style="background-color:orange;"{% endif %}{% endifequal %}>
 			{% ifequal action.data.date today %}
 				<span class="today">{{ action.data|date:"H:i" }}</span>
 			{% else %}
@@ -60,16 +60,18 @@
 			
 		</td>
 		<td>{{ action.user }}</td>
-		<td>{% with action.content_object.url as obj_url %}
-				{% if  obj_url %}
-					<a href="{{ obj_url }}">{{ action.content_type }} {{ action.object_id }}</a>
-				{% else %}
-					{{ action.content_type }} {{ action.object_id }}
+		<td>
+			{% with action.obj as obj %}
+				{% if obj %}
+					{% if obj.url %}
+						<a href='{{ obj.url }}'>{{ action.modelName }} {{ obj }}</a>
+					{% else %}
+						{{ action.modelName }} {{ obj }}
+					{% endif %}
 				{% endif %}
 			{% endwith %}
 		</td>
-		<td><img src="/media/actionIcons/{{ action.action_type}}.png" alt="{{ action.action_type}}" /></td>
-		<td>{{ action.description }}</td>
+		<td><img src="/media/actionIcons/{{ action.action_type}}.png" alt="{{ action.action_type}}" /> {{ action.description }}</td>
 	</tr>
 {% endfor %}
 </table>

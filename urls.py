@@ -8,6 +8,7 @@ import os
 
 urlpatterns = patterns ( '',
 	( r'', include( 'tam.urls' ) ),
+	( r'', include( 'modellog.urls' ) ),
 	( r'^archive/', include( 'tamArchive.urls' ) ),
 	( r'', include( 'license.urls' ) ),
 	( r'^fatture/', include( 'fatturazione.urls' ) ),

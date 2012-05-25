@@ -20,40 +20,43 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-usaSqlite = True # Forzo ad usare il db in sqlite
-if usaSqlite:
-	DATABASES = {	# DB di produzione
-		'default': {
-				'ENGINE': 'django.db.backends.sqlite3', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-				'NAME': os.path.join(PROJECT_PATH, 'tam.db3')
-		},
-		'archive': {
-				'ENGINE': 'django.db.backends.sqlite3',
-				'NAME': os.path.join(PROJECT_PATH, 'tamarchive.db3')
-		}
+DATABASES = {	# DB di produzione
+	'default': {
+			'ENGINE': 'django.db.backends.sqlite3', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+			'NAME': os.path.join(PROJECT_PATH, 'tam.db3')
+	},
+	'archive': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': os.path.join(PROJECT_PATH, 'tamarchive.db3')
+	},
+	'modellog': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': os.path.join(PROJECT_PATH, 'tamlog.db3')
 	}
-	DATABASE_OPTIONS = {
-	   "timeout": 20,	# Sqlite will wait some more
-	}
-else:
-	DATABASES = {	# DB di test
-		'default': {
-				'ENGINE': 'django.db.backends.postgresql_psycopg2', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-				'NAME': 'tam',
-				'USER': 'tam',
-				'PASSWORD': 'tampg',
-				'HOST':'localhost', 'PORT':5432
-		},
-		'archive': {
-				'ENGINE': 'django.db.backends.postgresql_psycopg2',
-				'NAME': 'tamArchive',
-				'USER': 'tam',
-				'PASSWORD': 'tampg',
-				'HOST':'localhost', 'PORT':5432
-		}
-	}
+}
+DATABASE_OPTIONS = {
+   "timeout": 20, 	# Sqlite will wait some more
+}
+#else:
+#	DATABASES = {	# DB di test
+#		'default': {
+#				'ENGINE': 'django.db.backends.postgresql_psycopg2', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+#				'NAME': 'tam',
+#				'USER': 'tam',
+#				'PASSWORD': 'tampg',
+#				'HOST':'localhost', 'PORT':5432
+#		},
+#		'archive': {
+#				'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#				'NAME': 'tamArchive',
+#				'USER': 'tam',
+#				'PASSWORD': 'tampg',
+#				'HOST':'localhost', 'PORT':5432
+#		}
+#	}
 
-DATABASE_ROUTERS = [ 'db_routers.TamArchiveRouter', ]
+DATABASE_ROUTERS = ['db_routers.TamArchiveRouter',
+					'modellog.db_routers.SeparateLogRouter']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -110,7 +113,7 @@ STATICFILES_FINDERS = (
 # List of callables that know how to import templates from various sources.
 if not DEBUG:
 	TEMPLATE_LOADERS = (
-		( 'django.template.loaders.cached.Loader', 	( # cache template loaders
+		('django.template.loaders.cached.Loader', 	(# cache template loaders
 			'django.template.loaders.filesystem.Loader',
 			'django.template.loaders.app_directories.Loader',
 			)
@@ -194,7 +197,7 @@ MEDIA_BUNDLES = (
 	('tamRules.css', 'css/tamrules.css'),
 	('jquery.editable-1.3.3.js', 'js/jquery.editable-1.3.3.js'),
 	('fattura.js', 'js/fatture/fattura.js'),
-			
+
 )
 YUICOMPRESSOR_PATH = os.path.join(PROJECT_PATH, 'yuicompressor.jar')
 if os.path.exists(YUICOMPRESSOR_PATH):
@@ -222,6 +225,8 @@ INSTALLED_APPS = (
 	'tamArchive',
 
 	'fatturazione',
+
+	'modellog',
 #	'license',
 )
 
@@ -242,7 +247,7 @@ EMAIL_PORT = 587
 #			)
 
 if DEBUG:
-	SESSION_COOKIE_AGE = 60*60*24*14	# 14 giorni in debug
+	SESSION_COOKIE_AGE = 60 * 60 * 24 * 14	# 14 giorni in debug
 else:
 	SESSION_COOKIE_AGE = 30 * 60	# cookie age in seconds (30 minutes)
 
@@ -286,7 +291,7 @@ CACHES = {
 }
 
 PASSWORD_HASHERS = (
-	'django.contrib.auth.hashers.SHA1PasswordHasher',	# Still use the old hashing until I pass to 1.4
+	'django.contrib.auth.hashers.SHA1PasswordHasher', 	# Still use the old hashing until I pass to 1.4
     'django.contrib.auth.hashers.PBKDF2PasswordHasher',
     'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',
