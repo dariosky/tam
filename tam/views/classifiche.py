@@ -4,6 +4,7 @@ from tam.models import Luogo, get_classifiche, Cliente, \
 	ProfiloUtente, Viaggio, Passeggero
 from django.shortcuts import render_to_response, HttpResponse, get_object_or_404
 from django.template.context import RequestContext	 # Context with steroid
+from decimal import Decimal
 
 def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html", confirmConguaglio=False):
 	user = request.user
