@@ -1,9 +1,12 @@
 #coding: utf-8
-from tam.models import Luogo, get_classifiche, Cliente, \
-	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, kmPuntoAbbinate, Listino, \
-	ProfiloUtente, Viaggio, Passeggero
-from django.shortcuts import render_to_response, HttpResponse, get_object_or_404
+from tam.models import get_classifiche, Conducente, Conguaglio, kmPuntoAbbinate, ProfiloUtente
+from django.shortcuts import render_to_response
 from django.template.context import RequestContext	 # Context with steroid
+from decimal import Decimal
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+import logging
 
 def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html", confirmConguaglio=False):
 	user = request.user
