@@ -37,7 +37,7 @@
 		    <td colspan="{{ punti_assocMin }}">
 			{% if confirmConguaglio %}
 			    <form method="post" action="">
-					<input type="submit" name="conguaglia" value="Memorizza">
+					<input type="submit" name="conguaglia" value="Memorizza" style='width:100%'>
 				</form>
 			{% else %}
 				    <a href="{% url tamConguaglio %}">CONGUAGLIA</a> TOTALE: {{ totaleConguaglioAbbinate|intcomma }} € MEDIA: {{ mediaAbbinate|intcomma }} €
