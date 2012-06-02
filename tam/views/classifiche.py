@@ -8,113 +8,125 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 import logging
 
+def conguaglia(classifica_definita):
+	# todo: la classifica dovrebbe definire i due campi del conducente da cui prendere i valoro iniziali
+#	viaggiSalvati = 0
+	for key, nick, classifica in classifica_definita['dati']: #@UnusedVariable
+		conducente = classifica["conducente"]
+		puntiDaTogliere = classifica_definita['min']
+		if conducente.classifica_iniziale_puntiDoppiVenezia: # il conducente ha punti iniziali tolgo quelli
+			prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
+			puntiInizialiTolti = min(puntiDaTogliere, conducente.classifica_iniziale_puntiDoppiVenezia)
+			logging.debug("Tolgo %s punti iniziali da %s a %s." % (puntiInizialiTolti, prezzoPuntiIniziali, conducente.nick))
+			conducente.classifica_iniziale_puntiDoppiVenezia -= puntiInizialiTolti
+			conducente.classifica_iniziale_prezzoDoppiVenezia -= prezzoPuntiIniziali
+			puntiDaTogliere -= puntiInizialiTolti
+			conducente.save()
+
+		while puntiDaTogliere > 0:
+			for viaggio in classifica["abbinate"]:
+				puntiDaTogliereAlViaggio = min(puntiDaTogliere, viaggio.punti_abbinata)
+				if puntiDaTogliereAlViaggio==0: continue
+#				logging.debug("Tolgo %d punti al viaggio %s"%(puntiDaTogliereAlViaggio, viaggio.id))
+
+				puntiDaTogliere -= puntiDaTogliereAlViaggio
+#				print "Non salvo %s,%s - %d" % (conducente, viaggio.id, puntiDaTogliereAlViaggio)
+#				viaggiSalvati += 1
+#				continue
+				viaggio.km_conguagliati += kmPuntoAbbinate * puntiDaTogliereAlViaggio
+				viaggio.save()
+				viaggio.updatePrecomp() # salvo perché mi toglierà i punti
+
+		conguaglio = Conguaglio(conducente=conducente, dare=classifica["debitoAbbinate"])
+		conguaglio.save()
+#	print 'avrei modificato %d viaggi' % viaggiSalvati
+
 def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html", confirmConguaglio=False):
 	user = request.user
-	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
+	profilo, created = ProfiloUtente.objects.get_or_create(user=user) #@UnusedVariable
 	mediabundleJS = ('tamUI.js',)
 	mediabundleCSS = ('tamUI.css',)
 
-	conducenti = Conducente.objects.filter(attivo=True)
 	if not profilo.luogo:
 		messages.error(request, "Devi inserire il luogo preferito per poter calcolare i disturbi.")
-
-	classificheViaggi = get_classifiche()
-	classifiche = []
-	# alle classifiche estratte da SQL, aggiungo:
-	#	il conducente
-	#	la lista di punti-valore abbinate
-	doppiVenezia = []	# lista per la visualizzazione delle classifiche doppi ordinata è (punti, conducentenick, classifica)
-	puntiDiurni = []	# anche le classifiche diurne e notturne le metto in lista per ordinarle qui in vista
-	puntiNotturni = []
-
-	punti_assocMin = 0
-
-	for classifica in classificheViaggi:	# creo le classifiche un po' estese
-		for conducente in conducenti:
-			if conducente.id == classifica["conducente_id"]:
-				doppiVenezia.append((classifica["puntiAbbinata"], conducente.nick, classifica))
-				puntiDiurni.append((classifica["puntiDiurni"], conducente.nick, classifica))
-				puntiNotturni.append((classifica["puntiNotturni"], conducente.nick, classifica))
-				classifica["conducente"] = conducente   # aggiungo alle classifiche il campo "conducente" con l'oggetto django del conducente
-				classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0)
-				classifica["punti_abbinate"] = []
-				classifica["celle_abbinate"] = []
-				if conducente.classifica_iniziale_puntiDoppiVenezia:	# aggiungo i punti iniziali
-					prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
-					for punto in range(conducente.classifica_iniziale_puntiDoppiVenezia):
-						classifica["punti_abbinate"].append(prezzoPuntiIniziali)
-						classifica["celle_abbinate"].append({"valore": prezzoPuntiIniziali, "data":None})
-				for viaggio in classifica["abbinate"]: # per ogni viaggio
-					for punto in range(viaggio.punti_abbinata): # per ogni punto
-						classifica["punti_abbinate"].append(viaggio.prezzoPunti)
-						classifica["celle_abbinate"].append({"valore": viaggio.prezzoPunti, "data":viaggio.data})
-				classifiche.append(classifica)
-	doppiVenezia.sort()
-	puntiDiurni.sort()
-	puntiNotturni.sort()
-
-	if classifiche:
-		prezzoDoppioPadovaMax = max([c["prezzoDoppioPadova"] for c in classifiche])
-		prezzoVeneziaMax = max([c["prezzoVenezia"] for c in classifiche])
-		prezzoPadovaMax = max([c["prezzoPadova"] for c in classifiche])
-
-		punti_assocMax = max([c["puntiAbbinata"] for c in classifiche])
-		punti_assocMin = min([c["puntiAbbinata"] for c in classifiche])
-
-	if punti_assocMin:
-		totaleConguaglioAbbinate = 0
-		for c in classifiche:
-			totaleConguaglioAbbinate += sum(c["punti_abbinate"][:punti_assocMin])
-		mediaAbbinate = round(totaleConguaglioAbbinate / len(classifiche), 0)
-		for c in classifiche:
-			c["debitoAbbinate"] = sum(c["punti_abbinate"][:punti_assocMin]) - Decimal(str(mediaAbbinate))
-			c["deveDare"] = (c["debitoAbbinate"] > 0)
-			if c["deveDare"]: c["debitoAssoluto"] = c["debitoAbbinate"]
-			else: c["debitoAssoluto"] = -c["debitoAbbinate"]
+		return HttpResponseRedirect('/')
 
 	if confirmConguaglio and not user.has_perm('tam.add_conguaglio'):
 		messages.error(request, "Non hai il permesso di effettuare conguagli.")
 		return HttpResponseRedirect(reverse("tamConducenti"))
 
-	# TMP
-#	for c in classifiche:
-#		conducente=c["conducente"]
-#		if conducente.nick=='16':
-#			for viaggio in c["abbinate"]:
-#				logging.debug("Viaggio di 16. %s. " % viaggio.id+ "%d punti da %s. "%(viaggio.punti_abbinata, viaggio.prezzoPunti) + "%s/%s km" % (viaggio.km_conguagliati, viaggio.get_kmtot()) )
 
-	if punti_assocMin and confirmConguaglio and ("conguaglia" in request.POST):	# conguaglio
-		for c in classifiche:
-			conducente = c["conducente"]
-#			if conducente.nick!='16':	#TMP
-#				logging.debug("Salto il conducente")
-#				continue
-			puntiDaTogliere = punti_assocMin
-			if conducente.classifica_iniziale_puntiDoppiVenezia: # il conducente ha punti iniziali tolgo quelli
-				prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
-				puntiInizialiTolti = min(puntiDaTogliere, conducente.classifica_iniziale_puntiDoppiVenezia)
-				logging.debug("Tolgo %s punti iniziali da %s a %s." % (puntiInizialiTolti, prezzoPuntiIniziali, conducente.nick))
-				conducente.classifica_iniziale_puntiDoppiVenezia -= puntiInizialiTolti
-				conducente.classifica_iniziale_prezzoDoppiVenezia -= prezzoPuntiIniziali
-				puntiDaTogliere -= puntiInizialiTolti
-				conducente.save()
+	classificheViaggi = get_classifiche()
+	# alle classifiche estratte da SQL, aggiungo:
+	#	il conducente
+	#	la lista di punti-valore abbinate
 
-			while puntiDaTogliere > 0:
-				for viaggio in c["abbinate"]:
-					puntiDaTogliereAlViaggio = min(puntiDaTogliere, viaggio.punti_abbinata)
-#					logging.debug("Tolgo %d punti al viaggio %s"%(puntiDaTogliereAlViaggio, viaggio.id))
+	conducenti = Conducente.objects.filter(attivo=True)
+	conducente_byId = {}	# dizionario id->conducente
+	for conducente in conducenti: conducente_byId[conducente.id] = conducente
+	from django.conf import settings
+	classifiche_definite = settings.CLASSIFICHE
 
-					puntiDaTogliere -= puntiDaTogliereAlViaggio
-#					logging.debug("Non salvo")	#TMP
-#					continue
-					viaggio.km_conguagliati += kmPuntoAbbinate * puntiDaTogliereAlViaggio
-					viaggio.save()
-					viaggio.updatePrecomp() # salvo perché mi toglierà i punti
+	# prendo le classifiche definite e le mappo per ID
+	classifiche_definite_byId = {}
+	for classifica_definita in classifiche_definite:
+		classifiche_definite_byId[classifica_definita.get('mapping_field')] = classifica_definita
+		classifica_definita['dati'] = []
 
-			conguaglio = Conguaglio(conducente=conducente, dare=c["debitoAbbinate"])
-			conguaglio.save()
-		messages.success(request, "Conguaglio memorizzato.")
-		return HttpResponseRedirect(reverse("tamConducenti"))
+	if confirmConguaglio:	# se sto confermando tolgo tutte le classifiche tranne quella puntiAbbinata
+		classifiche_definite = [classifiche_definite_byId['puntiAbbinata']]
 
-	tuttiConducenti = Conducente.objects.filter()
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+	for classifica in classificheViaggi:	# creo le classifiche un po' estese
+		conducente = conducente_byId[classifica["conducente_id"]] # prendo il conducente
+		classifica["conducente"] = conducente   # aggiungo alle classifiche il campo conducente
+
+		for key in ('puntiDiurni', 'puntiNotturni',
+					'puntiAbbinata',
+					'prezzoPadova', 'prezzoVenezia', 'prezzoDoppioPadova'):
+			# se ho una classifica con questa chiave le aggiungo i dati
+			if key in classifiche_definite_byId:
+				classifiche_definite_byId[key]['dati'].append((classifica[key], conducente.nick, classifica))
+				if key == 'puntiAbbinata':
+					classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0)
+					classifica["celle_abbinate"] = []
+					if conducente.classifica_iniziale_puntiDoppiVenezia:	# aggiungo i punti iniziali
+						prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
+						for punto in range(conducente.classifica_iniziale_puntiDoppiVenezia):
+							classifica["celle_abbinate"].append({"valore": prezzoPuntiIniziali, "data":None})
+					for viaggio in classifica["abbinate"]: # per ogni viaggio
+						for punto in range(viaggio.punti_abbinata): # per ogni punto
+							classifica["celle_abbinate"].append({"valore": viaggio.prezzoPunti, "data":viaggio.data})
+		#classifiche.append(classifica)
+
+	for classifica_definita in classifiche_definite:	# ordino i dati
+		classifica_definita['dati'].sort()
+		classifica_definita['min'] = classifica_definita["dati"][0][0]	# prendo la chiave del primo valore
+		classifica_definita['max'] = classifica_definita["dati"][-1][0]	# prendo la chiave del'ultimo valore
+		if classifica_definita.get("type") == "punti" and classifica_definita['min']: # abbiamo un minimo da conguagliare
+			punti_assocMin = classifica_definita['min'] # punti comuni a tutti gli attivi da conguagliare
+			totaleConguaglioAbbinate = 0
+			for key, nick, classifica in classifica_definita['dati']:
+				totaleConguaglioAbbinate += sum([punto['valore'] for punto in classifica["celle_abbinate"][:punti_assocMin]])
+			mediaAbbinate = round(totaleConguaglioAbbinate / len(classifica_definita['dati']), 0)
+			for key, nick, classifica  in classifica_definita['dati']:
+				classifica["debitoAbbinate"] = sum([punto['valore'] for punto in classifica["celle_abbinate"][:punti_assocMin]]) - Decimal(str(mediaAbbinate))
+				classifica["deveDare"] = (classifica["debitoAbbinate"] > 0)
+				if classifica["deveDare"]: classifica["debitoAssoluto"] = classifica["debitoAbbinate"]
+				else: classifica["debitoAssoluto"] = -classifica["debitoAbbinate"]
+			classifica_definita['totaleConguaglio'] = totaleConguaglioAbbinate
+			classifica_definita['mediaAbbinate'] = 	mediaAbbinate
+			if confirmConguaglio and ("conguaglia" in request.POST):
+				conguaglia(classifica_definita)
+				messages.success(request, "Conguaglio memorizzato.")
+				return HttpResponseRedirect(reverse("tamConducenti"))
+
+	tuttiConducenti = Conducente.objects.all()
+	return render_to_response(template_name,
+							  {
+							   'tuttiConducenti': tuttiConducenti,
+							   'mediabundleJS':mediabundleJS, 'mediabundleCSS':mediabundleCSS,
+							   'classifiche_definite': classifiche_definite,
+
+							   'confirmConguaglio':confirmConguaglio,
+							  },
+							  context_instance=RequestContext(request))
