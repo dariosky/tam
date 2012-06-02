@@ -5,27 +5,27 @@
 {% block content %}
 <h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
 
-    {% if not profilo.luogo %}
-		Inserisci un luogo preferito...<br/>
-		le classifiche dipendono molto dalle tratte previste.
-    {% else %}
+    <div id="accordion">
+    	{% for classifica_definita in classifiche_definite %}
+    		{% if classifica_definita.type = "punti" %}
+    			{% include "classifiche/classifica-punti.inc.html" %}
+    		{% elif classifica_definita.type = "supplementari" %}
+    			{% include "classifiche/classifica-supplementari.inc.html" %}
+    		{% else %}
+    			{% include "classifiche/classifica-prezzo.inc.html" %}
+    		{% endif %}
+    	{% endfor %}
 
-	{% if confirmConguaglio %}
-	    {% include "classifiche/classifica-doppi.html" %}
-	{% else %}
-	    <div id="accordion">
-		{% include "classifiche/classifica-supplementari.html" %}
-		{% include "classifiche/classifica-doppi.html" %}
-		{% include "classifiche/classifica-doppipadova.html" %}
-		{% include "classifiche/classifica-prezzi.html" %}
-		{% include "elenco-conducenti.html" %}
-	    </div>
-	{% endif %}
+    </div>
+	
+	{% if not confirmConguaglio %}
+		{% include "elenco-conducenti.inc.html" %}
+	{% endif %}    
 
-    {% endif %}
 {% endblock content%}
 
 {% block bottom %}
+{% if not confirmConguaglio %}
 <script type="text/javascript">
     $(document).ready( function() {
 		$("#accordion div").accordion({
@@ -37,4 +37,5 @@
 		//$("#accordion .selected").removeClass("selected");
     });
 </script>
+{% endif %}
 {% endblock bottom %}

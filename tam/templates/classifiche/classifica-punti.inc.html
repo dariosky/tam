@@ -1,0 +1,56 @@
+{% load humanize %}
+<div>
+<h2><a href="#">
+		{{ classifica_definita.nome }}
+		{% if classifica_definita.descrizione %}({{ classifica_definita.descrizione }}){% endif %}
+	</a>
+</h2>
+<div>
+	<table class="tablesorter">
+	<thead>
+		<tr>
+		<th>Nome</th>
+		<th colspan="{{ classifica_definita.max }}">Punti di abbinata</th>
+		</tr>
+	</thead>
+
+	<tbody>
+		{% for punti, nick, classifica in classifica_definita.dati %}
+		<tr>
+			<td>
+			{{ classifica.conducente }}
+				{% if classifica_definita.min %}
+					{% if not classifica.debitoAbbinate %}
+						É in pari.
+					{% else %}
+						{% if classifica.deveDare %}deve dare{% else %}deve ricevere{% endif %}
+						{{ classifica.debitoAssoluto|floatformat:2 }}€
+					{% endif %}
+				{% endif %}
+			</td>
+			{% for punto in classifica.celle_abbinate %}
+			    <td> {{ punto.valore|floatformat:2 }}{% if punto.data %}<br/>{{ punto.data|date:"d/m/Y " }}{% endif %}</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+
+		{% if classifica_definita.min %}
+		<tr>
+			<td></td>
+			<td colspan="{{ classifica_definita.min }}">
+			{% if confirmConguaglio %}
+				<form method="post" action="">
+					<input type="submit" name="conguaglia" value="Memorizza" style='width:100%'>
+				</form>
+			{% else %}
+				<a href="{% url tamConguaglio %}">CONGUAGLIA</a>
+				TOTALE: {{ classifica_definita.totaleConguaglio|intcomma }} €
+				MEDIA: {{ classifica_definita.mediaAbbinate|intcomma }} €
+			{% endif %}
+			</td>
+		</tr>
+		{% endif %}
+	</tbody>
+	</table>
+</div>
+</div>
