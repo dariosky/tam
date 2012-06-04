@@ -1,4 +1,22 @@
 #coding: utf-8
+""" Definizione delle CLASSIFICHE
+È una lista ordinata di dizionari
+nome
+descrizione (facoltativa)
+mapping field (per indicare da che campo (dei viaggi) viene popolata la classifica
+function (si usa per popolare i valori nel record del viaggio in modifica)
+type (predefinito è 'prezzo', potrebbe essere anche 'punti' o 'supplementari')
+
+verranno aggiungi in visualizzazione:
+			 'dati': con una lista ordinata per mapping_field di (chiave, conducente.nick, classifica)
+			   dove classifica tiene tutti i dati classifica del conducente (presi da SQL),
+			 	un campo 'conducente'
+			 	se è una classifica a punti tiene anche altri 3 campi:
+			 		abbinate: con tutti i viaggi del conducente ancora non completamente conguagliati
+			 		celle abbinate: una lista di punti del tipo {valore: x, data: x}
+			 'min', 'max': con i valori chiave massimi e minimi
+
+"""
 
 CLASSIFICHE = [
 			{"nome": "Supplementari mattutini",
@@ -14,7 +32,7 @@ CLASSIFICHE = [
 			
 			{"nome": "Doppi Venezia",
 			 'type':'punti',
-			 "mapping_field": "puntiAbbinata",
+			 "mapping_field": "punti_abbinata",
 			},
 			
 			{"nome": "Doppi Padova",
