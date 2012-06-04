@@ -9,6 +9,7 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
+
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
@@ -16,7 +17,6 @@ TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
 TIPISERVIZIO = [("T", "Taxi"), ("C", "Collettivo")]
 
-kmPuntoAbbinate = Decimal(120)
 #cache_conducentiPerPersona = {} # Tengo un dizionari con tutti i conducenti con più di key persone
 		# per evitare di interrogare il DB ogni volta.
 		# quando cambio un conducente lo svuoto
@@ -214,7 +214,7 @@ class Viaggio(models.Model):
 		result += u" %spax %s." % (self.numero_passeggeri, self.esclusivo and u"taxi" or u"collettivo")
 		if self.conducente: result += u" Assegnato a %s." % self.conducente
 		return result
-	
+
 	def descrizioneDivisioneClassifiche(self):
 		""" Restituisco come il viaggio si divide nelle classifiche """
 		return descrizioneDivisioneClassifiche(self)
@@ -283,43 +283,9 @@ class Viaggio(models.Model):
 		self.punti_diurni = self.punti_notturni = 0.0	# Precalcolo i punti disturbo della corsa
 		self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
 		self.punti_abbinata = self.prezzoPunti = 0
-
-		if self.is_abbinata and self.padre is None:	# per i padri abbinati
-			da = self.dettagliAbbinamento(numDoppi=numDoppi)	# trovo i dettagli
-#			logging.debug("Sono il padre di un abbinata da %s chilometri. Pricy: %s.\n%s"%(da["kmTotali"], da["pricy"], da) )
-
-			if da["puntiAbbinamento"] > 0:
-				self.punti_abbinata = da["puntiAbbinamento"]
-				self.prezzoPunti = da["valorePunti"]
-#				if da["pricy"]:	# da luglio 2009 se abbiamo almeno un punto abbinamento non sarà mai un doppiopadova
-#					self.prezzoDoppioPadova=da["rimanenteInLunghe"]
-#				else:
-				self.prezzoVenezia = da["rimanenteInLunghe"]
-			else:	# le corse abbinate senza punti si comportano come le singole
-				if da["pricy"]:
-					self.prezzoDoppioPadova = da["rimanenteInLunghe"]
-				else:
-					prezzoNetto = da["rimanenteInLunghe"]
-					if da["kmTotali"] >= 50:
-						self.prezzoVenezia = prezzoNetto
-					elif 25 <= da["kmTotali"] < 50:
-						self.prezzoPadova = prezzoNetto
-#			self.prezzoAbbinata=self.get_valuetot()
-
-		else: # se è un figlio o una corsa singola
-			if self.padre is None:	# corse non abbinate, o abbinate che non fanno alcun punto
-				if self.is_long():
-					self.prezzoVenezia = self.prezzo_finale
-				elif self.is_medium():
-					self.prezzoPadova = self.prezzo_finale
-			# i figli non prendono nulla
-
-		if self.padre is None:
-			for fascia, points in self.disturbi().items():
-				if fascia == "night":
-					self.punti_notturni += points
-				else:
-					self.punti_diurni += points
+		
+		process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
+		process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
 		self.html_tragitto = self.get_html_tragitto()
 
@@ -340,7 +306,7 @@ class Viaggio(models.Model):
 		tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": self})
 		tragitto = reallySpaceless(tragitto)
 		return tragitto
-		
+
 	def save(self, *args, **kwargs):
 		"""Ridefinisco il salvataggio dei VIAGGI per popolarmi i campi calcolati"""
 		if not self.conducente:	# quando confermo o richiedo un conducente DEVO avere un conducente
@@ -758,152 +724,6 @@ class Viaggio(models.Model):
 		""" True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
 		return not self.conducente_confermato and (self.date_start - datetime.timedelta(hours=2) < datetime.datetime.now())
 
-	def dettagliAbbinamento(self, numDoppi=None):
-		""" Restituisce un dizionario con i dettagli dell'abbinamento
-			la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
-			Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
-		"""
-		kmNonConguagliati = 0
-		partiAbbinamento = 0
-		valoreDaConguagliare = 0
-		valorePunti = 0
-		puntiAbbinamento = 0
-		valoreAbbinate = 0
-		rimanenteInLunghe = 0
-		kmRimanenti = 0
-		pricy = False
-
-		kmTotali = self.get_kmtot()
-#		logging.debug("Km totali di %s: %s"%(self.pk, kmTotali))
-
-		if kmTotali == 0: return locals()
-
-#		logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
-
-		forzaSingolo = (numDoppi is 0)
-		valoreTotale = self.get_valuetot(forzaSingolo=forzaSingolo)
-
-#		kmNonConguagliati= kmTotali - self.km_conguagliati
-#		valoreDaConguagliare = self.get_valuetot(forzaSingolo=forzaSingolo) * (kmNonConguagliati) / kmTotali
-#		logging.debug("Valore da conguagliare %s"% valoreDaConguagliare)
-
-		baciniDiPartenza = []
-		for viaggio in [self] + list(self.viaggio_set.all()):
-			bacino = viaggio.da
-			if viaggio.da.bacino: bacino = viaggio.da.bacino
-			if not bacino in baciniDiPartenza:
-				baciniDiPartenza.append(bacino)
-#		logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
-		if len(baciniDiPartenza) > 1:	# se partono tutti dalla stessa zona, non la considero un'abbinata
-			partiAbbinamento = kmTotali / kmPuntoAbbinate	# è un Decimal
-			puntiAbbinamento = int(partiAbbinamento)
-#		logging.debug("Casette abbinamento %d, sarebbero %s" % (puntiAbbinamento, partiAbbinamento))
-
-		if (numDoppi is not None) and (numDoppi != puntiAbbinamento):
-#			logging.debug("Forzo il numero di doppi a %d." % numDoppi)
-			puntiAbbinamento = min(numDoppi, puntiAbbinamento) # forzo di punti doppio, max quello calcolato
-
-		kmRimanenti = kmTotali - (puntiAbbinamento * kmPuntoAbbinate)	# il resto della divisione per 120
-
-		if puntiAbbinamento:
-			rimanenteInLunghe = kmRimanenti * Decimal("0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
-#			logging.debug("Dei %skm totali, %s sono fuori abbinta a 0.65 vengono %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
-			valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
-#			valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
-			valoreAbbinate = puntiAbbinamento * valorePunti
-			pricy = False
-		else:
-			rimanenteInLunghe = Decimal(str(int(valoreTotale - valoreAbbinate))) # vecchio modo: il rimanente è il rimanente
-			valorePunti = 0
-
-			if kmRimanenti:
-	#			lordoRimanente=self.get_lordotot()* (kmNonConguagliati) / kmTotali
-				lordoRimanente = self.get_lordotot()
-#				logging.debug("Mi rimangono euro %s in %s chilometri"%(lordoRimanente, kmTotali))
-				euroAlKm = lordoRimanente / kmTotali
-#				logging.debug("I rimanenti %.2fs km sono a %.2f euro/km" % (kmRimanenti, euroAlKm))
-				pricy = euroAlKm > Decimal("1.25")
-#				if pricy:
-#					logging.debug("Metto nei doppi Padova: %s" %rimanenteInLunghe)
-#				else:
-#					logging.debug("Metto nei Venezia: %s" %rimanenteInLunghe)
-
-		if self.km_conguagliati:
-			# Ho già conguagliato dei KM, converto i KM in punti (il valore è definito sopra) quei punti li tolgo ai puntiAbbinamento
-#			logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
-#						self.km_conguagliati, self.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
-			puntiAbbinamento -= (self.km_conguagliati / kmPuntoAbbinate)
-		result = {
-				"kmTotali":kmTotali,
-				"puntiAbbinamento":puntiAbbinamento,
-				"valorePunti":valorePunti,
-				"rimanenteInLunghe":rimanenteInLunghe,
-				"pricy":pricy
-			}
-		return result
-
-#		def addToResult(fieldName):
-#			""" Aggiunge a result tutti i conducenti con punteggio sotto il minimo contanto fieldName 
-#				Meno è meglio!
-#			"""
-##			logging.debug("Scelgo tra %d conducenti per %s." % (len(conducenti), fieldName))
-#			if not conducenti: return	# se non ho conducenti rimanenti, esco
-#			if len(conducenti)==1:
-#				result.insert(0, conducenti.values()[0])	# il primo è il vincitore
-#				conducenti.clear()
-#			# trova il minimo per vincere tra i rimanenti
-#			valoriInteressati=[classifica[fieldName] for classifica in classifiche if classifica["conducente_id"] in conducenti]
-#			if valoriInteressati:
-#				minToWin=min(valoriInteressati)
-#			else:
-#				minToWin=0
-##			logging.debug("Min to win %s: %s"%(fieldName, minToWin))
-#			discarded=[]	# tutti i perdenti li metto in lista di conducenti
-#				
-#			for id in conducenti.keys():	# sono ordinati, tengo una copia degli id, per iterare
-#				if not id in classid: continue
-#				c=classid[id]
-#				if c[fieldName]>minToWin:
-#					conducente=conducenti.pop(c["conducente_id"])
-#					discarded.append((c[fieldName], conducente)) # tolgo il conducente e lo metto tra gli scartati
-#
-##			for c in classifiche:	# vecchio metodo
-##				if c["conducente_id"] not in conducenti: continue # è un conducente che è già stato messo in lista
-##				if c[fieldName]>minToWin:
-##					conducente=conducenti.pop(c["conducente_id"])
-##					discarded.append((c[fieldName], conducente)) # tolgo il conducente e lo metto tra gli scartati
-#			discarded.sort(reverse=True)
-#			for c in discarded:
-##				logging.debug("Scarto %s per %s [%s/%s]" %(c[1].nick, fieldName, classid[c[1].id][fieldName], minToWin))
-#				result.insert(0, c[1])	# aggiungo il conducente ai risultati
-#
-#		if self.punti_diurni:
-#			addToResult("puntiDiurni")
-#			
-#		if self.punti_notturni:
-#			addToResult("puntiNotturni")
-#
-#		if self.is_abbinata:
-#			if self.punti_abbinata: addToResult("puntiAbbinata")	# è un doppioVenezia
-#			if self.prezzoDoppioPadova: addToResult("prezzoDoppioPadova") # è un doppioPadova
-#
-#		if self.prezzoVenezia:
-#			addToResult("prezzoVenezia")
-#
-#		if self.prezzoPadova:
-#			addToResult("prezzoPadova")
-#		
-#		vincitori=[]
-#		for id, c in conducenti.items():  # aggiungo come vincitori tutti i conducenti non scartati
-#			vincitori.append(c)
-##		logging.debug("Ho %d vincitori" % len(vincitori))
-#		result=vincitori+result
-#
-#		for conducente in inattivi:	# aggiungo infine i conducenti inattivi
-#			result.append(conducente)
-##		logging.debug("Fine classifica")
-#		return result
-
 	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
 		conducenti = []
 		inattivi = []
@@ -960,10 +780,9 @@ class Viaggio(models.Model):
 				chiave = []
 				if self.punti_diurni: chiave.append(classid[conducente.id]["puntiDiurni"])
 				if self.punti_notturni: chiave.append(classid[conducente.id]["puntiNotturni"])
-				if self.is_abbinata:
-					if self.punti_abbinata: chiave.append(classid[conducente.id]["punti_abbinata"])
-					if self.prezzoDoppioPadova: chiave.append(classid[conducente.id]["prezzoDoppioPadova"])
+				if self.punti_abbinata: chiave.append(classid[conducente.id]["punti_abbinata"])
 				if self.prezzoVenezia: chiave.append(classid[conducente.id]["prezzoVenezia"])
+				if self.prezzoDoppioPadova: chiave.append(classid[conducente.id]["prezzoDoppioPadova"])
 				if self.prezzoPadova: chiave.append(classid[conducente.id]["prezzoPadova"])
 				chiave.append(conducente.nick)	# nei parimeriti metto i nick in ordine
 
@@ -1030,7 +849,7 @@ class Conducente(models.Model):
 		return reverse("tamConducenteIdDel", kwargs={"id":self.id})
 	def url(self):
 		return reverse("tamConducenteId", kwargs={"id":self.id})
-	
+
 	def ricevute(self):
 		""" Ritorno le ricevute emesse da questo conducente """
 		from fatturazione.models import Fattura
@@ -1204,8 +1023,6 @@ def get_classifiche():
 		classifiche.append(classDict)
 	return classifiche
 
-
-
 # Comincia a loggare i cambiamenti a questi Modelli
 from modellog.actions import startLog
 startLog(Viaggio)
@@ -1216,4 +1033,5 @@ startLog(Tratta)
 startLog(PrezzoListino)
 
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
-from tam.views.classifiche import descrizioneDivisioneClassifiche 
+from tam.views.classifiche import descrizioneDivisioneClassifiche
+from django.conf import settings

@@ -45,7 +45,7 @@ Generazione Ricevute (viaggi con pagamento posticipato)
 
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from tam.views import parseDateString
+from tam.views.tamviews import parseDateString
 from django.conf import settings
 
 # Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato

@@ -1,17 +1,18 @@
 #coding: utf-8
-from tam.models import get_classifiche, Conducente, Conguaglio, kmPuntoAbbinate, ProfiloUtente
+from tam.models import get_classifiche, Conducente, Conguaglio, ProfiloUtente
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext	 # Context with steroid
 from decimal import Decimal
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.conf import settings
 import logging
 from django.utils.safestring import mark_safe
 from mediagenerator.utils import media_url
+from django.conf import settings
 
 def conguaglia(classifica_definita):
+	kmPuntoAbbinate = settings.KM_PUNTO_ABBINATE
 	# todo: la classifica dovrebbe definire i due campi del conducente da cui prendere i valoro iniziali
 #	viaggiSalvati = 0
 	for key, nick, classifica in classifica_definita['dati']: #@UnusedVariable
@@ -43,6 +44,7 @@ def conguaglia(classifica_definita):
 		conguaglio = Conguaglio(conducente=conducente, dare=classifica["debitoAbbinate"])
 		conguaglio.save()
 #	print 'avrei modificato %d viaggi' % viaggiSalvati
+
 
 def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html", confirmConguaglio=False):
 	user = request.user
