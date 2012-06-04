@@ -30,7 +30,7 @@ def getBackupInfo(doCleanup=False):
         doCleanup tell to keep at most backcount backups
     """
     backcount = 20    # numero di backup da tenere
-    dbname = os.path.join(settings.PROJECT_PATH, "tam.db3")
+    dbname = settings.DATABASES['default']['NAME']
     if not os.path.isfile(dbname):
         raise Exception("Impossibile trovare il DB %s." % dbname)
     backupdir = os.path.join(settings.PROJECT_PATH, 'backup')    # backup subfolder
@@ -90,10 +90,12 @@ def doBackup(username):
     newBackupFilename = "%s - tam - %s.db3.gz" % (n.strftime('%Y-%m-%d %H%M'), username)
     backupPath = os.path.join(backupInfo["backupdir"], newBackupFilename)
     logging.debug("%s ===> %s" % (backupInfo["dbname"], backupPath))
-    
+
     f_in = file(backupInfo["dbname"], "rb")
     real_out = open(backupPath, 'wb')
-    f_out = gzip.GzipFile('tam.db3', fileobj=real_out)	# scrivo sul file Gzip il contenuto si chiama sempre tam.db3
+
+    dbname = os.path.split(settings.DATABASES['default']['NAME'])[1]
+    f_out = gzip.GzipFile(dbname, fileobj=real_out)	# scrivo sul file Gzip il contenuto si chiama sempre tam.db3
     f_out.write(f_in.read())
     f_in.close()
     f_out.close()
