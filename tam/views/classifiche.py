@@ -6,7 +6,10 @@ from decimal import Decimal
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
+from django.conf import settings
 import logging
+from django.utils.safestring import mark_safe
+from mediagenerator.utils import media_url
 
 def conguaglia(classifica_definita):
 	# todo: la classifica dovrebbe definire i due campi del conducente da cui prendere i valoro iniziali
@@ -26,7 +29,7 @@ def conguaglia(classifica_definita):
 		while puntiDaTogliere > 0:
 			for viaggio in classifica["abbinate"]:
 				puntiDaTogliereAlViaggio = min(puntiDaTogliere, viaggio.punti_abbinata)
-				if puntiDaTogliereAlViaggio==0: continue
+				if puntiDaTogliereAlViaggio == 0: continue
 #				logging.debug("Tolgo %d punti al viaggio %s"%(puntiDaTogliereAlViaggio, viaggio.id))
 
 				puntiDaTogliere -= puntiDaTogliereAlViaggio
@@ -64,7 +67,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 	conducenti = Conducente.objects.filter(attivo=True)
 	conducente_byId = {}	# dizionario id->conducente
 	for conducente in conducenti: conducente_byId[conducente.id] = conducente
-	from django.conf import settings
+
 	classifiche_definite = settings.CLASSIFICHE
 
 	# prendo le classifiche definite e le mappo per ID
@@ -73,20 +76,20 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 		classifiche_definite_byId[classifica_definita.get('mapping_field')] = classifica_definita
 		classifica_definita['dati'] = []
 
-	if confirmConguaglio:	# se sto confermando tolgo tutte le classifiche tranne quella puntiAbbinata
-		classifiche_definite = [classifiche_definite_byId['puntiAbbinata']]
+	if confirmConguaglio:	# se sto confermando tolgo tutte le classifiche tranne quella punti_abbinata
+		classifiche_definite = [classifiche_definite_byId['punti_abbinata']]
 
 	for classifica in classificheViaggi:	# creo le classifiche un po' estese
 		conducente = conducente_byId[classifica["conducente_id"]] # prendo il conducente
 		classifica["conducente"] = conducente   # aggiungo alle classifiche il campo conducente
 
 		for key in ('puntiDiurni', 'puntiNotturni',
-					'puntiAbbinata',
+					'punti_abbinata',
 					'prezzoPadova', 'prezzoVenezia', 'prezzoDoppioPadova'):
 			# se ho una classifica con questa chiave le aggiungo i dati
 			if key in classifiche_definite_byId:
 				classifiche_definite_byId[key]['dati'].append((classifica[key], conducente.nick, classifica))
-				if key == 'puntiAbbinata':
+				if key == 'punti_abbinata':
 					classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0)
 					classifica["celle_abbinate"] = []
 					if conducente.classifica_iniziale_puntiDoppiVenezia:	# aggiungo i punti iniziali
@@ -130,3 +133,25 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 							   'confirmConguaglio':confirmConguaglio,
 							  },
 							  context_instance=RequestContext(request))
+
+
+def descrizioneDivisioneClassifiche(viaggio):
+	""" A seconda dei punti nei campi del viaggio riporto la descrizione di come è stato suddiviso nelle classifiche """
+	classifiche_definite = settings.CLASSIFICHE
+	result = ""
+	for classifica in classifiche_definite:
+		tipo_classifica = classifica.get('type', 'prezzo')
+		if tipo_classifica == 'prezzo':
+			field = classifica.get('mapping_field')
+			if field and getattr(viaggio, field, None):
+				result += "%s nei %s. " % (getattr(viaggio, field), classifica['nome'])
+		elif tipo_classifica == 'punti':
+			field = classifica.get('mapping_field')
+			punti = getattr(viaggio, field)
+			if punti > 0 :
+				result += ('<img src="%s" alt="DV" />' % media_url('casina.png')) * punti
+				result += '<br/>'
+				result += "%d x %s nei %s.<br/>" % (punti, viaggio.prezzoPunti, classifica["nome"])
+
+	result = mark_safe(result)
+	return result

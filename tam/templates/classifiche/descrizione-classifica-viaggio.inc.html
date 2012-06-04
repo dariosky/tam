@@ -1,10 +1,1 @@
-{% load utilTag %}{% load media %}
-{% if viaggio.punti_abbinata %}
-	{% num_range viaggio.punti_abbinata as punti_abbinata %}
-	{% for punto in punti_abbinata %}<img src="{% media_url "casina.png" %}" alt='DV' />{% endfor %}
-	<br/>
-	{{viaggio.punti_abbinata}} x {{viaggio.prezzoPunti}} nei doppi Venezia.<br/>
-{% endif %}
-{% if  viaggio.prezzoVenezia %}{{viaggio.prezzoVenezia}} nei Venezia.{% endif %}
-{% if  viaggio.prezzoPadova %}{{viaggio.prezzoPadova}} nei Padova.{% endif %}
-{% if  viaggio.prezzoDoppioPadova %}{{viaggio.prezzoDoppioPadova}} nei doppi Padova.{% endif %}
+{{ viaggio.descrizioneDivisioneClassifiche }}
