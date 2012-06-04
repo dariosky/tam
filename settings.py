@@ -3,7 +3,7 @@ import os
 import logging
 from socket import gethostname
 
-TAM_VERSION = "3.4"
+TAM_VERSION = "3.5"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 host = gethostname().lower()
