@@ -9,7 +9,6 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
-
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
@@ -215,6 +214,10 @@ class Viaggio(models.Model):
 		result += u" %spax %s." % (self.numero_passeggeri, self.esclusivo and u"taxi" or u"collettivo")
 		if self.conducente: result += u" Assegnato a %s." % self.conducente
 		return result
+	
+	def descrizioneDivisioneClassifiche(self):
+		""" Restituisco come il viaggio si divide nelle classifiche """
+		return descrizioneDivisioneClassifiche(self)
 
 #	__changeableFieldsComputed=None
 #	def _getChangeableFields(self):
@@ -952,13 +955,13 @@ class Viaggio(models.Model):
 						"prezzoVenezia": conducente.classifica_iniziale_long,
 						"prezzoPadova": conducente.classifica_iniziale_medium,
 						"prezzoDoppioPadova": conducente.classifica_iniziale_doppiPadova,
-						"puntiAbbinata": conducente.classifica_iniziale_puntiDoppiVenezia
+						"punti_abbinata": conducente.classifica_iniziale_puntiDoppiVenezia
 					}
 				chiave = []
 				if self.punti_diurni: chiave.append(classid[conducente.id]["puntiDiurni"])
 				if self.punti_notturni: chiave.append(classid[conducente.id]["puntiNotturni"])
 				if self.is_abbinata:
-					if self.punti_abbinata: chiave.append(classid[conducente.id]["puntiAbbinata"])
+					if self.punti_abbinata: chiave.append(classid[conducente.id]["punti_abbinata"])
 					if self.prezzoDoppioPadova: chiave.append(classid[conducente.id]["prezzoDoppioPadova"])
 				if self.prezzoVenezia: chiave.append(classid[conducente.id]["prezzoVenezia"])
 				if self.prezzoPadova: chiave.append(classid[conducente.id]["prezzoPadova"])
@@ -1183,7 +1186,7 @@ def get_classifiche():
 			  ifnull(sum(prezzoVenezia),0) + classifica_iniziale_long as prezzoVenezia,
 			  ifnull(sum(prezzoPadova),0) + classifica_iniziale_medium as prezzoPadova,
 			  ifnull(sum(prezzoDoppioPadova),0) + classifica_iniziale_doppiPadova as prezzoDoppioPadova,
-			  ifnull(sum(punti_abbinata),0) + classifica_iniziale_puntiDoppiVenezia as puntiAbbinata
+			  ifnull(sum(punti_abbinata),0) + classifica_iniziale_puntiDoppiVenezia as punti_abbinata
 		from tam_conducente c
 			 left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato=1
 		where  c.attivo=1 --and c.nick='2'
@@ -1211,3 +1214,6 @@ startLog(Passeggero)
 startLog(Conducente)
 startLog(Tratta)
 startLog(PrezzoListino)
+
+# l'import di classifiche deve stare in fondo per evitare loop di importazione
+from tam.views.classifiche import descrizioneDivisioneClassifiche 
