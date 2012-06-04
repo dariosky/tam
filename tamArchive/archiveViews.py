@@ -16,7 +16,7 @@ from django.db.models import Q
 from tam.models import Viaggio, ProfiloUtente, Conducente, \
 	get_classifiche
 from tamArchive.models import ViaggioArchive
-from tam.views import SmartPager
+from tam.views.tamviews import SmartPager
 
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
 from tam.models import reallySpaceless

@@ -8,7 +8,7 @@ from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
 import datetime
 from tam.models import Luogo, get_classifiche, Cliente, \
-	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, kmPuntoAbbinate, Listino, \
+	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
 from modellog.actions import logAction
 import time
