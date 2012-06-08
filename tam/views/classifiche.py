@@ -145,15 +145,21 @@ def descrizioneDivisioneClassifiche(viaggio):
 		tipo_classifica = classifica.get('type', 'prezzo')
 		if tipo_classifica == 'prezzo':
 			field = classifica.get('mapping_field')
-			if field and getattr(viaggio, field, None):
-				result += "%s nei %s. " % (getattr(viaggio, field), classifica['nome'])
+			valore = getattr(viaggio, field, None)
+			if field and valore:
+				result += "%(valore)s %(prefix)s %(nome)s. " % {"valore":valore,
+																"prefix":classifica.get("prefix", "nei"),
+																"nome":classifica['nome']}
 		elif tipo_classifica == 'punti':
 			field = classifica.get('mapping_field')
 			punti = getattr(viaggio, field)
 			if punti > 0 :
 				result += ('<img src="%s" alt="DV" />' % media_url('casina.png')) * punti
 				result += '<br/>'
-				result += "%d x %s nei %s.<br/>" % (punti, viaggio.prezzoPunti, classifica["nome"])
+				result += "%(punti)d x %(valore)s nei %(nome)s.<br/>" % {"punti":punti,
+																		 "valore":viaggio.prezzoPunti,
+																		 "prefix":classifica.get("prefix", "nei"),
+																		 "nome":classifica["nome"]}
 
 	result = mark_safe(result)
 	return result

@@ -144,7 +144,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 				instance = ct_class.objects.get(id=object_id)
 			except ct_class.DoesNotExist:
 				instance = None
-			messageLines.append("%s fatta da %s" % (action_type, user))
+#			messageLines.append("%s fatta da %s" % (action_type, user))
 			logAction(action=action_type, instance=instance, description=description, user=user, log_date=data)
 		messageLines.append("Cancello la vecchia tabella di LOG")
 		cursor.execute("drop table tam_actionlog")
