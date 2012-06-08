@@ -284,7 +284,6 @@ class Viaggio(models.Model):
 		self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
 		self.punti_abbinata = self.prezzoPunti = 0
 		
-		process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 		process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
 		self.html_tragitto = self.get_html_tragitto()
@@ -645,51 +644,7 @@ class Viaggio(models.Model):
 
 	def get_value(self, forzaSingolo=False):
 		""" Return the value of this trip on the scoreboard """
-		importoViaggio = self.prezzo	# lordo
-		forzaSingolo = False	# TMP
-		singolo = forzaSingolo or (not self.is_abbinata)
-		if forzaSingolo:
-			pass
-#			logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
-
-		if self.commissione:		# tolgo la commissione dal lordo
-			if self.tipo_commissione == "P":
-				importoViaggio = importoViaggio * (Decimal(1) - self.commissione / Decimal(100))	# commissione in percentuale
-			else:
-				importoViaggio = importoViaggio - self.commissione
-
-		importoViaggio = importoViaggio - self.costo_autostrada
-
-		# per le corse singole
-		if singolo:
-			chilometriTotali = self.get_kmtot()
-			if chilometriTotali:
-				renditaChilometrica = importoViaggio / chilometriTotali
-			else:
-				renditaChilometrica = 0
-			if self.is_long():
-				if renditaChilometrica < Decimal("0.65"):
-					importoViaggio *= renditaChilometrica / Decimal("0.65")
-#					logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
-			elif self.is_medium():
-						if renditaChilometrica < Decimal("0.8"):
-							importoViaggio *= renditaChilometrica / Decimal("0.8")
-#							logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
-
-		if self.pagamento_differito or self.fatturazione:	# tolgo gli abbuoni (per differito o altro)
-			importoViaggio = importoViaggio * Decimal("0.85")
-#		if self.tipo_abbuono=="F":
-#			importoViaggio-=self.abbuono
-#		else:
-#			importoViaggio=importoViaggio* (Decimal(1)-self.abbuono/Decimal(100))	# abbuono in percentuale
-		if self.abbuono_percentuale:
-			importoViaggio = importoViaggio * (Decimal(1) - self.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
-		if self.abbuono_fisso:
-			importoViaggio -= self.abbuono_fisso
-		importoViaggio = importoViaggio - self.costo_sosta
-
-		importoViaggio += self.prezzo_sosta * Decimal("0.75")	# aggiungo il prezzo della sosta scontato del 25%
-		return importoViaggio.quantize(Decimal('.01'))
+		return process_value(self, forzaSingolo=forzaSingolo)
 
 	def get_valuetot(self, forzaSingolo=False):
 		result = self.get_value()
@@ -1035,3 +990,5 @@ startLog(PrezzoListino)
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
 from tam.views.classifiche import descrizioneDivisioneClassifiche
 from django.conf import settings
+process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
+process_value = settings.GET_VALUE_FUNCTION
