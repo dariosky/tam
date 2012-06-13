@@ -7,27 +7,35 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from celery import registry
 
+def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
+	""" Stop concurrency using cache,
+		from http://stackoverflow.com/questions/4095940/running-unique-tasks-with-celery
+	"""
+	def task_exc(func):
+		def wrapper(*args, **kwargs):
+			lock_id = "celery-single-instance-" + func.__name__
+			acquire_lock = lambda: cache.add(lock_id, "true", timeout)
+			release_lock = lambda: cache.delete(lock_id)
+			if acquire_lock():
+				try:
+					func(*args, **kwargs)
+				finally:
+					release_lock()
+			else:
+				print "stop concurrency"
+		return wrapper
+	return task_exc
+
+
 @task(name="backup.job")
+@single_instance_task(60 * 5)	# 5 minutes timeout
 def doBackupTask(user_id):
-	lock_id = "tasklock"
-	cache.delete(lock_id)
-	LOCK_EXPIRE = 60 * 60 # Lock expires in 60 minutes
 	user = User.objects.get(id=user_id)
-	print "Esisteva la chiave %s? %s" % (lock_id, cache.get(lock_id))
-	acquire_lock = lambda: cache.add(lock_id, "true", LOCK_EXPIRE)
-	release_lock = lambda: cache.delete(lock_id)
-	if acquire_lock():
-		try:
-			print "Starting backup"
-			from tam.views.backup import doBackup
-			#doBackup(user.username)
-			import time
-			time.sleep(10)
-			print "Fine del backup"
-		finally:
-			release_lock()
-	else:
-		print "TASK is already in progress"
+	print "Starting backup"
+	from tam.views.backup import doBackup
+	doBackup(user)
+	print "Fine del backup"
+
 
 @task(name="movelogs")
 @transaction.commit_manually
@@ -62,3 +70,7 @@ def moveLogs():
 	from tamArchive.archiveViews import vacuum_db #@Reimport
 	vacuum_db()
 	con.commit()
+
+@task(name='testtask')
+def test_task(s='Test'):
+	return s
