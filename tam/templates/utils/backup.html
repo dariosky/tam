@@ -25,10 +25,14 @@
 					<td>{{ backup.username }}</td>
 					<td>
 						{% with backup.date|date:"d-m-Y-Hi" as f_date %}
-							<a href='{% url tamGetBackup f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
+							{% if backup.size == "zero" %}
+								{{ backup.date|date:"D j F, H:i" }}
+							{% else %}
+								<a href='{% url tamGetBackup f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
+							{% endif %}
 						{% endwith %}
 					</td>
-					<td>{{ backup.size }}</td>
+					<td>{% if backup.size == "zero" %} backup in corso {% else %}{{ backup.size }}{% endif %}</td>
 				</tr>
 				{% endfor %}
 			</tbody>

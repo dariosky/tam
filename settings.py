@@ -234,7 +234,6 @@ INSTALLED_APPS = (
 #	'license',
 )
 
-
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 
@@ -261,7 +260,7 @@ else:
 #===============================================================================
 # Set to True to use the debug_toolbar
 use_debug_toolbar = DEBUG and False
-if use_debug_toolbar :
+if use_debug_toolbar:
 	# put the debug toolbar middleware right after the Gzip middleware
 	try:
 		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
@@ -306,23 +305,6 @@ CACHES = {
 	}
 }
 
-# ******************* CELERY & RABBITMQ
-# RabbitMQ info
-rmquser = "tam"
-rmqpass = "tamRMQ"
-rmqhost = "localhost"
-rmqvhost = "tamvhost"
-
-""" To configure RMQ:
-$ rabbitmqctl add_user tam tamRMQ
-$ rabbitmqctl add_vhost tamvhost
-$ rabbitmqctl set_permissions -p tamvhost tam ".*" ".*" ".*"
-"""
-BROKER_URL = "amqp://%(user)s:%(password)s@%(host)s:5672/%(vhost)s" % {"user":rmquser,
-															  "password":rmqpass,
-															  "host":rmqhost,
-															  "vhost":rmqvhost}
-#BROKER_URL = "django://"
-
+from celeryconfig import * #@UnusedWildImport
 import djcelery
 djcelery.setup_loader()
