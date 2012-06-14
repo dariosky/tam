@@ -7,9 +7,6 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from tam.disturbi import trovaDisturbi, fasce_semilineari
 from django.contrib import messages
-from modellog.actions import logAction
-from django.contrib.auth.models import User
-from django.db import transaction
 
 def fixAction(request, template_name="utils/fixAction.html"):
 	if not request.user.is_superuser:
@@ -130,13 +127,8 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		messageLines.append("Errati (e corretti) %d/%d" % (sistemati, len(viaggi)))
 	if request.POST.get("spostaILog"):
 		from tam.tasks import moveLogs
-		moveLogs.delay()
+		moveLogs.delay() #@UndefinedVariable
 		messages.info(request, "Spostamento dei log iniziato.")
-	if request.POST.get("asyncBackup"):
-		from tam.tasks import doBackupTask
-		task_id = doBackupTask.delay(request.user.id)
-		messages.info(request, "Backup iniziato.")
-
 
 	return render_to_response(template_name, {"messageLines":messageLines, "error":error},
 							context_instance=RequestContext(request))
