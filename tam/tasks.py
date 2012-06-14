@@ -38,39 +38,61 @@ def doBackupTask(user_id):
 
 
 @task(name="movelogs")
-@transaction.commit_manually
-def moveLogs():
+#@single_instance_task(60 * 5)	# 5 minutes timeout
+#@transaction.commit_manually
+def moveLogs(name='movelogs.job'):
 	from django.contrib.contenttypes.models import ContentType
 	from django.db import connections
 	from modellog.actions import logAction
 	print "Cominciamo a spostare"
 	con = connections['default']
 	cursor = con.cursor()
+	try:
+		cursor.execute("SELECT count(*) from tam_actionlog")
+	except:
+		print "no table actionlog"
+		return
+	totalcount = cursor.fetchone()[0]
+	print totalcount
 	cursor.execute("SELECT * from tam_actionlog")
-	logs = cursor.fetchall()
-	print dir(con)
-	return
-	print len(logs), "***********************"
+	count = 0
+	chunksize = 500
+	oldPercent = None
+	usersByID = {}
+	while True:
+		oldLogsChunk = cursor.fetchmany(chunksize)
+		if not oldLogsChunk: break
+		for oldlog in oldLogsChunk:
+			user_id, content_type_id, object_id, action_type, data, pk, description = oldlog #@UnusedVariable
+			user = usersByID.get(user_id, User.objects.get(pk=user_id))
+			ct = ContentType.objects.get(id=content_type_id)
+			ct_class = ct.model_class()
+			try:
+				instance = ct_class.objects.get(id=object_id)
+			except ct_class.DoesNotExist:
+				instance = None
+			logAction(action=action_type, instance=instance, description=description, user=user, log_date=data)
+			count += 1
+			break
+		if count == 1: break
+		percent = count * 100 / totalcount
+		transaction.commit(using="default")
+		transaction.commit(using="modellog")
+		if oldPercent is None or percent >= oldPercent + 10:
+			print "%s%%" % percent,
+			oldPercent = percent
 
-	for oldlog in logs:
-		print "sposto", oldlog
-		user_id, content_type_id, object_id, action_type, data, pk, description = oldlog #@UnusedVariable
-		user = User.objects.get(pk=user_id)
-		ct = ContentType.objects.get(id=content_type_id)
-		ct_class = ct.model_class()
-		try:
-			instance = ct_class.objects.get(id=object_id)
-		except ct_class.DoesNotExist:
-			instance = None
-#			messageLines.append("%s fatta da %s" % (action_type, user))
-		logAction(action=action_type, instance=instance, description=description, user=user, log_date=data)
-	transaction.commit(using="modellog")
+	print
+	print "Delete table"
 	cursor.execute("drop table tam_actionlog")
-	con.commit()
-	from tamArchive.archiveViews import vacuum_db #@Reimport
+	from tamArchive.archiveViews import vacuum_db
 	vacuum_db()
-	con.commit()
+
+
 
 @task(name='testtask')
 def test_task(s='Test'):
 	return s
+
+if __name__ == '__main__':
+	moveLogs.run()
