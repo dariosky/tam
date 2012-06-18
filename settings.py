@@ -16,7 +16,7 @@ else:
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Dario Varotto', 'dario.varotto@gmail.com'),
+	('Dario Varotto', 'dario.varotto@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -96,17 +96,17 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+	# Put strings here, like "/home/html/static" or "C:/www/django/static".
+	# Always use forward slashes, even on Windows.
+	# Don't forget to use absolute paths, not relative paths.
 )
 
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+	'django.contrib.staticfiles.finders.FileSystemFinder',
+	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#	'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 
@@ -124,15 +124,15 @@ if not DEBUG:
 MIDDLEWARE_CLASSES = (
 	'mediagenerator.middleware.MediaMiddleware',
 #	'django.middleware.gzip.GZipMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    #'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	#'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
 	'tam.middleware.loginRequirement.RequireLoginMiddleware',
-#    'django.middleware.doc.XViewMiddleware',	# currently useless?
+#	'django.middleware.doc.XViewMiddleware',	# currently useless?
 
-    'django.middleware.transaction.TransactionMiddleware',
+	'django.middleware.transaction.TransactionMiddleware',
 
 	'tam.middleware.threadlocals.ThreadLocals',
 	# 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
@@ -141,9 +141,9 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates"
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+	# Put strings here, like "/home/html/django_templates"
+	# Always use forward slashes, even on Windows.
+	# Don't forget to use absolute paths, not relative paths.
 )
 
 
@@ -208,28 +208,31 @@ if os.path.exists(YUICOMPRESSOR_PATH):
 # **************************
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-#    'django.contrib.sites',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+#	'django.contrib.sites',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 
-    'django.contrib.admin',
-    'django.contrib.admindocs',
-    'django.contrib.humanize',
+	'django.contrib.admin',
+	'django.contrib.admindocs',
+	'django.contrib.humanize',
 	'mediagenerator',
 
-    'tam',
+	'tam',
 	'south',
 	'tamArchive',
 
 	'fatturazione',
 
 	'modellog',
+
+	'djcelery',
+	'kombu.transport.django',
+
 #	'license',
 )
-
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -254,20 +257,10 @@ else:
 #import datetime
 #LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
 
-# RabbitMQ info
-rmquser = "tam"
-rmqpass = "tamRMQ"
-tmqhost = "tam"
-""" To configure RMQ:
-$ rabbitmqctl add_user tam tamRMQ
-$ rabbitmqctl add_vhost tam
-$ rabbitmqctl set_permissions -p tam tam ".*" ".*" ".*"
-"""
-
 #===============================================================================
 # Set to True to use the debug_toolbar
 use_debug_toolbar = DEBUG and False
-if use_debug_toolbar :
+if use_debug_toolbar:
 	# put the debug toolbar middleware right after the Gzip middleware
 	try:
 		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
@@ -283,20 +276,13 @@ if use_debug_toolbar :
 	INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 #===============================================================================
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'TaM',
-    }
-}
-
 PASSWORD_HASHERS = (
 	'django.contrib.auth.hashers.SHA1PasswordHasher', 	# Still use the old hashing until I pass to 1.4
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-    'django.contrib.auth.hashers.BCryptPasswordHasher',
-    'django.contrib.auth.hashers.MD5PasswordHasher',
-    'django.contrib.auth.hashers.CryptPasswordHasher',
+	'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+	'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+	'django.contrib.auth.hashers.BCryptPasswordHasher',
+	'django.contrib.auth.hashers.MD5PasswordHasher',
+	'django.contrib.auth.hashers.CryptPasswordHasher',
 )
 
 TAM_VIAGGI_PAGINA = 100
@@ -306,3 +292,19 @@ try:
 except ImportError:
 	logging.warning("'settings_local.py' has not been found. Use this to keep out of VC secret settings.")
 	pass
+
+# ******************* CACHE
+CACHES = {
+#	'default': {
+#		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#		'LOCATION': 'TaM',
+#	}
+	'default': {
+		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+		'LOCATION': '127.0.0.1:11211',
+	}
+}
+
+from celeryconfig import * #@UnusedWildImport
+import djcelery
+djcelery.setup_loader()

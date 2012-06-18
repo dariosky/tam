@@ -22,11 +22,9 @@ from django.db import models
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
 from django.db.models.aggregates import Count
-from django.views.decorators.cache import cache_page #@UnusedImport
 from django.utils import simplejson
 from django.core.urlresolvers import reverse
 import logging
-from decimal import Decimal
 for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
