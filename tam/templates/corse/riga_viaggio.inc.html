@@ -1,8 +1,6 @@
 {% load utilTag %}
 {% load media %}
-{% load cache %}
 <tr{% if viaggio.warning %} class="warning"{% endif %}>
-{# {% cache 36000 viaggio viaggio.id %} #}
 	<td>
 		{% if not viaggio.conducente_confermato %}
 			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
@@ -41,8 +39,6 @@
 		{% include "corse/corse_prezzo_viaggio.inc.html" %}
 		{% include "corse/flags.inc.html" %}
 	</td>
-
-{# {% endcache %} #}
 
 	<td>
 	{% if viaggio.padre_id and not distinct %}
