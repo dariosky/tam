@@ -157,8 +157,8 @@ class Viaggio(models.Model):
 
 	incassato_albergo = models.BooleanField("Conto fine mese", default=False)	# flag per indicare se la corsa è incassata dall'albergo (sarà utile per reportistica)
 	fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
+	pagamento_differito = models.BooleanField("Fatturazione esente IVA", default=False)
 	cartaDiCredito = models.BooleanField("Pagamento con carta di credito", default=False)
-	pagamento_differito = models.BooleanField(default=False)
 	commissione = models.DecimalField("Quota consorzio", max_digits=9, decimal_places=2, default=0)	#fissa in euro
 	tipo_commissione = models.CharField("Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F")
 	numero_pratica = models.CharField(max_length=20, null=True, blank=True)
