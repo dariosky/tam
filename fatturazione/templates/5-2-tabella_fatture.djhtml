@@ -6,7 +6,7 @@
 		<tr>
 			<td>
 				{{fattura.descrittore}}
-				<a href='{% url tamFatturaConducente id_fattura=fattura.id %}' style='display:block'><img src='{% media_url 'fatture/invoice-icon2.png' %}' /></a>
+				<a href='{% url tamFatturaId id_fattura=fattura.id %}' style='display:block'><img src='{% media_url 'fatture/invoice-icon2.png' %}' /></a>
 				emessa il {{fattura.data|date:"l j F Y"}}
 			</td>
 			<td>

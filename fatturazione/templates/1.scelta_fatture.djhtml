@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load media %}
+{% load url from future %}
 {% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
@@ -13,31 +14,31 @@
 	</div>
 
 <div>
-	<h2 class='accordhead fatturaTipo1'>Fatture consorzio</h2>
-	{{ lista_consorzio.count }} corse.
+{% for f in gruppo_fatture %}
+	<h2 class='accordhead fatturaTipo{{f.d.codice}}'>{{f.d.nome}}</h2>
+	{{ f.lista.count }} corse.
 	<div style='display:none;'>
-		<div id='gotoConsorzio' class='floatingBlock'>
-			<a href="#generaConsorzio"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
+		<div id='goto{{f.d.codice}}' class='floatingBlock'>
+			<a href="#genera{{f.d.codice}}"><img src='{% media_url 'frecciagiu.png' %}' title='genera {{f.d.nome}}'></a>
 		</div>
-		<p>Le fatture che il consorzio fa ai clienti.<br>
-			Tutti i viaggi confermati con l'indicazione della fattura.
-		</p>
-		
+		<p style='white-space: pre-line;'>{{ f.d.descrizione}}</p>
 		{% with lista_consorzio as lista %}
-			
+		
 			{% if lista %}
-				<form method="post" action="{% url tamFattureGeneraConsorzio %}">
-					<div>
-						<input type='hidden' name='data_generazione' value='{{ data_end|date:"d/m/Y" }}' />
-						Anno <input type='text' name='anno' maxlength="4" value="{{ anno_consorzio }}">
-						Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{progressivo_consorzio}}">
-					</div>
-					<div class='fatturaTipo1'>
-						<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+				<form method="post" action="{% url f.d.url_name %}">
+					{% if f.parametri.ask_progressivo %}
+						<div>
+							<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
+							Anno <input type='text' name='anno' maxlength="4" value="{{ f.parametri.anno_consorzio }}">
+							Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{ f.parametri.progressivo }}">
+						</div>
+					{% endif %}
+					<div class='fatturaTipo{{f.d.codice}}'>
+						<table class='tablesorter' id='table_{{f.d.codice}}' style='text-align:center' >
 							<thead>
 								<tr>
 									<th>Cliente</th>
-								    <th><input type="checkbox" id='check_consorzio'/></th>
+								    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
 								    <th>Corsa</th>
 								    <th>Note</th>
 								    <th>Prezzo lordo</th>
@@ -48,8 +49,8 @@
 								{% include "1-1.scelta_riga_consorzio.djhtml" %}
 							{% endfor %}
 						</table>
-						<a name="generaConsorzio">
-							<input type="submit" name="preview" value="Genera le fatture consorzio"/>
+						<a name="genera{{f.d.codice}}">
+							<input type="submit" name="preview" value="Genera {{f.d.nome|lower}}"/>
 						</a>
 					</div>
 				</form>
@@ -57,79 +58,8 @@
 		
 		{% endwith %}
 	</div>
+{% endfor %}
 	
-	
-	<h2 class='accordhead fatturaTipo2'>Fatture conducente</h2>
-	{{ lista_conducente.count }} corse.
-	<div style='display:none;' class='fatturaTipo2'>
-		<div id='gotoConducente' class='floatingBlock'>
-			<a href="#generaConducente"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
-		</div>
-		<p>Le fatture che il conducente fa al consorzio.</p>
-		
-		{% with lista_conducente as lista %}
-			{% if lista %}
-				<form method="post" action="{% url tamFattureGeneraConducente %}">
-					<input type='hidden' name='data_generazione' value='{{ data_end|date:"d/m/Y" }}' />
-					<table class='tablesorter' id='table_conducente' style="text-align:center" >
-					<thead>
-						<tr>
-							<th>Conducente</th>
-							<th>Cliente</th>
-						    <th><input type="checkbox" id='check_conducente'/></th>
-						    <th>Corsa</th>
-						    <th>Descrizione</th>
-						    <th>Prezzo lordo</th>
-						</tr>
-					</thead>
-					{% for rigafattura in lista %}
-						{% include "1-2.scelta_riga_conducente.djhtml" %}
-					{% endfor %}
-					</table>
-					<a name="generaConducente">
-						<input type="submit" name="preview" value="Genera fatture conducente"/>
-					</a>
-				</form>
-			{% endif %}
-		{% endwith %}
-		
-	</div>
-	
-
-	<h2 class='accordhead fatturaTipo3'>Ricevute</h2>
-	{{ lista_ricevute.count }} corse.
-	<div style='display:none;' class='fatturaTipo3'>
-		<div id='gotoRicevute' class='floatingBlock'>
-			<a href="#generaRicevute"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture consorzio'></a>
-		</div>
-		<p>I viaggi con pagamento posticipato (e non fatturabili) vengono pagati con ricevuta.</p>
-		<div>
-			{% with lista_ricevute as lista %}
-				{% if lista %}
-					<form method="post" action="{% url tamFattureGeneraRicevute %}">
-					<input type='hidden' name='data_generazione' value='{{ data_end|date:"d/m/Y" }}' />
-					<table class='tablesorter' id='table_ricevute' style="text-align:center" >
-					<thead>
-						<tr>
-							<th>Cliente</th>
-						    <th><input type="checkbox" id='check_ricevute'/></th>
-						    <th>Corsa</th>
-						    <th>Note</th>
-						    <th>Prezzo lordo</th>
-						</tr>
-					</thead>
-					{% for viaggio in lista %}
-						{% include "1-3.scelta_riga_ricevuta.djhtml" %}
-					{% endfor %}
-					</table>
-					<a name="generaRicevute">
-						<input type="submit" name="preview" value="Genera ricevute"/>
-					</a>
-					</form>
-				{% endif %}
-			{% endwith %}
-		</div>
-	</div>
 </div>
 
 {% endblock %}
@@ -143,13 +73,11 @@
 					return false;
 				});
 			
-			scrollableGoto($('#gotoConsorzio'));
-			scrollableGoto($('#gotoConducente'));
-			scrollableGoto($('#gotoRicevute'));
+			{% for f in gruppo_fatture %}
+				scrollableGoto($('#goto{{f.d.codice}}'));
+				table_selector('#check_{{f.d.codice}}', '#table_{{f.d.codice}}');
+			{% endfor %}
 		
-			table_selector('#check_consorzio', '#table_consorzio');
-			table_selector('#check_conducente', '#table_conducente');
-			table_selector('#check_ricevute', '#table_ricevute');
 			$('#date_range input[type=text]').datepicker();
 			$('.clientSelect').click(function(){
 				// seleziono da qui al prossimo cliente indicato

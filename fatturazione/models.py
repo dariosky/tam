@@ -62,16 +62,8 @@ class Fattura(models.Model):
 		return nomi_fatture[self.tipo]
 
 	def url(self):
-		if self.tipo == "1":
-			return reverse("tamFatturaConsorzio",
-							kwargs={'anno': self.anno,
-									'progressivo':self.progressivo})
-		elif self.tipo=="2":
-			return reverse("tamFatturaConducente",
-							kwargs={'id_fattura': self.id})
-		elif self.tipo=="3":
-			return reverse("tamFatturaRicevuta",
-							kwargs={'id_fattura': self.id})	
+		return reverse("tamFatturaId",
+						kwargs={'id_fattura': self.id})
 
 	def emessa_da_html(self):
 		result = self.emessa_da\

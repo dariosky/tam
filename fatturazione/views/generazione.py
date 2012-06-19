@@ -48,9 +48,36 @@ from django.template.context import RequestContext
 from tam.views.tamviews import parseDateString
 from django.conf import settings
 
+class FattureConsorzio(object):
+	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
+
+	nome = "Fatture Consorzio"
+	descrizione = """Le fatture che il consorzio fa ai clienti.
+					 Dai viaggi confermati con il flag della fatturazione richiesta."""
+	codice = "1"
+	origine = Viaggio
+	filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
+			 ~ Q(conducente__nick__iexact='ANNUL')	# tolgo le corse assegnate al conducente annullato
+	keys = ["cliente"]	 							# come dividere una fattura dall'altra
+	order_by = ["cliente", "data"]	 				# ordinamento
+	url_generazione = r'^genera/consorzio/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
+	template_generazione = "2-1.fatturazione_consorzio.djhtml"
+	url_name = "tamFattureGeneraConsorzio"
+
+	@staticmethod
+	def update_context(data_start, data_end):
+		result = {"ask_progressivo":True}
+		result["data_generazione"] = data_end
+		result["anno_consorzio"] = data_end.year
+		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "1") + 1	# ultimo progressivo '1'
+
+		return result
+
+DEFINIZIONE_FATTURE = [ FattureConsorzio, ]
+
 # Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
 filtro_consorzio = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
-					~ Q(conducente__nick__iexact='ANNUL') # tolgo le corse assegnate al conducente annullato
+			   ~ Q(conducente__nick__iexact='ANNUL') # tolgo le corse assegnate al conducente annullato
 
 # Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
 # applicato sulle righe fatture
@@ -63,7 +90,7 @@ filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__is
 
 
 @permission_required('fatturazione.generate', '/')
-def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", tipo="1"):
+def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 	data_start = parseDateString(# dal primo del mese scorso
 									request.GET.get("data_start"),
 									default=(datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
@@ -75,13 +102,28 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 	# prendo i viaggi da fatturare
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
 	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
+
+	gruppo_fatture = []
+	for fatturazione in DEFINIZIONE_FATTURE:
+		selezione = fatturazione.origine.objects
+		if fatturazione.origine == Viaggio:
+			selezione = selezione.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
+		if fatturazione.origine == RigaFattura:
+			selezione = selezione.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
+		selezione = selezione.filter(fatturazione.filtro)
+		dictFatturazione = {"d": fatturazione, 	# la definizione della fatturazione
+							"lista": selezione,
+						   }
+		dictFatturazione["parametri"] = fatturazione.update_context(data_start, data_end) if hasattr(fatturazione, "update_context") else {}
+		gruppo_fatture.append(dictFatturazione)
+
 	# FATTURE CONSORZIO ****************
 	lista_consorzio = viaggi.filter(filtro_consorzio)
 	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
 						.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 	oggi = datetime.date.today()
 	anno_consorzio = data_end.year
-	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, tipo) + 1
+	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, "1") + 1
 
 	# FATTURE CONDUCENTE ****************
 	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
@@ -106,6 +148,8 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),
 
+								"gruppo_fatture": gruppo_fatture,
+
 								"anno_consorzio":anno_consorzio,
 								"progressivo_consorzio":progressivo_consorzio,
 								"lista_consorzio":lista_consorzio,
@@ -116,9 +160,15 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml", t
 
 @transaction.commit_on_success
 @permission_required('fatturazione.generate', '/')
-def genera_fatture(request, template_name, tipo="1", filtro=filtro_consorzio, keys=["cliente"], order_by=None,
-					manager=Viaggio.objects,
-				):
+# template_name, tipo, filtro, keys, order_by, manager
+def genera_fatture(request, fatturazione):
+	tipo = fatturazione.codice
+	template_name = fatturazione.template_generazione
+	manager = fatturazione.origine.objects
+	order_by = fatturazione.order_by
+	filtro = fatturazione.filtro
+	keys = fatturazione.keys
+
 	ids = request.POST.getlist("id")
 	plurale = nomi_plurale[tipo]
 	conducenti_ricevute = None

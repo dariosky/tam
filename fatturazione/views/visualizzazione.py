@@ -16,6 +16,7 @@ from modellog.actions import logAction
 from django.db import transaction
 from decimal import Decimal
 from django.contrib import messages
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5.lista-fatture.djhtml"):
@@ -28,11 +29,18 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 									default=datetime.date.today()
 								)
 
-	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
+	gruppo_fatture = []
+	for fatturazione in DEFINIZIONE_FATTURE:
+		dictFatturazione = {"d": fatturazione, 	# la definizione della fatturazione
+							"lista": Fattura.objects.filter(tipo=fatturazione.codice, data__gte=data_start, data__lte=data_end),
+						   }
+		gruppo_fatture.append(dictFatturazione)
+
+#	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
 #	lista_consorzio = lista_consorzio.annotate(valore=Sum(F('righe__prezzo')*(1+F('righe__iva')/100)))
 	#TODO: (Django 1.4) dovrei annotare prezzo*1+iva/100, non si può fare attualmente
-	lista_conducente = Fattura.objects.filter(tipo='2', data__gte=data_start, data__lte=data_end)
-	lista_ricevute = Fattura.objects.filter(tipo='3', data__gte=data_start, data__lte=data_end)
+#	lista_conducente = Fattura.objects.filter(tipo='2', data__gte=data_start, data__lte=data_end)
+#	lista_ricevute = Fattura.objects.filter(tipo='3', data__gte=data_start, data__lte=data_end)
 
 	return render_to_response(template_name,
                               {
@@ -42,9 +50,7 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),
 
-								"lista_consorzio":lista_consorzio,
-								"lista_conducente":lista_conducente,
-								"lista_ricevute":lista_ricevute,
+								"gruppo_fatture":gruppo_fatture,
 
                               },
                               context_instance=RequestContext(request))
@@ -66,7 +72,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
 	bigEdit = request.user.has_perm('fatturazione.generate')
-	
+
 	# gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
 	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
 	editable = bigEdit or smallEdit
