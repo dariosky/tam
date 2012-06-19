@@ -13,13 +13,13 @@ def humanizeTime(ms):
 		sec = ms / 1000
 		ms = ms % 1000
 		if sec >= 60:
-			min = sec / 60
-			if min >= 60:
-				hr = min / 60
-				min = min % 60
+			mins = sec / 60
+			if mins >= 60:
+				hr = mins / 60
+				mins = mins % 60
 				result += "%d hour " % hr
-			if min:
-				result += "%d min " % min
+			if mins:
+				result += "%d min " % mins
 			sec = sec % 60
 		if sec:
 			result += "%d sec " % sec
