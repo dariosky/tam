@@ -103,6 +103,10 @@ class Tratta(models.Model):
 	def save(self, *args, **kwargs):
 		""" Salvo la tratta """
 		super(Tratta, self).save(*args, **kwargs)
+		# invalida la cache
+		keyword = ("tratta%s-%s" % (self.da.id, self.a.id)).replace(" ", "")
+		cache.delete(keyword)
+		
 		# aggiorno tutte le corse precalcolate con questa tratta
 		viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
 				Viaggio.objects.filter(tratta=self) | \
@@ -114,7 +118,7 @@ class Tratta(models.Model):
 def get_tratta(da, a):
 	""" Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
 	if not da or not a: return
-	keyword = ("tratta%s-%s" % (da, a)).replace(" ", "")
+	keyword = ("tratta%s-%s" % (da.id, a.id)).replace(" ", "")
 	trattacache = cache.get(keyword)
 	if trattacache:
 		return trattacache
@@ -129,7 +133,7 @@ def get_tratta(da, a):
 			tratta = Tratta(da=da, a=a)
 			tratta.save()
 			result = tratta
-	cache.set(keyword, result, 5)	# keep in cache for 5 sec
+	cache.set(keyword, result)	# keep in cache
 	return result
 
 class Viaggio(models.Model):

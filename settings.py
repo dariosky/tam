@@ -285,28 +285,24 @@ PASSWORD_HASHERS = (
 	'django.contrib.auth.hashers.CryptPasswordHasher',
 )
 
-TAM_VIAGGI_PAGINA = 100
+TAM_VIAGGI_PAGINA = 80
+
+# ******************* CACHE
+CACHES = {
+	'default': {
+		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+		'LOCATION': 'TaM',
+	}
+}
+
+# Usiamo le sessioni su cookies per evitare di importunare il DB
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 try:
 	from settings_local import * #@UnusedWildImport
 except ImportError:
 	logging.warning("'settings_local.py' has not been found. Use this to keep out of VC secret settings.")
 	pass
-
-# Usiamo le sessioni su cookies per evitare di importunare il DB
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-
-# ******************* CACHE
-CACHES = {
-#	'default': {
-#		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#		'LOCATION': 'TaM',
-#	}
-	'default': {
-		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-		'LOCATION': '127.0.0.1:11211',
-	}
-}
 
 from celeryconfig import * #@UnusedWildImport
 import djcelery

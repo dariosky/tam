@@ -39,3 +39,4 @@ if __name__ == '__main__':
 				print "FAIL [%s]" % e
 			else:
 				print "OK"
+	print "fine."
