@@ -166,7 +166,7 @@ INVOICES_FOOTERS = {} # a dictionary with <invoinces type>:<list of footers>
 
 # MEDIA GENERATOR **********
 MEDIA_DEV_MODE = DEBUG
-DEV_MEDIA_URL = '/mediadev/'
+DEV_MEDIA_URL = '/mediaprod/'
 PRODUCTION_MEDIA_URL = '/mediaprod/'
 GLOBAL_MEDIA_DIRS = (os.path.join(os.path.dirname(__file__), 'media'),)
 MEDIA_BUNDLES = (
@@ -292,6 +292,9 @@ try:
 except ImportError:
 	logging.warning("'settings_local.py' has not been found. Use this to keep out of VC secret settings.")
 	pass
+
+# Usiamo le sessioni su cookies per evitare di importunare il DB
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 # ******************* CACHE
 CACHES = {
