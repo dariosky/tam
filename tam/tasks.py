@@ -5,12 +5,34 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import transaction
 import time
+
+#===============================================================================
+def humanizeTime(ms):
+	result = ""
+	if ms >= 1000:
+		sec = ms / 1000
+		ms = ms % 1000
+		if sec >= 60:
+			min = sec / 60
+			if min >= 60:
+				hr = min / 60
+				min = min % 60
+				result += "%d hour " % hr
+			if min:
+				result += "%d min " % min
+			sec = sec % 60
+		if sec:
+			result += "%d sec " % sec
+	if ms:
+		result += "%d ms" % ms
+	return result
+
 def print_timing(func):
 	def wrapper(*arg, **kwargs):
 		t1 = time.time()
 		res = func(*arg, **kwargs)
 		t2 = time.time()
-		print '%s took %0.6f ms' % (func.func_name, (t2 - t1) * 1000.0)
+		print '%s took %s' % (func.func_name, humanizeTime(t2 - t1))
 		return res
 	return wrapper
 
@@ -32,7 +54,7 @@ def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
 				print "stop concurrency"
 		return wrapper
 	return task_exc
-
+#===============================================================================
 
 @task(name="backup.job")
 @single_instance_task(60 * 5)	# 5 minutes timeout
@@ -57,9 +79,10 @@ def moveLogs(name='movelogs.job'):
 	con = connections['default']
 	cursor = con.cursor()
 	try:
-		cursor.execute("SELECT count(*) from tam_actionlog")
+		cursor.execute("SELECT count(*) from tam_actionlog where data>='20120101'")
 	except:
 		print "no table actionlog"
+		con.set_clean()
 		return
 	totalcount = cursor.fetchone()[0]
 	print "Total logs:", totalcount
@@ -112,12 +135,10 @@ def moveLogs(name='movelogs.job'):
 	print
 	print "Delete table"
 	cursor.execute("drop table tam_actionlog")
-	from tamArchive.archiveViews import vacuum_db
+	from tamArchive.tasks import vacuum_db
 	vacuum_db()
 	con.commit()
 	print "Fine"
-
-
 
 @task(name='testtask')
 def test_task(s='Test'):
@@ -125,3 +146,4 @@ def test_task(s='Test'):
 
 if __name__ == '__main__':
 	moveLogs.run()
+#	print humanizeTime(3690101)

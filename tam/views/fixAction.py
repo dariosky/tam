@@ -21,7 +21,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		# Azione di aggiornamento alla 2.0
 		# Aggiungo lo speciale ai luoghi in base al nome
 		# Effettuo il vacuum del DB
-		from tamArchive.archiveViews import vacuum_db
+		from tamArchive.tasks import vacuum_db
 		messageLines.append('Imposto gli speciali sui luoghi con stazione/aer* nel nome.')
 		stazioni = Luogo.objects.filter(nome__icontains='stazione').exclude(speciale='S')
 		if len(stazioni):

@@ -166,7 +166,7 @@ INVOICES_FOOTERS = {} # a dictionary with <invoinces type>:<list of footers>
 
 # MEDIA GENERATOR **********
 MEDIA_DEV_MODE = DEBUG
-DEV_MEDIA_URL = '/mediaprod/'
+DEV_MEDIA_URL = '/mediadev/'
 PRODUCTION_MEDIA_URL = '/mediaprod/'
 GLOBAL_MEDIA_DIRS = (os.path.join(os.path.dirname(__file__), 'media'),)
 MEDIA_BUNDLES = (

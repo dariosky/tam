@@ -19,8 +19,8 @@
 		</p>
 		{% if archive_needed %}
 			<p>
-				Archivio <strong>{{ archiveCount|intcomma }}</strong> corse.<br/>
-				Elimino <strong>{{ logCount|intcomma }}</strong> azioni dal log.
+				Archivio <strong>{{ archiveCount|intcomma }}</strong>/{{ archiveTotalCount|intcomma }} corse.<br/>
+				Elimino <strong>{{ logCount|intcomma }}</strong>/{{ logTotalCount|intcomma }} azioni dal log.
 			</p>
 	
 			<input type="hidden" name="end_date" value="{{ end_date_string }}"/>
