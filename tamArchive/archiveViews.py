@@ -6,7 +6,6 @@ from django import forms
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
-from django.template.loader import render_to_string
 from django.template.context import RequestContext
 from django.utils.translation import ugettext as _
 import logging
@@ -19,12 +18,11 @@ from tamArchive.models import ViaggioArchive
 from tam.views.tamviews import SmartPager
 
 from django.utils.datastructures import SortedDict # there are Python 2.4 OrderedDict, I use django to relax requirements
-from tam.models import reallySpaceless
 from django.contrib import messages
 from modellog.models import ActionLog
 from modellog.actions import logAction, stopLog, startLog
 
-archiveNotBefore_days = 90
+archiveNotBefore_days = 180
 
 def menu(request, template_name="archive/menu.html"):
 	dontHilightFirst = True
@@ -53,52 +51,6 @@ def menu(request, template_name="archive/menu.html"):
 			, context_instance=RequestContext(request))
 
 
-def vacuum_db(using='default'):
-	from django.db import connections
-	cursor = connections[using].cursor()
-	logging.debug("Vacuum [%s]" % using)
-	cursor.execute("VACUUM")
-	transaction.set_dirty(using=using)
-
-def archiveFromViaggio(viaggio):
-	""" Crea una voce di archivio dato un viaggio """
-	html_tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": viaggio})
-	html_tragitto = reallySpaceless(html_tragitto)
-	voceArchivio = ViaggioArchive(
-			data=viaggio.data,
-			da=viaggio.da,
-			a=viaggio.a,
-			path=html_tragitto,
-			pax=viaggio.numero_passeggeri,
-			flag_esclusivo=viaggio.esclusivo,
-			conducente="%s" % viaggio.conducente,
-			flag_richiesto=viaggio.conducente_richiesto,
-			cliente=(viaggio.cliente and viaggio.cliente.nome) or (viaggio.passeggero and viaggio.passeggero.nome),
-			prezzo=viaggio.prezzo,
-			prezzo_detail=render_to_string('corse/corse_prezzo_viaggio.inc.html', {"viaggio": viaggio, "nolink":True}),
-			flag_fineMese=viaggio.incassato_albergo,
-			flag_fatturazione=viaggio.fatturazione,
-			flag_cartaDiCredito=viaggio.cartaDiCredito,
-			flag_pagamentoDifferito=viaggio.pagamento_differito,
-			numero_pratica=viaggio.numero_pratica,
-			flag_arrivo=viaggio.arrivo,
-			punti_abbinata=viaggio.punti_abbinata,
-			note=viaggio.note,
-		)
-	return voceArchivio
-
-def daRicordareDelViaggio(ricordi, viaggio):
-	""" Ricorda quello che serve dalle classifiche di un viaggio """
-	conducente_id = viaggio.conducente.id
-	ricordiConducente = ricordi.get(conducente_id, {})
-	campiMemoria = ('punti_diurni', 'punti_notturni', 'prezzoVenezia', 'prezzoPadova',
-				'prezzoDoppioPadova', 'punti_abbinata')
-	for nome_campo in campiMemoria:
-		esistente = ricordiConducente.get(nome_campo, 0)
-		ricordiConducente[nome_campo] = esistente + getattr(viaggio, nome_campo)
-	ricordi[conducente_id] = ricordiConducente
-	return ricordi
-
 @transaction.commit_manually(using="archive")
 def action(request, template_name="archive/action.html"):
 	""" Archivia le corse, mantenendo le classifiche inalterate """
@@ -122,87 +74,23 @@ def action(request, template_name="archive/action.html"):
 
 	# non archivio le non confermate
 
-	filtroViaggi = Q(data__lt=end_date, conducente__isnull=False, padre__isnull=True)
+	archiveTotalCount = Viaggio.objects.count()
 	archiveCount = Viaggio.objects.filter(data__lt=end_date, conducente__isnull=False).count()
 
 	logDaEliminare = ActionLog.objects.filter(data__lt=end_date)
+	logTotalCount = ActionLog.objects.count()
 	logCount = logDaEliminare.count()
 	archive_needed = archiveCount or logCount
 
 	if "archive" in request.POST:
-		viaggiDaArchiviare = Viaggio.objects.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().filter(filtroViaggi)
-			# Optimizations: mi faccio dare solo i modelli che mi interessano
-			# Rimovo l'ordinamento di default
-		logAction("K",
-					instance=request.user,
-					description="Archiviazione fino al %s" % end_date,
-					user=request.user)
-		logging.debug("Effettuo l'archiviazione fino al %s" % end_date)
-		archiviati = 0
-		lastArchiveNotify = 0
-		stopLog(Viaggio)	# disabilita il log delle operazionni sul viaggio
-		stopLog(Conducente)
-		ricordi = {}	# ricordi[conducente_id] = {chiaveClassifica=valore}
-		for viaggio in viaggiDaArchiviare:
-			archiviati += 1
-
-			viaggioArchiviato = archiveFromViaggio(viaggio)
-			daRicordareDelViaggio(ricordi, viaggio)
-			viaggioArchiviato.save()
-
-			for figlio in viaggio.viaggio_set.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().all():
-				viaggioArchiviatoFiglio = archiveFromViaggio(figlio)
-				viaggioArchiviatoFiglio.padre = viaggioArchiviato
-				daRicordareDelViaggio(ricordi, figlio)
-				viaggioArchiviatoFiglio.save()
-				archiviati += 1
-			viaggio.delete()	
-				
-
-			if archiviati > 400:
-#				transaction.commit(using='archive')
-				for conducente_id, classifica in ricordi.items():
-					conducente = Conducente.objects.get(pk=conducente_id)
-					conducente.classifica_iniziale_diurni += classifica['punti_diurni']
-					conducente.classifica_iniziale_notturni += classifica['punti_notturni']
-
-					conducente.classifica_iniziale_long += classifica['prezzoVenezia']
-					conducente.classifica_iniziale_medium += classifica['prezzoPadova']
-					conducente.classifica_iniziale_doppiPadova += classifica['prezzoDoppioPadova']
-					conducente.classifica_iniziale_puntiDoppiVenezia += classifica['punti_abbinata']
-					conducente.save()
-
-				ricordi = {}
-#				assert(False)	#TMP: faccio solo i primi
-
-			if archiviati >= lastArchiveNotify + 500:
-				logging.debug("Effettuo il commit [%d]" % archiviati)
-				lastArchiveNotify = archiviati
-				transaction.commit(using='archive')
-				transaction.commit()
-#				assert(False)	#TMP
-
-		if lastArchiveNotify != archiviati:
-			logging.debug("Effettuo il commit [%d]" % archiviati)
-			transaction.commit(using='archive')
-
-		#logging.debug("Cancello tutti i viaggi appena archiviati")
-		#viaggiDaArchiviare.delete()
-
-		logging.debug("Ora cancello tutti i record di LOG.")
-		logDaEliminare.delete()
-
-		startLog(Conducente)
-		startLog(Viaggio)	# riabilita il log delle operazioni sul Viaggio
-
-		messages.success(request, "Archiviazione effettuata.")
-		vacuum_db()
-		transaction.commit()
+		from tamArchive.tasks import do_archiviazione
+		do_archiviazione.delay(request.user.id, end_date) #@UndefinedVariable
+		messages.info(request, "Archiviazione iniziata.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	return render_to_response(template_name,
-							 {"archiveCount":archiveCount,
-							  "logCount":logCount,
+							 {"archiveCount":archiveCount, "archiveTotalCount":archiveTotalCount,
+							  "logCount":logCount, "logTotalCount":logTotalCount,
 							  "archive_needed":archive_needed,
 							  "end_date":end_date,
 							  "end_date_string":end_date_string,
