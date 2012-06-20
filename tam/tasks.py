@@ -79,7 +79,7 @@ def moveLogs(name='movelogs.job'):
 	con = connections['default']
 	cursor = con.cursor()
 	try:
-		cursor.execute("SELECT count(*) from tam_actionlog where data>='20120101'")
+		cursor.execute("SELECT count(*) from tam_actionlog where data>='2012-01-01'") # sposto solo dal 2012
 	except:
 		print "no table actionlog"
 		con.set_clean()
