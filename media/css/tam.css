@@ -418,6 +418,24 @@ h2.fatturaTipo3 {
 	border: 3px solid #008000;
 }
 
+h2.fatturaTipo4 {
+	color: #8080ff;
+}
+.fatturaTipo4 th {
+	background: #8080ff;
+}
+.fatturaTipo4 input {
+	background: #8080ff;
+	padding:10px;
+	width:100%;
+	font-size:1.2em;
+}
+.fatturaTipo4 table {
+	border: 3px solid #8080ff;
+}
+
+
+
 .dati {
 	/* i dati di clienti nelle tabelle */
 	white-space:pre-line;

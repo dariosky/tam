@@ -48,7 +48,13 @@ from django.template.context import RequestContext
 from tam.views.tamviews import parseDateString
 from django.conf import settings
 
-class FattureConsorzio(object):
+class ModelloFattura(object):
+	@classmethod
+	def url_name(cls):
+		""" Restituisce il nome dell'url che rimanda alla generazione di queste fatture"""
+		return "tamNuova%s" % cls.codice
+	
+class FattureConsorzio(ModelloFattura):
 	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
 
 	nome = "Fatture Consorzio"
@@ -62,7 +68,47 @@ class FattureConsorzio(object):
 	order_by = ["cliente", "data"]	 				# ordinamento
 	url_generazione = r'^genera/consorzio/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
 	template_generazione = "2-1.fatturazione_consorzio.djhtml"
-	url_name = "tamFattureGeneraConsorzio"
+
+	@staticmethod
+	def update_context(data_start, data_end):
+		result = {"ask_progressivo":True}
+		result["data_generazione"] = data_end
+		result["anno_consorzio"] = data_end.year
+		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "1") + 1	# ultimo progressivo '1'
+		return result
+	
+
+class FattureNoIVA(ModelloFattura):
+	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
+
+	nome = "Fatture esenti IVA"
+	descrizione = """Le fatture che i consorziati fanno ai clienti, ma esentate IVA (ex ricevute).
+					 Per i soli viaggi con il flag "Fatturazione esente IVA"
+				  """
+	codice = "4"
+	origine = Viaggio
+	filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
+					~ Q(conducente__nick__iexact='ANNUL')
+	keys = ["cliente", "passeggero"]				# come dividere una fattura dall'altra
+	order_by = ["cliente", "data"]	 				# ordinamento
+	url_generazione = r'^genera/esentiIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
+	template_generazione = "2-3.fatturazione_ricevute.djhtml"
+
+
+class FattureConducente(ModelloFattura):
+	# Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
+
+	nome = "Fatture Conducente"
+	descrizione = """Le fatture che il conducente fa al consorzio.
+					 Generate dalle fatture consorzio."""
+	codice = "2"
+	origine = RigaFattura
+	filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None, conducente__attivo=True) & \
+					~ Q(conducente__nick__iexact='ANNUL')
+	keys = ["conducente"]	 							# come dividere una fattura dall'altra
+	order_by = ["conducente", "viaggio__cliente", "fattura__data"]	 				# ordinamento
+	url_generazione = r'^genera/conducente/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
+	template_generazione = "2-2.fatturazione_conducente.djhtml"
 
 	@staticmethod
 	def update_context(data_start, data_end):
@@ -73,20 +119,8 @@ class FattureConsorzio(object):
 
 		return result
 
-DEFINIZIONE_FATTURE = [ FattureConsorzio, ]
+DEFINIZIONE_FATTURE = [ FattureConsorzio, FattureNoIVA, FattureConducente]
 
-# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
-filtro_consorzio = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
-			   ~ Q(conducente__nick__iexact='ANNUL') # tolgo le corse assegnate al conducente annullato
-
-# Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
-# applicato sulle righe fatture
-filtro_conducente = Q(fattura__tipo="1", fattura_conducente_collegata=None, conducente__attivo=True) & \
-					~ Q(conducente__nick__iexact='ANNUL')
-
-# se un viaggio ha sia pagamento differito che fatturazione, faccio solo la fattura
-filtro_ricevute = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
-					~ Q(conducente__nick__iexact='ANNUL')
 
 
 @permission_required('fatturazione.generate', '/')
@@ -106,41 +140,50 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 	gruppo_fatture = []
 	for fatturazione in DEFINIZIONE_FATTURE:
 		selezione = fatturazione.origine.objects
+		
+		selezione = selezione.filter(fatturazione.filtro)
 		if fatturazione.origine == Viaggio:
 			selezione = selezione.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
+			selezione = selezione.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 		if fatturazione.origine == RigaFattura:
 			selezione = selezione.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
-		selezione = selezione.filter(fatturazione.filtro)
+			selezione = selezione.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
+						 'fattura', 'conducente')
+		selezione.order_by(*fatturazione.order_by)	
+		
 		dictFatturazione = {"d": fatturazione, 	# la definizione della fatturazione
 							"lista": selezione,
 						   }
-		dictFatturazione["parametri"] = fatturazione.update_context(data_start, data_end) if hasattr(fatturazione, "update_context") else {}
+		if hasattr(fatturazione, "update_context"):
+			dictFatturazione["parametri"] = fatturazione.update_context(data_start, data_end) if hasattr(fatturazione, "update_context") else {}
+		else:
+			dictFatturazione["parametri"] = {}
 		gruppo_fatture.append(dictFatturazione)
 
 	# FATTURE CONSORZIO ****************
-	lista_consorzio = viaggi.filter(filtro_consorzio)
-	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
-						.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
-	oggi = datetime.date.today()
-	anno_consorzio = data_end.year
-	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, "1") + 1
+#	lista_consorzio = viaggi.filter(filtro_consorzio)
+#	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
+#						.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+#	oggi = datetime.date.today()
+#	anno_consorzio = data_end.year
+#	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, "1") + 1
 
 	# FATTURE CONDUCENTE ****************
-	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
-	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").all()\
-		.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
-						 'fattura', 'conducente')
+#	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
+#	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").all()\
+#		.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
+#						 'fattura', 'conducente')
 
 	# RICEVUTE CONDUCENTE
-	lista_ricevute = viaggi.filter(filtro_ricevute)
-	lista_ricevute = lista_ricevute.order_by("cliente", "passeggero", "data").all()\
-		.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+#	lista_ricevute = viaggi.filter(filtro_ricevute)
+#	lista_ricevute = lista_ricevute.order_by("cliente", "passeggero", "data").all()\
+#		.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 
 	profile = ProfiloUtente.objects.get(user=request.user)
 	luogoRiferimento = profile.luogo
 	return render_to_response(template_name,
                               {
-								"today": oggi,
+#								"today": oggi,
 								"luogoRiferimento":luogoRiferimento,
 								"data_start":data_start,
 								"data_end":data_end,
@@ -150,11 +193,11 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 
 								"gruppo_fatture": gruppo_fatture,
 
-								"anno_consorzio":anno_consorzio,
-								"progressivo_consorzio":progressivo_consorzio,
-								"lista_consorzio":lista_consorzio,
-								"lista_conducente":lista_conducente,
-								"lista_ricevute":lista_ricevute,
+#								"anno_consorzio":anno_consorzio,
+#								"progressivo_consorzio":progressivo_consorzio,
+#								"lista_consorzio":lista_consorzio,
+#								"lista_conducente":lista_conducente,
+#								"lista_ricevute":lista_ricevute,
                               },
                               context_instance=RequestContext(request))
 

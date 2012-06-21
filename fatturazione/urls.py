@@ -4,9 +4,6 @@ Created on 11/set/2011
 @author: Dario Varotto
 '''
 from django.conf.urls.defaults import * #@UnusedWildImport
-from fatturazione.views.generazione import filtro_consorzio, filtro_ricevute, \
-	filtro_conducente
-from fatturazione.models import RigaFattura
 
 urlpatterns = patterns ('fatturazione.views',
     url(r'^$', 'lista_fatture_generabili', name="tamGenerazioneFatture"),
@@ -50,9 +47,9 @@ for fatturazione in DEFINIZIONE_FATTURE:
 		url(fatturazione.url_generazione,
 			'genera_fatture',
 			{ "fatturazione":fatturazione },
-			name=fatturazione.url_name
+			name="tamGenerazione%s" % fatturazione.codice
 		),
 		url(fatturazione.url_generazione.replace("$", "manuale/$"),
-			'nuova_fattura', {"tipo":fatturazione.codice}, name="tam-nuova-fattura-consorzio"
+			'nuova_fattura', {"tipo":fatturazione.codice}, name=fatturazione.url_name()
 		),
 	)
