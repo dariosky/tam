@@ -22,7 +22,7 @@
 			<a href="#genera{{f.d.codice}}"><img src='{% media_url 'frecciagiu.png' %}' title='genera {{f.d.nome}}'></a>
 		</div>
 		<p style='white-space: pre-line;'>{{ f.d.descrizione}}</p>
-		{% with lista_consorzio as lista %}
+		{% with f.lista as lista %}
 		
 			{% if lista %}
 				<form method="post" action="{% url f.d.url_name %}">
