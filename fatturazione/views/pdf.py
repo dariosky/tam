@@ -111,7 +111,7 @@ def onPage(canvas, doc, da, a):
 	fattura_a.wrapOn(canvas, 6.5 * cm, 10 * cm)
 	fattura_a.drawOn(canvas, x, y - fattura_a.height - fattura_a.style.borderPadding)
 
-	y -= fattura_a.height + fattura_a.style.borderPadding * 2  # spazio finale	#TMP: era 2
+	y -= fattura_a.height + fattura_a.style.borderPadding * 2  # spazio finale
 	right_y = y
 	lower_y = min(left_y, right_y)
 

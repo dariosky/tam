@@ -173,7 +173,7 @@ def action(request, template_name="archive/action.html"):
 					conducente.save()
 
 				ricordi = {}
-#				assert(False)	#TMP: faccio solo i primi
+#				assert(False)
 
 			if archiviati >= lastArchiveNotify + 500:
 				logging.debug("Effettuo il commit [%d]" % archiviati)

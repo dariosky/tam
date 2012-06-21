@@ -25,6 +25,7 @@ from django.db.models.aggregates import Count
 from django.utils import simplejson
 from django.core.urlresolvers import reverse
 import logging
+from django.db.models.query_utils import Q
 for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
@@ -161,6 +162,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		filterCliente = request.session.get("filterCliente", None)
 
 	viaggi = Viaggio.objects.all()	# mostro tutti i figli, non raggruppo per padre
+	viaggi = viaggi.filter(Q(padre_id=81833) | Q(id=81833))
 	if filterCliente or (filterFlag != "Tutti i flag") or outputFormat:		# non raggruppo
 		distinct = True
 
@@ -499,7 +501,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				removefields.append("numero_pratica")
 		if not id:
 			removefields += ["conducente_confermato"] # don't confirm on creation
-		if id and viaggio and viaggio.padre:
+		if id and viaggio and viaggio.padre_id:
 				# "Escludo i campi che non vanno nei figli"
 				removefields += ["conducente", "conducente_richiesto", "conducente_confermato"]
 
@@ -915,7 +917,7 @@ def resetAssociatiToDefault(viaggio, recurseOnChild=True):
 	"""
 	if viaggio is None:
 		return
-	if viaggio.padre:
+	if viaggio.padre_id:
 		resetAssociatiToDefault(viaggio.padre)	# applico sempre al padre
 		return
 	nodiDaSistemare = [viaggio]
@@ -953,7 +955,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 	for viaggio in viaggi:
 		logging.debug("%2s: %s di %s a %s" % (contatore, assoType, viaggio.pk, primo and primo.pk or "None"))
 
-		if viaggio.padre and not viaggio.padre in toUpdate: # segno i padri precedenti da aggiornare
+		if viaggio.padre_id and (not viaggio.padre in toUpdate): # segno i padri precedenti da aggiornare
 				toUpdate.append(viaggio.padre)
 
 		if assoType == 'unlink':
@@ -990,7 +992,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 		contatore += 1
 
 	for viaggio in toUpdate:
-		if viaggio.padre is None:	# sia il reset che l'update ricorre sui figli
+		if viaggio.padre_id is None:	# sia il reset che l'update ricorre sui figli
 			resetAssociatiToDefault(viaggio)
 			viaggio.updatePrecomp()
 
@@ -1000,7 +1002,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 		messages.error(request, "Non hai il permesso di creare i viaggi.")
 		return HttpResponseRedirect(reverse("tamCorse"))
 	corsa = get_object_or_404(Viaggio, pk=id)
-	if corsa.padre: corsa = corsa.padre
+	if corsa.padre_id: corsa = corsa.padre
 	if corsa.is_abbinata:
 		figli = corsa.viaggio_set.all()	# ottengo anche i figli
 
@@ -1061,7 +1063,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 					logging.debug("  ma le corse sono %d" % len(corseDaCopiare))
 					for corsaOrigine in corseDaCopiare:
 						nuovaCorsa = copy_model_instance(corsaOrigine)
-						if corsaOrigine.padre is None:
+						if corsaOrigine.padre_id is None:
 							nuovoPadre = nuovaCorsa
 						else:
 							nuovaCorsa.padre = nuovoPadre
@@ -1075,7 +1077,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 						nuovaCorsa.save()
 						logging.debug("Ho creato la corsa %s figlia di %s, %s" % (nuovaCorsa.pk, nuovaCorsa.padre and nuovaCorsa.padre.pk or "nissuni", nuovaCorsa.note))
 
-						if nuovaCorsa.padre is None:
+						if nuovaCorsa.padre_id is None:
 							nuoviPadriCreati.append(nuovaCorsa)
 
 					for nuovoPadre in nuoviPadriCreati:

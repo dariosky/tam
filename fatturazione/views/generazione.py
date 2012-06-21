@@ -135,16 +135,16 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 								)
 	# prendo i viaggi da fatturare
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
-	viaggi = Viaggio.objects.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
-
 	gruppo_fatture = []
 	for fatturazione in DEFINIZIONE_FATTURE:
 		selezione = fatturazione.origine.objects
 		
 		selezione = selezione.filter(fatturazione.filtro)
 		if fatturazione.origine == Viaggio:
+#			selezione = selezione.filter(id=81833)	#TMP:
 			selezione = selezione.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
-			selezione = selezione.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+			
+			selezione = selezione.all().select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 		if fatturazione.origine == RigaFattura:
 			selezione = selezione.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
 			selezione = selezione.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",

@@ -70,7 +70,7 @@
 
 		<p class="buttons">
 		    {% ifnotequal step 1 %}
-		        {% if not id or not viaggio.padre %}
+		        {% if not id or not viaggio.padre_id %}
 					{% if not  viaggio.conducente_confermato %}
 						<a href="?back">dettagli precedenti</a>
 					{% endif %}
