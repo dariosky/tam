@@ -37,3 +37,24 @@ mentre la pagina senza corse diventa solo 88 elementi! Eureka :) 2,1kb
 	#TODO: Cambio la modifica dei campi delle fatture da "input text" a delle textarea.
 	Consentirei così di inserire gli a capo, e abbandonerei editable.
 	Va però controllato se si riesce a gestirne l'altezza in modo automatico. 
+
+20/6/2012:
+	Vorrei rendere più veloce la lista corse (sempre lei) lavorando sul numero di query.
+	agosto/2011 ha 313 queries in 840ms ma il tempo totale è di 16,4 sec.
+	
+	Fatturazione: cancellando tutte le fatture esistenti
+		qui qualche SQL
+			select * from fatturazione_fattura where data >= '2012-05-01'
+			
+			--delete from fatturazione_fattura  where data >= '2012-05-01'
+			
+			select *
+			--delete
+			from fatturazione_rigafattura
+			where fattura_id not in (select id from fatturazione_fattura)
+		aprile 2012 veniva con corse (fatture)
+			http://localhost:8005/fatture/?data_start=01%2F03%2F2012&data_end=31%2F03%2F2012
+					295 f.consorzio (19)
+					296 ricevute (12)
+					
+		
