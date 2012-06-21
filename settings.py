@@ -242,6 +242,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'info@dariosky.it'
 EMAIL_HOST_PASSWORD = 'bangbangD'
 EMAIL_PORT = 587
+EMAIL_SUBJECT_PREFIX = "[TaM]"
 
 #if DEBUG:
 #	logging.basicConfig(
