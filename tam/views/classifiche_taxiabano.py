@@ -42,7 +42,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
 #	for k in da:
 #		print "%15s: %s" % (k, da[k])
 
-	if viaggio.padre is not None:
+	if viaggio.padre_id is not None:
 		return
 
 	valoreTotale = viaggio.get_valuetot()
@@ -80,13 +80,13 @@ def process_classifiche(viaggio, force_numDoppi=None):
 #			viaggio.prezzoVenezia = viaggio.prezzo_finale
 #			
 #		# i figli non prendono nulla
-#
-#	if viaggio.padre is None:	# padri e singoli possono avere i supplementi
-#		for fascia, points in viaggio.disturbi().items():
-#			if fascia == "night":
-#				viaggio.punti_notturni += points
-#			else:
-#				viaggio.punti_diurni += points
+
+	if viaggio.padre is None:	# padri e singoli possono avere i supplementi
+		for fascia, points in viaggio.disturbi().items():
+			if fascia == "night":
+				viaggio.punti_notturni += points
+			else:
+				viaggio.punti_diurni += points
 
 
 def dettagliAbbinamento(viaggio, force_numDoppi=None):

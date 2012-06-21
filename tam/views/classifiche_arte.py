@@ -68,14 +68,14 @@ def process_classifiche(viaggio, force_numDoppi=None):
 					viaggio.prezzoVenezia = prezzoNetto
 				elif 25 <= da["kmTotali"] < 50:
 					viaggio.prezzoPadova = prezzoNetto
-	elif viaggio.padre is None:	# corse non abbinate, o abbinate che non fanno alcun punto
+	elif viaggio.padre_id is None:	# corse non abbinate, o abbinate che non fanno alcun punto
 		if viaggio.is_long():
 			viaggio.prezzoVenezia = viaggio.prezzo_finale
 		elif viaggio.is_medium():
 			viaggio.prezzoPadova = viaggio.prezzo_finale
 		# i figli non prendono nulla
 
-	if viaggio.padre is None:	# padri e singoli possono avere i supplementi
+	if viaggio.padre_id is None:	# padri e singoli possono avere i supplementi
 		for fascia, points in viaggio.disturbi().items():
 			if fascia == "night":
 				viaggio.punti_notturni += points
