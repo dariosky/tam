@@ -54,7 +54,7 @@ kmPuntoAbbinate = Decimal(120)
 def process_classifiche(viaggio, force_numDoppi=None):
 	if viaggio.is_abbinata and viaggio.padre is None: # per i padri abbinati
 		da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)	# trovo i dettagli
-		#logging.debug("Sono il padre di un abbinata da %s chilometri. Pricy: %s.\n%s"%(da["kmTotali"], da["pricy"], da) )
+		#print("Sono il padre di un abbinata da %s chilometri. Pricy: %s.\n%s"%(da["kmTotali"], da["pricy"], da) )
 		if da["puntiAbbinamento"] > 0:
 			viaggio.punti_abbinata = da["puntiAbbinamento"]
 			viaggio.prezzoPunti = da["valorePunti"]
@@ -113,9 +113,9 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 	#logging.debug("Valore da conguagliare %s"% valoreDaConguagliare)
 
 	baciniDiPartenza = []
-	for viaggio in [viaggio] + list(viaggio.viaggio_set.all()):
-		bacino = viaggio.da
-		if viaggio.da.bacino: bacino = viaggio.da.bacino
+	for cursore in [viaggio] + list(viaggio.viaggio_set.all()):
+		bacino = cursore.da
+		if cursore.da.bacino: bacino = cursore.da.bacino
 		if not bacino in baciniDiPartenza:
 			baciniDiPartenza.append(bacino)
 		#logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
@@ -144,9 +144,9 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 		if kmRimanenti:
 			#lordoRimanente=viaggio.get_lordotot()* (kmNonConguagliati) / kmTotali
 			lordoRimanente = viaggio.get_lordotot()
-			#logging.debug("Mi rimangono euro %s in %s chilometri"%(lordoRimanente, kmTotali))
+			#logging.error("Mi rimangono euro %s in %s chilometri"%(lordoRimanente, kmTotali))
 			euroAlKm = lordoRimanente / kmTotali
-			#logging.debug("I rimanenti %.2fs km sono a %.2f euro/km" % (kmRimanenti, euroAlKm))
+			#logging.error("I rimanenti %.2fs km sono a %.2f euro/km" % (kmRimanenti, euroAlKm))
 			pricy = euroAlKm > Decimal("1.25")
 			#if pricy:
 			#	logging.debug("Metto nei doppi Padova: %s" %rimanenteInLunghe)
