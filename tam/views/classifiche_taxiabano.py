@@ -108,11 +108,11 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 	def specialPlace(luogo):
 		nome = luogo.nome.lower()
 		return ("venezia" in nome or "treviso" in nome)
-	for viaggio in [viaggio] + list(viaggio.viaggio_set.all()):
-		if VEorTV is False and (specialPlace(viaggio.da) or specialPlace(viaggio.a)):
+	for cursore in [viaggio] + list(viaggio.viaggio_set.all()):
+		if VEorTV is False and (specialPlace(cursore.da) or specialPlace(cursore.a)):
 			VEorTV = True
-		bacino = viaggio.da
-		if viaggio.da.bacino: bacino = viaggio.da.bacino	# prendo il luogo o il bacino
+		bacino = cursore.da
+		if cursore.da.bacino: bacino = cursore.da.bacino	# prendo il luogo o il bacino
 		if not bacino in baciniDiPartenza:
 			baciniDiPartenza.append(bacino)
 		#logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
