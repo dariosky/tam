@@ -20,7 +20,7 @@ urlpatterns += patterns('',
 	url(r'^admin/', include(admin.site.urls)),
 )
 # Serve media settings to simulate production, we know in REAL production this won't happend
-if settings.DEBUG:
+if True or settings.DEBUG:
 	urlpatterns += patterns('',
 		#mediaprod > _generated_media 
 		("^"+settings.PRODUCTION_MEDIA_URL[1:]+r'(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(os.path.dirname(__file__), '_generated_media')}),

@@ -25,11 +25,16 @@ def vacuum_db(using='default'):
 
 def archiveFromViaggio(viaggio):
 	""" Crea una voce di archivio dato un viaggio """
+	try:
+		path = viaggio.get_html_tragitto()
+	except:
+		path = "invalid path"
+		print path	
 	voceArchivio = ViaggioArchive(
 			data=viaggio.data,
 			da=viaggio.da,
 			a=viaggio.a,
-			path=viaggio.get_html_tragitto(),
+			path=path,
 			pax=viaggio.numero_passeggeri,
 			flag_esclusivo=viaggio.esclusivo,
 			conducente="%s" % viaggio.conducente,
@@ -131,7 +136,7 @@ def do_archiviazione(user_id, end_date):
 		if pendingChanges >= chunkSize:
 			applyRicordi(ricordi)
 			pendingChanges = 0
-
+	print "fine"
 	if pendingChanges:
 		applyRicordi(ricordi)
 	if archiviati:
