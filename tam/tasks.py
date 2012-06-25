@@ -92,7 +92,7 @@ def moveLogs(name='movelogs.job'):
 	usersByID = {}
 	ctypeByID = {}
 	while True:
-		cursor.execute("SELECT * from tam_actionlog order by data desc limit %d" % chunksize)
+		cursor.execute("SELECT * from tam_actionlog where data>='2012-01-01' order by data desc limit %d" % chunksize)
 		con.set_clean()
 		oldLogsChunk = cursor.fetchall()
 		logs_to_delete = []	# lista degli ID da cancellare
