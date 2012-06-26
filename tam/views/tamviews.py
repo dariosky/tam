@@ -162,7 +162,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		filterCliente = request.session.get("filterCliente", None)
 
 	viaggi = Viaggio.objects.all()	# mostro tutti i figli, non raggruppo per padre
-	viaggi = viaggi.filter(Q(padre_id=81833) | Q(id=81833))
+	#viaggi = viaggi.filter(Q(padre_id=81833) | Q(id=81833)) #TMP:
 	if filterCliente or (filterFlag != "Tutti i flag") or outputFormat:		# non raggruppo
 		distinct = True
 
