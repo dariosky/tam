@@ -298,14 +298,14 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 # ******************* CACHE
 CACHES = {
-#	'default': {
-#		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#		'LOCATION': 'TaM',
-#	}
 	'default': {
-		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-		'LOCATION': '127.0.0.1:11211',
+		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+		'LOCATION': 'TaM',
 	}
+#	'default': {
+#		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#		'LOCATION': '127.0.0.1:11211',
+#	}
 }
 
 from celeryconfig import * #@UnusedWildImport

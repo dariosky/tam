@@ -1,10 +1,5 @@
 {% extends "base.html" %}
 {% load media %}
-{% comment %}
-{% block title %}Lista corse &raquo; {{ block.super }}{% endblock %}
-{% block corse %}{{ block.super }} &raquo; <a href="{% url tamCorse %}">Lista corse</a>{% endblock %}
-{% endcomment %}
-
 {% block topContent %}
 	{% include "corse/corse_filter.inc.html" %}
 {% endblock %}
