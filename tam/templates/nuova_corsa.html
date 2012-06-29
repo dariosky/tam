@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% load media %}
 
-{% block title %}Nuova corsa &raquo; {{ block.super }}{% endblock %}
+{% block title %}{% if viaggio.id %} Modifica {% else %} Nuova {% endif %} corsa &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
 <div style="text-align:center">
