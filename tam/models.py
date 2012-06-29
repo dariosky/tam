@@ -371,10 +371,11 @@ class Viaggio(models.Model):
 
 	def nextfratello(self):
 		""" Per le abbinate restituisco il prossimo fratello (Niente se è l'ultimo) """
-		print "Trovo il next fratello per %d" % self.id
+#		print "Trovo il next fratello per %d" % self.id
 		if self.padre_id is None:
 			if not self._is_abbinata(simpleOne=True):
 #				self.nextfratello = None
+				self.cache_fratello = None
 				return  # per i singoli ritorno None
 			else:
 				padre = self
@@ -384,8 +385,10 @@ class Viaggio(models.Model):
 		for fratello in padre.viaggio_set.all():
 			if lastbro == self:
 #				self.nextfratello = fratello
+				self.cache_fratello = fratello
 				return fratello
 			lastbro = fratello
+		self.cache_fratello = None
 
 	def lastfratello(self):
 		""" Restituisco l'ultimo viaggio del gruppo """
@@ -599,13 +602,15 @@ class Viaggio(models.Model):
 		""" True se la corsa un'abbinata (padre o figlio)
 			se simpleOne==False controllo anche le differenze tra abbinata in Successione e abbinata in Partenza
 		"""
-		print("Abbinata? %s" % self.id)
+		#print("Abbinata? %s" % self.id)
 		if self.id is None: return False	# prima di salvare non sono un'abbinata (viaggio_set.count() mi darebbe tutte le corse
 		if self.padre_id or self.viaggio_set.count() > 0:
 			if simpleOne: return True
 			if self._is_collettivoInPartenza():
+				self.cache_isabbinata='P'
 				return "P"	# collettivo in partenza
 			else:
+				self.cache_isabbinata='S'
 				return "S"	# abbinata
 		else:
 			return ""	# non abbinata
