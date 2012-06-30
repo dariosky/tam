@@ -1,0 +1,33 @@
+<thead>
+	<tr>
+		<th>Conducente</th>
+		<th>Cliente</th>
+	    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
+	    <th>Corsa</th>
+	    <th>Descrizione</th>
+	    <th>Prezzo lordo</th>
+	</tr>
+</thead>
+{% for riga in lista %}
+	{% with riga as viaggio %}
+	<tr>
+		<td>{% ifchanged riga.conducente_id %}
+				<div>{{riga.conducente.nick}}</div>
+				<a href="#" class='clientSelect'>seleziona tutto</a>
+			{% endifchanged %}
+		</td>
+		<td>{% ifchanged riga.conducente_id riga.fattura.emessa_a %}
+			<div class='dati'>{{riga.fattura.emessa_a}}</div>
+			{% endifchanged %}
+		</td>
+		<td><input type='checkbox' name='id' value='{{riga.id}}' ></td>
+		<td>{% if riga.viaggio %}
+			{% with viaggio=riga.viaggio %}
+				{% include "inc.cellaViaggio.djhtml" %}
+			{%endwith%}
+		{%endif%}</td>
+		<td>{{riga.descrizione}}</td>
+		<td>{{riga.viaggio.prezzo|default:riga.prezzo}}</td>
+	</tr>
+	{% endwith %}
+{% endfor %}

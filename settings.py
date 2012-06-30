@@ -3,7 +3,7 @@ import os
 import logging
 from socket import gethostname
 
-TAM_VERSION = "3.5"
+TAM_VERSION = "3.7"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 host = gethostname().lower()
@@ -294,6 +294,10 @@ CACHES = {
 		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
 		'LOCATION': 'TaM',
 	}
+#	'default': {
+#		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#		'LOCATION': '127.0.0.1:11211',
+#	}
 }
 
 # Usiamo le sessioni su cookies per evitare di importunare il DB
