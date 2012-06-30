@@ -1,6 +1,6 @@
 {% extends "base.html" %}{% load media %}
 
-{% block title %}Nuova corsa &raquo; {{ block.super }}{% endblock %}
+{% block title %}{% if viaggio.id %} Modifica {% else %} Nuova {% endif %} corsa &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
 <div style="text-align:center">
@@ -70,7 +70,7 @@
 
 		<p class="buttons">
 		    {% ifnotequal step 1 %}
-		        {% if not id or not viaggio.padre %}
+		        {% if not id or not viaggio.padre_id %}
 					{% if not  viaggio.conducente_confermato %}
 						<a href="?back">dettagli precedenti</a>
 					{% endif %}

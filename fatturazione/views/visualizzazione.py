@@ -16,9 +16,10 @@ from modellog.actions import logAction
 from django.db import transaction
 from decimal import Decimal
 from django.contrib import messages
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE
 
 @permission_required('fatturazione.view', '/')
-def view_fatture(request, template_name="5.lista-fatture.djhtml"):
+def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 	data_start = parseDateString(# dal primo del mese scorso
 									request.GET.get("data_start"),
 									default=(datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
@@ -28,11 +29,18 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 									default=datetime.date.today()
 								)
 
-	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
+	gruppo_fatture = []
+	for fatturazione in DEFINIZIONE_FATTURE:
+		dictFatturazione = {"d": fatturazione, 	# la definizione della fatturazione
+							"lista": Fattura.objects.filter(tipo=fatturazione.codice, data__gte=data_start, data__lte=data_end),
+						   }
+		gruppo_fatture.append(dictFatturazione)
+
+#	lista_consorzio = Fattura.objects.filter(tipo='1', data__gte=data_start, data__lte=data_end)
 #	lista_consorzio = lista_consorzio.annotate(valore=Sum(F('righe__prezzo')*(1+F('righe__iva')/100)))
 	#TODO: (Django 1.4) dovrei annotare prezzo*1+iva/100, non si può fare attualmente
-	lista_conducente = Fattura.objects.filter(tipo='2', data__gte=data_start, data__lte=data_end)
-	lista_ricevute = Fattura.objects.filter(tipo='3', data__gte=data_start, data__lte=data_end)
+#	lista_conducente = Fattura.objects.filter(tipo='2', data__gte=data_start, data__lte=data_end)
+#	lista_ricevute = Fattura.objects.filter(tipo='3', data__gte=data_start, data__lte=data_end)
 
 	return render_to_response(template_name,
                               {
@@ -42,9 +50,7 @@ def view_fatture(request, template_name="5.lista-fatture.djhtml"):
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),
 
-								"lista_consorzio":lista_consorzio,
-								"lista_conducente":lista_conducente,
-								"lista_ricevute":lista_ricevute,
+								"gruppo_fatture":gruppo_fatture,
 
                               },
                               context_instance=RequestContext(request))
@@ -66,7 +72,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
 	bigEdit = request.user.has_perm('fatturazione.generate')
-	
+
 	# gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
 	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
 	editable = bigEdit or smallEdit
@@ -108,7 +114,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			riga = RigaFattura(descrizione="riga inserita manualmente",
 							qta=1,
 							prezzo=0,
-							iva=10 if fattura.tipo in ('1', '2') else 0,
+							iva=10 if not fattura.tipo in ('3', '4', '5') else 0,	# tipi esenti IVA
 							riga=ultimaRiga + 10)
 			logAction('C', instance=fattura, description="Riga inserita manualmente.", user=request.user)
 			riga.save()
@@ -216,19 +222,20 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
 @permission_required('fatturazione.generate', '/')
 @transaction.commit_on_success
-def nuova_fattura(request, tipo):
-	if tipo == "1":
+def nuova_fattura(request, fatturazione):
+	tipo = fatturazione.codice
+	if fatturazione.ask_progressivo:
 		anno = datetime.date.today().year
 		ultimo = ultimoProgressivoFattura(anno, tipo=tipo)
 		progressivo = ultimo + 1
 	else:
 		anno = None
 		progressivo = None
-	if tipo == '3':
-		# le ricevute hanno sempre come data l'ultimo fine mese precedente
-		data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
-	else:
-		data_fattura = datetime.date.today()
+#	if tipo == '3':
+#		# le ricevute hanno sempre come data l'ultimo fine mese precedente
+#		data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+#	else:
+	data_fattura = datetime.date.today()
 
 
 	fattura = Fattura(
@@ -237,9 +244,9 @@ def nuova_fattura(request, tipo):
 					progressivo=progressivo,
 					data=data_fattura
 					)
-	if tipo == "1":
+	if fatturazione.mittente=="consorzio":
 		fattura.emessa_da = settings.DATI_CONSORZIO
-	elif tipo == "2":
+	elif fatturazione.destinatario=="consorzio":
 		fattura.emessa_a = settings.DATI_CONSORZIO
 	fattura.save()
 	message = "Creata la %s %s." % (fattura.nome_fattura(), fattura.descrittore())

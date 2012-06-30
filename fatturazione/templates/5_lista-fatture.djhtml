@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load media humanize l10n %}
+{% block title %}Visualizzazione fatture &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+
+	<h1>Visualizzazione fatture</h1>
+	<div id='date_range'>
+		<form method='get' action=''>
+			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
+			a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<input type="submit" value="Trova fatture"/>
+		</form>
+	</div>
+
+{% for f in gruppo_fatture %}
+	<div>
+		<h2 class='accordhead fatturaTipo{{ f.d.codice }}'>{{ f.d.nome }}</h2>
+		{{ f.lista.count }} {{ f.d.nome|lower }}.
+		{% with f.lista as lista %}
+			{% include f.d.template_visualizzazione %}
+		{% endwith %}
+	</div>
+{% endfor %}
+
+{% endblock %}
+
+
+{% block bottom %}
+	<script type="text/javascript">
+	    $(function() {
+			$(".accordhead").click(function(){
+					$(this).next().toggle('slow');
+					return false;
+				});
+			
+			$('#date_range input[type=text]').datepicker();
+	    });
+	</script>
+{% endblock bottom %}

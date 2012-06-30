@@ -161,8 +161,8 @@ class Viaggio(models.Model):
 
 	incassato_albergo = models.BooleanField("Conto fine mese", default=False)	# flag per indicare se la corsa è incassata dall'albergo (sarà utile per reportistica)
 	fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
+	pagamento_differito = models.BooleanField("Fatturazione esente IVA", default=False)
 	cartaDiCredito = models.BooleanField("Pagamento con carta di credito", default=False)
-	pagamento_differito = models.BooleanField(default=False)
 	commissione = models.DecimalField("Quota consorzio", max_digits=9, decimal_places=2, default=0)	#fissa in euro
 	tipo_commissione = models.CharField("Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F")
 	numero_pratica = models.CharField(max_length=20, null=True, blank=True)
@@ -244,7 +244,7 @@ class Viaggio(models.Model):
 			numDoppi se è diverso da None forza al numero di doppi indicato
 			con forceDontSave indico l'id che sto già salvando, e che non c'è bisogno di risalvare anche se cambia
 		"""
-		if doitOnFather and self.padre:
+		if doitOnFather and self.padre_id:
 #			logging.debug("Ricorro al padre di %s: %s" % (self.pk, self.padre.pk))
 			self.padre.updatePrecomp(forceDontSave=forceDontSave)	# run update on father instead
 			return
@@ -287,7 +287,7 @@ class Viaggio(models.Model):
 		self.punti_diurni = self.punti_notturni = 0.0	# Precalcolo i punti disturbo della corsa
 		self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
 		self.punti_abbinata = self.prezzoPunti = 0
-		
+
 		process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
 		self.html_tragitto = self.get_html_tragitto()
@@ -323,15 +323,15 @@ class Viaggio(models.Model):
 			self.passeggero = None
 
 		# inserisco data e ID del gruppo per gli ordinamenti
-		self.id_padre = self.padre.id if self.padre is not None else self.id
-		self.data_padre = self.padre.data if self.padre is not None else self.data
+		self.id_padre = self.padre.id if self.padre_id is not None else self.id
+		self.data_padre = self.padre.data if self.padre_id is not None else self.data
 
 		logging.debug("Update di *%s*." % self.pk)
 		#invalidate_template_cache("viaggio", self.id)
 		super(Viaggio, self).save(*args, **kwargs)
 		for figlio in self.viaggio_set.all(): # i figli ereditano dal padre
 			changed = False
-			if self.padre:   # tutti i figli hanno un solo padre, nessuna ricorsione
+			if self.padre_id:   # tutti i figli hanno un solo padre, nessuna ricorsione
 				figlio.padre = self.padre
 				changed = True
 			if figlio.conducente != self.conducente:   # il conducente è sempre quello del padre
@@ -363,7 +363,7 @@ class Viaggio(models.Model):
 	def _get_prefratello(self):
 		""" Per i figli restituisco il fratello precedente (o il padre) """
 #		logging.debug("Trovo il pre fratello per %s"%self.id)
-		if self.padre is None:
+		if self.padre_id is None:
 			return
 		lastbro = self.padre
 		for fratello in self.padre.viaggio_set.all():
@@ -373,11 +373,13 @@ class Viaggio(models.Model):
 		return lastbro
 	prefratello = property(_get_prefratello)
 
-	def _get_nextfratello(self):
+	def nextfratello(self):
 		""" Per le abbinate restituisco il prossimo fratello (Niente se è l'ultimo) """
-#		logging.debug("Trovo il next fratello per %d" % self.id)
-		if self.padre is None:
+#		print "Trovo il next fratello per %d" % self.id
+		if self.padre_id is None:
 			if not self._is_abbinata(simpleOne=True):
+#				self.nextfratello = None
+				self.cache_fratello = None
 				return  # per i singoli ritorno None
 			else:
 				padre = self
@@ -386,43 +388,43 @@ class Viaggio(models.Model):
 		lastbro = padre
 		for fratello in padre.viaggio_set.all():
 			if lastbro == self:
+#				self.nextfratello = fratello
+				self.cache_fratello = fratello
 				return fratello
 			lastbro = fratello
-	nextfratello = property(_get_nextfratello)
+		self.cache_fratello = None
 
 	def lastfratello(self):
 		""" Restituisco l'ultimo viaggio del gruppo """
-#		logging.debug("Trovo l'ultimo fratello per %s"%self.id)
+		logging.debug("Trovo l'ultimo fratello per %s" % self.id)
 		lastone = self
-		if self.padre:	# vado al padre
+		if self.padre_id:	# vado al padre
 			lastone = self.padre
 		if lastone.viaggio_set.count() > 0:   # e scendo all'ultimo figlio
 			lastone = list(lastone.viaggio_set.all())[-1]
 		return lastone
 
+
 	def _tratta_start(self):
 		""" Restituisce la tratta dal luogo di riferimento all'inizio della corsa """
-#		logging.debug("Trovo la tratta start %s" %self.id)
-		if self.padre is None:	# per singoli o padri parto dal luogo di riferimento
+		logging.debug("Trovo la tratta start %s" % self.id)
+		if self.padre_id is None:	# per singoli o padri parto dal luogo di riferimento
 			luogoDa = self.luogoDiRiferimento
 			if luogoDa != self.da:
 				return get_tratta(luogoDa, self.da)
 
 	def _tratta(self):
 		""" Normalmente è la tratta vera e propria, ma per le associazioni 	potrebbe essere una tratta intermedia, o addirittura essere nulla """
-#		logging.debug("Trovo la tratta middle %s" %self.id)
+		logging.debug("Trovo la tratta middle %s" % self.id)
 		if self._is_abbinata() == "P":
 			return None
 		else:
 			return get_tratta(self.da, self.a)
 
-
-
-
 	def _tratta_end(self):
 		""" Restituisce la tratta dal luogo di riferimento all'inizio della corsa """
-#		logging.debug("Trovo la tratta end %s" %self.id)
-		nextbro = self.nextfratello
+		logging.debug("Trovo la tratta end %s" % self.id)
+		nextbro = self.nextfratello()
 		if not nextbro: # non ho successivi, riporto al luogoDiRiferimento
 			da = self.a
 			a = self.luogoDiRiferimento
@@ -436,8 +438,9 @@ class Viaggio(models.Model):
 		if da != a:
 			return get_tratta(da, a)
 
+
 	def sostaFinale(self):
-		nextbro = self.nextfratello
+		nextbro = self.nextfratello()
 		if nextbro:
 			if nextbro.data <= self.date_end():
 				return None
@@ -588,7 +591,7 @@ class Viaggio(models.Model):
 			Assieme si andrà  ad una destinazione comune
 		"""
 #		logging.debug("Is collettivo in partenza %s" %self.id)
-		nextbro = self.nextfratello
+		nextbro = self.nextfratello()
 		if nextbro and nextbro.da == self.a:	# se il successivo parte da dove arrivo è sicuramente un collettivo in successione
 			return False
 		if nextbro and nextbro.data < \
@@ -603,13 +606,15 @@ class Viaggio(models.Model):
 		""" True se la corsa un'abbinata (padre o figlio)
 			se simpleOne==False controllo anche le differenze tra abbinata in Successione e abbinata in Partenza
 		"""
-#		logging.debug("Abbinata? %s" %self.id)
+		#print("Abbinata? %s" % self.id)
 		if self.id is None: return False	# prima di salvare non sono un'abbinata (viaggio_set.count() mi darebbe tutte le corse
-		if self.padre or self.viaggio_set.count() > 0:
+		if self.padre_id or self.viaggio_set.count() > 0:
 			if simpleOne: return True
 			if self._is_collettivoInPartenza():
+				self.cache_isabbinata='P'
 				return "P"	# collettivo in partenza
 			else:
+				self.cache_isabbinata='S'
 				return "S"	# abbinata
 		else:
 			return ""	# non abbinata
@@ -772,7 +777,7 @@ class Conducente(models.Model):
 	nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
 	max_persone = models.IntegerField(default=4)
 	attivo = models.BooleanField(default=True, db_index=True)
-	emette_ricevute = models.BooleanField(default=True)
+	emette_ricevute = models.BooleanField("Emette senza IVA?", help_text="Il conducente può emettere fatture senza IVA?", default=True)
 	assente = models.BooleanField(default=False)
 
 	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=9, decimal_places=2, default=0)

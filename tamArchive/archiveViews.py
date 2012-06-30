@@ -86,6 +86,7 @@ def action(request, template_name="archive/action.html"):
 		from tamArchive.tasks import do_archiviazione
 		do_archiviazione.delay(request.user.id, end_date) #@UndefinedVariable
 		messages.info(request, "Archiviazione iniziata.")
+
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
 	return render_to_response(template_name,

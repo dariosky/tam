@@ -5,42 +5,42 @@
 	padding: 0;
 }
 .editable, .editable * {
-	margin:0; padding:0;
+	margin: 0;
+	padding: 0;
 }
-.editable.nullable{
-	display:inline-block;
-	min-width:50px;
-	white-space:pre;
+.editable.nullable {
+	display: inline-block;
+	min-width: 50px;
+	white-space: pre;
 }
 div.editable, .pre {
 	white-space: pre-line;
 }
 .editable textarea {
-	width:100%;
+	width: 100%;
 }
 td.editable input {
-	width:100%;
+	width: 100%;
 }
-
 #fat_note {
-	padding:10px;
+	padding: 10px;
 	margin: 10px;
 	margin-right: 350px;
 }
 #fat_logo {
-	float:left;
-	margin:30px 0;
+	float: left;
+	margin: 30px 0;
 	width: 500px;
 	max-width: 40%;
 }
-.fat_title{
-	font-size:12pt;
+.fat_title {
+	font-size: 12pt;
 	font-weight: bold;
 }
 #fat_mittente {
 	float: right;
 	padding: 20px;
-	margin:10px 0;
+	margin: 10px 0;
 	width: 300px;
 }
 #fat_destinatario {
@@ -48,7 +48,7 @@ td.editable input {
 	float: right;
 	width: 300px;
 	padding: 20px;
-	margin:10px 0;
+	margin: 10px 0;
 	border: 1px solid silver;
 	border-radius: 20px;
 }
@@ -67,14 +67,10 @@ td.editable input {
 	padding: 30px;
 	width: 300px;
 }
-
 #fat_footer {
 }
-
 #fat_footer.privacy {
 	padding-top: 15px;
 	margin: 0 auto;
 	font-size: smaller;
-}
-
 }

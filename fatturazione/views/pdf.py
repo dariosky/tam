@@ -14,6 +14,8 @@ from reportlab.lib import colors
 from django.templatetags.l10n import localize
 from fatturazione.views.money_util import moneyfmt, NumberedCanvas
 import datetime
+from fatturazione.views.generazione import FATTURE_PER_TIPO
+from decimal import Decimal
 
 logoImage_path = os.path.join(settings.MEDIA_ROOT, settings.OWNER_LOGO)
 test = settings.DEBUG
@@ -28,6 +30,7 @@ def onPage(canvas, doc, da, a):
 	width, height = canvas._doctemplate.pagesize
 	canvas.saveState()
 	fattura = doc.fattura
+	fatturazione = doc.fatturazione
 	stondata_style = ParagraphStyle("IntestazioneStondata", fontName='Helvetica', fontSize=8, leading=10,
 								 borderRadius=5, borderWidth=1, borderColor=colors.silver, borderPadding=5)
 	a_style = ParagraphStyle("Titolo della fattura", fontName='Helvetica', fontSize=8, leading=10)
@@ -42,7 +45,7 @@ def onPage(canvas, doc, da, a):
 	if tipo == '3':
 		nome = 'Ricevuta servizio TAXI'
 	else:
-		nome = 'Fattura'	# Fatture consorzio e conducente si chiamano semplicemente FATTURA	
+		nome = 'Fattura'	# Fatture consorzio e conducente si chiamano semplicemente FATTURA
 	descrittoreFattura = u"%s %s" % (nome, fattura.descrittore())
 	canvas.setTitle(descrittoreFattura)
 
@@ -54,7 +57,7 @@ def onPage(canvas, doc, da, a):
 		p = canvas.beginPath()
 		p.moveTo(0, y); p.lineTo(width, y)
 		canvas.drawPath(p)
-	if tipo == "1":
+	if fatturazione.mittente == "consorzio":
 		logo_height = 2.5 * cm
 		y -= logo_height
 		canvas.drawImage(logoImage_path, x=x, y=y, width=7 * cm, height=logo_height)
@@ -64,7 +67,7 @@ def onPage(canvas, doc, da, a):
 	descrittore.drawOn(canvas, x=x, y=y - descrittore.height)
 	y -= descrittore.height + 10
 
-	if tipo == '2':	# nelle fatture conducente metto il mittente a sinistra
+	if fatturazione.mittente == "conducente":	# nelle fatture conducente metto il mittente a sinistra
 		fattura_da = Paragraph(da.strip().replace('\n', '<br/>'), a_style)
 		fattura_da.wrapOn(canvas, 6.5 * cm, 10 * cm)
 		fattura_da.drawOn(canvas, x, y - fattura_da.height)
@@ -77,9 +80,9 @@ def onPage(canvas, doc, da, a):
 		y = y - note.height - 8
 		note.drawOn(canvas, 1 * cm, y=y)
 
-	if tipo in ("3"):
+	if tipo in ("3", '4'):
 		y = y - 10
-		ricevutaMultipla = (fattura.tipo == "3") and fattura.data >= data_ricevute_sdoppiate
+		ricevutaMultipla = (fattura.tipo == "3" and fattura.data >= data_ricevute_sdoppiate) or tipo == '4'
 		testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
 		if ricevutaMultipla:
 			testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
@@ -100,7 +103,7 @@ def onPage(canvas, doc, da, a):
 	y = height - doc.topMargin
 	x = width - 8 * cm
 
-	if tipo <> '2':	# nelle fatture conducente metto il mittente a sinistra
+	if not fatturazione.mittente == "conducente":	# nelle fatture conducente ho messo già il conducente a sinistra
 		fattura_da = Paragraph(da.strip().replace('\n', '<br/>'), a_style)
 		fattura_da.wrapOn(canvas, 6.5 * cm, 10 * cm)
 		fattura_da.drawOn(canvas, x, y - fattura_da.height)
@@ -111,7 +114,7 @@ def onPage(canvas, doc, da, a):
 	fattura_a.wrapOn(canvas, 6.5 * cm, 10 * cm)
 	fattura_a.drawOn(canvas, x, y - fattura_a.height - fattura_a.style.borderPadding)
 
-	y -= fattura_a.height + fattura_a.style.borderPadding * 2  # spazio finale	#TMP: era 2
+	y -= fattura_a.height + fattura_a.style.borderPadding * 2  # spazio finale
 	right_y = y
 	lower_y = min(left_y, right_y)
 
@@ -150,6 +153,7 @@ def onPage(canvas, doc, da, a):
 	canvas.drawPath(p)
 
 	canvas.restoreState()
+
 
 def onPageNormal(canvas, doc):
 	#print "Normal"
@@ -207,13 +211,41 @@ def render_to_reportlab(context):
 							showBoundary=test,
 							pageTemplates=pageTemplates,
 						)
+	fatturazione = FATTURE_PER_TIPO[fattura.tipo]
 	doc.fattura = fattura
+	doc.fatturazione = fatturazione
 
 	righeFattura = [
 					('Descrizione', 'Q.tà', 'Prezzo', 'IVA %', 'Importo'),
 				]
 
-	for riga in fattura.righe.all():
+	righe = fattura.righe.all()
+
+	if fatturazione.codice == "5" and not "Imposta di bollo" in [r.descrizione for r in righe]:
+		print "5 esente iva con barbatrucco"
+		totale = sum([r.val_totale() for r in righe])
+		netto = totale / Decimal(1.1)
+		class RigaTotaleIvata(object):	# una riga che fa corrispondere il totale
+			descrizione = "Servizi per consorzio."
+			note = None
+			qta = 1
+			prezzo = netto
+			iva = 10
+			def val_imponibile(self):
+				return netto
+			def val_iva(self):
+				return netto * Decimal(0.1)
+			def val_totale(self):
+				return totale
+		righe = [RigaTotaleIvata()]
+		imponibile = netto
+		iva = totale - netto
+	else:
+		imponibile = fattura.val_imponibile()
+		iva = fattura.val_iva()
+
+
+	for riga in righe:
 		descrizione = riga.descrizione
 		if riga.note: descrizione += " (%s)" % riga.note
 		righeFattura.append((
@@ -223,10 +255,10 @@ def render_to_reportlab(context):
 							))
 	righeTotali = []
 	righeTotali.append((
-						'Imponibile', moneyfmt(fattura.val_imponibile())
+						'Imponibile', moneyfmt(imponibile)
 						))
 	righeTotali.append((
-						'IVA', moneyfmt(fattura.val_iva())
+						'IVA', moneyfmt(iva)
 						))
 	righeTotali.append((
 						'TOTALE', moneyfmt(fattura.val_totale())

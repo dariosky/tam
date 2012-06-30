@@ -5,8 +5,10 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 
-nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi"}
-nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute taxi"}
+nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi",
+				'4': "Fattura consorzio esente IVA", '5':"Fattura conducente esente IVA"}
+nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute taxi",
+				'4': "fatture consorzio esente IVA", '5':"fatture conducente esente IVA"}
 
 class Fattura(models.Model):
 	emessa_da = models.TextField()	# anagrafica emittente
@@ -62,16 +64,8 @@ class Fattura(models.Model):
 		return nomi_fatture[self.tipo]
 
 	def url(self):
-		if self.tipo == "1":
-			return reverse("tamFatturaConsorzio",
-							kwargs={'anno': self.anno,
-									'progressivo':self.progressivo})
-		elif self.tipo=="2":
-			return reverse("tamFatturaConducente",
-							kwargs={'id_fattura': self.id})
-		elif self.tipo=="3":
-			return reverse("tamFatturaRicevuta",
-							kwargs={'id_fattura': self.id})	
+		return reverse("tamFatturaId",
+						kwargs={'id_fattura': self.id})
 
 	def emessa_da_html(self):
 		result = self.emessa_da\
@@ -80,8 +74,9 @@ class Fattura(models.Model):
 		return mark_safe(result)
 
 	def descrittore(self):
+		prefissiFattura = {"1":"FC", "4":"FE"} # Fattura consorzio, fattura consorzio esente IVA
 		if self.anno and self.progressivo:
-			return "%s/%s" % (self.anno, self.progressivo)
+			return "%s%s/%s" % (prefissiFattura.get(self.tipo, ""), self.anno, self.progressivo)
 		return "%s%s" % (self.anno or "", self.progressivo or "")
 
 

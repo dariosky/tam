@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load media %}
+{% load url from future %}
+{% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+
+	<h1>Generazione fatture</h1>
+	<div id='date_range'>
+		<form method='get' action=''>
+			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
+			a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<input type="submit" value="Trova corse fatturabili"/>
+		</form>
+	</div>
+
+<div>
+{% for f in gruppo_fatture %}
+	<h2 class='accordhead fatturaTipo{{f.d.codice}}'>{{f.d.nome}}</h2>
+	{{ f.lista.count }} corse.
+	<div style='display:none;'>
+		<div id='goto{{f.d.codice}}' class='floatingBlock'>
+			<a href="#genera{{f.d.codice}}"><img src='{% media_url 'frecciagiu.png' %}' title='genera {{f.d.nome}}'></a>
+		</div>
+		<p style='white-space: pre-line;'>{{ f.d.descrizione}}</p>
+		{% with f.lista as lista %}
+		
+			{% if lista %}
+				<form method="post" action="{% url f.d.urlname_generazione %}">
+					<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
+					{% if f.d.ask_progressivo %}
+						<div>
+							Anno <input type='text' name='anno' maxlength="4" value="{{ f.parametri.anno_consorzio }}">
+							Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{ f.parametri.progressivo }}">
+						</div>
+					{% endif %}
+					<div class='fatturaTipo{{f.d.codice}}'>
+						<table class='tablesorter' id='table_{{f.d.codice}}' style='text-align:center' >
+							{% include f.d.template_scelta %}
+						</table>
+						<a name="genera{{f.d.codice}}">
+							<input type="submit" name="preview" value="Genera {{f.d.nome|lower}}"/>
+						</a>
+					</div>
+				</form>
+			{% endif %}
+		
+		{% endwith %}
+	</div>
+{% endfor %}
+	
+</div>
+
+{% endblock %}
+
+{% block bottom %}
+	{% include_media 'selFatture.js' %}
+	<script type="text/javascript">
+	    $(function() {
+			$(".accordhead").click(function(){
+					$(this).next().toggle();
+					return false;
+				});
+			
+			{% for f in gruppo_fatture %}
+				scrollableGoto($('#goto{{f.d.codice}}'));
+				table_selector('#check_{{f.d.codice}}', '#table_{{f.d.codice}}');
+			{% endfor %}
+		
+			$('#date_range input[type=text]').datepicker();
+			$('.clientSelect').click(function(){
+				// seleziono da qui al prossimo cliente indicato
+				selectCheckboxToNext(this);
+				return false;
+			});	
+	    });
+	</script>
+{% endblock bottom %}
