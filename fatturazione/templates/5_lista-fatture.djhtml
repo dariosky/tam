@@ -13,13 +13,15 @@
 	</div>
 
 {% for f in gruppo_fatture %}
+ 	{% with f.lista as lista %}
+ 	{% if lista  %}
 	<div>
 		<h2 class='accordhead fatturaTipo{{ f.d.codice }}'>{{ f.d.nome }}</h2>
-		{{ f.lista.count }} {{ f.d.nome|lower }}.
-		{% with f.lista as lista %}
-			{% include f.d.template_visualizzazione %}
-		{% endwith %}
+		{{ lista.count }} {{ f.d.nome|lower }}.
+		{% include f.d.template_visualizzazione %}
 	</div>
+	{%endif%}
+	{% endwith %}
 {% endfor %}
 
 {% endblock %}
