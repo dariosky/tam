@@ -773,7 +773,7 @@ class Conducente(models.Model):
 	nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
 	max_persone = models.IntegerField(default=4)
 	attivo = models.BooleanField(default=True, db_index=True)
-	emette_ricevute = models.BooleanField(default=True)
+	emette_ricevute = models.BooleanField("Emette senza IVA?", help_text="Il conducente può emettere fatture senza IVA?", default=True)
 	assente = models.BooleanField(default=False)
 
 	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=9, decimal_places=2, default=0)

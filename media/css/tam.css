@@ -370,10 +370,17 @@ td img {vertical-align: middle;}
 }
 
 /* colori indicatori di fattura */
+.fatturaIcon {
+	display:block;
+	padding:3px 0px;
+	width:52px;
+	margin:0 auto;
+}
+
 h2.fatturaTipo1 {
 	color: #0080ff;
 }
-.fatturaTipo1 th {
+.fatturaTipo1 th, .fatturaTipo1Back {
 	background: #0080ff;
 }
 .fatturaTipo1 input {
@@ -389,7 +396,7 @@ h2.fatturaTipo1 {
 h2.fatturaTipo2 {
 	color: #8000ff;
 }
-.fatturaTipo2 th {
+.fatturaTipo2 th, .fatturaTipo2Back {
 	background: #8000ff;
 }
 .fatturaTipo2 input {
@@ -405,7 +412,7 @@ h2.fatturaTipo2 {
 h2.fatturaTipo3 {
 	color: #008000;
 }
-.fatturaTipo3 th {
+.fatturaTipo3 th, .fatturaTipo3Back {
 	background: #008000;
 }
 .fatturaTipo3 input {
@@ -419,21 +426,37 @@ h2.fatturaTipo3 {
 }
 
 h2.fatturaTipo4 {
-	color: #8080ff;
+	color: #008080;
 }
-.fatturaTipo4 th {
-	background: #8080ff;
+
+.fatturaTipo4 th, .fatturaTipo4Back {
+	background: #008080;
 }
 .fatturaTipo4 input {
-	background: #8080ff;
+	background: #008080;
 	padding:10px;
 	width:100%;
 	font-size:1.2em;
 }
 .fatturaTipo4 table {
-	border: 3px solid #8080ff;
+	border: 3px solid #008080;
 }
 
+h2.fatturaTipo5 {
+	color: #800080;
+}
+.fatturaTipo5 th {
+	background: #800080;
+}
+.fatturaTipo5 input {
+	background: #800080;
+	padding:10px;
+	width:100%;
+	font-size:1.2em;
+}
+.fatturaTipo5 table {
+	border: 3px solid #800080;
+}
 
 
 .dati {

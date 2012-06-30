@@ -1,14 +1,18 @@
-{% load media %}
-{% load url from future %}
+{% load media %}{% load url from future %}
 <div style='display:none;'>
 	<table class='tablesorter' style='text-align: center'>
-		<tr><th>Fattura</th><th>cliente</th><th>righe</th><th>Importo</th></tr>
+	<tr><th>Fattura</th><th>cliente</th><th>righe</th><th>Importo</th></tr>
 	{% for fattura in lista %}
 		<tr>
 			<td>
 				{{fattura.descrittore}}
-				<a href='{% url "tamFatturaId" fattura.id %}' style='display:block'><img src='{% media_url 'fatture/invoice-icon1.png' %}' /></a>
+				<a href='{% url "tamFatturaId" fattura.id %}' class='fatturaTipo{{f.d.codice}}Back fatturaIcon'>
+					<img src='{% media_url 'fatture/invoice-icon.png' %}' />
+				</a>
 				emessa il {{fattura.data|date:"l j F Y"}}
+			</td>
+			<td>
+				{{fattura.mittente}}
 			</td>
 			<td>
 				{% if fattura.cliente %}
@@ -28,11 +32,11 @@
 		</tr>
 	{% endfor %}
 	</table>
-	{% if perms.fatturazione.generate %}
+	{% if perms.fatturazione.generate and f.d.generabile %}
 	<div>
-		<a href='{% url "tam-nuova-fattura-consorzio" %}'>
-		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova fattura consorzio manuale' />
-		Nuova fattura consorzio manuale.
+		<a href='{% url f.d.urlname_manuale %}'>
+		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova {{ f.d.nome }} manuale' />
+		Nuova {{ f.d.nome }} manuale.
 		</a>
 	</div>
 	{% endif %}

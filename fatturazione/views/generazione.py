@@ -49,11 +49,29 @@ from tam.views.tamviews import parseDateString
 from django.conf import settings
 
 class ModelloFattura(object):
+	ask_progressivo = False
+	generabile = True
+
 	@classmethod
-	def url_name(cls):
+	def urlname_generazione(cls):
 		""" Restituisce il nome dell'url che rimanda alla generazione di queste fatture"""
-		return "tamNuova%s" % cls.codice
-	
+		return "tamFatGenerazione%s" % cls.codice
+
+	@classmethod
+	def urlname_manuale(cls):
+		""" Restituisce il nome dell'url che rimanda alla generazione manuale di una fattura"""
+		return "tamFatManuale%s" % cls.codice
+
+	@staticmethod
+	def update_context(data_start, data_end):
+		result = {}
+		result["data_generazione"] = data_end
+		return result
+
+#	@classmethod
+#	def 
+
+
 class FattureConsorzio(ModelloFattura):
 	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
 
@@ -67,16 +85,22 @@ class FattureConsorzio(ModelloFattura):
 	keys = ["cliente"]	 							# come dividere una fattura dall'altra
 	order_by = ["cliente", "data"]	 				# ordinamento
 	url_generazione = r'^genera/consorzio/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_generazione = "2-1.fatturazione_consorzio.djhtml"
+	ask_progressivo = True
+	template_scelta = "1.perCliente.djhtml"
+	template_generazione = "2.perCliente.djhtml"
+	template_visualizzazione = "5.perCliente.djhtml"
+	codice_fattura = "FC"
+	destinatario = "cliente"
+	mittente = "consorzio"
+	esente_iva = False
 
 	@staticmethod
 	def update_context(data_start, data_end):
-		result = {"ask_progressivo":True}
-		result["data_generazione"] = data_end
+		result = ModelloFattura.update_context(data_start, data_end)
 		result["anno_consorzio"] = data_end.year
 		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "1") + 1	# ultimo progressivo '1'
 		return result
-	
+
 
 class FattureNoIVA(ModelloFattura):
 	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
@@ -92,7 +116,21 @@ class FattureNoIVA(ModelloFattura):
 	keys = ["cliente", "passeggero"]				# come dividere una fattura dall'altra
 	order_by = ["cliente", "data"]	 				# ordinamento
 	url_generazione = r'^genera/esentiIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_generazione = "2-3.fatturazione_ricevute.djhtml"
+	ask_progressivo = True
+	template_scelta = "1.perCliente.djhtml"
+	template_generazione = "2.perCliente.djhtml"
+	template_visualizzazione = "5.perCliente.djhtml"
+	codice_fattura = "FE"
+	destinatario = "cliente"
+	mittente = "consorzio"
+	esente_iva = True
+
+	@staticmethod
+	def update_context(data_start, data_end):
+		result = ModelloFattura.update_context(data_start, data_end)
+		result["anno_consorzio"] = data_end.year
+		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "4") + 1	# ultimo progressivo '4'
+		return result
 
 
 class FattureConducente(ModelloFattura):
@@ -103,28 +141,60 @@ class FattureConducente(ModelloFattura):
 					 Generate dalle fatture consorzio."""
 	codice = "2"
 	origine = RigaFattura
-	filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None, conducente__attivo=True) & \
+	filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None) & \
 					~ Q(conducente__nick__iexact='ANNUL')
 	keys = ["conducente"]	 							# come dividere una fattura dall'altra
 	order_by = ["conducente", "viaggio__cliente", "fattura__data"]	 				# ordinamento
 	url_generazione = r'^genera/conducente/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_generazione = "2-2.fatturazione_conducente.djhtml"
+	template_scelta = "1.perConducenteCliente.djhtml"
+	template_generazione = "2.perConducenteCliente.djhtml"
+	template_visualizzazione = "5.perConducente.djhtml"
+	destinatario = "consorzio"
+	mittente = "conducente"
+	esente_iva = False
 
-	@staticmethod
-	def update_context(data_start, data_end):
-		result = {"ask_progressivo":True}
-		result["data_generazione"] = data_end
-		result["anno_consorzio"] = data_end.year
-		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "1") + 1	# ultimo progressivo '1'
 
-		return result
+class FattureConducenteNoIva(ModelloFattura):
+	# Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
 
-DEFINIZIONE_FATTURE = [ FattureConsorzio, FattureNoIVA, FattureConducente]
+	nome = "Fatture Conducente esenti IVA"
+	descrizione = """Le fatture che il conducente fa al consorzio.
+					 Generate dalle fatture consorzio esenti IVA."""
+	codice = "5"
+	origine = RigaFattura
+	filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & \
+					~ Q(conducente__nick__iexact='ANNUL')
+	keys = ["conducente"]	 							# come dividere una fattura dall'altra
+	order_by = ["conducente", "viaggio__cliente", "fattura__data"]	 				# ordinamento
+	url_generazione = r'^genera/conducenteNoIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
+	template_scelta = "1.perConducenteCliente.djhtml"
+	template_generazione = "2.perConducenteCliente.djhtml"
+	template_visualizzazione = "5.perConducente.djhtml"
+	destinatario = "consorzio"
+	mittente = "conducente"
+	esente_iva = True
 
+
+class Ricevute(ModelloFattura):
+	""" Le ricevute, ora non più generabili
+		producevano una ricevuta divisa a livello di PDF da consorzio a cliente, e da conducente a consorzio 
+	"""
+
+	nome = "Ricevute"
+	descrizione = """Ricevute per emodializzati, divise in 2 a livello di stampa."""
+	codice = "3"
+	template_visualizzazione = "5.perConducenteCliente.djhtml"
+	generabile = False
+
+
+DEFINIZIONE_FATTURE = [ FattureConsorzio, FattureNoIVA, FattureConducente, FattureConducenteNoIva, Ricevute]
+FATTURE_PER_TIPO = {}
+for fatturazione in DEFINIZIONE_FATTURE:
+	FATTURE_PER_TIPO[fatturazione.codice] = fatturazione
 
 
 @permission_required('fatturazione.generate', '/')
-def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
+def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 	data_start = parseDateString(# dal primo del mese scorso
 									request.GET.get("data_start"),
 									default=(datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
@@ -137,20 +207,21 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
 	gruppo_fatture = []
 	for fatturazione in DEFINIZIONE_FATTURE:
+		if not fatturazione.generabile: continue
 		selezione = fatturazione.origine.objects
-		
 		selezione = selezione.filter(fatturazione.filtro)
+
 		if fatturazione.origine == Viaggio:
 #			selezione = selezione.filter(id=81833)	#TMP:
 			selezione = selezione.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
-			
-			selezione = selezione.all().select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+
+			selezione = selezione.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 		if fatturazione.origine == RigaFattura:
 			selezione = selezione.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
 			selezione = selezione.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
 						 'fattura', 'conducente')
-		selezione.order_by(*fatturazione.order_by)	
-		
+		selezione = selezione.order_by(*fatturazione.order_by)
+
 		dictFatturazione = {"d": fatturazione, 	# la definizione della fatturazione
 							"lista": selezione,
 						   }
@@ -159,31 +230,13 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 		else:
 			dictFatturazione["parametri"] = {}
 		gruppo_fatture.append(dictFatturazione)
-
-	# FATTURE CONSORZIO ****************
-#	lista_consorzio = viaggi.filter(filtro_consorzio)
-#	lista_consorzio = lista_consorzio.order_by("cliente", "data").all()\
-#						.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
-#	oggi = datetime.date.today()
-#	anno_consorzio = data_end.year
-#	progressivo_consorzio = ultimoProgressivoFattura(anno_consorzio, "1") + 1
-
-	# FATTURE CONDUCENTE ****************
-#	fatture = RigaFattura.objects.filter(viaggio__data__gte=data_start, viaggio__data__lte=data_end + datetime.timedelta(days=1))
-#	lista_conducente = fatture.filter(filtro_conducente).order_by("viaggio__conducente", "viaggio__cliente", "viaggio__data").all()\
-#		.select_related("viaggio__da", "viaggio__a", "viaggio__cliente", "viaggio__conducente", "viaggio__passeggero",
-#						 'fattura', 'conducente')
-
-	# RICEVUTE CONDUCENTE
-#	lista_ricevute = viaggi.filter(filtro_ricevute)
-#	lista_ricevute = lista_ricevute.order_by("cliente", "passeggero", "data").all()\
-#		.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+	oggi = datetime.date.today()
 
 	profile = ProfiloUtente.objects.get(user=request.user)
 	luogoRiferimento = profile.luogo
 	return render_to_response(template_name,
                               {
-#								"today": oggi,
+								"today": oggi,
 								"luogoRiferimento":luogoRiferimento,
 								"data_start":data_start,
 								"data_end":data_end,
@@ -193,11 +246,6 @@ def lista_fatture_generabili(request, template_name="1.scelta_fatture.djhtml"):
 
 								"gruppo_fatture": gruppo_fatture,
 
-#								"anno_consorzio":anno_consorzio,
-#								"progressivo_consorzio":progressivo_consorzio,
-#								"lista_consorzio":lista_consorzio,
-#								"lista_conducente":lista_conducente,
-#								"lista_ricevute":lista_ricevute,
                               },
                               context_instance=RequestContext(request))
 
@@ -222,7 +270,7 @@ def genera_fatture(request, fatturazione):
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
 	data_generazione = parseDateString(request.POST['data_generazione'])
-	if tipo == "1":	# la generazione fatture consorzio richiede anno e progressivo - li controllo
+	if fatturazione.ask_progressivo:	# la generazione fatture consorzio richiede anno e progressivo - li controllo
 		try:
 			anno = int(request.POST.get("anno"))
 		except:
@@ -256,127 +304,72 @@ def genera_fatture(request, fatturazione):
 		return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 	fatture = 0
 
-	if tipo == "3":	# ricevuto mi preparo una lista entro la quale ciclare di conducenti che emettono ricevuti
-		conducenti_ricevute = Conducente.objects.filter(emette_ricevute=True)
-		if conducenti_ricevute.count() == 0:
-			messages.error(request, "Nessun conducente emette ricevute. Deve essercene almeno uno.")
-			return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
-		dati_conducenti_ricevute = {}
-		for conducente in conducenti_ricevute:
-			# mi annoto il n° di fatture emesse per ogni conducente, lo cambierò sotto contando il conducente scelto come se avesse già emesso
-			conducente._ricevute = len(conducente.ricevute())
-			dati_conducenti_ricevute[conducente.id] = conducente	# tengo i conducenti in un dizionario
-
 	lastKey = None
-	conducenteRicevuta = None
 	for elemento in lista:
 		key = [getattr(elemento, keyName) for keyName in keys]
 		if lastKey <> key:
 			if lastKey <> None: progressivo += 1
-			if tipo == '3':
-				""" scelgo ruotando tra tutti i conducenti che non hanno mai emesso prima o tra quelli che hanno emesso più tempo fa
-					ruoto per progressivo
-				"""
-				emessa_a = (elemento.cliente.dati or elemento.cliente.nome) or (elemento.passeggero.dati or elemento.passeggero.nome)
-				conducenti_precedenti = conducenti_ricevute.filter(fatture__fattura__emessa_a=emessa_a, fatture__fattura__tipo='3').annotate(Max("fatture__fattura__data"))\
-								.order_by("fatture__fattura__data__max")
-
-				conducenti_estraibili = [c for c in conducenti_ricevute]
-				for c in conducenti_precedenti:
-					logging.debug("elimino %d che ha fatturato il %s" % (c.id, c.fatture__fattura__data__max))
-					del conducenti_estraibili[conducenti_estraibili.index(c)]	# tolgo quelli che hanno già fatturato
-				if conducenti_estraibili:
-#					print "Ho conducenti che non hanno mai fatturato li tolgo dagli estraibili."
-					pass
-				else:
-#					print "Tutti hanno già fatturato. Ripesco negli estraibili quelli che non hanno fatturato al cliente da più tempo."
-					data_vecchia = conducenti_precedenti[0].fatture__fattura__data__max
-					for c in conducenti_precedenti:
-						if c.fatture__fattura__data__max > data_vecchia: break
-						# c è il mio conducente in ricevute, lo cerco nella lista dei conducenti_ricevute (mi serve la conta delle ricevute)
-						conducente = dati_conducenti_ricevute[c.id]
-						conducenti_estraibili.append(conducente)
-
-
-#					conducenti_PerNumRicevute.append( (conducente._ricevute, conducente.id) )
-#					conducenti_PerNumRicevute.sort() # ordino per n° di ricevute emesse
-#					print "Numero ricevute / Conducenti", conducenti_PerNumRicevute
-#					for numRicevute, cond_id in conducenti_PerNumRicevute: #@UnusedVariable
-#						conducenti_estraibili.append(cond_id)
-
-				#random.shuffle(conducenti_estraibili)	# randomizzo tra gli aventi diritto
-
-				conducenti_estraibili.sort(lambda x, y: cmp(x._ricevute, y._ricevute)) # ordino per n° di ricevute		
-				#print "Parimerito:", conducenti_estraibili
-				#conducente = conducenti_estraibili[progressivo % len(conducenti_estraibili)]
-				conducente = conducenti_estraibili[0] # pesco il primo
-				#print "Pesco il primo: %s" % (conducente)
-				conducente._ricevute += 1	# conto come se l'avesse già amessa
-				conducenteRicevuta = conducente
 			lastKey = key
 			fatture += 1
+
 		elemento.key = key
-		if tipo == '1':
+		if fatturazione.ask_progressivo:
+			elemento.codice_fattura = fatturazione.codice_fattura
 			elemento.progressivo_fattura = progressivo
 			elemento.anno_fattura = anno
-		if tipo == '3':
-			elemento.conducente_ricevuta = conducenteRicevuta
 
 	if request.method == "POST":
 		if request.POST.has_key("generate"):
 			lastKey = None
 			fatture_generate = 0
+			totale_fattura = 0	# il totale (ivato) degli elementi in fattura
+			righe_fattura = 0	# il numero degli elementi in fattura
 
 			for elemento in lista:
-				if tipo in ("1", "3"):
-					viaggio = elemento
-				else:
+				if manager == RigaFattura.objects:
 					viaggio = elemento.viaggio
+				else:
+					viaggio = elemento
 				if elemento.key <> lastKey:
+					if tipo == "5" and righe_fattura and not elemento.conducente.emette_ricevute:
+						# con le fatture conducente esenti iva scrivo solo una riga di totale
+						scrivi_totale_con_iva_scorporata(fattura, totale_fattura) #@UndefinedVariable
 					# TESTATA
 					fattura = Fattura(tipo=tipo)
 					data_fattura = data_generazione
-#					if tipo == '3':
-#						# le ricevute hanno sempre come data l'ultimo fine mese precedente
-#						data_fattura = datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
-#					else:
-#						data_fattura = datetime.date.today()
-
 					fattura.data = data_fattura
-					if tipo in ('1', '3'):	# popolo il destinatario della fattura
+					totale_fattura = 0
+					righe_fattura = 0
+					if fatturazione.ask_progressivo:
+						fattura.anno = anno
+						fattura.progressivo = viaggio.progressivo_fattura
+
+					if fatturazione.destinatario == "cliente": # popolo il destinatario della fattura
 						if viaggio.cliente:
 							fattura.cliente = viaggio.cliente
 							fattura.emessa_a = viaggio.cliente.dati or viaggio.cliente.nome
-						else:
+						elif viaggio.passeggero:
 							fattura.passeggero = viaggio.passeggero
 							fattura.emessa_a = viaggio.passeggero.dati or viaggio.passeggero.nome
+					elif fatturazione.destinatario == "consorzio":
+						fattura.emessa_a = settings.DATI_CONSORZIO
+					else:
+						messages.error(request, "%s non è un valido destinatario." % fatturazione.destinatario)
+						assert False
 
-					if tipo == "1":	# fattura consorzio: da consorzio a cliente
-						fattura.anno = anno
-						fattura.progressivo = viaggio.progressivo_fattura
+					if fatturazione.mittente == "consorzio":
 						fattura.emessa_da = settings.DATI_CONSORZIO
 						fattura.note = 'Pagamento: Bonifico bancario 30 giorni data fattura'
-					elif tipo == "3": # ricevuta: da conducente a cliente
-						fattura.emessa_da = viaggio.conducente_ricevuta.dati or viaggio.conducente_ricevuta.nome
-					elif tipo == "2": #fattura conducente
+					elif fatturazione.mittente == "conducente":
 						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
-						fattura.emessa_a = settings.DATI_CONSORZIO
-						if viaggio:
-							# nelle fatture conducente derivanti da un viaggio...
-							# il cliente non è il destinatario. E può essere diverso per ogni riga
-							pass
-							# lascio il cliente in testata a None
-							# il nome del cliente lo metto nelle note della riga.
-#							if viaggio.cliente:
-#								fattura.cliente = viaggio.cliente
-#							else:
-#								fattura.passeggero = viaggio.passeggero
-
+					else:
+						messages.error(request, "%s non è un valido mittente." % fatturazione.mittente)
+						assert False
 					fattura.save()
 					fatture_generate += 1
 					riga = 10
-					if tipo == "3":
-						# per le 
+					if fatturazione.esente_iva and (fatturazione.codice <> '5' or elemento.conducente.emette_ricevute):
+						# alle esenti IVA metto l'imposta di bollo
 						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("1.81"), riga=riga)
 						fattura.righe.add(riga_fattura)
 						riga += 10
@@ -386,20 +379,9 @@ def genera_fatture(request, fatturazione):
 				# RIGHE dettaglio
 				riga_fattura = RigaFattura()
 				riga_fattura.riga = riga	# progressivo riga
-				if tipo in ("1", "3"):
-					riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
-								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y"),
-									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
-					riga_fattura.qta = 1
-					riga_fattura.prezzo = viaggio.prezzo
+				riga_fattura.conducente = elemento.conducente
 
-					if viaggio.prezzo_sosta > 0:	# se ho una sosta, aggiungo il prezzo della sosta in fattura
-						riga_fattura.prezzo += viaggio.prezzo_sosta
-						riga_fattura.descrizione += " + sosta"
-
-					riga_fattura.iva = 10 if tipo == "1" else 0
-					riga_fattura.viaggio = viaggio
-				else:
+				if manager == RigaFattura.objects:	# fattura da altra fattura
 					campi_da_riportare = "descrizione", "qta", "iva"
 					for campo in campi_da_riportare:
 						setattr(riga_fattura, campo, getattr(elemento, campo))
@@ -413,11 +395,21 @@ def genera_fatture(request, fatturazione):
 					else:
 						riga_fattura.prezzo = elemento.prezzo	# ... a meno che il viaggio non manchi
 					riga_fattura.riga_fattura_consorzio = elemento
-				if tipo == '3':
-					riga_fattura.conducente = elemento.conducente_ricevuta	# nelle ricevute i conducenti abilitati si ciclano per fatturare
-				else:
-					riga_fattura.conducente = elemento.conducente
-				fattura.righe.add(riga_fattura)
+				else:	# fattura da un viaggio
+					riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
+								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y"),
+									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
+					riga_fattura.qta = 1
+					riga_fattura.prezzo = viaggio.prezzo
+
+					if viaggio.prezzo_sosta > 0:	# se ho una sosta, aggiungo il prezzo della sosta in fattura
+						riga_fattura.prezzo += viaggio.prezzo_sosta
+						riga_fattura.descrizione += " + sosta"
+
+					riga_fattura.iva = 10 if fatturazione.esente_iva else 0
+					riga_fattura.viaggio = viaggio
+
+				fattura.righe.add(riga_fattura)	# salvo la riga
 				riga += 10
 
 			message = "Generate %d %s." % (fatture_generate, plurale)
@@ -434,11 +426,12 @@ def genera_fatture(request, fatturazione):
 								"lista":lista,
 								"mediabundleJS": ('tamUI.js',),
 								"mediabundleCSS": ('tamUI.css',),
-								"tipo": nomi_fatture[tipo],
+								"singolare": nomi_fatture[tipo],
 								"fatture":fatture,
 								"plurale":plurale,
 #								"error_message":error_message,
 								'conducenti_ricevute':conducenti_ricevute,
 								'data_generazione':data_generazione,
+								'fatturazione':fatturazione,
                               },
                               context_instance=RequestContext(request))
