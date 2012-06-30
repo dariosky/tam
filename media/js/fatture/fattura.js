@@ -32,7 +32,6 @@ function ricalcolaTotali(){
 	var imponibile=0;
 	var iva=0;
 	var totale=0;
-	 
 	var righe=$('#righe .priceRow').each(function(){
 		var rowData=rowProcess( $(this) );
 		iva= iva + rowData.val_iva;
@@ -89,7 +88,11 @@ $('.delrow').live("click",
 		)
 		.complete(function(xhr, data){
 			if (xhr.status==200) {
-				row.hide('fast', function(){row.remove()})
+				row.hide('fast', function(){
+									row.remove();
+									ricalcolaTotali();
+								});
+				
 			}
 			else {
 				messageBox(xhr.responseText);

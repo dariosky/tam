@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load media humanize l10n %}
-{% block title %}Gestione fatture &raquo; {{ block.super }} {% endblock %}
+{% block title %}Visualizzazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
-	<h1>Gestione fatture</h1>
+	<h1>Visualizzazione fatture</h1>
 	<div id='date_range'>
 		<form method='get' action=''>
 			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
@@ -17,7 +17,7 @@
 		<h2 class='accordhead fatturaTipo{{ f.d.codice }}'>{{ f.d.nome }}</h2>
 		{{ f.lista.count }} {{ f.d.nome|lower }}.
 		{% with f.lista as lista %}
-			{% include "5-1-tabella_fatture.djhtml" %}
+			{% include f.d.template_visualizzazione %}
 		{% endwith %}
 	</div>
 {% endfor %}

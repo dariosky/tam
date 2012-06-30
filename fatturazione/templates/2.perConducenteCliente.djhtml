@@ -1,20 +1,22 @@
 {% extends "base.html" %}
 {% load media %}
-{% block title %}Generazione {{ plurale }} &raquo; {{ block.super }} {% endblock %}
+{% block title %}Generazione {{ fatturazione.nome }} &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
-<h2 class='fatturaTipo2'>Generazione {{plurale}}</h2>
+<h2 class='fatturaTipo{{fatturazione.codice}}'>Generazione {{ fatturazione.nome }}</h2>
 
-{# {% if error_message %}<div class='errorlist'>{{error_message}}</div>{% endif %} #}
-<div class='fatturaTipo2'>
-		{{ fatture }} {{plurale}} / {{ lista.count }} corse. Data generazione: {{ data_generazione|date:"d/m/Y" }}<br />
+<div class='fatturaTipo{{fatturazione.codice}}'>
+		{{ fatture }} fatture / {{ lista.count }} corse. Data generazione: {{ data_generazione|date:"d/m/Y" }}<br />
 		{% if lista %}
 		<form method="post" action="">
-		<div id='gotoConducente' class='floatingBlock'>
-			<a href="#generaConducente"><img src='{% media_url 'frecciagiu.png' %}' title='genera fatture conducente'></a>
+		<div id='goto' class='floatingBlock'>
+			<a href="#genera"><img src='{% media_url 'frecciagiu.png' %}' title='genera {{ fatturazione.nome }}'></a>
 		</div>
+		<input type='hidden' name='anno' value='{{anno}}'>
+		<input type='hidden' name='progressivo' value='{{progressivo_iniziale}}'>
 		<input type='hidden' name='data_generazione' value='{{ data_generazione|date:"d/m/Y" }}' />
-		<table class='tablesorter' id='table_consorzio' style="text-align:center" >
+		
+		<table class='tablesorter' style="text-align:center" >
 		<thead>
 			<tr>
 				<th>Conducente</th>
@@ -45,8 +47,8 @@
 			{% endwith %}
 		{% endfor %}
 		</table>
-		<a name="generaConducente">
-			<input type="submit" name="generate" value="Genera {{plurale}}" />
+		<a name="genera">
+			<input type="submit" name="generate" value="Genera {{ fatturazione.nome }}"/>
 		</a>
 		</form>
 		
@@ -56,9 +58,8 @@
 </div>
 {% endblock %}
 
-
 {% block bottom %}
 <script type="text/javascript">
-	scrollableGoto($('#gotoConducente'));
+	scrollableGoto($('#goto'));
 </script>
 {% endblock bottom %}

@@ -25,29 +25,17 @@
 		{% with f.lista as lista %}
 		
 			{% if lista %}
-				<form method="post" action="{% url f.d.url_name %}">
-					{% if f.parametri.ask_progressivo %}
+				<form method="post" action="{% url f.d.urlname_generazione %}">
+					<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
+					{% if f.d.ask_progressivo %}
 						<div>
-							<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
 							Anno <input type='text' name='anno' maxlength="4" value="{{ f.parametri.anno_consorzio }}">
 							Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{ f.parametri.progressivo }}">
 						</div>
 					{% endif %}
 					<div class='fatturaTipo{{f.d.codice}}'>
 						<table class='tablesorter' id='table_{{f.d.codice}}' style='text-align:center' >
-							<thead>
-								<tr>
-									<th>Cliente</th>
-								    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
-								    <th>Corsa</th>
-								    <th>Note</th>
-								    <th>Prezzo lordo</th>
-								    <th>Conducente</th>
-								</tr>
-							</thead>
-							{% for viaggio in lista %}
-								{% include "1-1.scelta_riga_consorzio.djhtml" %}
-							{% endfor %}
+							{% include f.d.template_scelta %}
 						</table>
 						<a name="genera{{f.d.codice}}">
 							<input type="submit" name="preview" value="Genera {{f.d.nome|lower}}"/>
