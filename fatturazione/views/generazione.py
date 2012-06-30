@@ -184,6 +184,9 @@ class Ricevute(ModelloFattura):
 	descrizione = """Ricevute per emodializzati, divise in 2 a livello di stampa."""
 	codice = "3"
 	template_visualizzazione = "5.perConducenteCliente.djhtml"
+	
+	mittente = "conducente"
+	destinatario = "cliente"
 	generabile = False
 
 
@@ -406,7 +409,7 @@ def genera_fatture(request, fatturazione):
 						riga_fattura.prezzo += viaggio.prezzo_sosta
 						riga_fattura.descrizione += " + sosta"
 
-					riga_fattura.iva = 10 if fatturazione.esente_iva else 0
+					riga_fattura.iva = 0 if fatturazione.esente_iva else 10
 					riga_fattura.viaggio = viaggio
 
 				fattura.righe.add(riga_fattura)	# salvo la riga
