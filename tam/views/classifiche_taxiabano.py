@@ -14,20 +14,20 @@ CLASSIFICHE = [
 
 			{"nome": "Corte",
 			 "prefix": "nelle",
-			 "descrizione": "Padova, <=20km",
+			 "descrizione": "Padova, <=30km",
 			 "mapping_field": "prezzoPadova",
 			},
 			{"nome": "Venezia-Treviso",
 			 'type':'punti',
 			 "mapping_field": "punti_abbinata",
 			},
-			{"nome": "Abbinate",
+			{"nome": "Doppi Padova",
 			 "prefix": "nelle",
 			 "mapping_field": "prezzoDoppioPadova",
 			},
 			{"nome": "Lunghe",
 			 "prefix": "nelle",
-			 "descrizione": ">20km non abbinati",
+			 "descrizione": ">30km non abbinati",
 			 "mapping_field": "prezzoVenezia",
 			},
 ]
@@ -52,12 +52,17 @@ def process_classifiche(viaggio, force_numDoppi=None):
 			viaggio.punti_abbinata = 0	# corsa già conguagliata, zero punti
 		else:
 			viaggio.punti_abbinata = 1
-		viaggio.prezzoPunti = valoreTotale
+		if viaggio.prezzo_sosta:
+			# se ho un prezzo sosta nei Venezia-Treviso lo conto nelle lunghe 
+			viaggio.prezzoPunti = valoreTotale-viaggio.prezzo_sosta
+			viaggio.prezzoVenezia = viaggio.prezzo_sosta
+		else:
+			viaggio.prezzoPunti = valoreTotale
 	else:
 		if da["num_bacini"] > 1:
 			viaggio.prezzoDoppioPadova = valoreTotale # corsa abbinata
 		else:
-			if da["kmTotali"] <= 20:
+			if da["kmTotali"] <= 30:
 				viaggio.prezzoPadova = valoreTotale
 			else:
 				viaggio.prezzoVenezia = valoreTotale
@@ -179,10 +184,9 @@ def get_value(viaggio, forzaSingolo=False):
 			importoViaggio = importoViaggio - viaggio.commissione
 
 	importoViaggio = importoViaggio - viaggio.costo_autostrada
-
-	if viaggio.pagamento_differito or viaggio.fatturazione:	# tolgo gli abbuoni (per differito o altro)
-		importoViaggio = importoViaggio * Decimal("0.85")
-		print "sconto per pagamento differito"
+#   Taxiabano non hanno abbuono per pagamento differito o fatturato
+#	if viaggio.pagamento_differito or viaggio.fatturazione:	# tolgo gli abbuoni (per differito o altro)
+#		importoViaggio = importoViaggio * Decimal("0.85")
 #		if viaggio.tipo_abbuono=="F":
 #			importoViaggio-=viaggio.abbuono
 #		else:
@@ -193,5 +197,5 @@ def get_value(viaggio, forzaSingolo=False):
 		importoViaggio -= viaggio.abbuono_fisso
 	importoViaggio = importoViaggio - viaggio.costo_sosta
 
-	importoViaggio += viaggio.prezzo_sosta * Decimal("0.75")	# aggiungo il prezzo della sosta scontato del 25%
+	importoViaggio += viaggio.prezzo_sosta	# aggiungo il prezzo della sosta interamente
 	return importoViaggio.quantize(Decimal('.01'))
