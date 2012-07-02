@@ -408,6 +408,22 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				messages.info(request, "Non puoi cambiare la prima pagina di dettagli finché la corsa è abbinata.")
 				return HttpResponseRedirect(destination2)
 				#form.fields['data'].widget.attrs['readonly'] = True
+		else:	# sto modificando una corsa esistente, step2.
+			# Mi trovo il prezzo da listino per indicarlo 
+			if cliente:
+				prezzolistino = None
+				if cliente.listino:
+					prezzolistino = cliente.listino.get_prezzo(viaggio.da, viaggio.a,
+										tipo_servizio=viaggio.esclusivo and "T" or "C",
+										pax=viaggio.numero_passeggeri)
+					prezzoDaListinoNotturno = viaggio.trattaInNotturna()
+					prezzoDaListinoDiurno = not prezzoDaListinoNotturno
+	
+					if prezzolistino:
+						if prezzoDaListinoDiurno:	# "Scelgo il prezzo normale"
+							prezzo_da_listino = prezzolistino.prezzo_diurno
+						else:		# "Scelgo il prezzo notturno"
+							prezzo_da_listino = prezzolistino.prezzo_notturno
 
 	else:  # new form
 		cliente = step1.get("cliente", None)
@@ -456,9 +472,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 
 				if prezzolistino:
 					if prezzoDaListinoDiurno:	# "Scelgo il prezzo normale"
-						default["prezzo"] = prezzolistino.prezzo_diurno
+						prezzo_da_listino = prezzolistino.prezzo_diurno
 					else:		# "Scelgo il prezzo notturno"
-						default["prezzo"] = prezzolistino.prezzo_notturno
+						prezzo_da_listino = prezzolistino.prezzo_notturno
+					default["prezzo"]=prezzo_da_listino
 
 					if prezzolistino.flag_fatturazione == 'S':
 						default["fatturazione"] = True
