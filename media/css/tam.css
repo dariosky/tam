@@ -486,3 +486,6 @@ h2.fatturaTipo5 {
 	.content { border: 0px; margin:0; padding:0; background:white;}
 	.noprint { display:none; }
 }
+.note{
+	max-width: 400px;
+}
