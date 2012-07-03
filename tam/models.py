@@ -284,7 +284,7 @@ class Viaggio(models.Model):
 		forzaSingolo = (numDoppi is 0)
 		self.prezzo_finale = self.get_value(forzaSingolo=forzaSingolo)	# richiede le tratte
 
-		self.punti_diurni = self.punti_notturni = 0.0	# Precalcolo i punti disturbo della corsa
+		self.punti_diurni = self.punti_notturni = Decimal(0)	# Precalcolo i punti disturbo della corsa
 		self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
 		self.punti_abbinata = self.prezzoPunti = 0
 
