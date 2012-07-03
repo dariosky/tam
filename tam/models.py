@@ -407,7 +407,7 @@ class Viaggio(models.Model):
 
 	def _tratta_start(self):
 		""" Restituisce la tratta dal luogo di riferimento all'inizio della corsa """
-		logging.debug("Trovo la tratta start %s" % self.id)
+		#logging.debug("Trovo la tratta start %s" % self.id)
 		if self.padre_id is None:	# per singoli o padri parto dal luogo di riferimento
 			luogoDa = self.luogoDiRiferimento
 			if luogoDa != self.da:
@@ -415,7 +415,7 @@ class Viaggio(models.Model):
 
 	def _tratta(self):
 		""" Normalmente è la tratta vera e propria, ma per le associazioni 	potrebbe essere una tratta intermedia, o addirittura essere nulla """
-		logging.debug("Trovo la tratta middle %s" % self.id)
+		#logging.debug("Trovo la tratta middle %s" % self.id)
 		if self._is_abbinata() == "P":
 			return None
 		else:
@@ -423,7 +423,7 @@ class Viaggio(models.Model):
 
 	def _tratta_end(self):
 		""" Restituisce la tratta dal luogo di riferimento all'inizio della corsa """
-		logging.debug("Trovo la tratta end %s" % self.id)
+		#logging.debug("Trovo la tratta end %s" % self.id)
 		nextbro = self.nextfratello()
 		if not nextbro: # non ho successivi, riporto al luogoDiRiferimento
 			da = self.a
@@ -498,7 +498,11 @@ class Viaggio(models.Model):
 		""" Restituisce True se la sola tratta considerata (non i figli e non le pre_tratte post_tratte
 		 sono in fascia [22-6) """
 		start = self.data
-		end = self.data + datetime.timedelta(minutes=self._tratta().minuti)
+		tratta = self._tratta()
+		if tratta:
+			end = self.data + datetime.timedelta(minutes=tratta.minuti)
+		else:
+			end = self.data	
 		inizioNotte = start.replace(hour=22, minute=0)
 		if start.hour < 6: inizioNotte -= datetime.timedelta(days=1)
 		fineNotte = end.replace(hour=6, minute=0)

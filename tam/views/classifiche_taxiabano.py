@@ -95,7 +95,6 @@ def process_classifiche(viaggio, force_numDoppi=None):
 			if fascia == "night":
 				viaggio.punti_notturni += points
 			else:
-				print type(viaggio.punti_diurni)
 				viaggio.punti_diurni += points
 
 
