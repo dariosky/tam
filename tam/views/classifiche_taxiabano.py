@@ -48,16 +48,20 @@ def process_classifiche(viaggio, force_numDoppi=None):
 	valoreTotale = viaggio.get_valuetot()
 #	print "Valore totale:", valoreTotale
 	if da["VEorTV"]:
-		if viaggio.km_conguagliati:
-			viaggio.punti_abbinata = 0	# corsa già conguagliata, zero punti
+		# i VE/TV singoli con valore >=80€ vanno nelle lunghe
+		if da["num_bacini"] == 1 and valoreTotale >= 80:
+			viaggio.prezzoVenezia = valoreTotale
 		else:
-			viaggio.punti_abbinata = 1
-		if viaggio.prezzo_sosta:
-			# se ho un prezzo sosta nei Venezia-Treviso lo conto nelle lunghe 
-			viaggio.prezzoPunti = valoreTotale-viaggio.prezzo_sosta
-			viaggio.prezzoVenezia = viaggio.prezzo_sosta
-		else:
-			viaggio.prezzoPunti = valoreTotale
+			if viaggio.km_conguagliati:
+				viaggio.punti_abbinata = 0	# corsa già conguagliata, zero punti
+			else:
+				viaggio.punti_abbinata = 1
+			if viaggio.prezzo_sosta:
+				# se ho un prezzo sosta nei Venezia-Treviso lo conto nelle lunghe 
+				viaggio.prezzoPunti = valoreTotale - viaggio.prezzo_sosta
+				viaggio.prezzoVenezia = viaggio.prezzo_sosta
+			else:
+				viaggio.prezzoPunti = valoreTotale
 	else:
 		if da["num_bacini"] > 1:
 			viaggio.prezzoDoppioPadova = valoreTotale # corsa abbinata
@@ -91,6 +95,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
 			if fascia == "night":
 				viaggio.punti_notturni += points
 			else:
+				print type(viaggio.punti_diurni)
 				viaggio.punti_diurni += points
 
 
@@ -199,3 +204,18 @@ def get_value(viaggio, forzaSingolo=False):
 
 	importoViaggio += viaggio.prezzo_sosta	# aggiungo il prezzo della sosta interamente
 	return importoViaggio.quantize(Decimal('.01'))
+
+if __name__ == '__main__':
+	import os
+	os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
+	from tam.models import Viaggio
+	viaggio = Viaggio.objects.get(id=13)
+	print viaggio
+	viaggio.km_conguagliati = 0
+	viaggio.save()
+	process_classifiche(viaggio)
+	print "VETV punti:", viaggio.punti_abbinata, "valore:", viaggio.prezzoPunti, "conguagliato?", viaggio.km_conguagliati
+	print "Doppi Padova:", viaggio.prezzoDoppioPadova
+	print "Corte:", viaggio.prezzoPadova
+	print "Lunghe", viaggio.prezzoVenezia
+
