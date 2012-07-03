@@ -2,6 +2,7 @@
 
 import datetime
 from math import ceil, floor
+from decimal import Decimal
 
 def fascia_uno_o_due_disturbi(fascia_start, fascia_end, date_start, date_end,
 							 punti_fascia, tipo, results={}):
@@ -9,7 +10,7 @@ def fascia_uno_o_due_disturbi(fascia_start, fascia_end, date_start, date_end,
 	intersection_end = min(fascia_end, date_end)
 	if intersection_start <= intersection_end:
 		#print "Tocco la fascia %s-%s" % (fascia_start, fascia_end)
-		results[tipo] = max(results.get(tipo, 0), punti_fascia) # massimo due punti
+		results[tipo] = Decimal(max(results.get(tipo, 0), punti_fascia)) # massimo due punti
 
 
 def fascia_quarti_lineari(fascia_start, fascia_end, date_start, date_end,
@@ -32,7 +33,7 @@ def fascia_quarti_lineari(fascia_start, fascia_end, date_start, date_end,
 		quarti = ceil(float(minuti) / minuti_per_quarto)
 		#if quarti == 0: quarti = 1.0	# minimo un quarto
 #		print "%d minuti. Quarti: %d." % (minuti, quarti)
-		results[tipo] = results.get(tipo, 0.0) + quarti / 4
+		results[tipo] = Decimal(results.get(tipo, 0.0) + quarti / 4)
 
 
 def fascia_semilineari(fascia_start, fascia_end, date_start, date_end,
@@ -71,7 +72,7 @@ def fascia_semilineari(fascia_start, fascia_end, date_start, date_end,
 
 		#if quarti == 0: quarti = 1.0	# minimo un quarto
 #		print "    %d minuti. Quarti: %d. Punti: %.2f" % (minuti, quarti, quarti / 4)
-		results[tipo] = max(results.get(tipo, 0.0), quarti / 4)
+		results[tipo] = Decimal(max(results.get(tipo, 0.0), quarti / 4))
 
 # *****************************************
 
@@ -126,7 +127,7 @@ def fasce_lineari(dayMarker, data_inizio, data_fine, results):
 
 
 def fasce_semilineari(dayMarker, data_inizio, data_fine, results):
-	giornoPrima = dayMarker - datetime.timedelta(days= 1)
+	giornoPrima = dayMarker - datetime.timedelta(days=1)
 	if giornoPrima.isoweekday() in (6, 7):	# il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
 		fascia_semilineari(dayMarker.replace(hour=0, minute=0), dayMarker.replace(hour=3, minute=29),
 						   data_inizio, data_fine,
