@@ -775,10 +775,15 @@ class Viaggio(models.Model):
 		""" Stringa che aggiungo alla descrizione dei prezzi per indicare che la sosta viene scontata """
 		if settings.SCONTO_SOSTA:
 			return "al %d%%" % (100 - settings.SCONTO_SOSTA)
+		else:
+			return ""
+		
 	def incidenza_differto(self):
 		""" Stringa che aggiungo alla descrizione dei prezzi per indicare che il prezzo viene scontato perché differto """
 		if settings.SCONTO_FATTURATE:
-			return "- p%d%%" % settings.SCONTO_FATTURATE	
+			return "- p%d%%" % settings.SCONTO_FATTURATE
+		else:
+			return ""
 
 
 
