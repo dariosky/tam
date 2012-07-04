@@ -9,6 +9,7 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
+from django.conf import settings
 
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
@@ -106,7 +107,7 @@ class Tratta(models.Model):
 		# invalida la cache
 		keyword = ("tratta%s-%s" % (self.da.id, self.a.id)).replace(" ", "")
 		cache.delete(keyword)
-		
+
 		# aggiorno tutte le corse precalcolate con questa tratta
 		viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
 				Viaggio.objects.filter(tratta=self) | \
@@ -157,7 +158,8 @@ class Viaggio(models.Model):
 	abbuono_fisso = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
 	abbuono_percentuale = models.IntegerField(default=0)	# abbuono percentuale
 
-	prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2, default=0, help_text="Verrà aggiunto al prezzo per un 75%")	# prezzo della sosta, si aggiunge al prezzo normale ma incide solo del 75% (scontato del 25%)
+	help_sosta = "Verrà aggiunto al prezzo scontato del %d%%" % settings.SCONTO_SOSTA if settings.SCONTO_SOSTA else ""
+	prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2, default=0, help_text=help_sosta)
 
 	incassato_albergo = models.BooleanField("Conto fine mese", default=False)	# flag per indicare se la corsa è incassata dall'albergo (sarà utile per reportistica)
 	fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
@@ -502,7 +504,7 @@ class Viaggio(models.Model):
 		if tratta:
 			end = self.data + datetime.timedelta(minutes=tratta.minuti)
 		else:
-			end = self.data	
+			end = self.data
 		inizioNotte = start.replace(hour=22, minute=0)
 		if start.hour < 6: inizioNotte -= datetime.timedelta(days=1)
 		fineNotte = end.replace(hour=6, minute=0)
@@ -615,10 +617,10 @@ class Viaggio(models.Model):
 		if self.padre_id or self.viaggio_set.count() > 0:
 			if simpleOne: return True
 			if self._is_collettivoInPartenza():
-				self.cache_isabbinata='P'
+				self.cache_isabbinata = 'P'
 				return "P"	# collettivo in partenza
 			else:
-				self.cache_isabbinata='S'
+				self.cache_isabbinata = 'S'
 				return "S"	# abbinata
 		else:
 			return ""	# non abbinata
@@ -769,6 +771,15 @@ class Viaggio(models.Model):
 	def punti_diurni_quarti(self):
 		""" Restituisce la parte frazionaria dei notturni """
 		return  self.punti_diurni % 1
+
+	def incidenza_prezzo_sosta(self):
+		""" Stringa che aggiungo alla descrizione dei prezzi per indicare che la sosta viene scontata """
+		if settings.SCONTO_SOSTA:
+			return "al %d%%" % (100 - settings.SCONTO_SOSTA)
+	def incidenza_differto(self):
+		""" Stringa che aggiungo alla descrizione dei prezzi per indicare che il prezzo viene scontato perché differto """
+		if settings.SCONTO_FATTURATE:
+			return "- p%d%%" % settings.SCONTO_FATTURATE	
 
 
 
@@ -1002,6 +1013,5 @@ startLog(PrezzoListino)
 
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
 from tam.views.classifiche import descrizioneDivisioneClassifiche
-from django.conf import settings
 process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 process_value = settings.GET_VALUE_FUNCTION
