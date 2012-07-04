@@ -9,7 +9,7 @@ from decimal import Decimal
 import logging
 from django.core.cache import cache
 from django.db import connections
-
+from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
@@ -157,7 +157,8 @@ class Viaggio(models.Model):
 	abbuono_fisso = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
 	abbuono_percentuale = models.IntegerField(default=0)	# abbuono percentuale
 
-	prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2, default=0, help_text="Verrà aggiunto al prezzo per un 75%")	# prezzo della sosta, si aggiunge al prezzo normale ma incide solo del 75% (scontato del 25%)
+	help_sosta = "Verrà aggiunto al prezzo scontato del %d%%" % settings.SCONTO_SOSTA if settings.SCONTO_SOSTA else ""
+	prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2, default=0, help_text=help_sosta)
 
 	incassato_albergo = models.BooleanField("Conto fine mese", default=False)	# flag per indicare se la corsa è incassata dall'albergo (sarà utile per reportistica)
 	fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
@@ -1002,6 +1003,5 @@ startLog(PrezzoListino)
 
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
 from tam.views.classifiche import descrizioneDivisioneClassifiche
-from django.conf import settings
 process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 process_value = settings.GET_VALUE_FUNCTION

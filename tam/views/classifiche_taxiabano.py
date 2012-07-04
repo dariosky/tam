@@ -188,21 +188,23 @@ def get_value(viaggio, forzaSingolo=False):
 			importoViaggio = importoViaggio - viaggio.commissione
 
 	importoViaggio = importoViaggio - viaggio.costo_autostrada
-#   Taxiabano non hanno abbuono per pagamento differito o fatturato
-#	if viaggio.pagamento_differito or viaggio.fatturazione:	# tolgo gli abbuoni (per differito o altro)
-#		importoViaggio = importoViaggio * Decimal("0.85")
-#		if viaggio.tipo_abbuono=="F":
-#			importoViaggio-=viaggio.abbuono
-#		else:
-#			importoViaggio=importoViaggio* (Decimal(1)-viaggio.abbuono/Decimal(100))	# abbuono in percentuale
+	
+	#   Taxiabano non hanno abbuono per pagamento differito o fatturato
+	if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:	# tolgo gli abbuoni (per differito o altro)
+		importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
 	if viaggio.abbuono_percentuale:
 		importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
 	if viaggio.abbuono_fisso:
 		importoViaggio -= viaggio.abbuono_fisso
 	importoViaggio = importoViaggio - viaggio.costo_sosta
 
-	importoViaggio += viaggio.prezzo_sosta	# aggiungo il prezzo della sosta interamente
+	if settings.SCONTO_SOSTA:
+		importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - viaggio.SCONTO_SOSTA / Decimal(100))	# aggiungo il prezzo della sosta scontato del 25%
+	else:	
+		importoViaggio += viaggio.prezzo_sosta	# prezzo sosta intero
 	return importoViaggio.quantize(Decimal('.01'))
+
+from django.conf import settings
 
 if __name__ == '__main__':
 	import os
