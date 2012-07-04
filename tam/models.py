@@ -10,7 +10,6 @@ import logging
 from django.core.cache import cache
 from django.db import connections
 from django.conf import settings
-
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
