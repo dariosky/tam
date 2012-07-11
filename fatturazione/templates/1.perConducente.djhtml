@@ -16,9 +16,7 @@
 				<a href="#" class='clientSelect'>seleziona tutto</a>
 			{% endifchanged %}
 		</td>
-		<td>{% ifchanged riga.conducente_id riga.fattura.emessa_a %}
-			<div class='dati'>{{riga.fattura.emessa_a}}</div>
-			{% endifchanged %}
+		<td><div class='dati'>{{riga.fattura.emessa_a}}</div>
 		</td>
 		<td><input type='checkbox' name='id' value='{{riga.id}}' ></td>
 		<td>{% if riga.viaggio %}

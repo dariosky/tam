@@ -35,10 +35,8 @@
 					{%endifchanged%}
 				</td>
 				<td>
-				<input type='hidden' name='id' value='{{rigafattura.id}}' >
-				{% ifchanged rigafattura.conducente_id rigafattura.fattura.emessa_a %}
+					<input type='hidden' name='id' value='{{rigafattura.id}}' >
 					<div class='dati'>{{rigafattura.fattura.emessa_a}}</div>
-				{% endifchanged %}
 				</td>
 				<td>{%if viaggio%}{% include "inc.cellaViaggio.djhtml" %}{%endif%}</td>
 				<td>{{rigafattura.descrizione}}</td>
