@@ -94,7 +94,7 @@ class RigaFattura(models.Model):
 
 	viaggio = models.OneToOneField(Viaggio, null=True, related_name="riga_fattura", on_delete=models.SET_NULL)
 	conducente = models.ForeignKey(Conducente, null=True, related_name="fatture", on_delete=models.SET_NULL)
-	riga_fattura_consorzio = models.OneToOneField("RigaFattura", null=True, related_name="fattura_conducente_collegata")
+	riga_fattura_consorzio = models.OneToOneField("RigaFattura", null=True, related_name="fattura_conducente_collegata", on_delete=models.SET_NULL)
 
 	def val_imponibile(self):
 		result = (self.prezzo or Decimal(0)) * self.qta

@@ -51,6 +51,7 @@ from django.conf import settings
 class ModelloFattura(object):
 	ask_progressivo = False
 	generabile = True
+	order_by = []
 
 	@classmethod
 	def urlname_generazione(cls):
@@ -144,10 +145,10 @@ class FattureConducente(ModelloFattura):
 	filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None) & \
 					~ Q(conducente__nick__iexact='ANNUL')
 	keys = ["conducente"]	 							# come dividere una fattura dall'altra
-	order_by = ["conducente", "viaggio__cliente", "fattura__data"]	 				# ordinamento
+	order_by = ["conducente", "viaggio__data", "viaggio__cliente"]	 				# ordinamento
 	url_generazione = r'^genera/conducente/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_scelta = "1.perConducenteCliente.djhtml"
-	template_generazione = "2.perConducenteCliente.djhtml"
+	template_scelta = "1.perConducente.djhtml"
+	template_generazione = "2.perConducente.djhtml"
 	template_visualizzazione = "5.perConducente.djhtml"
 	destinatario = "consorzio"
 	mittente = "conducente"
@@ -165,10 +166,10 @@ class FattureConducenteNoIva(ModelloFattura):
 	filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & \
 					~ Q(conducente__nick__iexact='ANNUL')
 	keys = ["conducente"]	 							# come dividere una fattura dall'altra
-	order_by = ["conducente", "viaggio__cliente", "fattura__data"]	 				# ordinamento
+	order_by = ["conducente", "fattura__data", "viaggio__cliente"]	 				# ordinamento
 	url_generazione = r'^genera/conducenteNoIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_scelta = "1.perConducenteCliente.djhtml"
-	template_generazione = "2.perConducenteCliente.djhtml"
+	template_scelta = "1.perConducente.djhtml"
+	template_generazione = "2.perConducente.djhtml"
 	template_visualizzazione = "5.perConducente.djhtml"
 	destinatario = "consorzio"
 	mittente = "conducente"

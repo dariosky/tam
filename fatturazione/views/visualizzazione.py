@@ -31,8 +31,10 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 
 	gruppo_fatture = []
 	for fatturazione in DEFINIZIONE_FATTURE:
+		selezione = Fattura.objects.filter(tipo=fatturazione.codice, data__gte=data_start, data__lte=data_end)
+		selezione = selezione.order_by('emessa_da', 'data', 'emessa_a')	# ordinamento delle fatture in visualizzazione
 		dictFatturazione = {"d": fatturazione, 	# la definizione della fatturazione
-							"lista": Fattura.objects.filter(tipo=fatturazione.codice, data__gte=data_start, data__lte=data_end),
+							"lista": selezione,
 						   }
 		gruppo_fatture.append(dictFatturazione)
 
