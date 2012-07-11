@@ -199,7 +199,7 @@ def get_value(viaggio, forzaSingolo=False):
 	importoViaggio = importoViaggio - viaggio.costo_sosta
 
 	if settings.SCONTO_SOSTA:
-		importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - viaggio.SCONTO_SOSTA / Decimal(100))	# aggiungo il prezzo della sosta scontato del 25%
+		importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))	# aggiungo il prezzo della sosta scontato del 25%
 	else:	
 		importoViaggio += viaggio.prezzo_sosta	# prezzo sosta intero
 	return importoViaggio.quantize(Decimal('.01'))
