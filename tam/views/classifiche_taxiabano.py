@@ -48,8 +48,8 @@ def process_classifiche(viaggio, force_numDoppi=None):
 	valoreTotale = viaggio.get_valuetot()
 #	print "Valore totale:", valoreTotale
 	if da["VEorTV"]:
-		# i VE/TV singoli con valore >=80€ vanno nelle lunghe
-		if da["num_bacini"] == 1 and valoreTotale >= 80:
+		# i VE/TV singoli con valore >=75€ vanno nelle lunghe
+		if da["num_bacini"] == 1 and valoreTotale >= 75:
 			viaggio.prezzoVenezia = valoreTotale
 		else:
 			if viaggio.km_conguagliati:
