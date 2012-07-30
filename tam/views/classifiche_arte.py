@@ -47,6 +47,7 @@ CLASSIFICHE = [
 			 "mapping_field": "prezzoPadova",
 			},
 ]
+NOMI_CAMPI_CONDUCENTE = {}	# tutto dai modelli
 
 from decimal import Decimal
 kmPuntoAbbinate = Decimal(120)

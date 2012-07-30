@@ -129,13 +129,16 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		from tam.tasks import moveLogs
 		moveLogs.delay() #@UndefinedVariable
 		messages.info(request, "Spostamento dei log iniziato.")
-	
+
 	if request.POST.get("permessiStandard"):
 		import tam.views.actions.set_default_permissions as setperm
 		setperm.delete_all_permissions()
 		setperm.create_missing_permissions()
 		setperm.create_missing_groups()
-		setperm.setDefaultPermissions()  
+		setperm.setDefaultPermissions()
+	if request.POST.get("deleteAllCorse"):
+		messageLines.append("CANCELLO TUTTE LE CORSE")
+		Viaggio.objects.all().delete()
 
 	return render_to_response(template_name, {"messageLines":messageLines, "error":error},
 							context_instance=RequestContext(request))

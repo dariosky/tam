@@ -416,7 +416,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					prezzolistino = cliente.listino.get_prezzo(viaggio.da, viaggio.a,
 										tipo_servizio=viaggio.esclusivo and "T" or "C",
 										pax=viaggio.numero_passeggeri)
-					
+
 					if prezzolistino:
 						prezzoDaListinoNotturno = viaggio.trattaInNotturna()
 						prezzoDaListinoDiurno = not prezzoDaListinoNotturno
@@ -475,7 +475,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 						prezzo_da_listino = prezzolistino.prezzo_diurno
 					else:		# "Scelgo il prezzo notturno"
 						prezzo_da_listino = prezzolistino.prezzo_notturno
-					default["prezzo"]=prezzo_da_listino
+					default["prezzo"] = prezzo_da_listino
 
 					if prezzolistino.flag_fatturazione == 'S':
 						default["fatturazione"] = True
@@ -796,12 +796,16 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
 def conducente(*args, **kwargs):
 	request = args and args[0] or kwargs['request']
 	delete = kwargs.get('delete', False)
+	kwargs['fields_descriptions'] = settings.NOMI_CAMPI_CONDUCENTE
+
 	if not request.user.has_perm('tam.change_classifiche_iniziali'):	# gli utenti base non possono cambiare molto dei conducenti
-		kwargs["excludedFields"] = [	'classifica_iniziale_diurni', "classifica_iniziale_notturni",
+		kwargs["excludedFields"] = [
+									'classifica_iniziale_diurni', "classifica_iniziale_notturni",
 									"classifica_iniziale_puntiDoppiVenezia", "classifica_iniziale_prezzoDoppiVenezia",
 									"classifica_iniziale_doppiPadova", "classifica_iniziale_long", "classifica_iniziale_medium",
 									"attivo"
 								]
+
 		if delete:
 			messages.error(request, 'Devi avere i superpoteri per cancellare un conducente.')
 			return HttpResponseRedirect("/")
@@ -809,7 +813,10 @@ def conducente(*args, **kwargs):
 
 
 def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectOk="/", delete=False, unique=(("nome",),),
-			note="", excludedFields=None):
+			note="", excludedFields=None, fields_descriptions=None):
+	"""
+		@param extra_dict:	Addictional var to give to response 
+	"""
 	if "next" in request.GET:
 		redirectOk = request.GET["next"]
 	nuovo = id is None
@@ -863,7 +870,13 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 				return HttpResponseRedirect(redirectOk)
 			else:
 				return HttpResponseRedirect(redirectOk)
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+	context_vars = locals()
+	if fields_descriptions:
+		#context_vars.extend(extra_dict)
+		print form.fields.keys()
+		for field_name, description in fields_descriptions.items():
+			form.fields[field_name].label = description
+	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
 
 def privati(request, template_name="passeggeri.html"):
 	""" Mostro tutti i passeggeri privati """

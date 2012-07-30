@@ -32,6 +32,16 @@ CLASSIFICHE = [
 			},
 ]
 
+NOMI_CAMPI_CONDUCENTE = {
+	"classifica_iniziale_diurni": "Supplementari diurni",
+	"classifica_iniziale_notturni": "Supplementari notturni",
+	"classifica_iniziale_puntiDoppiVenezia": "Punti VE-TV",
+	"classifica_iniziale_prezzoDoppiVenezia": "Valore punti VE-TV",
+	"classifica_iniziale_doppiPadova": "Valore Doppi Padova",
+	"classifica_iniziale_long":"Valore Lunghe",
+	"classifica_iniziale_medium":"Valore Corte (Padova)",
+}
+
 from decimal import Decimal
 kmPuntoAbbinate = Decimal(120)
 
@@ -188,7 +198,7 @@ def get_value(viaggio, forzaSingolo=False):
 			importoViaggio = importoViaggio - viaggio.commissione
 
 	importoViaggio = importoViaggio - viaggio.costo_autostrada
-	
+
 	#   Taxiabano non hanno abbuono per pagamento differito o fatturato
 	if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:	# tolgo gli abbuoni (per differito o altro)
 		importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
@@ -200,7 +210,7 @@ def get_value(viaggio, forzaSingolo=False):
 
 	if settings.SCONTO_SOSTA:
 		importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))	# aggiungo il prezzo della sosta scontato del 25%
-	else:	
+	else:
 		importoViaggio += viaggio.prezzo_sosta	# prezzo sosta intero
 	return importoViaggio.quantize(Decimal('.01'))
 
