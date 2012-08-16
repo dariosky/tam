@@ -666,7 +666,15 @@ class Viaggio(models.Model):
 			result += figlio.get_value()
 		return result
 
+	def lordo(self):
+		""" Il lordo vero e proprio """
+		result = self.prezzo
+		for figlio in self.viaggio_set.all():
+			result += figlio.prezzo
+		return result
+
 	def get_lordotot(self):
+		""" Restituisce il lordo, tolto di autostrada e commissione """
 		result = self.prezzo - self.costo_autostrada - self.prezzo_commissione()
 #		logging.debug("Corsa padre: %s" % result )
 		for figlio in self.viaggio_set.all():
@@ -777,7 +785,7 @@ class Viaggio(models.Model):
 			return "al %d%%" % (100 - settings.SCONTO_SOSTA)
 		else:
 			return ""
-		
+
 	def incidenza_differto(self):
 		""" Stringa che aggiungo alla descrizione dei prezzi per indicare che il prezzo viene scontato perché differto """
 		if settings.SCONTO_FATTURATE:
