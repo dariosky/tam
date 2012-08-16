@@ -59,7 +59,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
 #	print "Valore totale:", valoreTotale
 	if da["VEorTV"]:
 		# i VE/TV singoli con valore >=75€ vanno nelle lunghe
-		if da["num_bacini"] == 1 and valoreTotale >= 75:
+		if da["num_bacini"] == 1 and viaggio.lordo() >= 75:
 			viaggio.prezzoVenezia = valoreTotale
 		else:
 			if viaggio.km_conguagliati:
