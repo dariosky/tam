@@ -70,22 +70,21 @@ $(function() {
 		}
 	});
 	function populateSelect(select, address) {
-		$(select).bind('click keydown', function() {
+		$(select).bind('click keydown focus', function() {
 			var select = $(this);
 			if (select.data('done')) return;
 			
-			$(this).data('done', true);
-			// mark the select as populated
-			var options = $(this);
-			//var textToInsert = [];
-			//var i = 0;
+			select.data('done', true);	// mark the select as populated
+			
 			$.getJSON(address, function(result) {
-				$.each(result, function() {
+				var html="";
+				$.each(result, function(event) {
 					// this è un array: (id, nome, attivo)
-					options.append($('<option />', {value:this[0], text:this[1] }));
+					//options.append($('<option />', {value:this[0], text:this[1] }));
 					//console.log('<option id="'+ this[0] +'">'+this[1]+'</option>')
-					//textToInsert[i++] = '<option id="'+ this[0] +'">'+this[1]+'</option>';
+					html += '<option id="'+ this[0] +'">'+this[1]+'</option>';
 				});
+				select.append(html);
 			});
 		});
 	}
