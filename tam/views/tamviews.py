@@ -268,13 +268,17 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 
+	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+
 	paginator = Paginator(viaggi, settings.TAM_VIAGGI_PAGINA, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
+	
 	page = request.GET.get("page", 1)
 	try:page = int(page)
 	except: page = 1
 	s = SmartPager(page, paginator.num_pages)
 	paginator.smart_page_range = s.results
+	
 	try:
 		thisPage = paginator.page(page)
 		viaggi = thisPage.object_list
@@ -282,8 +286,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		messages.warning(request, "Pagina %d è vuota." % page)
 		thisPage = None
 		viaggi = []
-
-	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
+	
 	num_viaggi = len(viaggi)
 #	logging.debug("Ho caricato %d viaggi." % num_viaggi)
 	classifiche = None	# ottengo le classifiche globali
