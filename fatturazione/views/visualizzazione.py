@@ -116,7 +116,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			riga = RigaFattura(descrizione="riga inserita manualmente",
 							qta=1,
 							prezzo=0,
-							iva=10 if not fattura.tipo in ('3', '4', '5') else 0,	# tipi esenti IVA
+							iva=10 if not fattura.tipo in ('3', '4', '5') else 0, 	# tipi esenti IVA
 							riga=ultimaRiga + 10)
 			logAction('C', instance=fattura, description="Riga inserita manualmente.", user=request.user)
 			riga.save()
@@ -145,6 +145,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			object_value = request.POST.get('value')
 			header_ids = {'fat_mittente':'emessa_da', 'fat_note':'note', 'fat_destinatario':'emessa_a',
 							'fat_anno':'anno', 'fat_progressivo':'progressivo',
+							'fat_data':'data',
 						}
 			header_numerici = ['fat_anno', 'fat_progressivo']
 			logAction('C', instance=fattura, description="Valore modificato.", user=request.user)
@@ -164,6 +165,28 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 					esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value), tipo=fattura.tipo)
 					if esistenti.count() > 0:
 						return HttpResponse("Esiste già una fattura con questo progressivo.", status=500)
+				if object_id == "fat_data":
+					try:
+						value_string = object_value
+						translate_months = dict(gennaio="january",
+												febbraio="february",
+												marzo="march",
+												aprile="april",
+												maggio="may",
+												giugno="june",
+												luglio="july",
+												agosto="august",
+												settembre="september",
+												ottobre="october",
+												novembre="november",
+												dicembre="december",
+											)
+						for m_ita, m_eng in translate_months.items():
+							value_string = value_string.replace(m_ita, m_eng)
+						object_value = datetime.datetime.strptime(value_string, "%d %B %Y")
+					except:
+						return HttpResponse("Non sono riuscito a interpretare la data.", status=500)
+
 				#print header_ids[object_id], "=",  object_value
 				setattr(fattura, header_ids[object_id], object_value)
 				fattura.save()
@@ -246,9 +269,9 @@ def nuova_fattura(request, fatturazione):
 					progressivo=progressivo,
 					data=data_fattura
 					)
-	if fatturazione.mittente=="consorzio":
+	if fatturazione.mittente == "consorzio":
 		fattura.emessa_da = settings.DATI_CONSORZIO
-	elif fatturazione.destinatario=="consorzio":
+	elif fatturazione.destinatario == "consorzio":
 		fattura.emessa_a = settings.DATI_CONSORZIO
 	fattura.save()
 	message = "Creata la %s %s." % (fattura.nome_fattura(), fattura.descrittore())

@@ -214,6 +214,10 @@ def get_value(viaggio, forzaSingolo=False):
 		importoViaggio += viaggio.prezzo_sosta	# prezzo sosta intero
 	return importoViaggio.quantize(Decimal('.01'))
 
+GET_VALUE_FUNCTION = get_value
+PROCESS_CLASSIFICHE_FUNCTION = process_classifiche
+KM_PUNTO_ABBINATE = kmPuntoAbbinate
+
 from django.conf import settings
 
 if __name__ == '__main__':
