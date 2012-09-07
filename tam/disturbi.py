@@ -157,6 +157,35 @@ def fasce_semilineari(dayMarker, data_inizio, data_fine, results):
 			if results[k] < max_val:
 				#print "cancello", k
 				del(results[k])
+				
+def fasce_semilineari_notturne(dayMarker, data_inizio, data_fine, results):
+	giornoPrima = dayMarker - datetime.timedelta(days=1)
+	if giornoPrima.isoweekday() in (6, 7):	# il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
+		fascia_semilineari(dayMarker.replace(hour=0, minute=0), dayMarker.replace(hour=3, minute=29),
+						   data_inizio, data_fine,
+						   minuti_per_quarto=30, tipo='night', punti_partenza=2.25, results=results)
+	else:
+		fascia_semilineari(dayMarker.replace(hour=0, minute=0), dayMarker.replace(hour=3, minute=29),
+						   data_inizio, data_fine,
+						   minuti_per_quarto=30, tipo='night', punti_partenza=2.0, results=results)
+
+	if dayMarker.isoweekday() in (6, 7):	   # saturday and sunday, normal worktime is less
+		fascia_semilineari(dayMarker.replace(hour=20, minute=0), dayMarker.replace(hour=23, minute=59),
+						data_inizio, data_fine,
+						minuti_per_quarto=30, tipo='night', results=results)
+	else:
+		fascia_semilineari(dayMarker.replace(hour=20, minute=30), dayMarker.replace(hour=23, minute=59),
+						data_inizio, data_fine,
+						minuti_per_quarto=30, tipo='night', results=results)
+	# qui ho i risultati delle fasce diurine e notturne.
+	# restituisco però solo la fascia con il massimo
+	if results:
+		max_val = max(results.values())
+		for k in results.keys():
+			if results[k] < max_val:
+				#print "cancello", k
+				del(results[k])
+	
 
 # ***************************************************************************************
 

@@ -13,6 +13,7 @@ from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
+
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
 TIPISERVIZIO = [("T", "Taxi"), ("C", "Collettivo")]
@@ -528,7 +529,7 @@ class Viaggio(models.Model):
 		if self.date_start < datetime.datetime(2012, 3, 1):
 			metodo = fasce_uno_due
 		else:
-			metodo = fasce_semilineari
+			metodo = getattr(settings, "METODO_FASCE", fasce_semilineari)
 		return trovaDisturbi(self.date_start, self.date_end(recurse=True), metodo=metodo)
 
 		def aggiungi_fascia(h_start, min_start, h_end, m_end, points, fasciaKey):
@@ -699,7 +700,10 @@ class Viaggio(models.Model):
 
 	def warning(self):
 		""" True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
-		return not self.conducente_confermato and (self.date_start - datetime.timedelta(hours=2) < datetime.datetime.now())
+		return (not self.conducente_confermato
+				 and (self.date_start - datetime.timedelta(hours=2) < datetime.datetime.now())
+				) \
+				or self.prezzo==0 
 
 	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
 		conducenti = []

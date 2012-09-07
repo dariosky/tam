@@ -359,6 +359,10 @@ td img {vertical-align: middle;}
 	font-weight: bold;
 	font-size: 1.2em; /* era 1.1 */
 }
+.lordo.error{
+	font-size:1.5; color:red;
+}
+
 .advFilters input {
 	/* il filtro data avanzato, abbrevio gli input */
 	width:75px;
