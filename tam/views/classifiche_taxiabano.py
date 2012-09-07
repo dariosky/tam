@@ -1,11 +1,6 @@
 #coding: utf-8
 
 CLASSIFICHE = [
-			{"nome": "Supplementari mattutini",
-			 "mapping_field": "puntiDiurni",
-			 'type': 'supplementari',
-			 'image': "morning.png",
-			},
 			{"nome": "Supplementari serali",
 			 "mapping_field": "puntiNotturni",
 			 'type': 'supplementari',
