@@ -702,8 +702,7 @@ class Viaggio(models.Model):
 		""" True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
 		return (not self.conducente_confermato
 				 and (self.date_start - datetime.timedelta(hours=2) < datetime.datetime.now())
-				) \
-				or self.prezzo==0 
+				)
 
 	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
 		conducenti = []
