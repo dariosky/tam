@@ -82,7 +82,7 @@ $(function() {
 					// this è un array: (id, nome, attivo)
 					//options.append($('<option />', {value:this[0], text:this[1] }));
 					//console.log('<option id="'+ this[0] +'">'+this[1]+'</option>')
-					html += '<option id="'+ this[0] +'">'+this[1]+'</option>';
+					html += '<option value="'+ this[0] +'">'+this[1]+'</option>';
 				});
 				select.append(html);
 			});
