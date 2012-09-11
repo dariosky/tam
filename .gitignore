@@ -26,4 +26,5 @@ media/fatture/unused
 settings_local.py
 media/fatture/arte.jpg
 win_settings.bat
-/static/
+
+/static
