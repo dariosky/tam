@@ -222,7 +222,7 @@ def render_to_reportlab(context):
 	righe = fattura.righe.all()
 
 	if fatturazione.codice == "5" and not "Imposta di bollo" in [r.descrizione for r in righe]:
-		print "5 esente iva con barbatrucco"
+		#print "5 esente iva con barbatrucco"
 		totale = sum([r.val_totale() for r in righe])
 		netto = totale / Decimal(1.1)
 		class RigaTotaleIvata(object):	# una riga che fa corrispondere il totale
@@ -232,14 +232,19 @@ def render_to_reportlab(context):
 			prezzo = netto
 			iva = 10
 			def val_imponibile(self):
-				return netto
+				return self.prezzo
 			def val_iva(self):
-				return netto * Decimal(0.1)
+				return totale - netto
 			def val_totale(self):
 				return totale
-		righe = [RigaTotaleIvata()]
+
+		riga = RigaTotaleIvata()
+		# la fattura ha totale pari al totale di tutte le righe
+		# l'iva è fissa al 10% e il netto è calcolato di conseguenza
 		imponibile = netto
 		iva = totale - netto
+		righe = [riga]
+
 	else:
 		imponibile = fattura.val_imponibile()
 		iva = fattura.val_iva()
