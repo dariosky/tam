@@ -166,7 +166,7 @@ class FattureConducenteNoIva(ModelloFattura):
 	filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & \
 					~ Q(conducente__nick__iexact='ANNUL')
 	keys = ["conducente"]	 							# come dividere una fattura dall'altra
-	order_by = ["conducente", "fattura__data", "viaggio__cliente"]	 				# ordinamento
+	order_by = ["conducente", "fattura__data", "viaggio__data", "viaggio__cliente"]	 				# ordinamento
 	url_generazione = r'^genera/conducenteNoIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
 	template_scelta = "1.perConducente.djhtml"
 	template_generazione = "2.perConducente.djhtml"
@@ -185,7 +185,7 @@ class Ricevute(ModelloFattura):
 	descrizione = """Ricevute per emodializzati, divise in 2 a livello di stampa."""
 	codice = "3"
 	template_visualizzazione = "5.perConducenteCliente.djhtml"
-	
+
 	mittente = "conducente"
 	destinatario = "cliente"
 	generabile = False
@@ -326,24 +326,18 @@ def genera_fatture(request, fatturazione):
 		if request.POST.has_key("generate"):
 			lastKey = None
 			fatture_generate = 0
-			totale_fattura = 0	# il totale (ivato) degli elementi in fattura
-			righe_fattura = 0	# il numero degli elementi in fattura
 
 			for elemento in lista:
 				if manager == RigaFattura.objects:
 					viaggio = elemento.viaggio
 				else:
 					viaggio = elemento
+
 				if elemento.key <> lastKey:
-					if tipo == "5" and righe_fattura and not elemento.conducente.emette_ricevute:
-						# con le fatture conducente esenti iva scrivo solo una riga di totale
-						scrivi_totale_con_iva_scorporata(fattura, totale_fattura) #@UndefinedVariable
 					# TESTATA
 					fattura = Fattura(tipo=tipo)
 					data_fattura = data_generazione
 					fattura.data = data_fattura
-					totale_fattura = 0
-					righe_fattura = 0
 					if fatturazione.ask_progressivo:
 						fattura.anno = anno
 						fattura.progressivo = viaggio.progressivo_fattura
@@ -358,8 +352,7 @@ def genera_fatture(request, fatturazione):
 					elif fatturazione.destinatario == "consorzio":
 						fattura.emessa_a = settings.DATI_CONSORZIO
 					else:
-						messages.error(request, "%s non è un valido destinatario." % fatturazione.destinatario)
-						assert False
+						raise Exception("%s non è un valido destinatario." % fatturazione.destinatario)
 
 					if fatturazione.mittente == "consorzio":
 						fattura.emessa_da = settings.DATI_CONSORZIO
@@ -367,11 +360,11 @@ def genera_fatture(request, fatturazione):
 					elif fatturazione.mittente == "conducente":
 						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
 					else:
-						messages.error(request, "%s non è un valido mittente." % fatturazione.mittente)
-						assert False
+						raise Exception("%s non è un valido mittente." % fatturazione.mittente)
 					fattura.save()
 					fatture_generate += 1
 					riga = 10
+
 					if fatturazione.esente_iva and (fatturazione.codice <> '5' or elemento.conducente.emette_ricevute):
 						# alle esenti IVA metto l'imposta di bollo
 						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("1.81"), riga=riga)
@@ -386,9 +379,17 @@ def genera_fatture(request, fatturazione):
 				riga_fattura.conducente = elemento.conducente
 
 				if manager == RigaFattura.objects:	# fattura da altra fattura
-					campi_da_riportare = "descrizione", "qta", "iva"
+					campi_da_riportare = "descrizione", "qta"
 					for campo in campi_da_riportare:
 						setattr(riga_fattura, campo, getattr(elemento, campo))
+
+					if fatturazione.codice == "5" and elemento.conducente.emette_ricevute == False:
+						# le fatture senza IVA per i conducenti che non le emettono, hanno IVA comunque
+						riga_fattura.iva = 10
+					else:
+						# altrimenti riporto l'iva dalla fattura di origine
+						riga_fattura.iva = elemento.iva
+
 					if viaggio:
 						# uso il prezzo del viaggio, non della fattura consorzio
 						riga_fattura.prezzo = viaggio.prezzo if viaggio else elemento.prezzo
