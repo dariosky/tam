@@ -876,7 +876,7 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 	context_vars = locals()
 	if fields_descriptions:
 		#context_vars.extend(extra_dict)
-		print form.fields.keys()
+		#print form.fields.keys()
 		for field_name, description in fields_descriptions.items():
 			form.fields[field_name].label = description
 	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
