@@ -1,5 +1,5 @@
 #coding: utf-8
-
+from django.conf import settings
 CLASSIFICHE = [
 			{"nome": "Supplementari serali",
 			 "mapping_field": "puntiNotturni",
@@ -197,10 +197,14 @@ def get_value(viaggio, forzaSingolo=False):
 	#   Taxiabano non hanno abbuono per pagamento differito o fatturato
 	if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:	# tolgo gli abbuoni (per differito o altro)
 		importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
-	if viaggio.abbuono_percentuale:
-		importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
-	if viaggio.abbuono_fisso:
-		importoViaggio -= viaggio.abbuono_fisso
+
+	ABBUONO_SOLO_SE_IMPORTO = getattr(settings, 'ABBUONO_SOLO_SE_IMPORTO', False)
+	if ABBUONO_SOLO_SE_IMPORTO and importoViaggio > 0:	# non do l'abbuono se non ho importo
+		if viaggio.abbuono_percentuale:
+			importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
+		if viaggio.abbuono_fisso:
+			importoViaggio -= viaggio.abbuono_fisso
+
 	importoViaggio = importoViaggio - viaggio.costo_sosta
 
 	if settings.SCONTO_SOSTA:
@@ -209,11 +213,12 @@ def get_value(viaggio, forzaSingolo=False):
 		importoViaggio += viaggio.prezzo_sosta	# prezzo sosta intero
 	return importoViaggio.quantize(Decimal('.01'))
 
+
+
 GET_VALUE_FUNCTION = get_value
 PROCESS_CLASSIFICHE_FUNCTION = process_classifiche
 KM_PUNTO_ABBINATE = kmPuntoAbbinate
 
-from django.conf import settings
 
 if __name__ == '__main__':
 	import os
