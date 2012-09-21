@@ -3,15 +3,15 @@ from modellog.actions import logAction, stopLog, startLog
 from django.contrib.auth.models import User
 from tam.models import Viaggio, Conducente, reallySpaceless
 import logging
-from django.db import transaction
+from django.db import transaction, models
 from modellog.models import ActionLog
 from django.db.models.query_utils import Q
 from tam.tasks import print_timing, single_instance_task
-from celery.task import task
-from tamArchive.models import ViaggioArchive
+#from celery.task import task
 from django.template.loader import render_to_string
 import datetime
 from django.conf import settings
+import djangotasks
 #===============================================================================
 
 def vacuum_db(using='default'):
@@ -29,7 +29,8 @@ def archiveFromViaggio(viaggio):
 		path = viaggio.get_html_tragitto()
 	except:
 		path = "invalid path"
-		print path	
+		print path
+	from tamArchive.models import ViaggioArchive
 	voceArchivio = ViaggioArchive(
 			data=viaggio.data,
 			da=viaggio.da,
@@ -67,18 +68,33 @@ def daRicordareDelViaggio(ricordi, viaggio):
 	return ricordi
 
 #===============================================================================
+# Djangotasks uses DB, so each tasktype has a model
+class TaskArchive(models.Model):
+	user = models.ForeignKey(User) # the user who starts the backup
+	end_date = models.DateField()
+	def do(self):
+		do_archiviazione(self.user, self.end_date)
+djangotasks.register_task(TaskArchive.do, "Run TAM archive")
 
-@task(name="archive.job")
+def do_archiviazioneTask(user, end_date):
+	" Crea il task per l'archiviazione e lo schedula "
+	archiviazione_task = TaskArchive(user=user, end_date=end_date)
+	archiviazione_task.save()
+
+	# ...and finally defer the task
+	task = djangotasks.task_for_object(archiviazione_task.do)
+	djangotasks.run_task(task)
+
+#@task(name="archive.job")
 @single_instance_task(60 * 30)	# 5 minutes timeout
 @print_timing
 @transaction.commit_manually
 @transaction.commit_manually(using="archive")
 @transaction.commit_manually(using="modellog")
-def do_archiviazione(user_id, end_date):
+def do_archiviazione(user, end_date):
 	if settings.DEBUG:
 		print "L'archiviazione non è effettuabile finché sei in modalità DEBUG."
 		return
-	user = User.objects.get(id=user_id)
 	filtroViaggi = Q(data__lt=end_date, conducente__isnull=False, padre__isnull=True)
 	viaggiDaArchiviare = Viaggio.objects.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().filter(filtroViaggi)
 		# Optimizations: mi faccio dare solo i modelli che mi interessano
@@ -164,6 +180,5 @@ def do_archiviazione(user_id, end_date):
 
 	logging.debug("Archiviazione fino al %s completata." % end_date)
 
-
 if __name__ == '__main__':
-	do_archiviazione.run(1, datetime.date(2011, 1, 1))
+	do_archiviazione(User.objects.get(id=1), datetime.date(2011, 1, 1))

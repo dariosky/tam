@@ -83,8 +83,8 @@ def action(request, template_name="archive/action.html"):
 	archive_needed = archiveCount or logCount
 
 	if "archive" in request.POST:
-		from tamArchive.tasks import do_archiviazione
-		do_archiviazione.delay(request.user.id, end_date) #@UndefinedVariable
+		from tamArchive.tasks import do_archiviazioneTask
+		do_archiviazioneTask(request.user, end_date) #@UndefinedVariable
 		messages.info(request, "Archiviazione iniziata.")
 
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
