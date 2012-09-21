@@ -272,13 +272,13 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	paginator = Paginator(viaggi, settings.TAM_VIAGGI_PAGINA, orphans=10)	# pagine da tot viaggi
 	tuttiViaggi = viaggi
-	
+
 	page = request.GET.get("page", 1)
 	try:page = int(page)
 	except: page = 1
 	s = SmartPager(page, paginator.num_pages)
 	paginator.smart_page_range = s.results
-	
+
 	try:
 		thisPage = paginator.page(page)
 		viaggi = thisPage.object_list
@@ -286,7 +286,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		messages.warning(request, "Pagina %d è vuota." % page)
 		thisPage = None
 		viaggi = []
-	
+
 	num_viaggi = len(viaggi)
 #	logging.debug("Ho caricato %d viaggi." % num_viaggi)
 	classifiche = None	# ottengo le classifiche globali
@@ -985,6 +985,8 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 		primo = None
 
 	contatore = 1
+	# di standard gli abbinati non hanno abbuoni per aeroporto/stazioni
+	ABBUONI_LUOGO_ABBINATI = getattr(settings, 'ABBUONI_LUOGO_ABBINATI', False)
 	for viaggio in viaggi:
 		logging.debug("%2s: %s di %s a %s" % (contatore, assoType, viaggio.pk, primo and primo.pk or "None"))
 
@@ -993,7 +995,8 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 
 		if assoType == 'unlink':
 			viaggio.padre = None
-			if viaggio.da.speciale != "-":	# tolgo l'associazione a un viaggio da stazione/aeroporto
+			# rimetto l'associazione a un viaggio da stazione/aeroporto
+			if viaggio.da.speciale != "-" and ABBUONI_LUOGO_ABBINATI == False:
 				logging.debug("Deassocio da un luogo speciale, rimetto l'eventuale abbuono speciale")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != settings.ABBUONO_AEROPORTI:
 					messages.info(request, "Il %d° viaggio è da un aeroporto rimetto l'abbuono di %d€. Era di %d€." % (contatore, settings.ABBUONO_AEROPORTI, viaggio.abbuono_fisso))
@@ -1002,7 +1005,9 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 					messages.info(request, "Il %d° viaggio è da una stazione rimetto l'abbuono di %d€. Era di %d€." % (contatore, settings.ABBUONO_STAZIONI, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = settings.ABBUONO_STAZIONI
 		elif assoType == 'link':
-			if viaggio.da.speciale != "-":	# associando un viaggio da stazione/aeroporto
+			# tolgo l'associazione a un viaggio da stazione/aeroporto
+			# associando un viaggio da stazione/aeroporto
+			if viaggio.da.speciale != "-" and ABBUONI_LUOGO_ABBINATI == False:
 				logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono speciale")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == settings.ABBUONO_AEROPORTI:
 					messages.info(request, "Il %d° viaggio è da un aeroporto tolgo l'abbuono di %d€." % (contatore, settings.ABBUONO_AEROPORTI))
