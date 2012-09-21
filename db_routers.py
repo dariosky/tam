@@ -6,7 +6,7 @@ class TamArchiveRouter(object):
 	def db_for_read(self, model, **hints):
 		if not hasattr(model, "_meta"):	# dutchtape fix, cause of ticket 14948 in Django 1.2.4
 			return False
-		
+
 		# use 'archive' connection when reading/writing a model in tamArchive
 		if model._meta.app_label == 'tamArchive':
 			return 'archive'
@@ -16,11 +16,11 @@ class TamArchiveRouter(object):
 	def allow_syncdb(self, db, model):
 		if not hasattr(model, "_meta"):	# dutchtape fix, cause of ticket 14948 in Django 1.2.4
 			return False
-		
+
 		if db == 'archive':
 			# if the db Archive use only tamArchive models
 			return model._meta.app_label == 'tamArchive'
-		elif model._meta.app_label =='tamArchive':
+		elif model._meta.app_label == 'tamArchive':
 			# in the other DB put everything else
 			return False
 

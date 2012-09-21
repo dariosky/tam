@@ -127,7 +127,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		messageLines.append("Errati (e corretti) %d/%d" % (sistemati, len(viaggi)))
 	if request.POST.get("spostaILog"):
 		from tam.tasks import moveLogs
-		moveLogs.delay() #@UndefinedVariable
+		moveLogs()
 		messages.info(request, "Spostamento dei log iniziato.")
 
 	if request.POST.get("permessiStandard"):

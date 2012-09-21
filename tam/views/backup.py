@@ -17,7 +17,7 @@ from tam.tasks import doBackupTask
 def humanizeSize(size):
 	size = float(size)
 	suffix = "byte"
-	if size==0: return "zero"
+	if size == 0: return "zero"
 	if size > 1024:
 		size = size / 1024
 		suffix = "KB"
@@ -113,7 +113,7 @@ def backup(request, template_name="utils/backup.html"):
 		return HttpResponseRedirect("/")
 	if "backup" in request.POST:
 		#backupFile = doBackup(request.user)
-		doBackupTask.delay(user_id = request.user.id)
+		doBackupTask(request.user)
 		messages.success(request, "Backup del database avviato... sarà pronto tra poco.")
 		return HttpResponseRedirect(reverse("tamBackup"))
 	backupInfo = getBackupInfo()
