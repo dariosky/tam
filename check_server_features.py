@@ -17,15 +17,15 @@ def check_cache():
 	assert result == True
 
 
-def check_celery():
-	from time import sleep
-	result = test_task.delay("Task delayed") #@UndefinedVariable
-	for x in range(1, 5):
-		if result.ready():
-			return
-		if x > 1: print "waiting",
-		sleep(1)
-	assert(result.ready())
+#def check_celery():
+#	from time import sleep
+#	result = test_task.delay("Task delayed") #@UndefinedVariable
+#	for x in range(1, 5):
+#		if result.ready():
+#			return
+#		if x > 1: print "waiting",
+#		sleep(1)
+#	assert(result.ready())
 
 
 if __name__ == '__main__':

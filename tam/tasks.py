@@ -1,10 +1,12 @@
 # coding: utf-8
-from celery.task import task
+#from celery.task import task
 from django.core.cache import cache
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.db import transaction
+from django.db import transaction, models
 import time
+import djangotasks
+
 
 #===============================================================================
 def humanizeTime(ms):
@@ -42,7 +44,7 @@ def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
 	"""
 	def task_exc(func):
 		def wrapper(*args, **kwargs):
-			lock_id = "celery-single-instance-" + func.__name__
+			lock_id = "task-single-instance-" + func.__name__
 			acquire_lock = lambda: cache.add(lock_id, "true", timeout)
 			release_lock = lambda: cache.delete(lock_id)
 			if acquire_lock():
@@ -56,17 +58,33 @@ def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
 	return task_exc
 #===============================================================================
 
-@task(name="backup.job")
+
+
+#============================================================
+# Djangotasks uses DB, so each tasktype has a model
+class TaskBackup(models.Model):
+	user = models.ForeignKey(User) # the user who starts the backup
+	def do(self):
+		print 'Stating backup'
+		from tam.views.backup import doBackup
+		doBackup(self.user)
+		print "Fine del backup"
+djangotasks.register_task(TaskBackup.do, "Run TAM backup")
+
+
+#@task(name="backup.job")
 @single_instance_task(60 * 5)	# 5 minutes timeout
-def doBackupTask(user_id):
-	user = User.objects.get(id=user_id)
-	print "Starting backup"
-	from tam.views.backup import doBackup
-	doBackup(user)
-	print "Fine del backup"
+def doBackupTask(user):
+	# ... create the backup action object in the DB
+	backup_task = TaskBackup(user=user)
+	backup_task.save()
+
+	# ...and finally defer the task
+	task = djangotasks.task_for_object(backup_task.do)
+	djangotasks.run_task(task)
 
 
-@task(name="movelogs")
+#@task(name="movelogs")
 @single_instance_task(60 * 25)	# 25 minutes timeout
 @print_timing
 @transaction.commit_manually
@@ -140,7 +158,7 @@ def moveLogs(name='movelogs.job'):
 	con.commit()
 	print "Fine"
 
-@task(name='testtask')
+#@task(name='testtask')
 def test_task(s='Test'):
 	return s
 

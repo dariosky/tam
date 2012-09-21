@@ -13,6 +13,8 @@ from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
+# load models required for the tasks
+from tam.tasks import TaskBackup
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
