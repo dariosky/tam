@@ -65,14 +65,13 @@ def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
 class TaskBackup(models.Model):
 	user = models.ForeignKey(User) # the user who starts the backup
 	def do(self):
-		print 'Stating backup'
+		print 'Starting backup'
 		from tam.views.backup import doBackup
 		doBackup(self.user)
 		print "Fine del backup"
 djangotasks.register_task(TaskBackup.do, "Run TAM backup")
 
 
-#@task(name="backup.job")
 @single_instance_task(60 * 5)	# 5 minutes timeout
 def doBackupTask(user):
 	# ... create the backup action object in the DB
@@ -84,7 +83,14 @@ def doBackupTask(user):
 	djangotasks.run_task(task)
 
 
-#@task(name="movelogs")
+############################################################################
+
+class TaskMovelog(models.Model):
+	def do(self):
+		moveLogs()
+djangotasks.register_task(TaskMovelog.do, "Oldlog move")
+
+
 @single_instance_task(60 * 25)	# 25 minutes timeout
 @print_timing
 @transaction.commit_manually
@@ -159,8 +165,8 @@ def moveLogs(name='movelogs.job'):
 	print "Fine"
 
 #@task(name='testtask')
-def test_task(s='Test'):
-	return s
+#def test_task(s='Test'):
+#	return s
 
 if __name__ == '__main__':
 	moveLogs.run()
