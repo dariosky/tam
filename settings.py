@@ -228,10 +228,12 @@ INSTALLED_APPS = (
 
 	'modellog',
 
-	'djcelery',
-	'kombu.transport.django',
+#	'djcelery',
+#	'kombu.transport.django',
 
 #	'license',
+	
+	'djangotasks',	# let's use djangotasks instead of celery
 )
 
 LOGIN_URL = "/login/"
@@ -309,6 +311,6 @@ except ImportError:
 	logging.warning("'settings_local.py' has not been found. Use this to keep out of VC secret settings.")
 	pass
 
-from celeryconfig import * #@UnusedWildImport
-import djcelery
-djcelery.setup_loader()
+#from celeryconfig import * #@UnusedWildImport
+#import djcelery
+#djcelery.setup_loader()
