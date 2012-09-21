@@ -3,7 +3,6 @@
 """ Controlla che le funzionalità richieste dal server siano rispettate """
 from django.conf import settings
 from django.contrib.auth.models import User
-from tam.tasks import test_task
 
 def check_db():
 	User.objects.get(id=1)
@@ -17,15 +16,16 @@ def check_cache():
 	assert result == True
 
 
-def check_celery():
-	from time import sleep
-	result = test_task.delay("Task delayed") #@UndefinedVariable
-	for x in range(1, 5):
-		if result.ready():
-			return
-		if x > 1: print "waiting",
-		sleep(1)
-	assert(result.ready())
+#def check_celery():
+#	from time import sleep
+#	from tam.tasks import test_task
+#	result = test_task.delay("Task delayed") #@UndefinedVariable
+#	for x in range(1, 5):
+#		if result.ready():
+#			return
+#		if x > 1: print "waiting",
+#		sleep(1)
+#	assert(result.ready())
 
 
 if __name__ == '__main__':
