@@ -2,32 +2,49 @@
 from django.core.management import setup_environ
 import settings
 from tam.models import stopAllLog
+from django.db import transaction
 setup_environ(settings)
 
-from tam.models import User, Bacino, Luogo #@UnusedWildImport
+from tam.models import * #@UnusedWildImport
 
 objects = [
 			User,
 			Bacino,
 			Luogo,
-#			Tratta,
-#			Conducente,
-#			Listino,
-#			PrezzoListino,
-		 ]#Conducente, Luogo]
+			Tratta,
+			Conducente,
+			Listino,
+			PrezzoListino,
+			Cliente,
+			Passeggero,
+			ProfiloUtente,
+			Conguaglio,
+			#Viaggio
+		 ]
 
+@transaction.commit_manually
 def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 	totale = Model.objects.using(db_from).count()
+	name = Model.__name__
 	print "Copio %d oggetti di tipo %s da %s a %s" % (totale,
-													  Model.__name__,
+													  name,
 													  db_from,
 													  db_to)
 	kwargs = {}
-	if Model.__name__ in ('Luogo', 'Tratta'):
+	if name in ('Luogo', 'Tratta', 'Viaggio'):
 		kwargs['updateViaggi'] = False
-	for obj in Model.objects.all():
-		obj.save(using=db_to, **kwargs)
-		print "  copio", obj
+	try:
+		for obj in Model.objects.all():
+			obj.save(using=db_to, **kwargs)
+	except:
+		print "errore nella copia:"
+		print obj
+		transaction.rollback()
+		raise Exception('Annullo la copia di %s e mi fermo' % name)
+	else:
+		transaction.commit()
+
+	transaction.commit()
 
 def delete_all_objects_of_model(Model, db_name='postgre'):
 	totale = Model.objects.using(db_name).count()
@@ -37,6 +54,8 @@ def delete_all_objects_of_model(Model, db_name='postgre'):
 stopAllLog()
 for Object in objects:
 	delete_all_objects_of_model(Object)
-
+print
 for Object in objects:
 	move_all_objects_of_model(Object)
+
+startAllLog()
