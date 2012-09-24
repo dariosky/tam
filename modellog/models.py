@@ -14,7 +14,7 @@ class ActionLog(models.Model):
 	user_id = models.IntegerField(null=True, blank=True, default=None)
 	#user = models.ForeignKey(User, null=True, blank=True, default=None)
 	action_type = models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
-	
+
 	modelName = models.CharField(max_length='20', null=True, blank=True, default=None)
 	instance_id = models.IntegerField(null=True, blank=True, default=None)
 #	content_type = models.ForeignKey(ContentType)
@@ -31,21 +31,19 @@ class ActionLog(models.Model):
 	def __unicode__(self):
 		longName = {"A":"Creazione", "M":"Modifica", "D":"Cancellazione"}[self.action_type]
 		return "%s di un %s - %s.\n  %s" % (longName, self.content_type, self.user, self.description)
-	
+
 	def user(self):
 		""" The user who made the action """
 		if self.user_id:
 			return User.objects.get(id=self.user_id)
-		
+
 	def obj(self):
 		""" Return the related object from tam.models """
 		import tam.models as tamModels
 		guessed_modelname = self.modelName
-		guessed_modelname=guessed_modelname[0].upper()+guessed_modelname[1:]
+		guessed_modelname = guessed_modelname[0].upper() + guessed_modelname[1:]
 		try:
 			class_name = getattr(tamModels, guessed_modelname)
 			return class_name.objects.get(id=self.instance_id)
 		except:
 			return None
-
-

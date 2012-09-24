@@ -164,10 +164,20 @@ def moveLogs(name='movelogs.job'):
 	con.commit()
 	print "Fine"
 
+
+# Djangotasks uses DB, so each tasktype has a model
+class TaskArchive(models.Model):
+	user = models.ForeignKey(User) # the user who starts the backup
+	end_date = models.DateField()
+	def do(self):
+		from tamArchive.tasks import do_archiviazione
+		do_archiviazione(self.user, self.end_date)
+djangotasks.register_task(TaskArchive.do, "Run TAM archive")
+
 #@task(name='testtask')
 #def test_task(s='Test'):
 #	return s
 
 if __name__ == '__main__':
-	moveLogs.run()
+	pass
 #	print humanizeTime(3690101)
