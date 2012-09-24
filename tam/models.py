@@ -325,6 +325,14 @@ class Viaggio(models.Model):
 
 	def save(self, *args, **kwargs):
 		"""Ridefinisco il salvataggio dei VIAGGI per popolarmi i campi calcolati"""
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
+		if not updateViaggi:
+			return super(Viaggio, self).save(*args, **kwargs)
+		
 		if not self.conducente:	# quando confermo o richiedo un conducente DEVO avere un conducente
 			self.conducente_confermato = False
 			self.conducente_richiesto = False
@@ -821,15 +829,15 @@ class Conducente(models.Model):
 	emette_ricevute = models.BooleanField("Emette senza IVA?", help_text="Il conducente può emettere fatture senza IVA?", default=True)
 	assente = models.BooleanField(default=False)
 
-	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=9, decimal_places=2, default=0)
-	classifica_iniziale_notturni = models.DecimalField("Supplementari notturni", max_digits=9, decimal_places=2, default=0)
+	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=12, decimal_places=2, default=0)
+	classifica_iniziale_notturni = models.DecimalField("Supplementari notturni", max_digits=12, decimal_places=2, default=0)
 
 	classifica_iniziale_puntiDoppiVenezia = models.IntegerField("Punti Doppi Venezia", default=0)
-	classifica_iniziale_prezzoDoppiVenezia = models.DecimalField("Valore Doppi Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
-	classifica_iniziale_doppiPadova = models.DecimalField("Doppi Padova", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
+	classifica_iniziale_prezzoDoppiVenezia = models.DecimalField("Valore Doppi Venezia", max_digits=12, decimal_places=2, default=0)		# fino a 9999.99
+	classifica_iniziale_doppiPadova = models.DecimalField("Doppi Padova", max_digits=12, decimal_places=2, default=0)		# fino a 9999.99
 
-	classifica_iniziale_long = models.DecimalField("Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
-	classifica_iniziale_medium = models.DecimalField("Padova", max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
+	classifica_iniziale_long = models.DecimalField("Venezia", max_digits=12, decimal_places=2, default=0)		# fino a 9999.99
+	classifica_iniziale_medium = models.DecimalField("Padova", max_digits=12, decimal_places=2, default=0)	# fino a 9999.99
 
 	class Meta:
 		verbose_name_plural = _("Conducenti")
@@ -909,7 +917,7 @@ class Listino(models.Model):
 	""" Ogni listino ha un suo nome ed una serie di tratte collegate.
 		È indipendente dal cliente.
 	"""
-	nome = models.CharField(max_length=20, unique=True)
+	nome = models.CharField(max_length=30, unique=True)
 	class Meta:
 		verbose_name_plural = _("Listini")
 		ordering = ["nome"]
