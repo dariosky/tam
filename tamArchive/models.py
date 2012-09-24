@@ -2,7 +2,6 @@
 
 from django.db import models
 # load models required for the tasks
-from tamArchive.tasks import TaskArchive #@UnusedImport
 
 class ViaggioArchive(models.Model):
 	class Meta:
