@@ -9,6 +9,7 @@ class Migration(DataMigration):
 
     def forwards(self, orm):
         "Write your forwards methods here."
+        return #disabled... we won't migrate anymore
         for viaggio in orm.Viaggio.objects.all():
 #            print "Cambio data_padre da %s" % viaggio.data_padre,
             viaggio.id_padre = viaggio.padre.id if viaggio.padre is not None else viaggio.id

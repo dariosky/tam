@@ -15,6 +15,7 @@ from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
 # load models required for the tasks
 from tam.tasks import TaskBackup, TaskMovelog #@UnusedImport
+from tamArchive.tasks import TaskArchive #@UnusedImport
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -63,7 +64,13 @@ class Luogo(models.Model):
 		return reverse("tamLuogoIdDel", kwargs={"id":self.id})
 
 	def save(self, *args, **kwargs):
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
 		super(Luogo, self).save(*args, **kwargs)
+		if not updateViaggi: return
 		# aggiorno tutte le corse precalcolate con quel luogo
 		viaggiCoinvolti = Viaggio.objects.filter(tratta_start__da=self) | Viaggio.objects.filter(tratta_start__a=self) | \
 			Viaggio.objects.filter(tratta__da=self) | Viaggio.objects.filter(tratta__a=self) | \
@@ -105,18 +112,24 @@ class Tratta(models.Model):
 
 	def save(self, *args, **kwargs):
 		""" Salvo la tratta """
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
 		super(Tratta, self).save(*args, **kwargs)
 		# invalida la cache
 		keyword = ("tratta%s-%s" % (self.da.id, self.a.id)).replace(" ", "")
 		cache.delete(keyword)
 
-		# aggiorno tutte le corse precalcolate con questa tratta
-		viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
-				Viaggio.objects.filter(tratta=self) | \
-				Viaggio.objects.filter(tratta_end=self)
-		viaggiCoinvolti = viaggiCoinvolti.filter(conducente_confermato=False)	# ricalcolo tutti i non confermati
-		for viaggio in viaggiCoinvolti:
-			viaggio.updatePrecomp()
+		if updateViaggi:
+			# aggiorno tutte le corse precalcolate con questa tratta
+			viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
+					Viaggio.objects.filter(tratta=self) | \
+					Viaggio.objects.filter(tratta_end=self)
+			viaggiCoinvolti = viaggiCoinvolti.filter(conducente_confermato=False)	# ricalcolo tutti i non confermati
+			for viaggio in viaggiCoinvolti:
+				viaggio.updatePrecomp()
 
 def get_tratta(da, a):
 	""" Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
@@ -1020,13 +1033,17 @@ def get_classifiche():
 	return classifiche
 
 # Comincia a loggare i cambiamenti a questi Modelli
-from modellog.actions import startLog
-startLog(Viaggio)
-startLog(Cliente)
-startLog(Passeggero)
-startLog(Conducente)
-startLog(Tratta)
-startLog(PrezzoListino)
+from modellog.actions import startLog, stopLog
+models_to_log = (Viaggio, Cliente, Passeggero,
+				 Conducente, Tratta, PrezzoListino)
+def startAllLog():
+	for Model in models_to_log:
+		startLog(Model)
+
+def stopAllLog():
+	for Model in models_to_log:
+		stopLog(Model)
+
 
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
 from tam.views.classifiche import descrizioneDivisioneClassifiche

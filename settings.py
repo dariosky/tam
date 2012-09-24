@@ -21,7 +21,7 @@ ADMINS = (
 
 MANAGERS = ADMINS
 DATABASES = {	# DB di produzione
-	'default': {
+	'sqlite': {
 			'ENGINE': 'django.db.backends.sqlite3', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 			'NAME': os.path.join(PROJECT_PATH, 'tam.db3')
 	},
@@ -32,8 +32,17 @@ DATABASES = {	# DB di produzione
 	'modellog': {
 			'ENGINE': 'django.db.backends.sqlite3',
 			'NAME': os.path.join(PROJECT_PATH, 'tamlog.db3')
-	}
+	},
+	'postgre': {
+			'ENGINE': 'django.db.backends.postgresql_psycopg2', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+			'NAME': 'artetam',
+			'USER': 'tam',
+			'PASSWORD': 'tamPostgre',
+			'HOST':'localhost', 'PORT':5432
+	},
 }
+DATABASES['default'] = DATABASES['sqlite']
+
 DATABASE_OPTIONS = {
    "timeout": 20, 	# Sqlite will wait some more
 }
@@ -232,8 +241,8 @@ INSTALLED_APPS = (
 #	'kombu.transport.django',
 
 #	'license',
-	
-	'djangotasks',	# let's use djangotasks instead of celery
+
+	'djangotasks', 	# let's use djangotasks instead of celery
 )
 
 LOGIN_URL = "/login/"
