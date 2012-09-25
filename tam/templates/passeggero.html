@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% block title %}Gestione passeggeri &raquo; {{ block.super }}{% endblock %}
+
+{% block content %}
+<div style="text-align:center">
+	{% if not delete %}
+		<h1>Gestione passeggeri</h1>
+		{% if note %}<h2>{{ note }}</h2>{% endif %}
+		<form action="" method="post">
+			<table style='margin:0 auto;'>
+				{{ form.as_table }}
+				<tr>
+					<td colspan="2">
+					<input type="submit" style='width: 100%' value="{% if nuovo %}Crea{% else %}Modifica{% endif %} passeggero" />
+					
+		<p>
+		{% if viaggi_con_passeggero %}
+			
+			Passeggero già usato in 
+			<a href='{% url "tamCorse" %}?filterPrivato={{ instance.nome }}&filterCliente=Privato&filterConducente=&filterType=Tutti+i+tipi&filterFlag=Tutti+i+flag&filterWhen=all'
+			   target='_blank" '>{{viaggi_con_passeggero}} viaggi</a>
+			(clicca per vedere quali).
+		{% else %}
+			Passeggero non presente in alcun viaggio memorizzato.
+		{% endif %}
+		</p>
+					
+		{% if not nuovo and permessi_cancellazione %}
+			{% if no_corse_future %}
+					Non ci sono corse future per questo passeggero, puoi cancellarlo.<br>
+					Le vecchie corse rimarranno con l'indicazione di "Privato" generica.
+					<p>
+						<a href="{{ instance.delete_url }}">
+							Cancella passeggero
+						</a>
+					</p>
+			{% else %}
+				Il passeggero ha delle corse future programmate, non puoi cancellarlo.		
+			{% endif %}		
+		{% endif %}
+				</td></tr>
+			</table>
+		</form>
+		
+	{% else %}
+		<h1>Cancellazione passeggero.</h1>
+		{% if note %}<h2>{{ note }}</h2>{% endif %}
+		Sicuro di voler cancellare il passeggero:
+		<br/>
+		<b>{{ instance }}</b><br />
+		<br/>
+		Si possono cancellare passeggeri solo se non sono usati in corse future.
+		Cancellando un passeggero, tutte le corse che lo utilizzano
+		rimarranno con un'indicazione di "Privato" generico.
+		<form action="" method="post">
+			<p>
+				<input type="submit" name="OK" value="Sì" />
+				<input type="submit" value="No" />
+			</p>
+		</form>
+	{% endif %}
+	<a href='{% url "tamPrivati" %}'>Torna alla lista dei passeggeri.</a>
+</div>
+{% endblock %}

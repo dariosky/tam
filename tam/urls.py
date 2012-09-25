@@ -58,9 +58,9 @@ urlpatterns = patterns('tam.views.tamviews',
 
     url(r'^privati/$', 'privati', name="tamPrivati"),
 
-    url(r'^privato/$', 'bacino', {"Model": Passeggero, "redirectOk":"/privati/" }, name="tamNuovoPrivato"),
-    url(r'^privato/(?P<id>\d*)/$', 'bacino', {"Model": Passeggero, "redirectOk":"/privati/" }, name="tamPrivatoId"),
-    url(r'^privato/(?P<id>\d*)/delete/$', 'bacino', {"Model": Passeggero, "redirectOk":"/privati/", "delete":True, "note":"Verranno eliminate tutte le corse con questo privato." }, name="tamPrivatoIdDel"),
+    url(r'^privato/$', 'passeggero', name="tamNuovoPrivato"),
+    url(r'^privato/(?P<id>\d*)/$', 'passeggero', name="tamPrivatoId"),
+    url(r'^privato/(?P<id>\d*)/delete/$', 'passeggero', {"delete":True}, name="tamPrivatoIdDel"),
 
     url(r'^CC/$', 'classificheconducenti', name="tamConducenti"),
 	url(r'^conguaglio/$', 'classificheconducenti', {"confirmConguaglio":True}, name="tamConguaglio"),
