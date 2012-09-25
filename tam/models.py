@@ -12,6 +12,7 @@ from django.db import connections
 from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
+from django.db.models.deletion import SET_NULL
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -158,7 +159,7 @@ class Viaggio(models.Model):
 	esclusivo = models.BooleanField("Servizio taxi", default=True)	# se non è consentito il raggruppamento contemporaneo
 
 	cliente = models.ForeignKey("Cliente", null=True, blank=True, db_index=True)	# se null è un privato
-	passeggero = models.ForeignKey("Passeggero", null=True, blank=True) # eventuale passeggero se cliente 'Privato'
+	passeggero = models.ForeignKey("Passeggero", null=True, blank=True, on_delete=SET_NULL) # eventuale passeggero se cliente 'Privato'
 
 	prezzo = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
 	costo_autostrada = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
@@ -901,7 +902,7 @@ class Cliente(models.Model):
 class Passeggero(models.Model):
 	""" I passeggeri sono clienti particolari con meno caratteristiche """
 	nome = models.CharField(max_length=40, unique=True)
-	dati = models.TextField(null=True)
+	dati = models.TextField(null=True, blank=True)
 	class Meta:
 		verbose_name_plural = _("Passeggeri")
 		ordering = ["nome"]
