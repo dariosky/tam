@@ -19,7 +19,7 @@ objects = [
 			Passeggero,
 			ProfiloUtente,
 			Conguaglio,
-			#Viaggio
+			Viaggio
 		 ]
 
 @transaction.commit_manually
@@ -33,14 +33,21 @@ def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 	kwargs = {}
 	if name in ('Luogo', 'Tratta', 'Viaggio'):
 		kwargs['updateViaggi'] = False
+	tutti = Model.objects.all()
+	#if name == 'Viaggio':
+	#	tutti = tutti.filter(id__in=(52489, 52479))
 	try:
-		for obj in Model.objects.all():
+		for obj in tutti:
+			#print obj.id, obj.padre_id, "\n ", obj
 			obj.save(using=db_to, **kwargs)
 	except:
 		print "errore nella copia:"
-		print obj
+
 		transaction.rollback()
-		raise Exception('Annullo la copia di %s e mi fermo' % name)
+		print obj.id
+		obj.save(using=db_to, **kwargs)
+		#raise Exception('Annullo la copia di %s e mi fermo' % name)
+
 	else:
 		transaction.commit()
 
@@ -58,4 +65,5 @@ print
 for Object in objects:
 	move_all_objects_of_model(Object)
 
+print "Fine."
 startAllLog()

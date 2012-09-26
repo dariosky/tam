@@ -41,7 +41,7 @@ DATABASES = {	# DB di produzione
 			'HOST':'localhost', 'PORT':5432
 	},
 }
-DATABASES['default'] = DATABASES['sqlite']
+DATABASES['default'] = DATABASES['postgre']
 
 DATABASE_OPTIONS = {
    "timeout": 20, 	# Sqlite will wait some more
