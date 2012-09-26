@@ -23,8 +23,8 @@ class Fattura(models.Model):
 	tipo = models.CharField(max_length=1, db_index=True) # tipo fattura: 1.Consorzio (a cliente), 2.Conducente (a consorzio), 3.Ricevuta (a cliente)
 
 	data = models.DateField(db_index=True)
-	anno = models.IntegerField(db_index=True)
-	progressivo = models.IntegerField(db_index=True)
+	anno = models.IntegerField(db_index=True, null=True)
+	progressivo = models.IntegerField(db_index=True, null=True)
 
 	archiviata = models.BooleanField(default=False) # se true la fattura non è più modificabile
 
@@ -89,7 +89,7 @@ class RigaFattura(models.Model):
 	note = models.TextField()
 
 	qta = models.IntegerField()
-	prezzo = models.DecimalField(max_digits=9, decimal_places=2, null=True)	#fissa in euro
+	prezzo = models.DecimalField(max_digits=9, decimal_places=2, default=0, null=True)	#fissa in euro
 	iva = models.IntegerField()	# iva in percentuale
 
 	viaggio = models.OneToOneField(Viaggio, null=True, related_name="riga_fattura", on_delete=models.SET_NULL)
@@ -107,6 +107,8 @@ class RigaFattura(models.Model):
 
 	class Meta:
 		verbose_name_plural = "Righe Fattura"
-		ordering = ("fattura", "riga")
+		# ordino per fattura.tipo in modo da copiare prima le fatture
+		# referenziate (che hanno tipo minore di quelle che referenziano)
+		ordering = ("fattura__tipo", "fattura", "riga")
 	def __unicode__(self):
 		return u"Fattura %d. Riga %d. %.2f." % (self.fattura.id, self.riga, self.prezzo or 0)

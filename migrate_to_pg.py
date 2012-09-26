@@ -6,6 +6,7 @@ from django.db import transaction
 setup_environ(settings)
 
 from tam.models import * #@UnusedWildImport
+from fatturazione.models import Fattura, RigaFattura
 
 objects = [
 			User,
@@ -19,7 +20,9 @@ objects = [
 			Passeggero,
 			ProfiloUtente,
 			Conguaglio,
-			Viaggio
+			Viaggio,
+			Fattura,
+			RigaFattura,
 		 ]
 
 @transaction.commit_manually
@@ -33,23 +36,26 @@ def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 	kwargs = {}
 	if name in ('Luogo', 'Tratta', 'Viaggio'):
 		kwargs['updateViaggi'] = False
-	tutti = Model.objects.all()
+	tutti = Model.objects.using(db_from).all()
 	#if name == 'Viaggio':
 	#	tutti = tutti.filter(id__in=(52489, 52479))
 	try:
 		for obj in tutti:
-			#print obj.id, obj.padre_id, "\n ", obj
+			#print obj.id, "\n ", obj
 			obj.save(using=db_to, **kwargs)
 	except:
 		print "errore nella copia:"
 
 		transaction.rollback()
 		print obj.id
+		# rieseguo l'operazione per sollevare l'eccezione...
+		# fuori dalla gestione della transazione
 		obj.save(using=db_to, **kwargs)
 		#raise Exception('Annullo la copia di %s e mi fermo' % name)
 
 	else:
 		transaction.commit()
+		pass
 
 	transaction.commit()
 
