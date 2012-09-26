@@ -22,7 +22,7 @@ ADMINS = (
 MANAGERS = ADMINS
 DATABASES = {	# DB di produzione
 	'sqlite': {
-			'ENGINE': 'django.db.backends.sqlite3', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+			'ENGINE': 'django.db.backends.sqlite3',
 			'NAME': os.path.join(PROJECT_PATH, 'tam.db3')
 	},
 	'archive': {
@@ -34,22 +34,22 @@ DATABASES = {	# DB di produzione
 			'NAME': os.path.join(PROJECT_PATH, 'tamlog.db3')
 	},
 	'postgre': {
-			'ENGINE': 'django.db.backends.postgresql_psycopg2', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+			'ENGINE': 'django.db.backends.postgresql_psycopg2',
+			'HOST':'localhost', 'PORT':5432,
 			'NAME': 'artetam',
 			'USER': 'tam',
 			'PASSWORD': 'tamPostgre',
-			'HOST':'localhost', 'PORT':5432
 	},
 }
 DATABASES['default'] = DATABASES['postgre']
 
 DATABASE_OPTIONS = {
-   "timeout": 20, 	# Sqlite will wait some more
+		"timeout": 20, 	# Sqlite will wait some more
 }
 #else:
 #	DATABASES = {	# DB di test
 #		'default': {
-#				'ENGINE': 'django.db.backends.postgresql_psycopg2', 		# 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+#				'ENGINE': 'django.db.backends.postgresql_psycopg2',
 #				'NAME': 'tam',
 #				'USER': 'tam',
 #				'PASSWORD': 'tampg',
@@ -312,7 +312,7 @@ CACHES = {
 }
 
 # Usiamo le sessioni su cookies per evitare di importunare il DB
-SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+#SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 try:
 	from settings_local import * #@UnusedWildImport

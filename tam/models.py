@@ -1050,6 +1050,7 @@ def stopAllLog():
 	for Model in models_to_log:
 		stopLog(Model)
 
+startAllLog()
 
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
 from tam.views.classifiche import descrizioneDivisioneClassifiche
