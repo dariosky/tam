@@ -1013,17 +1013,18 @@ def get_classifiche():
 	cursor = connections['default'].cursor()
 	query = """
 		select
-			  c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
-			  ifnull(sum(punti_diurni),0)+classifica_iniziale_diurni as puntiDiurni,
-			  ifnull(sum(punti_notturni),0)+classifica_iniziale_notturni as puntiNotturni,
-			  ifnull(sum(prezzoVenezia),0) + classifica_iniziale_long as prezzoVenezia,
-			  ifnull(sum(prezzoPadova),0) + classifica_iniziale_medium as prezzoPadova,
-			  ifnull(sum(prezzoDoppioPadova),0) + classifica_iniziale_doppiPadova as prezzoDoppioPadova,
-			  ifnull(sum(punti_abbinata),0) + classifica_iniziale_puntiDoppiVenezia as punti_abbinata
+			c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
+			coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
+			coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
+			coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
+			coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
+			coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
+			coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
 		from tam_conducente c
-			 left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato=1
-		where  c.attivo=1 --and c.nick='2'
+			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
+		where c.attivo --and c.nick='2'
 		group by c.id, c.nick
+		order by conducente_nick
 	"""
 	cursor.execute(query, ())
 	results = cursor.fetchall()
