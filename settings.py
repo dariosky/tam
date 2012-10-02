@@ -2,11 +2,11 @@
 import os
 import logging
 from socket import gethostname
+host = gethostname().lower()
 
-TAM_VERSION = "3.7.8"
+TAM_VERSION = "4.0.0"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
-host = gethostname().lower()
 if host in ("dariosky", "acido"):
 	DEBUG = True	# siamo in Test
 else:
@@ -20,49 +20,7 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-DATABASES = {	# DB di produzione
-	'sqlite': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': os.path.join(PROJECT_PATH, 'tam.db3')
-	},
-	'archive': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': os.path.join(PROJECT_PATH, 'tamarchive.db3')
-	},
-	'modellog': {
-			'ENGINE': 'django.db.backends.sqlite3',
-			'NAME': os.path.join(PROJECT_PATH, 'tamlog.db3')
-	},
-	'postgre': {
-			'ENGINE': 'django.db.backends.postgresql_psycopg2',
-			'HOST':'localhost', 'PORT':5432,
-			'NAME': 'artetam',
-			'USER': 'tam',
-			'PASSWORD': 'tamPostgre',
-	},
-}
-DATABASES['default'] = DATABASES['postgre']
-
-DATABASE_OPTIONS = {
-		"timeout": 20, 	# Sqlite will wait some more
-}
-#else:
-#	DATABASES = {	# DB di test
-#		'default': {
-#				'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#				'NAME': 'tam',
-#				'USER': 'tam',
-#				'PASSWORD': 'tampg',
-#				'HOST':'localhost', 'PORT':5432
-#		},
-#		'archive': {
-#				'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#				'NAME': 'tamArchive',
-#				'USER': 'tam',
-#				'PASSWORD': 'tampg',
-#				'HOST':'localhost', 'PORT':5432
-#		}
-#	}
+DATABASES = {}	# set them in settings_local
 
 DATABASE_ROUTERS = ['db_routers.TamArchiveRouter',
 					'modellog.db_routers.SeparateLogRouter']
@@ -248,11 +206,11 @@ INSTALLED_APPS = (
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'info@dariosky.it'
-EMAIL_HOST_PASSWORD = 'bangbangD'
-EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_HOST_USER = 'xxx@xxx.com'
+#EMAIL_HOST_PASSWORD = 'xxx'
+#EMAIL_PORT = 587
 EMAIL_SUBJECT_PREFIX = "[TaM]"
 
 #if DEBUG:

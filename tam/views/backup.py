@@ -13,6 +13,8 @@ import os
 import time
 from django.contrib import messages
 from tam.tasks import doBackupTask
+import sys
+import subprocess
 
 def humanizeSize(size):
 	size = float(size)
@@ -33,12 +35,9 @@ def getBackupInfo(doCleanup=False):
 	"""
 	backcount = 20	# numero di backup da tenere
 	dbname = settings.DATABASES['default']['NAME']
-	if not os.path.isfile(dbname):
-		raise Exception("Impossibile trovare il DB %s." % dbname)
 	backupdir = os.path.join(settings.PROJECT_PATH, 'backup')	# backup subfolder
 	if not os.path.isdir(backupdir):
 		os.makedirs(backupdir)
-	backupFilter = os.path.join(backupdir, '*.gz')
 
 	def extractBackupUser(filename):
 		""" Cerca di estrarre il nome dell'utente che ha fatto il backup
@@ -50,20 +49,21 @@ def getBackupInfo(doCleanup=False):
 		except:
 			return "anonimo"
 
+	backupFiles = glob(os.path.join(backupdir, '*.db3.gz'))	# sqlitefiles
+	backupFiles += glob(os.path.join(backupdir, '*.pgdump'))	# sqlitefiles
 	backups = [ {
 			"filename":filename,
 			"date":datetime.datetime.fromtimestamp(os.path.getmtime(filename)),
 			"size":humanizeSize(os.path.getsize(filename)),
 			"username": extractBackupUser(filename),
-			} for filename in glob(backupFilter) ]
+			} for filename in backupFiles ]
 	backups.sort()
 
 	if doCleanup and len(backups) > backcount:
 		for backup in backups[:-backcount + 1]:
 			logging.debug("Cancello il backup: %s" % os.path.basename(backup["filename"]))
 			os.unlink(backup["filename"])
-	return { "dbname": dbname, "backupdir":backupdir, "backups":backups,
-		}
+	return { "dbname": dbname, "backupdir":backupdir, "backups":backups, 	}
 
 def getbackup(request, backupdate):
 	if not request.user.has_perm('tam.get_backup'):
@@ -85,26 +85,73 @@ def getbackup(request, backupdate):
 		messages.error(request, "Backup del %s non trovato." % dataScelta)
 		return HttpResponseRedirect(reverse("tamBackup"))
 
+def doBackupSqlite(targetFile, sourceFile):
+	if not os.path.isfile(sourceFile):
+		raise Exception("Impossibile trovare il DB %s." % sourceFile)
+	f_in = file(sourceFile, "rb")
+	real_out = open(targetFile, 'wb')
 
-def doBackup(user):
-	logAction('B', description='Backup richiesto', user=user)
-	username = user.username
-	backupInfo = getBackupInfo(doCleanup=True)
-	n = datetime.datetime.now()
-	newBackupFilename = "%s - tam - %s.db3.gz" % (n.strftime('%Y-%m-%d %H%M'), username)
-	backupPath = os.path.join(backupInfo["backupdir"], newBackupFilename)
-	logging.debug("%s ===> %s" % (backupInfo["dbname"], backupPath))
-
-	f_in = file(backupInfo["dbname"], "rb")
-	real_out = open(backupPath, 'wb')
-
-	dbname = os.path.split(settings.DATABASES['default']['NAME'])[1]
+	dbname = os.path.split(sourceFile)[1]
 	f_out = gzip.GzipFile(dbname, fileobj=real_out)	# scrivo sul file Gzip il contenuto si chiama sempre tam.db3
 	f_out.write(f_in.read())
 	f_in.close()
 	f_out.close()
 	real_out.close()
-	return HttpResponseRedirect(reverse("tamBackup"))
+
+
+def doBackupPostgre(targetFile, dbName,
+					host=None, port=None,
+				    username=None, password=None):
+	# SET PGPASSWORD=<PassWord>
+	#C:\Programmi\PostgreSQL\9.2\bin
+	# pg_dump.exe -F c -h localhost -p 5432 -U tam -f c:\artebackup.sql artetam
+	pg_dump_prefix = getattr(settings, 'PG_DUMP_PREFIX', '')
+	pgdump_command = 'pg_dump.exe' if 'win' in sys.platform else 'pg_dump'
+	args = []
+	if host: args.append('--username=%s' % username)
+	if password:
+		#args.append('--password')	# force password request
+		os.putenv('PGPASSWORD', password)	# use password from env
+	if host: args.append('--host=%s' % host)
+	if port: args.append('--port=%s' % port)
+	args.append('-F c')					# use the custom format
+	args.append("-w")					# no password prompt
+	args.append('-f "%s"' % targetFile)	# specify the output file path
+	if dbName: args.append(dbName)
+	command = "%s%s %s" % (pg_dump_prefix, pgdump_command, " ".join(args))
+	print "Starting process"
+	print command
+	print subprocess.check_output(command, shell=True)
+	print "End of the process"
+
+
+def doBackup(user):
+	backupInfo = getBackupInfo(doCleanup=True)
+
+	logAction('B', description='Backup richiesto', user=user)
+	username = user.username
+
+	dbType = settings.DATABASES['default']['ENGINE']
+
+	n = datetime.datetime.now()
+	newBackupFilename = "%s - tam - %s" % (n.strftime('%Y-%m-%d %H%M'), username)
+	backupPath = os.path.join(backupInfo["backupdir"], newBackupFilename)
+	logging.debug("%s ===> %s" % (backupInfo["dbname"], backupPath))
+
+	if dbType == 'django.db.backends.sqlite3':
+		doBackupSqlite(targetFile=backupPath + ".db3.gz", sourceFile=backupInfo["dbname"])
+	if dbType == 'django.db.backends.postgresql_psycopg2':
+		doBackupPostgre(targetFile=backupPath + ".pgdump",
+						dbName=settings.DATABASES['default']['NAME'],
+						host=settings.DATABASES['default']['HOST'],
+						port=settings.DATABASES['default']['PORT'],
+						username=settings.DATABASES['default']['USER'],
+						password=settings.DATABASES['default']['PASSWORD'],
+					   )
+	else:
+		raise Exception("Impossibile fare backup di %s" % dbType)
+
+	return backupPath
 
 
 def backup(request, template_name="utils/backup.html"):
@@ -118,3 +165,9 @@ def backup(request, template_name="utils/backup.html"):
 		return HttpResponseRedirect(reverse("tamBackup"))
 	backupInfo = getBackupInfo()
 	return render_to_response(template_name, {"backupInfo":backupInfo}, context_instance=RequestContext(request))
+
+
+if __name__ == '__main__':
+	from django.contrib.auth.models import User
+	user = User.objects.get(id=1)
+	doBackup(user)
