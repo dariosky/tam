@@ -1,5 +1,5 @@
-Django
-South
+django
+south
 distribute
 django-mediagenerator
 xlrd

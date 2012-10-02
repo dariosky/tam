@@ -1,20 +1,20 @@
 #
 # Copyright (c) 2010 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
+#
 #     1. Redistributions of source code must retain the above copyright notice,
 #        this list of conditions and the following disclaimer.
-#    
+#
 #     2. Redistributions in binary form must reproduce the above copyright
 #        notice, this list of conditions and the following disclaimer in the
 #        documentation and/or other materials provided with the distribution.
-# 
+#
 #     3. Neither the names of Django, nexB, Django-tasks nor the names of the contributors may be used
 #        to endorse or promote products derived from this software without
 #        specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -34,12 +34,12 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     args = "task_id"
-    
+
     def handle(self, *args, **options):
         if len(args) != 1:
             self.print_help(sys.argv[0], sys.argv[1])
             return
-            
+
         if 'DJANGOTASKS_TESTING' in os.environ:
             # In tests, we make sure that we are using the right database connection
             # This code is heavily inspired by BaseDatabaseCreation._create_test_db in django/db/backends/creation.py
@@ -53,7 +53,7 @@ class Command(BaseCommand):
                 else:
                     from django.db.backends.creation import TEST_DATABASE_PREFIX
                     test_database_name = TEST_DATABASE_PREFIX + connection.settings_dict['NAME']
-                    
+
                 connection.settings_dict["NAME"] = test_database_name
                 if hasattr(connection.creation, '_rollback_works'):
                     # needed in Django 1.2, but not anymore in 1.3
@@ -70,4 +70,4 @@ class Command(BaseCommand):
         LOG.setLevel(logging.INFO)
 
         return Task.objects.exec_task(*args)
-        
+

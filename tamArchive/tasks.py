@@ -1,13 +1,11 @@
 # coding: utf-8
 from modellog.actions import logAction, stopLog, startLog
 from django.contrib.auth.models import User
-from tam.models import Viaggio, Conducente, reallySpaceless
 import logging
-from django.db import transaction, models
+from django.db import transaction
 from modellog.models import ActionLog
 from django.db.models.query_utils import Q
 from tam.tasks import print_timing, single_instance_task
-#from celery.task import task
 from django.template.loader import render_to_string
 import datetime
 from django.conf import settings
@@ -68,16 +66,10 @@ def daRicordareDelViaggio(ricordi, viaggio):
 	return ricordi
 
 #===============================================================================
-# Djangotasks uses DB, so each tasktype has a model
-class TaskArchive(models.Model):
-	user = models.ForeignKey(User) # the user who starts the backup
-	end_date = models.DateField()
-	def do(self):
-		do_archiviazione(self.user, self.end_date)
-djangotasks.register_task(TaskArchive.do, "Run TAM archive")
 
 def do_archiviazioneTask(user, end_date):
 	" Crea il task per l'archiviazione e lo schedula "
+	from tam.models import TaskArchive
 	archiviazione_task = TaskArchive(user=user, end_date=end_date)
 	archiviazione_task.save()
 
@@ -93,8 +85,9 @@ def do_archiviazioneTask(user, end_date):
 @transaction.commit_manually(using="modellog")
 def do_archiviazione(user, end_date):
 	if settings.DEBUG:
-		print "L'archiviazione non è effettuabile finché sei in modalità DEBUG."
+		raise Exception("Per archiviare devi uscire dal DEBUG mode.")
 		return
+	from tam.models import Viaggio, Conducente
 	filtroViaggi = Q(data__lt=end_date, conducente__isnull=False, padre__isnull=True)
 	viaggiDaArchiviare = Viaggio.objects.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().filter(filtroViaggi)
 		# Optimizations: mi faccio dare solo i modelli che mi interessano
@@ -158,7 +151,6 @@ def do_archiviazione(user, end_date):
 	if archiviati:
 		vacuum_db()
 		transaction.commit()
-
 
 	#logging.debug("Cancello tutti i viaggi appena archiviati")
 	#viaggiDaArchiviare.delete()

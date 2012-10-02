@@ -8,36 +8,44 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'ActionLog'
-        try:
-            db.delete_table('tam_actionlog')
-        except:
-            pass 
 
-        # Adding model 'TaskBackup'
-        db.create_table('tam_taskbackup', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-        ))
-        db.send_create_signal('tam', ['TaskBackup'])
+        # Changing field 'Conducente.classifica_iniziale_doppiPadova'
+        db.alter_column('tam_conducente', 'classifica_iniziale_doppiPadova', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2))
 
+        # Changing field 'Conducente.classifica_iniziale_notturni'
+        db.alter_column('tam_conducente', 'classifica_iniziale_notturni', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_prezzoDoppiVenezia'
+        db.alter_column('tam_conducente', 'classifica_iniziale_prezzoDoppiVenezia', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_diurni'
+        db.alter_column('tam_conducente', 'classifica_iniziale_diurni', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_medium'
+        db.alter_column('tam_conducente', 'classifica_iniziale_medium', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_long'
+        db.alter_column('tam_conducente', 'classifica_iniziale_long', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2))
 
     def backwards(self, orm):
-        # Adding model 'ActionLog'
-        db.create_table('tam_actionlog', (
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('action_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['auth.User'], null=True, blank=True)),
-            ('data', self.gf('django.db.models.fields.DateTimeField')(db_index=True)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal('tam', ['ActionLog'])
 
-        # Deleting model 'TaskBackup'
-        db.delete_table('tam_taskbackup')
+        # Changing field 'Conducente.classifica_iniziale_doppiPadova'
+        db.alter_column('tam_conducente', 'classifica_iniziale_doppiPadova', self.gf('django.db.models.fields.DecimalField')(max_digits=9, decimal_places=2))
 
+        # Changing field 'Conducente.classifica_iniziale_notturni'
+        db.alter_column('tam_conducente', 'classifica_iniziale_notturni', self.gf('django.db.models.fields.DecimalField')(max_digits=9, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_prezzoDoppiVenezia'
+        db.alter_column('tam_conducente', 'classifica_iniziale_prezzoDoppiVenezia', self.gf('django.db.models.fields.DecimalField')(max_digits=9, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_diurni'
+        db.alter_column('tam_conducente', 'classifica_iniziale_diurni', self.gf('django.db.models.fields.DecimalField')(max_digits=9, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_medium'
+        db.alter_column('tam_conducente', 'classifica_iniziale_medium', self.gf('django.db.models.fields.DecimalField')(max_digits=9, decimal_places=2))
+
+        # Changing field 'Conducente.classifica_iniziale_long'
+        db.alter_column('tam_conducente', 'classifica_iniziale_long', self.gf('django.db.models.fields.DecimalField')(max_digits=9, decimal_places=2))
 
     models = {
         'auth.group': {
@@ -100,12 +108,12 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "['-attivo', 'nick', 'nome']", 'object_name': 'Conducente'},
             'assente': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'attivo': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
-            'classifica_iniziale_diurni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_doppiPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_long': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_medium': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_notturni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_prezzoDoppiVenezia': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
+            'classifica_iniziale_diurni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_doppiPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_long': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_medium': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_notturni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_prezzoDoppiVenezia': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
             'classifica_iniziale_puntiDoppiVenezia': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'dati': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'emette_ricevute': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -159,10 +167,20 @@ class Migration(SchemaMigration):
             'luogo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Luogo']", 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'})
         },
+        'tam.taskarchive': {
+            'Meta': {'object_name': 'TaskArchive'},
+            'end_date': ('django.db.models.fields.DateField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
         'tam.taskbackup': {
             'Meta': {'object_name': 'TaskBackup'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'tam.taskmovelog': {
+            'Meta': {'object_name': 'TaskMovelog'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'tam.tratta': {
             'Meta': {'ordering': "['da', 'a']", 'unique_together': "(('da', 'a'),)", 'object_name': 'Tratta'},

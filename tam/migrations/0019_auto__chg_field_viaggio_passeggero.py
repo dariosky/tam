@@ -8,36 +8,14 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'ActionLog'
-        try:
-            db.delete_table('tam_actionlog')
-        except:
-            pass 
 
-        # Adding model 'TaskBackup'
-        db.create_table('tam_taskbackup', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-        ))
-        db.send_create_signal('tam', ['TaskBackup'])
-
+        # Changing field 'Viaggio.passeggero'
+        db.alter_column('tam_viaggio', 'passeggero_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tam.Passeggero'], null=True, on_delete=models.SET_NULL))
 
     def backwards(self, orm):
-        # Adding model 'ActionLog'
-        db.create_table('tam_actionlog', (
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('action_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['auth.User'], null=True, blank=True)),
-            ('data', self.gf('django.db.models.fields.DateTimeField')(db_index=True)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal('tam', ['ActionLog'])
 
-        # Deleting model 'TaskBackup'
-        db.delete_table('tam_taskbackup')
-
+        # Changing field 'Viaggio.passeggero'
+        db.alter_column('tam_viaggio', 'passeggero_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['tam.Passeggero'], null=True))
 
     models = {
         'auth.group': {
@@ -100,12 +78,12 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "['-attivo', 'nick', 'nome']", 'object_name': 'Conducente'},
             'assente': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'attivo': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
-            'classifica_iniziale_diurni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_doppiPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_long': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_medium': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_notturni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_prezzoDoppiVenezia': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
+            'classifica_iniziale_diurni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_doppiPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_long': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_medium': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_notturni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_prezzoDoppiVenezia': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
             'classifica_iniziale_puntiDoppiVenezia': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'dati': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'emette_ricevute': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -124,7 +102,7 @@ class Migration(SchemaMigration):
         'tam.listino': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Listino'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '20'})
+            'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         },
         'tam.luogo': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Luogo'},
@@ -135,7 +113,7 @@ class Migration(SchemaMigration):
         },
         'tam.passeggero': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Passeggero'},
-            'dati': ('django.db.models.fields.TextField', [], {'null': 'True'}),
+            'dati': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'})
         },
@@ -159,10 +137,20 @@ class Migration(SchemaMigration):
             'luogo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Luogo']", 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'})
         },
+        'tam.taskarchive': {
+            'Meta': {'object_name': 'TaskArchive'},
+            'end_date': ('django.db.models.fields.DateField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
         'tam.taskbackup': {
             'Meta': {'object_name': 'TaskBackup'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'tam.taskmovelog': {
+            'Meta': {'object_name': 'TaskMovelog'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'tam.tratta': {
             'Meta': {'ordering': "['da', 'a']", 'unique_together': "(('da', 'a'),)", 'object_name': 'Tratta'},
@@ -174,7 +162,7 @@ class Migration(SchemaMigration):
             'minuti': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         'tam.viaggio': {
-            'Meta': {'ordering': "('data_padre', 'id_padre', 'data')", 'object_name': 'Viaggio'},
+            'Meta': {'ordering': "('data_padre', 'id_padre', 'padre__id', 'data')", 'object_name': 'Viaggio'},
             'a': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'a'", 'to': "orm['tam.Luogo']"}),
             'abbuono_fisso': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
             'abbuono_percentuale': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -208,7 +196,7 @@ class Migration(SchemaMigration):
             'padre': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Viaggio']", 'null': 'True', 'blank': 'True'}),
             'pagamento_differito': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'pagato': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'passeggero': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Passeggero']", 'null': 'True', 'blank': 'True'}),
+            'passeggero': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Passeggero']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'prezzo': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
             'prezzoDoppioPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
             'prezzoPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),

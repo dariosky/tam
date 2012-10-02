@@ -8,73 +8,109 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'ActionLog'
-        try:
-            db.delete_table('tam_actionlog')
-        except:
-            pass 
 
-        # Adding model 'TaskBackup'
-        db.create_table('tam_taskbackup', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
-        ))
-        db.send_create_signal('tam', ['TaskBackup'])
+        # Changing field 'RigaFattura.prezzo'
+        db.alter_column('fatturazione_rigafattura', 'prezzo', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=9, decimal_places=2))
 
+        # Changing field 'RigaFattura.viaggio'
+        db.alter_column('fatturazione_rigafattura', 'viaggio_id', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, null=True, on_delete=models.SET_NULL, to=orm['tam.Viaggio']))
+
+        # Changing field 'RigaFattura.conducente'
+        db.alter_column('fatturazione_rigafattura', 'conducente_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, on_delete=models.SET_NULL, to=orm['tam.Conducente']))
+
+        # Changing field 'RigaFattura.riga_fattura_consorzio'
+        db.alter_column('fatturazione_rigafattura', 'riga_fattura_consorzio_id', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, null=True, on_delete=models.SET_NULL, to=orm['fatturazione.RigaFattura']))
+        # Adding index on 'Fattura', fields ['tipo']
+        db.create_index('fatturazione_fattura', ['tipo'])
+
+
+        # Changing field 'Fattura.passeggero'
+        db.alter_column('fatturazione_fattura', 'passeggero_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, on_delete=models.SET_NULL, to=orm['tam.Passeggero']))
+        # Adding index on 'Fattura', fields ['data']
+        db.create_index('fatturazione_fattura', ['data'])
+
+
+        # Changing field 'Fattura.progressivo'
+        db.alter_column('fatturazione_fattura', 'progressivo', self.gf('django.db.models.fields.IntegerField')(null=True))
+        # Adding index on 'Fattura', fields ['progressivo']
+        db.create_index('fatturazione_fattura', ['progressivo'])
+
+
+        # Changing field 'Fattura.anno'
+        db.alter_column('fatturazione_fattura', 'anno', self.gf('django.db.models.fields.IntegerField')(null=True))
+        # Adding index on 'Fattura', fields ['anno']
+        db.create_index('fatturazione_fattura', ['anno'])
+
+
+        # Changing field 'Fattura.cliente'
+        db.alter_column('fatturazione_fattura', 'cliente_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, on_delete=models.SET_NULL, to=orm['tam.Cliente']))
 
     def backwards(self, orm):
-        # Adding model 'ActionLog'
-        db.create_table('tam_actionlog', (
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('action_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['auth.User'], null=True, blank=True)),
-            ('data', self.gf('django.db.models.fields.DateTimeField')(db_index=True)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal('tam', ['ActionLog'])
+        # Removing index on 'Fattura', fields ['anno']
+        db.delete_index('fatturazione_fattura', ['anno'])
 
-        # Deleting model 'TaskBackup'
-        db.delete_table('tam_taskbackup')
+        # Removing index on 'Fattura', fields ['progressivo']
+        db.delete_index('fatturazione_fattura', ['progressivo'])
 
+        # Removing index on 'Fattura', fields ['data']
+        db.delete_index('fatturazione_fattura', ['data'])
+
+        # Removing index on 'Fattura', fields ['tipo']
+        db.delete_index('fatturazione_fattura', ['tipo'])
+
+
+        # User chose to not deal with backwards NULL issues for 'RigaFattura.prezzo'
+        raise RuntimeError("Cannot reverse this migration. 'RigaFattura.prezzo' and its values cannot be restored.")
+
+        # Changing field 'RigaFattura.viaggio'
+        db.alter_column('fatturazione_rigafattura', 'viaggio_id', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, null=True, to=orm['tam.Viaggio']))
+
+        # Changing field 'RigaFattura.conducente'
+        db.alter_column('fatturazione_rigafattura', 'conducente_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm['tam.Conducente']))
+
+        # Changing field 'RigaFattura.riga_fattura_consorzio'
+        db.alter_column('fatturazione_rigafattura', 'riga_fattura_consorzio_id', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, null=True, to=orm['fatturazione.RigaFattura']))
+
+        # Changing field 'Fattura.passeggero'
+        db.alter_column('fatturazione_fattura', 'passeggero_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm['tam.Passeggero']))
+
+        # User chose to not deal with backwards NULL issues for 'Fattura.progressivo'
+        raise RuntimeError("Cannot reverse this migration. 'Fattura.progressivo' and its values cannot be restored.")
+
+        # User chose to not deal with backwards NULL issues for 'Fattura.anno'
+        raise RuntimeError("Cannot reverse this migration. 'Fattura.anno' and its values cannot be restored.")
+
+        # Changing field 'Fattura.cliente'
+        db.alter_column('fatturazione_fattura', 'cliente_id', self.gf('django.db.models.fields.related.ForeignKey')(null=True, to=orm['tam.Cliente']))
 
     models = {
-        'auth.group': {
-            'Meta': {'object_name': 'Group'},
+        'fatturazione.fattura': {
+            'Meta': {'ordering': "('anno', 'progressivo')", 'object_name': 'Fattura'},
+            'anno': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'db_index': 'True'}),
+            'archiviata': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'cliente': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'fatture'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['tam.Cliente']"}),
+            'data': ('django.db.models.fields.DateField', [], {'db_index': 'True'}),
+            'emessa_a': ('django.db.models.fields.TextField', [], {}),
+            'emessa_da': ('django.db.models.fields.TextField', [], {}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '80'}),
-            'permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'})
+            'note': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'passeggero': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'fatture'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['tam.Passeggero']"}),
+            'progressivo': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'db_index': 'True'}),
+            'tipo': ('django.db.models.fields.CharField', [], {'max_length': '1', 'db_index': 'True'})
         },
-        'auth.permission': {
-            'Meta': {'ordering': "('content_type__app_label', 'content_type__model', 'codename')", 'unique_together': "(('content_type', 'codename'),)", 'object_name': 'Permission'},
-            'codename': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+        'fatturazione.rigafattura': {
+            'Meta': {'ordering': "('fattura', 'riga')", 'object_name': 'RigaFattura'},
+            'conducente': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'fatture'", 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['tam.Conducente']"}),
+            'descrizione': ('django.db.models.fields.TextField', [], {}),
+            'fattura': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'righe'", 'to': "orm['fatturazione.Fattura']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        'auth.user': {
-            'Meta': {'object_name': 'User'},
-            'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
-            'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'groups': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Group']", 'symmetrical': 'False', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'is_staff': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'is_superuser': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'last_login': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
-            'last_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
-            'password': ('django.db.models.fields.CharField', [], {'max_length': '128'}),
-            'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
-            'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
-        },
-        'contenttypes.contenttype': {
-            'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
-            'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
+            'iva': ('django.db.models.fields.IntegerField', [], {}),
+            'note': ('django.db.models.fields.TextField', [], {}),
+            'prezzo': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '9', 'decimal_places': '2'}),
+            'qta': ('django.db.models.fields.IntegerField', [], {}),
+            'riga': ('django.db.models.fields.IntegerField', [], {}),
+            'riga_fattura_consorzio': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'fattura_conducente_collegata'", 'unique': 'True', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['fatturazione.RigaFattura']"}),
+            'viaggio': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'riga_fattura'", 'unique': 'True', 'null': 'True', 'on_delete': 'models.SET_NULL', 'to': "orm['tam.Viaggio']"})
         },
         'tam.bacino': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Bacino'},
@@ -100,12 +136,12 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "['-attivo', 'nick', 'nome']", 'object_name': 'Conducente'},
             'assente': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'attivo': ('django.db.models.fields.BooleanField', [], {'default': 'True', 'db_index': 'True'}),
-            'classifica_iniziale_diurni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_doppiPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_long': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_medium': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_notturni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
-            'classifica_iniziale_prezzoDoppiVenezia': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
+            'classifica_iniziale_diurni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_doppiPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_long': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_medium': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_notturni': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
+            'classifica_iniziale_prezzoDoppiVenezia': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '12', 'decimal_places': '2'}),
             'classifica_iniziale_puntiDoppiVenezia': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'dati': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'emette_ricevute': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
@@ -114,17 +150,10 @@ class Migration(SchemaMigration):
             'nick': ('django.db.models.fields.CharField', [], {'max_length': '5', 'null': 'True', 'blank': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'})
         },
-        'tam.conguaglio': {
-            'Meta': {'object_name': 'Conguaglio'},
-            'conducente': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Conducente']"}),
-            'dare': ('django.db.models.fields.DecimalField', [], {'default': '10', 'max_digits': '9', 'decimal_places': '2'}),
-            'data': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
         'tam.listino': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Listino'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '20'})
+            'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         },
         'tam.luogo': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Luogo'},
@@ -135,34 +164,9 @@ class Migration(SchemaMigration):
         },
         'tam.passeggero': {
             'Meta': {'ordering': "['nome']", 'object_name': 'Passeggero'},
-            'dati': ('django.db.models.fields.TextField', [], {'null': 'True'}),
+            'dati': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'nome': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '40'})
-        },
-        'tam.prezzolistino': {
-            'Meta': {'ordering': "['tipo_servizio', 'max_pax']", 'unique_together': "(('listino', 'tratta', 'tipo_servizio', 'max_pax'),)", 'object_name': 'PrezzoListino'},
-            'commissione': ('django.db.models.fields.DecimalField', [], {'default': '0', 'null': 'True', 'max_digits': '9', 'decimal_places': '2'}),
-            'flag_fatturazione': ('django.db.models.fields.CharField', [], {'default': "'-'", 'max_length': '1'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'listino': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Listino']"}),
-            'max_pax': ('django.db.models.fields.IntegerField', [], {'default': '4'}),
-            'prezzo_diurno': ('django.db.models.fields.DecimalField', [], {'default': '10', 'max_digits': '9', 'decimal_places': '2'}),
-            'prezzo_notturno': ('django.db.models.fields.DecimalField', [], {'default': '10', 'max_digits': '9', 'decimal_places': '2'}),
-            'tipo_commissione': ('django.db.models.fields.CharField', [], {'default': "'F'", 'max_length': '1'}),
-            'tipo_servizio': ('django.db.models.fields.CharField', [], {'default': "'T'", 'max_length': '1'}),
-            'tratta': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Tratta']"}),
-            'ultima_modifica': ('django.db.models.fields.DateField', [], {'auto_now': 'True', 'blank': 'True'})
-        },
-        'tam.profiloutente': {
-            'Meta': {'object_name': 'ProfiloUtente'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'luogo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Luogo']", 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'})
-        },
-        'tam.taskbackup': {
-            'Meta': {'object_name': 'TaskBackup'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
         },
         'tam.tratta': {
             'Meta': {'ordering': "['da', 'a']", 'unique_together': "(('da', 'a'),)", 'object_name': 'Tratta'},
@@ -174,7 +178,7 @@ class Migration(SchemaMigration):
             'minuti': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         'tam.viaggio': {
-            'Meta': {'ordering': "('data_padre', 'id_padre', 'data')", 'object_name': 'Viaggio'},
+            'Meta': {'ordering': "('data_padre', 'id_padre', 'padre__id', 'data')", 'object_name': 'Viaggio'},
             'a': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'a'", 'to': "orm['tam.Luogo']"}),
             'abbuono_fisso': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
             'abbuono_percentuale': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -208,7 +212,7 @@ class Migration(SchemaMigration):
             'padre': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Viaggio']", 'null': 'True', 'blank': 'True'}),
             'pagamento_differito': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'pagato': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'passeggero': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Passeggero']", 'null': 'True', 'blank': 'True'}),
+            'passeggero': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Passeggero']", 'null': 'True', 'on_delete': 'models.SET_NULL', 'blank': 'True'}),
             'prezzo': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
             'prezzoDoppioPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
             'prezzoPadova': ('django.db.models.fields.DecimalField', [], {'default': '0', 'max_digits': '9', 'decimal_places': '2'}),
@@ -226,4 +230,4 @@ class Migration(SchemaMigration):
         }
     }
 
-    complete_apps = ['tam']
+    complete_apps = ['fatturazione']
