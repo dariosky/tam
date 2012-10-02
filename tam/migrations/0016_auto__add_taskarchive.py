@@ -8,35 +8,18 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'ActionLog'
-        try:
-            db.delete_table('tam_actionlog')
-        except:
-            pass 
-
-        # Adding model 'TaskBackup'
-        db.create_table('tam_taskbackup', (
+        # Adding model 'TaskArchive'
+        db.create_table('tam_taskarchive', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'])),
+            ('end_date', self.gf('django.db.models.fields.DateField')()),
         ))
-        db.send_create_signal('tam', ['TaskBackup'])
+        db.send_create_signal('tam', ['TaskArchive'])
 
 
     def backwards(self, orm):
-        # Adding model 'ActionLog'
-        db.create_table('tam_actionlog', (
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('action_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['auth.User'], null=True, blank=True)),
-            ('data', self.gf('django.db.models.fields.DateTimeField')(db_index=True)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal('tam', ['ActionLog'])
-
-        # Deleting model 'TaskBackup'
-        db.delete_table('tam_taskbackup')
+        # Deleting model 'TaskArchive'
+        db.delete_table('tam_taskarchive')
 
 
     models = {
@@ -159,10 +142,20 @@ class Migration(SchemaMigration):
             'luogo': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['tam.Luogo']", 'null': 'True', 'blank': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']", 'unique': 'True'})
         },
+        'tam.taskarchive': {
+            'Meta': {'object_name': 'TaskArchive'},
+            'end_date': ('django.db.models.fields.DateField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
         'tam.taskbackup': {
             'Meta': {'object_name': 'TaskBackup'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'user': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['auth.User']"})
+        },
+        'tam.taskmovelog': {
+            'Meta': {'object_name': 'TaskMovelog'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
         },
         'tam.tratta': {
             'Meta': {'ordering': "['da', 'a']", 'unique_together': "(('da', 'a'),)", 'object_name': 'Tratta'},

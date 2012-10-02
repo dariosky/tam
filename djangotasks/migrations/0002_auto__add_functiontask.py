@@ -7,7 +7,7 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        
+
         # Adding model 'FunctionTask'
         db.create_table('djangotasks_functiontask', (
             ('function_name', self.gf('django.db.models.fields.CharField')(max_length=400, primary_key=True)),
@@ -16,7 +16,7 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        
+
         # Deleting model 'FunctionTask'
         db.delete_table('djangotasks_functiontask')
 

@@ -161,6 +161,14 @@ def listaCorse(request, template_name="corse/lista.html"):
 	else:
 		filterCliente = request.session.get("filterCliente", None)
 
+	if u'filterPrivato'	in request.GET:
+		filterPrivato = request.GET["filterPrivato"]
+		filterCliente = ""
+		# non uso session per filterPrivato
+	else:
+		filterPrivato = False
+
+
 	viaggi = Viaggio.objects.all()	# mostro tutti i figli, non raggruppo per padre
 	#viaggi = viaggi.filter(Q(padre_id=81833) | Q(id=81833)) #TMP:
 	if filterCliente or (filterFlag != "Tutti i flag") or outputFormat:		# non raggruppo
@@ -245,6 +253,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		else:
 			viaggi = viaggi.filter(cliente__id=filterCliente)	# cliente specifico
 			clienteFiltrato = Cliente.objects.get(id=filterCliente)
+	if filterPrivato:
+		viaggi = viaggi.filter(passeggero__nome=filterPrivato)
 
 	if data_inizio: viaggi = viaggi.filter(data__gt=data_inizio)
 	if data_fine: viaggi = viaggi.filter(data__lt=data_fine) # prossimi 15 giorni
@@ -818,7 +828,7 @@ def conducente(*args, **kwargs):
 def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectOk="/", delete=False, unique=(("nome",),),
 			note="", excludedFields=None, fields_descriptions=None):
 	"""
-		@param extra_dict:	Addictional var to give to response 
+		@param extra_dict:	Addictional var to give to response
 	"""
 	if "next" in request.GET:
 		redirectOk = request.GET["next"]
@@ -885,6 +895,84 @@ def privati(request, template_name="passeggeri.html"):
 	""" Mostro tutti i passeggeri privati """
 	privati = Passeggero.objects.all()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
+def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/privati/", delete=False, unique=(("nome",),),
+			excludedFields=None, fields_descriptions=None):
+	"""
+		@param extra_dict:	Addictional var to give to response
+	"""
+	if "next" in request.GET:
+		redirectOk = request.GET["next"]
+	nuovo = id is None
+	user = request.user
+	actionName = getActionName(delete=delete, nuovo=nuovo)
+
+	permissionName = "tam.%(action)s_%(module)s" % {"action":actionName, "module":Passeggero._meta.module_name}
+	allowed = user.has_perm(permissionName)
+	if not allowed:
+		messages.error(request, "Operazione non concessa.")
+		return HttpResponseRedirect(redirectOk)
+
+	class GenericModelForm(forms.ModelForm):
+		def clean(self):
+			for constraintList in unique:
+				query = self.Meta.model.objects	# get all objects
+				for field in constraintList:	# and filter all with the fields=contraints
+					if not field in self.cleaned_data:
+						return self.cleaned_data	# un campo di controllo è vuoto, fallirà dopo
+					if isinstance(self.Meta.model._meta.get_field(field), models.CharField):
+						# insensitive match only for CharField fields
+						kwargs = { "%s__iexact" % field: self.cleaned_data[field] }
+					else:
+						kwargs = { "%s" % field: self.cleaned_data[field] }
+					query = query.filter(**kwargs)
+				if id: query = query.exclude(id=id)	# exclude current id if editing
+				if query.count() > 0:
+					raise forms.ValidationError(u"Esiste già un passeggero con questo %s." % (", ".join(constraintList)))
+			return self.cleaned_data
+		class Meta:
+			model = Passeggero
+			exclude = excludedFields
+
+	instance = id and Passeggero.objects.get(id=id) or None
+
+	if not nuovo:
+		viaggi = Viaggio.objects.filter(passeggero=id)
+		viaggi_con_passeggero = viaggi.count()
+		permessi_cancellazione = user.has_perm("tam.delete_passeggero")
+		no_corse_future = viaggi.filter(data__gte=datetime.date.today()).count() == 0
+	else:
+		no_corse_future = False
+
+	if not delete:	# creation or edit
+		form = GenericModelForm(request.POST or None, instance=instance)
+		if form.is_valid():
+			instance = form.save()
+			messages.success(request, "%s passeggero: %s." % (nuovo and "Creato" or "Aggiornato", instance))
+			return HttpResponseRedirect(redirectOk)
+	else:
+		if not instance:
+			messages.error(request, "Impossibile trovare l'oggetto da cancellare.")
+			return HttpResponseRedirect(redirectOk)
+		if no_corse_future == False:
+			messages.error(request, "Passeggero con corse future, protetto.")
+			return HttpResponseRedirect(redirectOk)
+		if request.method == "POST":
+			if "OK" in request.POST:
+				instance.delete()
+				messages.success(request, "Cancellato il passeggero %s." % instance)
+				return HttpResponseRedirect(redirectOk)
+			else:
+				return HttpResponseRedirect(redirectOk)
+
+	context_vars = locals()
+	if fields_descriptions:
+		#context_vars.extend(extra_dict)
+		#print form.fields.keys()
+		for field_name, description in fields_descriptions.items():
+			form.fields[field_name].label = description
+	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
+
 
 def profilo(request, *args, **kwargs):
 	instance, created = ProfiloUtente.objects.get_or_create(user=request.user)

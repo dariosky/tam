@@ -12,9 +12,7 @@ from django.db import connections
 from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
-
-# load models required for the tasks
-from tam.tasks import TaskBackup, TaskMovelog #@UnusedImport
+from django.db.models.deletion import SET_NULL
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -63,7 +61,13 @@ class Luogo(models.Model):
 		return reverse("tamLuogoIdDel", kwargs={"id":self.id})
 
 	def save(self, *args, **kwargs):
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
 		super(Luogo, self).save(*args, **kwargs)
+		if not updateViaggi: return
 		# aggiorno tutte le corse precalcolate con quel luogo
 		viaggiCoinvolti = Viaggio.objects.filter(tratta_start__da=self) | Viaggio.objects.filter(tratta_start__a=self) | \
 			Viaggio.objects.filter(tratta__da=self) | Viaggio.objects.filter(tratta__a=self) | \
@@ -105,18 +109,24 @@ class Tratta(models.Model):
 
 	def save(self, *args, **kwargs):
 		""" Salvo la tratta """
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
 		super(Tratta, self).save(*args, **kwargs)
 		# invalida la cache
 		keyword = ("tratta%s-%s" % (self.da.id, self.a.id)).replace(" ", "")
 		cache.delete(keyword)
 
-		# aggiorno tutte le corse precalcolate con questa tratta
-		viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
-				Viaggio.objects.filter(tratta=self) | \
-				Viaggio.objects.filter(tratta_end=self)
-		viaggiCoinvolti = viaggiCoinvolti.filter(conducente_confermato=False)	# ricalcolo tutti i non confermati
-		for viaggio in viaggiCoinvolti:
-			viaggio.updatePrecomp()
+		if updateViaggi:
+			# aggiorno tutte le corse precalcolate con questa tratta
+			viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
+					Viaggio.objects.filter(tratta=self) | \
+					Viaggio.objects.filter(tratta_end=self)
+			viaggiCoinvolti = viaggiCoinvolti.filter(conducente_confermato=False)	# ricalcolo tutti i non confermati
+			for viaggio in viaggiCoinvolti:
+				viaggio.updatePrecomp()
 
 def get_tratta(da, a):
 	""" Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
@@ -149,7 +159,7 @@ class Viaggio(models.Model):
 	esclusivo = models.BooleanField("Servizio taxi", default=True)	# se non è consentito il raggruppamento contemporaneo
 
 	cliente = models.ForeignKey("Cliente", null=True, blank=True, db_index=True)	# se null è un privato
-	passeggero = models.ForeignKey("Passeggero", null=True, blank=True) # eventuale passeggero se cliente 'Privato'
+	passeggero = models.ForeignKey("Passeggero", null=True, blank=True, on_delete=SET_NULL) # eventuale passeggero se cliente 'Privato'
 
 	prezzo = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
 	costo_autostrada = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
@@ -210,7 +220,7 @@ class Viaggio(models.Model):
 	class Meta:
 		verbose_name_plural = _("Viaggi")
 		permissions = (('change_oldviaggio', 'Cambia vecchio viaggio'), ('change_doppi', 'Cambia il numero di casette'))
-		ordering = ("data_padre", "id_padre", "data")
+		ordering = ("data_padre", "id_padre", "padre__id", "data")
 
 	def url(self):
 		return reverse("tamNuovaCorsaId", kwargs={"id":self.id})
@@ -316,6 +326,14 @@ class Viaggio(models.Model):
 
 	def save(self, *args, **kwargs):
 		"""Ridefinisco il salvataggio dei VIAGGI per popolarmi i campi calcolati"""
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
+		if not updateViaggi:
+			return super(Viaggio, self).save(*args, **kwargs)
+		
 		if not self.conducente:	# quando confermo o richiedo un conducente DEVO avere un conducente
 			self.conducente_confermato = False
 			self.conducente_richiesto = False
@@ -812,15 +830,15 @@ class Conducente(models.Model):
 	emette_ricevute = models.BooleanField("Emette senza IVA?", help_text="Il conducente può emettere fatture senza IVA?", default=True)
 	assente = models.BooleanField(default=False)
 
-	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=9, decimal_places=2, default=0)
-	classifica_iniziale_notturni = models.DecimalField("Supplementari notturni", max_digits=9, decimal_places=2, default=0)
+	classifica_iniziale_diurni = models.DecimalField("Supplementari diurni", max_digits=12, decimal_places=2, default=0)
+	classifica_iniziale_notturni = models.DecimalField("Supplementari notturni", max_digits=12, decimal_places=2, default=0)
 
 	classifica_iniziale_puntiDoppiVenezia = models.IntegerField("Punti Doppi Venezia", default=0)
-	classifica_iniziale_prezzoDoppiVenezia = models.DecimalField("Valore Doppi Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
-	classifica_iniziale_doppiPadova = models.DecimalField("Doppi Padova", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
+	classifica_iniziale_prezzoDoppiVenezia = models.DecimalField("Valore Doppi Venezia", max_digits=12, decimal_places=2, default=0)		# fino a 9999.99
+	classifica_iniziale_doppiPadova = models.DecimalField("Doppi Padova", max_digits=12, decimal_places=2, default=0)		# fino a 9999.99
 
-	classifica_iniziale_long = models.DecimalField("Venezia", max_digits=9, decimal_places=2, default=0)		# fino a 9999.99
-	classifica_iniziale_medium = models.DecimalField("Padova", max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
+	classifica_iniziale_long = models.DecimalField("Venezia", max_digits=12, decimal_places=2, default=0)		# fino a 9999.99
+	classifica_iniziale_medium = models.DecimalField("Padova", max_digits=12, decimal_places=2, default=0)	# fino a 9999.99
 
 	class Meta:
 		verbose_name_plural = _("Conducenti")
@@ -884,7 +902,7 @@ class Cliente(models.Model):
 class Passeggero(models.Model):
 	""" I passeggeri sono clienti particolari con meno caratteristiche """
 	nome = models.CharField(max_length=40, unique=True)
-	dati = models.TextField(null=True)
+	dati = models.TextField(null=True, blank=True)
 	class Meta:
 		verbose_name_plural = _("Passeggeri")
 		ordering = ["nome"]
@@ -900,7 +918,7 @@ class Listino(models.Model):
 	""" Ogni listino ha un suo nome ed una serie di tratte collegate.
 		È indipendente dal cliente.
 	"""
-	nome = models.CharField(max_length=20, unique=True)
+	nome = models.CharField(max_length=30, unique=True)
 	class Meta:
 		verbose_name_plural = _("Listini")
 		ordering = ["nome"]
@@ -995,17 +1013,18 @@ def get_classifiche():
 	cursor = connections['default'].cursor()
 	query = """
 		select
-			  c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
-			  ifnull(sum(punti_diurni),0)+classifica_iniziale_diurni as puntiDiurni,
-			  ifnull(sum(punti_notturni),0)+classifica_iniziale_notturni as puntiNotturni,
-			  ifnull(sum(prezzoVenezia),0) + classifica_iniziale_long as prezzoVenezia,
-			  ifnull(sum(prezzoPadova),0) + classifica_iniziale_medium as prezzoPadova,
-			  ifnull(sum(prezzoDoppioPadova),0) + classifica_iniziale_doppiPadova as prezzoDoppioPadova,
-			  ifnull(sum(punti_abbinata),0) + classifica_iniziale_puntiDoppiVenezia as punti_abbinata
+			c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
+			coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
+			coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
+			coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
+			coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
+			coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
+			coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
 		from tam_conducente c
-			 left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato=1
-		where  c.attivo=1 --and c.nick='2'
+			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
+		where c.attivo --and c.nick='2'
 		group by c.id, c.nick
+		order by conducente_nick
 	"""
 	cursor.execute(query, ())
 	results = cursor.fetchall()
@@ -1020,15 +1039,23 @@ def get_classifiche():
 	return classifiche
 
 # Comincia a loggare i cambiamenti a questi Modelli
-from modellog.actions import startLog
-startLog(Viaggio)
-startLog(Cliente)
-startLog(Passeggero)
-startLog(Conducente)
-startLog(Tratta)
-startLog(PrezzoListino)
+from modellog.actions import startLog, stopLog
+models_to_log = (Viaggio, Cliente, Passeggero,
+				 Conducente, Tratta, PrezzoListino)
+def startAllLog():
+	for Model in models_to_log:
+		startLog(Model)
+
+def stopAllLog():
+	for Model in models_to_log:
+		stopLog(Model)
+
+startAllLog()
 
 # l'import di classifiche deve stare in fondo per evitare loop di importazione
 from tam.views.classifiche import descrizioneDivisioneClassifiche
 process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 process_value = settings.GET_VALUE_FUNCTION
+
+# load models required for the tasks
+from tam.tasks import TaskBackup, TaskMovelog, TaskArchive #@UnusedImport

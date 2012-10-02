@@ -6,37 +6,40 @@
 <h1>Gestione dei backup.</h1>
 
 <div>
-	TaM consente di effettuare contemporaneamente un backup di tutti
-	i dati sul server e poterne scaricare una copia in locale.
+	Da qui puoi avviare dei backup manuali del database e scaricarli se ne hai i permessi.
 	<form action="" method="post">
-		<table class="tablesorter">
-			<thead>
-				<tr>
-					<th></th>
-					<th>Utente</th>
-					<th>Data</th>
-					<th>Dimensione</th>
-				</tr>
-			</thead>
-			<tbody>
-				{% for backup in backupInfo.backups %}
-				<tr>
-					<td>{{ forloop.counter }}.</td>
-					<td>{{ backup.username }}</td>
-					<td>
-						{% with backup.date|date:"d-m-Y-Hi" as f_date %}
-							{% if backup.size == "zero" %}
-								{{ backup.date|date:"D j F, H:i" }}
-							{% else %}
-								<a href='{% url tamGetBackup f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
-							{% endif %}
-						{% endwith %}
-					</td>
-					<td>{% if backup.size == "zero" %} backup in corso {% else %}{{ backup.size }}{% endif %}</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+	{% if backupInfo.backups %}
+			<table class="tablesorter">
+				<thead>
+					<tr>
+						<th></th>
+						<th>Utente</th>
+						<th>Data</th>
+						<th>Dimensione</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for backup in backupInfo.backups %}
+					<tr>
+						<td>{{ forloop.counter }}.</td>
+						<td>{{ backup.username }}</td>
+						<td>
+							{% with backup.date|date:"d-m-Y-Hi" as f_date %}
+								{% if backup.size == "zero" %}
+									{{ backup.date|date:"D j F, H:i" }}
+								{% else %}
+									<a href='{% url tamGetBackup f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
+								{% endif %}
+							{% endwith %}
+						</td>
+						<td>{% if backup.size == "zero" %} backup in corso {% else %}{{ backup.size }}{% endif %}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			<p>Non sono presenti backup del database.</p>
+		{% endif %}	
 		<p>
 			<input type="submit" name="backup" value="Backup DB" class="bigButton"/>
 		</p>
