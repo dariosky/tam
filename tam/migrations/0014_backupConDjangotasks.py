@@ -8,9 +8,6 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting model 'ActionLog'
-        db.delete_table('tam_actionlog')
-
         # Adding model 'TaskBackup'
         db.create_table('tam_taskbackup', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
@@ -20,18 +17,6 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
-        # Adding model 'ActionLog'
-        db.create_table('tam_actionlog', (
-            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'])),
-            ('action_type', self.gf('django.db.models.fields.CharField')(max_length=1)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(default=None, to=orm['auth.User'], null=True, blank=True)),
-            ('data', self.gf('django.db.models.fields.DateTimeField')(db_index=True)),
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('object_id', self.gf('django.db.models.fields.PositiveIntegerField')()),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-        ))
-        db.send_create_signal('tam', ['ActionLog'])
-
         # Deleting model 'TaskBackup'
         db.delete_table('tam_taskbackup')
 
