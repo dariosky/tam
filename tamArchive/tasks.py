@@ -6,7 +6,6 @@ from django.db import transaction
 from modellog.models import ActionLog
 from django.db.models.query_utils import Q
 from tam.tasks import print_timing, single_instance_task
-#from celery.task import task
 from django.template.loader import render_to_string
 import datetime
 from django.conf import settings

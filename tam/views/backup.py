@@ -16,6 +16,7 @@ from tam.tasks import doBackupTask
 import sys
 import subprocess
 
+
 def humanizeSize(size):
 	size = float(size)
 	suffix = "byte"
@@ -27,6 +28,7 @@ def humanizeSize(size):
 			size = size / 1024
 			suffix = "MB"
 	return "%.2f%s" % (size, suffix)
+
 
 def getBackupInfo(doCleanup=False):
 	""" Return some info needed to do a sqlite backup
@@ -65,6 +67,7 @@ def getBackupInfo(doCleanup=False):
 			os.unlink(backup["filename"])
 	return { "dbname": dbname, "backupdir":backupdir, "backups":backups, 	}
 
+
 def getbackup(request, backupdate):
 	if not request.user.has_perm('tam.get_backup'):
 		messages.error(request, "Non hai accesso al download dei backup.")
@@ -84,6 +87,7 @@ def getbackup(request, backupdate):
 	else:
 		messages.error(request, "Backup del %s non trovato." % dataScelta)
 		return HttpResponseRedirect(reverse("tamBackup"))
+
 
 def doBackupSqlite(targetFile, sourceFile):
 	if not os.path.isfile(sourceFile):
