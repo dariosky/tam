@@ -1,20 +1,20 @@
 #
 # Copyright (c) 2010 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
+#
 #     1. Redistributions of source code must retain the above copyright notice,
 #        this list of conditions and the following disclaimer.
-#    
+#
 #     2. Redistributions in binary form must reproduce the above copyright
 #        notice, this list of conditions and the following disclaimer in the
 #        documentation and/or other materials provided with the distribution.
-# 
+#
 #     3. Neither the names of Django, nexB, Django-tasks nor the names of the contributors may be used
 #        to endorse or promote products derived from this software without
 #        specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,7 +26,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from __future__ import with_statement 
+from __future__ import with_statement
 
 import sys
 import StringIO
@@ -51,7 +51,7 @@ class LogCheck(object):
         self.test = test
         self.expected_log = expected_log or ''
         self.fail_if_different = fail_if_different
-        
+
     def __enter__(self):
         from djangotasks.models import LOG
         self.loghandlers = LOG.handlers
@@ -60,7 +60,7 @@ class LogCheck(object):
         test_handler = logging.StreamHandler(self.log)
         test_handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
         LOG.addHandler(test_handler)
-        
+
     def __exit__(self, type, value, traceback):
         # Restore state
         from djangotasks.models import LOG
@@ -70,7 +70,7 @@ class LogCheck(object):
         # Check the output only if no exception occured (to avoid "eating" test failures)
         if type:
             return
-        
+
         if self.fail_if_different:
             self.test.assertEquals(self.expected_log, self.log.getvalue())
 
@@ -91,11 +91,11 @@ class TestModel(models.Model):
         self._trigger(trigger_name)
 
     def run_something_long(self, msg=''):
-        self._run("run_something_long_1", 0.0) # trigger right away, 
+        self._run("run_something_long_1", 0.0) # trigger right away,
         time.sleep(0.2) # then sleep
         self._run("run_something_long_2")
         return "finished"
-    
+
     def run_something_else(self):
         pass
 
@@ -138,8 +138,8 @@ class TestModel(models.Model):
 TESTMODEL_NAME = unicode(TestModel._meta)
 
 def _start_message(task):
-    return "INFO: Starting task " + str(task.pk) + "...\nINFO: ...Task " + str(task.pk) + " started.\n" 
-    
+    return "INFO: Starting task " + str(task.pk) + "...\nINFO: ...Task " + str(task.pk) + " started.\n"
+
 def _test_function():
     print "running _test_function"
 
@@ -177,7 +177,7 @@ class TasksTestCase(unittest.TestCase):
     def setUp(self):
         from djangotasks.models import TaskManager
         TaskManager.DEFINED_TASKS['djangotasks.testmodel'] = TEST_DEFINED_TASKS
-        
+
         import tempfile
         self.tempdir = tempfile.mkdtemp()
         import os
@@ -192,7 +192,7 @@ class TasksTestCase(unittest.TestCase):
         shutil.rmtree(self.tempdir)
         import os
         del os.environ['DJANGOTASKS_TESTING']
-        
+
     #  This may be needed for databases that can't share transactions (connections) accross threads (sqlite in particular):
     #  the tests tasks may need to be commited before the execution thread is started, which require transaction.commit to actually *do* the commit --
     #  and the original "_fixture_setup" causes "transaction.commit" to be transformed into a "nop" !!!
@@ -225,7 +225,7 @@ class TasksTestCase(unittest.TestCase):
 
         self.assertEquals("successful", task.status)
         self.assertEquals("running _test_function\n", task.log)
-        
+
 
     def test__get_model_class(self):
         from djangotasks.models import _get_model_class
@@ -235,7 +235,7 @@ class TasksTestCase(unittest.TestCase):
         from djangotasks.models import _get_model_name
         self.assertEquals('djangotasks.testmodel', _get_model_name(TestModel))
 
-    def _tasks_for_object(self, object_id):        
+    def _tasks_for_object(self, object_id):
         key = join(self.tempdir, object_id)
         object, _ = TestModel.objects.get_or_create(pk=key)
         return djangotasks.tasks_for_object(object)
@@ -253,9 +253,9 @@ class TasksTestCase(unittest.TestCase):
         class NotAValidModel(object):
             def a_method(self):
                 pass
-        self.assertRaises(Exception("type object 'NotAValidModel' has no attribute 'objects'"), 
+        self.assertRaises(Exception("type object 'NotAValidModel' has no attribute 'objects'"),
                           self._task_for_object, NotAValidModel.a_method, 'key1')
-            
+
     def test_tasks_register(self):
         class MyClass(object):
             _meta = "djangotasks.myclass"
@@ -264,16 +264,16 @@ class TasksTestCase(unittest.TestCase):
 
             def mymethod2(self):
                 pass
-            
+
             def mymethod3(self):
                 pass
-                
+
             def mymethod4(self):
                 pass
 
             def mymethod5(self):
                 pass
-                
+
         from djangotasks.models import TaskManager
         try:
             djangotasks.register_task(MyClass.mymethod1, '''Some documentation''')
@@ -281,11 +281,11 @@ class TasksTestCase(unittest.TestCase):
             djangotasks.register_task(MyClass.mymethod3, None, MyClass.mymethod1, MyClass.mymethod2)
             djangotasks.register_task(MyClass.mymethod4, None, [MyClass.mymethod1, MyClass.mymethod2])
             djangotasks.register_task(MyClass.mymethod5, None, (MyClass.mymethod1, MyClass.mymethod2))
-            self.assertEquals([('mymethod1', 'Some documentation', ''), 
+            self.assertEquals([('mymethod1', 'Some documentation', ''),
                                ('mymethod2', 'Some other documentation', 'mymethod1'),
                                ('mymethod3', '', 'mymethod1,mymethod2'),
                                ('mymethod4', '', 'mymethod1,mymethod2'),
-                               ('mymethod5', '', 'mymethod1,mymethod2'),                               
+                               ('mymethod5', '', 'mymethod1,mymethod2'),
                               ],
                               TaskManager.DEFINED_TASKS['djangotasks.myclass'])
         finally:
@@ -298,7 +298,7 @@ class TasksTestCase(unittest.TestCase):
             max -= 0.1
         if not max:
             self.fail("Timeout on key=%s, event=%s" % (key, event))
-        
+
     def _reset(self, key, event):
         os.remove(join(self.tempdir, key + event))
 
@@ -316,13 +316,13 @@ class TasksTestCase(unittest.TestCase):
         task = self._task_for_object(TestModel.check_database_settings, 'key1')
         djangotasks.run_task(task)
         from django.db import connection
-        self._check_running('key1', task, None, 'check_database_settings', 
+        self._check_running('key1', task, None, 'check_database_settings',
                             connection.settings_dict["NAME"] + u'\n') # May fail if your Django settings define a different test database for each run: in which case you should modify it, to ensure it's always the same.
 
     def test_tasks_run_with_space_fast(self):
         task = self._task_for_object(TestModel.run_something_fast, 'key with space')
         djangotasks.run_task(task)
-        self._check_running('key with space', task, None, 'run_something_fast', 
+        self._check_running('key with space', task, None, 'run_something_fast',
                             u'running run_something_fast\n')
 
     def test_tasks_run_cancel_running(self):
@@ -356,7 +356,7 @@ class TasksTestCase(unittest.TestCase):
         with LogCheck(self, "INFO: Cancelling task " + str(task.pk) + "...\nINFO: Task " + str(task.pk) + " finished with status \"cancelled\"\nINFO: ...Task " + str(task.pk) + " cancelled.\n"):
             Task.objects._do_schedule()
         new_task = Task.objects.get(pk=task.pk)
-        self.assertEquals("cancelled", new_task.status)            
+        self.assertEquals("cancelled", new_task.status)
         self.assertEquals("", new_task.log)
 
     def test_tasks_run_failing(self):
@@ -371,7 +371,7 @@ class TasksTestCase(unittest.TestCase):
         self.assertTrue(u'running run_something_failing' in new_task.log)
         self.assertTrue(u'raise Exception("Failed !")' in new_task.log)
         self.assertTrue(u'Exception: Failed !' in new_task.log)
-    
+
     def test_tasks_get_tasks_for_object(self):
         tasks = self._tasks_for_object('key2')
         self.assertEquals(len(TEST_DEFINED_TASKS), len(tasks))
@@ -387,9 +387,9 @@ class TasksTestCase(unittest.TestCase):
 
     def test_tasks_get_task_for_object_required(self):
         task = self._task_for_object(TestModel.run_something_with_two_required, 'key-more')
-        self.assertEquals(['run_something_long', 'run_something_with_required'], 
+        self.assertEquals(['run_something_long', 'run_something_with_required'],
                           [required_task.method for required_task in task.get_required_tasks()])
-        
+
     def test_tasks_archive_task(self):
         tasks = self._tasks_for_object('key3')
         task = tasks[0]
@@ -398,7 +398,7 @@ class TasksTestCase(unittest.TestCase):
         task.save()
         self.assertEquals(False, task.archived)
         new_task = djangotasks.run_task(task)
-        
+
         self.assertTrue(new_task.pk)
         self.assertTrue(task.pk != new_task.pk)
         old_task = Task.objects.get(pk=task.pk)
@@ -408,8 +408,8 @@ class TasksTestCase(unittest.TestCase):
         task = self._task_for_object(TestModel.run_something_with_required, 'key1')
         self.assertEquals(['run_something_long'],
                           [required_task.method for required_task in task.get_required_tasks()])
-        
-        
+
+
         task = self._task_for_object(TestModel.run_something_with_two_required, 'key1')
         self.assertEquals(['run_something_long', 'run_something_with_required'],
                           [required_task.method for required_task in task.get_required_tasks()])
@@ -426,7 +426,7 @@ class TasksTestCase(unittest.TestCase):
         time.sleep(0.5)
         self._assert_status("successful", current_task)
         if expected_log != None:
-            self.assertEquals(expected_log, 
+            self.assertEquals(expected_log,
                               Task.objects.get(pk=current_task.pk).log)
 
     def test_tasks_run_required_task_successful(self):
@@ -444,26 +444,26 @@ class TasksTestCase(unittest.TestCase):
         task = Task.objects.get(pk=task.pk)
         complete_log, _ = DATETIME_REGEX.subn('', task.complete_log())
 
-        self.assertEquals(u'Run a successful task started on \n' + 
-                          u'running run_something_long_1\n' + 
-                          u'running run_something_long_2\n' + 
-                          u'\n' + 
-                          u'Run a successful task finished successfully on \n' + 
-                          u'Run a task with a required task started on \n' + 
-                          u'running run_something_with_required\n' + 
-                          u'\n' + 
+        self.assertEquals(u'Run a successful task started on \n' +
+                          u'running run_something_long_1\n' +
+                          u'running run_something_long_2\n' +
+                          u'\n' +
+                          u'Run a successful task finished successfully on \n' +
+                          u'Run a task with a required task started on \n' +
+                          u'running run_something_with_required\n' +
+                          u'\n' +
                           u'Run a task with a required task finished successfully on ', complete_log)
 
         complete_log_direct, _ = DATETIME_REGEX.subn('', task.complete_log(True))
 
-        self.assertEquals(u'Run a successful task started on \n' + 
-                          u'running run_something_long_1\n' + 
-                          u'running run_something_long_2\n' + 
-                          u'\n' + 
-                          u'Run a successful task finished successfully on \n' + 
-                          u'Run a task with a required task started on \n' + 
-                          u'running run_something_with_required\n' + 
-                          u'\n' + 
+        self.assertEquals(u'Run a successful task started on \n' +
+                          u'running run_something_long_1\n' +
+                          u'running run_something_long_2\n' +
+                          u'\n' +
+                          u'Run a successful task finished successfully on \n' +
+                          u'Run a task with a required task started on \n' +
+                          u'running run_something_with_required\n' +
+                          u'\n' +
                           u'Run a task with a required task finished successfully on ', complete_log_direct)
 
     def test_tasks_run_two_required_tasks_successful(self):
@@ -484,35 +484,35 @@ class TasksTestCase(unittest.TestCase):
         task = Task.objects.get(pk=task.pk)
         complete_log, _ = DATETIME_REGEX.subn('', task.complete_log())
 
-        self.assertEquals(u'Run a successful task started on \n' + 
-                          u'running run_something_long_1\n' + 
-                          u'running run_something_long_2\n' + 
-                          u'\n' + 
-                          u'Run a successful task finished successfully on \n' + 
-                          u'Run a task with a required task started on \n' + 
-                          u'running run_something_with_required\n' + 
-                          u'\n' + 
-                          u'Run a task with a required task finished successfully on \n' + 
-                          u'Run a task with two required task started on \n' + 
-                          u'running run_something_with_two_required\n' + 
-                          u'\n' + 
+        self.assertEquals(u'Run a successful task started on \n' +
+                          u'running run_something_long_1\n' +
+                          u'running run_something_long_2\n' +
+                          u'\n' +
+                          u'Run a successful task finished successfully on \n' +
+                          u'Run a task with a required task started on \n' +
+                          u'running run_something_with_required\n' +
+                          u'\n' +
+                          u'Run a task with a required task finished successfully on \n' +
+                          u'Run a task with two required task started on \n' +
+                          u'running run_something_with_two_required\n' +
+                          u'\n' +
                           u'Run a task with two required task finished successfully on ',
                           complete_log)
 
         complete_log_direct, _ = DATETIME_REGEX.subn('', task.complete_log(True))
 
-        self.assertEquals(u'Run a successful task started on \n' + 
-                          u'running run_something_long_1\n' + 
-                          u'running run_something_long_2\n' + 
-                          u'\n' + 
-                          u'Run a successful task finished successfully on \n' + 
-                          u'Run a task with a required task started on \n' + 
-                          u'running run_something_with_required\n' + 
-                          u'\n' + 
-                          u'Run a task with a required task finished successfully on \n' + 
-                          u'Run a task with two required task started on \n' + 
-                          u'running run_something_with_two_required\n' + 
-                          u'\n' + 
+        self.assertEquals(u'Run a successful task started on \n' +
+                          u'running run_something_long_1\n' +
+                          u'running run_something_long_2\n' +
+                          u'\n' +
+                          u'Run a successful task finished successfully on \n' +
+                          u'Run a task with a required task started on \n' +
+                          u'running run_something_with_required\n' +
+                          u'\n' +
+                          u'Run a task with a required task finished successfully on \n' +
+                          u'Run a task with two required task started on \n' +
+                          u'running run_something_with_two_required\n' +
+                          u'\n' +
                           u'Run a task with two required task finished successfully on ',
                           complete_log_direct)
 
@@ -539,34 +539,34 @@ class TasksTestCase(unittest.TestCase):
         task = Task.objects.get(pk=task.pk)
         complete_log, _ = DATETIME_REGEX.subn('', task.complete_log())
 
-        self.assertEquals(u'Run a successful task started on \n' + 
-                          u'running run_something_long_1\n' + 
-                          u'running run_something_long_2\n' + 
-                          u'\n' + 
-                          u'Run a successful task finished successfully on \n' + 
-                          u'Run a task with a required task started on \n' + 
-                          u'running run_something_with_required\n' + 
-                          u'\n' + 
-                          u'Run a task with a required task finished successfully on \n' + 
-                          u'Run a task with two required task started on \n' + 
-                          u'running run_something_with_two_required\n' + 
-                          u'\n' + 
-                          u'Run a task with two required task finished successfully on \n' + 
-                          u'Run a task with a required task that has a required task started on \n' + 
-                          u'running run_something_with_required_with_two_required\n' + 
-                          u'\n' + 
+        self.assertEquals(u'Run a successful task started on \n' +
+                          u'running run_something_long_1\n' +
+                          u'running run_something_long_2\n' +
+                          u'\n' +
+                          u'Run a successful task finished successfully on \n' +
+                          u'Run a task with a required task started on \n' +
+                          u'running run_something_with_required\n' +
+                          u'\n' +
+                          u'Run a task with a required task finished successfully on \n' +
+                          u'Run a task with two required task started on \n' +
+                          u'running run_something_with_two_required\n' +
+                          u'\n' +
+                          u'Run a task with two required task finished successfully on \n' +
+                          u'Run a task with a required task that has a required task started on \n' +
+                          u'running run_something_with_required_with_two_required\n' +
+                          u'\n' +
                           u'Run a task with a required task that has a required task finished successfully on ',
                           complete_log)
 
         complete_log_direct, _ = DATETIME_REGEX.subn('', task.complete_log(True))
 
-        self.assertEquals(u'Run a task with two required task started on \n' + 
-                          u'running run_something_with_two_required\n' + 
-                          u'\n' + 
-                          u'Run a task with two required task finished successfully on \n' + 
-                          u'Run a task with a required task that has a required task started on \n' + 
-                          u'running run_something_with_required_with_two_required\n' + 
-                          u'\n' + 
+        self.assertEquals(u'Run a task with two required task started on \n' +
+                          u'running run_something_with_two_required\n' +
+                          u'\n' +
+                          u'Run a task with two required task finished successfully on \n' +
+                          u'Run a task with a required task that has a required task started on \n' +
+                          u'running run_something_with_required_with_two_required\n' +
+                          u'\n' +
                           u'Run a task with a required task that has a required task finished successfully on ',
                           complete_log_direct)
 
@@ -598,15 +598,15 @@ class TasksTestCase(unittest.TestCase):
 
         complete_log, _ = DATETIME_REGEX.subn('', task.complete_log())
         self.assertTrue(complete_log.startswith('Run a failing task started on \nrunning run_something_failing\nTraceback (most recent call last):'))
-        self.assertTrue(complete_log.endswith(u', in run_something_failing\n    raise Exception("Failed !")\nException: Failed !\n\n' + 
-                                              u'Run a failing task failed on \n' + 
-                                              u'Run a task with a required task that fails started\n' + 
+        self.assertTrue(complete_log.endswith(u', in run_something_failing\n    raise Exception("Failed !")\nException: Failed !\n\n' +
+                                              u'Run a failing task failed on \n' +
+                                              u'Run a task with a required task that fails started\n' +
                                               u'Run a task with a required task that fails failed'))
         complete_log_direct, _ = DATETIME_REGEX.subn('', task.complete_log(True))
         self.assertTrue(complete_log_direct.startswith('Run a failing task started on \nrunning run_something_failing\nTraceback (most recent call last):'))
-        self.assertTrue(complete_log_direct.endswith(u', in run_something_failing\n    raise Exception("Failed !")\nException: Failed !\n\n' + 
-                                                     u'Run a failing task failed on \n' + 
-                                                     u'Run a task with a required task that fails started\n' + 
+        self.assertTrue(complete_log_direct.endswith(u', in run_something_failing\n    raise Exception("Failed !")\nException: Failed !\n\n' +
+                                                     u'Run a failing task failed on \n' +
+                                                     u'Run a task with a required task that fails started\n' +
                                                      u'Run a task with a required task that fails failed'))
         self.assertEquals("unsuccessful", task.status)
 
@@ -630,13 +630,13 @@ class TasksTestCase(unittest.TestCase):
         import re
         pks = re.findall(r'(\d+)', output_check.log.getvalue())
         new_task = Task.objects.get(pk=int(pks[0]))
-        self.assertEquals(_start_message(new_task) + 'INFO: Task ' + str(new_task.pk) + ' finished with status "successful"\n', 
+        self.assertEquals(_start_message(new_task) + 'INFO: Task ' + str(new_task.pk) + ' finished with status "successful"\n',
                           output_check.log.getvalue())
         self.assertTrue(new_task.pk != task.pk)
         self.assertEquals("successful", new_task.status)
         tasks = self._tasks_for_object('key1')
         self.assertEquals(new_task.pk, tasks[5].pk)
-        
+
 
     def test_tasks_exception_in_thread(self):
         task = self._task_for_object(TestModel.run_something_long, 'key1')
@@ -649,7 +649,7 @@ class TasksTestCase(unittest.TestCase):
             self.fail("Should throw an exception")
         except Exception, e:
             self.assertEquals("Task matching query does not exist.", str(e))
-            
+
         with LogCheck(self, 'WARNING: Failed to change status from "scheduled" to "running" for task %d\n' % task.pk):
             task.do_run()
             time.sleep(0.5)
@@ -676,7 +676,7 @@ class TasksTestCase(unittest.TestCase):
     def test_send_signal_on_task_completed(self):
         from djangotasks.models import TaskManager
         from djangotasks.signals import task_completed
-        
+
         def receiver(sender, **kwargs):
             task = kwargs['task']
             self.assertEqual(TaskManager, sender.__class__)
@@ -686,7 +686,7 @@ class TasksTestCase(unittest.TestCase):
             # Ensure that this function was called by the Signal
             task.log = "Text added from the signal receiver"
             task.save()
-        
+
         task_completed.connect(receiver)
         task = self._task_for_object(TestModel.run_something_fast, 'key1')
         djangotasks.run_task(task)

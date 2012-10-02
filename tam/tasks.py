@@ -1,5 +1,4 @@
 # coding: utf-8
-#from celery.task import task
 from django.core.cache import cache
 from django.contrib import messages
 from django.contrib.auth.models import User

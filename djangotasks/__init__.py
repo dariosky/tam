@@ -1,20 +1,20 @@
 #
 # Copyright (c) 2010 by nexB, Inc. http://www.nexb.com/ - All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
+#
 #     1. Redistributions of source code must retain the above copyright notice,
 #        this list of conditions and the following disclaimer.
-#    
+#
 #     2. Redistributions in binary form must reproduce the above copyright
 #        notice, this list of conditions and the following disclaimer in the
 #        documentation and/or other materials provided with the distribution.
-# 
+#
 #     3. Neither the names of Django, nexB, Django-tasks nor the names of the contributors may be used
 #        to endorse or promote products derived from this software without
 #        specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -33,7 +33,7 @@
 # The functions below should be sufficient to work with djangotasks.
 # Please enter bugs on http://code.google.com/p/django-tasks if you need anything more.
 # This API is still work-in-progress: it may still change, although it is probably quite stable.
-# 
+#
 #
 
 
@@ -67,18 +67,18 @@ def task_for_object(object_method):
 
 
 def task_for_function(function):
-    ''' Create (or find, if has been created already) a task for this function. 
+    ''' Create (or find, if has been created already) a task for this function.
 
-    Any package-level function that does not take any parameters can be run as a asynchronously. 
-    
+    Any package-level function that does not take any parameters can be run as a asynchronously.
+
     Contrary to model objects methods, functions do not need to be registered in order to be available as tasks.'''
     return Task.objects.task_for_function(function)
 
 
 def run_task(task):
-    ''' Runs the task. 
-    
-    The task will be re-run (and the previous one archived) if it has already run. 
+    ''' Runs the task.
+
+    The task will be re-run (and the previous one archived) if it has already run.
     In that case, the object returned by run_task will be the new task.'''
     return Task.objects.run_task(task.pk)
 
