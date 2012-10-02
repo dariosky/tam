@@ -144,7 +144,7 @@ def doBackup(user):
 
 	if dbType == 'django.db.backends.sqlite3':
 		doBackupSqlite(targetFile=backupPath + ".db3.gz", sourceFile=backupInfo["dbname"])
-	if dbType == 'django.db.backends.postgresql_psycopg2':
+	elif dbType == 'django.db.backends.postgresql_psycopg2':
 		doBackupPostgre(targetFile=backupPath + ".pgdump",
 						dbName=settings.DATABASES['default']['NAME'],
 						host=settings.DATABASES['default']['HOST'],
