@@ -5,26 +5,36 @@ from tam.models import stopAllLog
 from django.db import transaction
 setup_environ(settings)
 
+from django.contrib.auth.models import User, Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from tam.models import * #@UnusedWildImport
 from fatturazione.models import Fattura, RigaFattura
 
 objects = [
+			Permission,
+			Group,
 			User,
-			Bacino,
-			Luogo,
-			Tratta,
-			Conducente,
-			Listino,
-			PrezzoListino,
-			Cliente,
-			Passeggero,
+#			ContentType,
+
+#			Bacino,
+#			Luogo,
+#			Tratta,
+#			Conducente,
+#			Listino,
+#			PrezzoListino,
+#			Cliente,
+#			Passeggero,
 			ProfiloUtente,
-			Conguaglio,
-			Viaggio,
-			Fattura,
-			RigaFattura,
+#			Conguaglio,
+#			Viaggio,
+#			Fattura,
+#			RigaFattura,
 		 ]
 
+manyToManyToSave = {
+					'Group':['permissions'],
+					'User':['groups', 'user_permissions']
+				}
 @transaction.commit_manually
 def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 	totale = Model.objects.using(db_from).count()
@@ -42,16 +52,34 @@ def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 	try:
 		for obj in tutti:
 			#print obj.id, "\n ", obj
-			obj.save(using=db_to, **kwargs)
-	except:
-		print "errore nella copia:"
+			if name in manyToManyToSave:
+				oldRelations = {}
+				for manyFieldName in manyToManyToSave[name]:
+					# keep the id list of all related objects
+					oldRelations[manyFieldName] = [e[0] for e in getattr(obj, manyFieldName).all().values_list('id')]
+					#print "copio le %d correlazioni %s con %s" % (len(oldRelations[manyFieldName]), manyFieldName, name),
+				obj.save(using=db_to, **kwargs)
+				for manyFieldName in manyToManyToSave[name]:
+					for oldRelatedID in oldRelations[manyFieldName]:
+						newRelated = getattr(obj, manyFieldName).model.objects.using(db_to).get(id=oldRelatedID)
+						getattr(obj, manyFieldName).add(newRelated)	# add with the save DB
+					#print "ne ritrovo %d" % len(getattr(obj, manyFieldName).all()),
+				#print
+			else:
+				obj.save(using=db_to, **kwargs)
+	except Exception, e:
+		print "\nErrore nella copia: ******************"
 
 		transaction.rollback()
-		print obj.id
+		print "Error on object id:", obj.id
+		print obj
 		# rieseguo l'operazione per sollevare l'eccezione...
 		# fuori dalla gestione della transazione
+
 		obj.save(using=db_to, **kwargs)
-		#raise Exception('Annullo la copia di %s e mi fermo' % name)
+		print e
+
+		raise Exception('Annullo la copia di %s e mi fermo' % name)
 
 	else:
 		transaction.commit()
@@ -64,12 +92,12 @@ def delete_all_objects_of_model(Model, db_name='postgre'):
 	print "Cancello %d records da %s in postgre" % (totale, Object.__name__)
 	Model.objects.using(db_name).all().delete()
 
-stopAllLog()
-for Object in objects:
-	delete_all_objects_of_model(Object)
-print
-for Object in objects:
-	move_all_objects_of_model(Object)
-
-print "Fine."
-startAllLog()
+if __name__ == '__main__':
+	stopAllLog()
+	for Object in objects:
+		delete_all_objects_of_model(Object)
+	print
+	for Object in objects:
+		move_all_objects_of_model(Object)
+	print "Fine."
+	startAllLog()
