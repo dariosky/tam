@@ -21,7 +21,10 @@ class Migration(SchemaMigration):
         # Changing field 'RigaFattura.riga_fattura_consorzio'
         db.alter_column('fatturazione_rigafattura', 'riga_fattura_consorzio_id', self.gf('django.db.models.fields.related.OneToOneField')(unique=True, null=True, on_delete=models.SET_NULL, to=orm['fatturazione.RigaFattura']))
         # Adding index on 'Fattura', fields ['tipo']
-        db.create_index('fatturazione_fattura', ['tipo'])
+        try:
+            db.create_index('fatturazione_fattura', ['tipo'])
+        except:
+            pass
 
 
         # Changing field 'Fattura.passeggero'

@@ -122,7 +122,7 @@ def doBackupPostgre(targetFile, dbName,
 	args.append("-w")					# no password prompt
 	args.append('-f "%s"' % targetFile)	# specify the output file path
 	if dbName: args.append(dbName)
-	command = "%s%s %s" % (pg_dump_prefix, pgdump_command, " ".join(args))
+	command = "\"%s%s\" %s" % (pg_dump_prefix, pgdump_command, " ".join(args))
 	print "Starting process"
 	print command
 	print subprocess.check_output(command, shell=True)
