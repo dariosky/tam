@@ -84,7 +84,8 @@ class FattureConsorzio(ModelloFattura):
 	filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
 			 ~ Q(conducente__nick__iexact='ANNUL')	# tolgo le corse assegnate al conducente annullato
 	keys = ["cliente"]	 							# come dividere una fattura dall'altra
-	order_by = ["cliente", "data"]	 				# ordinamento
+	order_by = ["cliente", "data"]	 				# ordinamento per generazione
+	order_on_view = ["anno", "progressivo"]			# ordinamento in visualizzazione
 	url_generazione = r'^genera/consorzio/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
 	ask_progressivo = True
 	template_scelta = "1.perCliente.djhtml"
@@ -115,7 +116,8 @@ class FattureNoIVA(ModelloFattura):
 	filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
 					~ Q(conducente__nick__iexact='ANNUL')
 	keys = ["cliente", "passeggero"]				# come dividere una fattura dall'altra
-	order_by = ["cliente", "data"]	 				# ordinamento
+	order_by = ["cliente", "data"]	 				# ordinamento per generazione
+	order_on_view = ["anno", "progressivo"]			# ordinamento in visualizzazione
 	url_generazione = r'^genera/esentiIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
 	ask_progressivo = True
 	template_scelta = "1.perCliente.djhtml"
