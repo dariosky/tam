@@ -82,7 +82,7 @@ class FattureConsorzio(ModelloFattura):
 	codice = "1"
 	origine = Viaggio
 	filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
-			 ~ Q(conducente__nick__iexact='ANNUL')	# tolgo le corse assegnate al conducente annullato
+			 ~ Q(conducente__nick__istartswith='ANNUL')	# tolgo le corse assegnate al conducente annullato
 	keys = ["cliente"]	 							# come dividere una fattura dall'altra
 	order_by = ["cliente", "data"]	 				# ordinamento
 	url_generazione = r'^genera/consorzio/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
@@ -113,7 +113,7 @@ class FattureNoIVA(ModelloFattura):
 	codice = "4"
 	origine = Viaggio
 	filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
-					~ Q(conducente__nick__iexact='ANNUL')
+					~ Q(conducente__nick__istartswith='ANNUL')
 	keys = ["cliente", "passeggero"]				# come dividere una fattura dall'altra
 	order_by = ["cliente", "data"]	 				# ordinamento
 	url_generazione = r'^genera/esentiIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
@@ -143,7 +143,7 @@ class FattureConducente(ModelloFattura):
 	codice = "2"
 	origine = RigaFattura
 	filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None) & \
-					~ Q(conducente__nick__iexact='ANNUL')
+					~ Q(conducente__nick__istartswith='ANNUL')
 	keys = ["conducente"]	 							# come dividere una fattura dall'altra
 	order_by = ["conducente", "viaggio__data", "viaggio__cliente"]	 				# ordinamento
 	url_generazione = r'^genera/conducente/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
@@ -164,7 +164,7 @@ class FattureConducenteNoIva(ModelloFattura):
 	codice = "5"
 	origine = RigaFattura
 	filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & \
-					~ Q(conducente__nick__iexact='ANNUL')
+					~ Q(conducente__nick__istartswith='ANNUL')
 	keys = ["conducente"]	 							# come dividere una fattura dall'altra
 	order_by = ["conducente", "fattura__data", "viaggio__data", "viaggio__cliente"]	 				# ordinamento
 	url_generazione = r'^genera/conducenteNoIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
