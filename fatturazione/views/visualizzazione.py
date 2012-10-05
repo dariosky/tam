@@ -119,9 +119,9 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 							prezzo=0,
 							iva=10 if not fattura.tipo in ('3', '4', '5') else 0, 	# tipi esenti IVA
 							riga=ultimaRiga + 10)
-			logAction('C', instance=fattura, description="Riga inserita manualmente.", user=request.user)
+			riga.fattura = fattura
 			riga.save()
-			fattura.righe.add(riga)
+			logAction('C', instance=fattura, description="Riga inserita manualmente.", user=request.user)
 			return render_to_response('6.fattura-riga.inc.djhtml',
 									{
 										"riga":riga,
