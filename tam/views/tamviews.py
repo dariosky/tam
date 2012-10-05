@@ -648,6 +648,15 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 		return HttpResponseRedirect(reverse("tamListini"))
 
 	class ClientForm(forms.ModelForm):
+		def clean(self):
+			if 'nome' in self.cleaned_data:
+				self.cleaned_data['nome'] = self.cleaned_data['nome'].strip()
+			queryset = Cliente.objects.filter(nome__iexact=self.cleaned_data['nome'])
+			if id_cliente: queryset = queryset.exclude(id=id_cliente)	# exclude current id if editing
+			if queryset.count() > 0:
+				raise forms.ValidationError(u"Esiste già un cliente con questo nome.")
+			return self.cleaned_data
+
 		class Meta:
 			model = Cliente
 
@@ -852,6 +861,7 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 					if not field in self.cleaned_data:
 						return self.cleaned_data	# un campo di controllo è vuoto, fallirà dopo
 					if isinstance(self.Meta.model._meta.get_field(field), models.CharField):
+						self.cleaned_data[field] = self.cleaned_data[field].strip()
 						# insensitive match only for CharField fields
 						kwargs = { "%s__iexact" % field: self.cleaned_data[field] }
 					else:
@@ -861,11 +871,16 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 				if query.count() > 0:
 					raise forms.ValidationError(u"Esiste già un %s con questo %s." % (verbose_name, ", ".join(constraintList)))
 			return self.cleaned_data
+
 		class Meta:
 			model = Model
 			exclude = excludedFields
 
-	instance = id and Model.objects.get(id=id) or None
+	try:
+		instance = id and Model.objects.get(id=id) or None
+	except Model.DoesNotExist:
+		messages.error(request, "%s inesistente." % verbose_name.capitalize())
+		return HttpResponseRedirect(redirectOk)
 	if not delete:	# creation or edit
 		form = GenericModelForm(request.POST or None, instance=instance)
 		if form.is_valid():
@@ -891,10 +906,12 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 			form.fields[field_name].label = description
 	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
 
+
 def privati(request, template_name="passeggeri.html"):
 	""" Mostro tutti i passeggeri privati """
 	privati = Passeggero.objects.all()
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/privati/", delete=False, unique=(("nome",),),
 			excludedFields=None, fields_descriptions=None):
@@ -915,12 +932,14 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 
 	class GenericModelForm(forms.ModelForm):
 		def clean(self):
+			print unique
 			for constraintList in unique:
 				query = self.Meta.model.objects	# get all objects
 				for field in constraintList:	# and filter all with the fields=contraints
 					if not field in self.cleaned_data:
 						return self.cleaned_data	# un campo di controllo è vuoto, fallirà dopo
 					if isinstance(self.Meta.model._meta.get_field(field), models.CharField):
+						self.cleaned_data[field] = self.cleaned_data[field].strip()
 						# insensitive match only for CharField fields
 						kwargs = { "%s__iexact" % field: self.cleaned_data[field] }
 					else:
@@ -934,7 +953,11 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 			model = Passeggero
 			exclude = excludedFields
 
-	instance = id and Passeggero.objects.get(id=id) or None
+	try:
+		instance = id and Passeggero.objects.get(id=id) or None
+	except Passeggero.DoesNotExist:
+		messages.error(request, "Passeggero inesistente.")
+		return HttpResponseRedirect(redirectOk)
 
 	if not nuovo:
 		viaggi = Viaggio.objects.filter(passeggero=id)
