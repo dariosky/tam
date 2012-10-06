@@ -9,7 +9,7 @@
 				<a href='{% url "tamFatturaId" fattura.id %}' class='fatturaTipo{{f.d.codice}}Back fatturaIcon'>
 					<img src='{% media_url 'fatture/invoice-icon.png' %}' />
 				</a>
-				emessa il {{fattura.data|date:"l j F Y"}}
+				emessa {{fattura.data|date:"l j F Y"}}
 			</td>
 			<td>
 				{% if fattura.cliente %}

@@ -80,9 +80,9 @@ def onPage(canvas, doc, da, a):
 		y = y - note.height - 8
 		note.drawOn(canvas, 1 * cm, y=y)
 
-	if tipo in ("3", '4'):
+	if tipo in ("3"):	# le vecchie ricevute hanno l'indicazione di servizio emodializzato
 		y = y - 10
-		ricevutaMultipla = (fattura.tipo == "3" and fattura.data >= data_ricevute_sdoppiate) or tipo == '4'
+		ricevutaMultipla = (fattura.tipo == "3" and fattura.data >= data_ricevute_sdoppiate)
 		testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
 		if ricevutaMultipla:
 			testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
