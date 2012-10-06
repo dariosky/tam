@@ -220,7 +220,7 @@ class Viaggio(models.Model):
 	class Meta:
 		verbose_name_plural = _("Viaggi")
 		permissions = (('change_oldviaggio', 'Cambia vecchio viaggio'), ('change_doppi', 'Cambia il numero di casette'))
-		ordering = ("data_padre", "id_padre", "data")
+		ordering = ("data_padre", "id_padre", "data", 'id')
 
 	def url(self):
 		return reverse("tamNuovaCorsaId", kwargs={"id":self.id})
