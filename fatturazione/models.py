@@ -4,11 +4,15 @@ from tam.models import Viaggio, Conducente, Cliente, Passeggero
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
+import datetime
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi",
 				'4': "Fattura consorzio esente IVA", '5':"Fattura conducente esente IVA"}
 nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute taxi",
 				'4': "fatture consorzio esente IVA", '5':"fatture conducente esente IVA"}
+
+data_ricevute_sdoppiate = datetime.date(2012, 4, 29)	# da questa data le ricevute create sono sdoppiate
+
 
 class Fattura(models.Model):
 	emessa_da = models.TextField()	# anagrafica emittente
@@ -78,6 +82,14 @@ class Fattura(models.Model):
 		if self.anno and self.progressivo:
 			return "%s%s/%s" % (prefissiFattura.get(self.tipo, ""), self.anno, self.progressivo)
 		return "%s%s" % (self.anno or "", self.progressivo or "")
+
+	def note_fisse(self):
+		if self.tipo == '3':
+			ricevutaMultipla = self.data >= data_ricevute_sdoppiate
+			testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
+			if ricevutaMultipla:
+				testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
+			return testo_fisso
 
 
 

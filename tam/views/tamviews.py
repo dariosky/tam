@@ -126,7 +126,11 @@ def listaCorse(request, template_name="corse/lista.html"):
 	filtriTipo = [
 			u"Partenze", u"Arrivi", u"Fuori classifica", u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
 	]
-	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito', u'Quote consorzio', u'No quota consorzio', 'Sup.diurni', 'Sup.notturni']
+	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito',
+				  u'Quote consorzio', u'No quota consorzio',
+				  'Abbuoni',
+				  'Sup.diurni', 'Sup.notturni',
+				 ]
 
 	if u"filterFlag" in request.GET:
 		filterFlag = request.GET["filterFlag"]
@@ -246,6 +250,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggi = viaggi.filter(punti_notturni__gt=0)
 		elif filterFlag == u'Carta di credito':
 			viaggi = viaggi.filter(cartaDiCredito=True)
+		elif filterFlag == 'Abbuoni':
+			viaggi = viaggi.filter(Q(abbuono_fisso__gt=0) | Q(abbuono_percentuale__gt=0))
 
 	if filterCliente:
 		if filterCliente == "Privato":
@@ -322,6 +328,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	if outputFormat == 'xls':
 		from tamXml import xlsResponse
+		tuttiViaggi = tuttiViaggi.exclude(annullato=True)
 		logAction(action='X', description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
 	mediabundleJS = ('tamCorse.js',)
@@ -531,6 +538,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				removefields.append("numero_pratica")
 		if not id:
 			removefields += ["conducente_confermato"] # don't confirm on creation
+			removefields += ['annullato'] # non si annulla in creazione
 		if id and viaggio and viaggio.padre_id:
 				# "Escludo i campi che non vanno nei figli"
 				removefields += ["conducente", "conducente_richiesto", "conducente_confermato"]
