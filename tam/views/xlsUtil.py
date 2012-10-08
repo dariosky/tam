@@ -127,7 +127,7 @@ def resetSizes():
 def updateSizes(sheet):
 	""" Apply suggested width to all columns """
 	for x, col in xlsColWidth.items():	# trovo le larghezze di colonna
-		logging.debug( "setting col(%d) to %d" % (x, col))
+		#logging.debug( "setting col(%d) to %d" % (x, col))
 		sheet.col(x).width = min(col, 65535)	# set a max column width
 
 def styleFromField(field, stile=sty(), **kwargs):

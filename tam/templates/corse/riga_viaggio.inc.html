@@ -1,6 +1,6 @@
 {% load utilTag %}
 {% load media %}
-<tr{% if viaggio.warning %} class="warning"{% endif %}>
+<tr{% if viaggio.warning and not viaggio.annullato %} class="warning"{% elif viaggio.annullato %} class='annullato'{% endif %}>
 	<td>
 		{% if not viaggio.conducente_confermato %}
 			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
@@ -44,31 +44,35 @@
 	{% if viaggio.padre_id and not distinct %}
 		<img src="{% media_url "arrow_join.png" %}" alt='' />
 	{% else %}
-		{% with viaggio.confirmed as confirmed %}
-			{% if viaggio.conducente_richiesto %}
-				<strong>no suppl:<br/>{{ viaggio.conducente }}</strong>
-			{% else %}
-				{% if confirmed %}
-					{{ viaggio.conducente }}
+		{% if viaggio.annullato %}
+			{% if viaggio.conducente %}{{ viaggio.conducente }}{% endif %}
+		{% else %}
+			{% with viaggio.confirmed as confirmed %}
+				{% if viaggio.conducente_richiesto %}
+					<strong>no suppl:<br/>{{ viaggio.conducente }}</strong>
 				{% else %}
-					{% with viaggio.classifica as classificaViaggio %}
-					{% if classificaViaggio %}
-						<form action="" method="post">
-							<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
-							<select name="conducente" style='display:block'>
-								{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
-							</select>
-							<input type="checkbox" name="confirmed" class="cbConducente" />
-							{# <input type="submit" name="confirm" class='conducenteOkBtn' value="ok" /> #}
-						</form>
+					{% if confirmed %}
+						{{ viaggio.conducente }}
 					{% else %}
-					    Nessun conducente disponibile
+						{% with viaggio.classifica as classificaViaggio %}
+						{% if classificaViaggio %}
+							<form action="" method="post">
+								<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
+								<select name="conducente" style='display:block'>
+									{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
+								</select>
+								<input type="checkbox" name="confirmed" class="cbConducente" />
+								{# <input type="submit" name="confirm" class='conducenteOkBtn' value="ok" /> #}
+							</form>
+						{% else %}
+							Nessun conducente disponibile
+						{% endif %}
+						{% endwith %}
 					{% endif %}
-					{% endwith %}
 				{% endif %}
-			{% endif %}
-			{% if confirmed %}<br/><img alt="confermato" src="{% media_url "ok.png" %}" /> {% endif %}
-		{% endwith %}
-        {% endif %}
+				{% if confirmed %}<br/><img alt="confermato" src="{% media_url "ok.png" %}" /> {% endif %}
+			{% endwith %}
+		{% endif %}
+	{% endif %}
 	</td>
 </tr>

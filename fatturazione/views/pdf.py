@@ -24,7 +24,6 @@ styles = getSampleStyleSheet()
 normalStyle = copy.deepcopy(styles['Normal'])
 normalStyle.fontSize = 8
 normalStyle.fontName = 'Helvetica'
-data_ricevute_sdoppiate = datetime.date(2012, 4, 29)	# da questa data le ricevute create sono sdoppiate
 
 def onPage(canvas, doc, da, a):
 	width, height = canvas._doctemplate.pagesize
@@ -80,14 +79,10 @@ def onPage(canvas, doc, da, a):
 		y = y - note.height - 8
 		note.drawOn(canvas, 1 * cm, y=y)
 
-	if tipo in ("3", '4'):
+	note_fisse = fattura.note_fisse()
+	if note_fisse:	# le vecchie ricevute hanno l'indicazione di servizio emodializzato
 		y = y - 10
-		ricevutaMultipla = (fattura.tipo == "3" and fattura.data >= data_ricevute_sdoppiate) or tipo == '4'
-		testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
-		if ricevutaMultipla:
-			testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
-
-		testata_fissa = Paragraph("<font size='6'>%s</font>" % testo_fisso, a_style)
+		testata_fissa = Paragraph("<font size='6'>%s</font>" % note_fisse, a_style)
 		testata_fissa.wrapOn(canvas, width / 2, 2 * cm)
 		y = y - testata_fissa.height
 		testata_fissa.drawOn(canvas, x, y)

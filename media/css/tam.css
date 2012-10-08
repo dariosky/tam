@@ -237,6 +237,9 @@ td img {vertical-align: middle;}
 	background-repeat: repeat-x;
 	background-position: bottom;
 }
+.annullato td{
+	background:#EEE;
+}
 
 .inattivo td {
 	background-color:plum !important;
