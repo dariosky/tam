@@ -19,7 +19,6 @@
 			<a id="unlinkUrl" href="#"><img src="{% media_url "smallX.png" %}" alt="x" title="disassocia" /></a><br/>
 		</div>
 	</div>
-	
     {% if viaggi %}
 		<form id="viaggioActions" action="" method="post">
 			<div>
@@ -39,6 +38,7 @@
 			</thead>
 			<tbody>
 			{% for viaggio in viaggi %}
+				{% if not viaggio.padre_id and not distinct %}{% cycle 'even' 'odd' as back_class silent %}{% endif %}
                	{% include "corse/riga_viaggio.inc.html" %}
 			{% endfor %}
 			</tbody>
