@@ -12,8 +12,7 @@
 			<span class='{% if bigEdit or smallEdit %}editable {%endif%}nullable' id='fat_progressivo'>{{fattura.progressivo|default_if_none:" "}}</span></span>
 			del <span class='{% if bigEdit %}editable{%endif%}' id='fat_data'>{{fattura.data}}</span>
 		</div>
-		<div id='fat_note' class='{% if bigEdit or smallEdit %}editable{%endif%}'>{{fattura.note}}
-		</div>
+		<div id='fat_note' class='{% if bigEdit or smallEdit %}editable{%endif%}'>{{fattura.note}}</div>
 	</div>
 	
 	

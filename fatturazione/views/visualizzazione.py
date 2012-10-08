@@ -77,7 +77,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 	bigEdit = request.user.has_perm('fatturazione.generate')
 
 	# gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
-	smallEdit = request.user.has_perm('fatturazione.smalledit') and fattura.tipo == '2'
+	smallEdit = request.user.has_perm('fatturazione.smalledit') \
+				and fattura.tipo in ('2', '5') # le fatture conducente IVATE e NON consentono gli smalledit
 	editable = bigEdit or smallEdit
 	readonly = not editable
 
@@ -135,7 +136,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 			object_id = request.POST.get('id')
 			smallcampi_modificabili = ('fat_anno', 'fat_progressivo', 'fat_note') # modificabili in testata
 			if request.user.has_perm('fatturazione.smalledit') \
-					and fattura.tipo == '2'  \
+					and fattura.tipo in ('2', '5')  \
 					and (object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
 				# posso modificare il campo in quanto è una modifica consentita
 				pass
