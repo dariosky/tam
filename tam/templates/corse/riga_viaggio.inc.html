@@ -1,17 +1,19 @@
 {% load utilTag %}
 {% load media %}
-<tr{% if viaggio.warning and not viaggio.annullato %} class="warning"{% elif viaggio.annullato %} class='annullato'{% endif %}>
+<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'> 
 	<td>
-		{% if not viaggio.conducente_confermato %}
-			<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
-		{% endif %}
-		{% if viaggio.padre_id %}
-				<img src="{% media_url "frecciaverde.png" %}" alt="*" />
-		{% else %}
-			{% if viaggio.is_abbinata %}
-				<img src="{% media_url "frecciagiu.png" %}" alt="." />
+		{% if not distinct %}
+			{% if not viaggio.conducente_confermato %}
+				<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
 			{% endif %}
-		{% endif %}
+			{% if viaggio.padre_id %}
+					<img src="{% media_url "frecciaverde.png" %}" alt="*" />
+			{% else %}
+				{% if viaggio.is_abbinata %}
+					<img src="{% media_url "frecciagiu.png" %}" alt="." />
+				{% endif %}
+			{% endif %}
+		{% endif %}	
 	</td>
 
 	<td>

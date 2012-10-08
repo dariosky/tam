@@ -232,15 +232,6 @@ td img {vertical-align: middle;}
 	background-color:red; /*#f9f9f9;*/
 }
 
-.warning td {
-	background:white url(../v-grad-red.png);
-	background-repeat: repeat-x;
-	background-position: bottom;
-}
-.annullato td{
-	background:#EEE;
-}
-
 .inattivo td {
 	background-color:plum !important;
 }
@@ -495,4 +486,20 @@ h2.fatturaTipo5 {
 }
 .note{
 	max-width: 400px;
+}
+
+.warning td {
+	background:white url(../v-grad-red.png) !important;
+	background-repeat: repeat-x !important;
+	background-position: bottom !important;
+}
+
+.annullato td{
+	background-color:#DDD !important;
+}
+.even td {
+	background-color: #F5F5F5;
+}
+.odd td {
+	background-color: #FFF;
 }
