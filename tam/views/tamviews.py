@@ -328,6 +328,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	if outputFormat == 'xls':
 		from tamXml import xlsResponse
+		tuttiViaggi = tuttiViaggi.exclude(annullato=True)
 		logAction(action='X', description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
 	mediabundleJS = ('tamCorse.js',)
@@ -537,6 +538,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				removefields.append("numero_pratica")
 		if not id:
 			removefields += ["conducente_confermato"] # don't confirm on creation
+			removefields += ['annullato'] # non si annulla in creazione
 		if id and viaggio and viaggio.padre_id:
 				# "Escludo i campi che non vanno nei figli"
 				removefields += ["conducente", "conducente_richiesto", "conducente_confermato"]

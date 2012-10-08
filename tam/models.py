@@ -215,6 +215,7 @@ class Viaggio(models.Model):
 	prezzoDoppioPadova = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	date_start = models.DateTimeField(editable=False, default=datetime.datetime(2009, 01, 01, 0, 0, 0))
+	annullato = models.BooleanField('Corsa annullata', default=False, editable=True)
 
 	""" Nel listare i viaggi, mostro solo quelli padre, con sottolistati i loro eventuali viaggi figli """
 	class Meta:
@@ -333,7 +334,7 @@ class Viaggio(models.Model):
 			updateViaggi = True
 		if not updateViaggi:
 			return super(Viaggio, self).save(*args, **kwargs)
-		
+
 		if not self.conducente:	# quando confermo o richiedo un conducente DEVO avere un conducente
 			self.conducente_confermato = False
 			self.conducente_richiesto = False
@@ -1023,6 +1024,7 @@ def get_classifiche():
 		from tam_conducente c
 			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
 		where c.attivo --and c.nick='2'
+			and not v.annullato
 		group by c.id, c.nick
 		order by conducente_nick
 	"""

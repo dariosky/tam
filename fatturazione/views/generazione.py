@@ -82,7 +82,7 @@ class FattureConsorzio(ModelloFattura):
 	codice = "1"
 	origine = Viaggio
 	filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
-			 ~ Q(conducente__nick__istartswith='ANNUL')	# tolgo le corse assegnate al conducente annullato
+			~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True)) # tolgo le corse assegnate al conducente annullato
 	keys = ["cliente"]	 							# come dividere una fattura dall'altra
 	order_by = ["cliente", "data"]	 				# ordinamento per generazione
 	order_on_view = ["anno", "progressivo"]			# ordinamento in visualizzazione
@@ -114,7 +114,7 @@ class FattureNoIVA(ModelloFattura):
 	codice = "4"
 	origine = Viaggio
 	filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
-					~ Q(conducente__nick__istartswith='ANNUL')
+					~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True))
 	keys = ["cliente", "passeggero"]				# come dividere una fattura dall'altra
 	order_by = ["cliente", "data"]	 				# ordinamento per generazione
 	order_on_view = ["anno", "progressivo"]			# ordinamento in visualizzazione
