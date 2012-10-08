@@ -126,7 +126,11 @@ def listaCorse(request, template_name="corse/lista.html"):
 	filtriTipo = [
 			u"Partenze", u"Arrivi", u"Fuori classifica", u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
 	]
-	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito', u'Quote consorzio', u'No quota consorzio', 'Sup.diurni', 'Sup.notturni']
+	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito',
+				  u'Quote consorzio', u'No quota consorzio',
+				  'Abbuoni',
+				  'Sup.diurni', 'Sup.notturni',
+				 ]
 
 	if u"filterFlag" in request.GET:
 		filterFlag = request.GET["filterFlag"]
@@ -246,6 +250,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 			viaggi = viaggi.filter(punti_notturni__gt=0)
 		elif filterFlag == u'Carta di credito':
 			viaggi = viaggi.filter(cartaDiCredito=True)
+		elif filterFlag == 'Abbuoni':
+			viaggi = viaggi.filter(Q(abbuono_fisso__gt=0) | Q(abbuono_percentuale__gt=0))
 
 	if filterCliente:
 		if filterCliente == "Privato":
