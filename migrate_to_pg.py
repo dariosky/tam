@@ -11,24 +11,24 @@ from tam.models import * #@UnusedWildImport
 from fatturazione.models import Fattura, RigaFattura
 
 objects = [
+			ContentType,
 			Permission,
 			Group,
 			User,
-#			ContentType,
 
-#			Bacino,
-#			Luogo,
-#			Tratta,
-#			Conducente,
-#			Listino,
-#			PrezzoListino,
-#			Cliente,
-#			Passeggero,
+			Bacino,
+			Luogo,
+			Tratta,
+			Conducente,
+			Listino,
+			PrezzoListino,
+			Cliente,
+			Passeggero,
 			ProfiloUtente,
-#			Conguaglio,
-#			Viaggio,
-#			Fattura,
-#			RigaFattura,
+			Conguaglio,
+			Viaggio,
+			Fattura,
+			RigaFattura,
 		 ]
 
 manyToManyToSave = {
@@ -66,6 +66,9 @@ def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 					#print "ne ritrovo %d" % len(getattr(obj, manyFieldName).all()),
 				#print
 			else:
+				if name == 'Permission' and len(obj.name) > 50:
+					print "Truncate permission name from %s to %s" % (obj.name, obj.name[:50])
+					obj.name = obj.name[:50]
 				obj.save(using=db_to, **kwargs)
 	except Exception, e:
 		print "\nErrore nella copia: ******************"
