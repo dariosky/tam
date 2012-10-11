@@ -359,7 +359,7 @@ def genera_fatture(request, fatturazione):
 					if fatturazione.mittente == "consorzio":
 						fattura.emessa_da = settings.DATI_CONSORZIO
 						fattura.note = 'Pagamento: Bonifico bancario 30 giorni data fattura'
-						if fatturazione.tipo == '4':
+						if fatturazione.codice == '4':
 							fattura.note += "\n" + "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
 					elif fatturazione.mittente == "conducente":
 						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
