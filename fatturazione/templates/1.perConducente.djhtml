@@ -5,7 +5,7 @@
 	    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
 	    <th>Corsa</th>
 	    <th>Descrizione</th>
-	    <th>Prezzo lordo</th>
+	    <th>Prezzo netto</th>
 	</tr>
 </thead>
 {% for riga in lista %}

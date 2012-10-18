@@ -23,7 +23,7 @@
 				<th>Cliente</th>
 			    <th>Corsa</th>
 			    <th>Note</th>
-			    <th>Prezzo lordo</th>
+			    <th>Prezzo netto</th>
 			</tr>
 		</thead>
 		{% for rigafattura in lista %}
