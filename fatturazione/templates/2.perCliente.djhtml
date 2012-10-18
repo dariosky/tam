@@ -23,7 +23,7 @@
 				<th>Cliente</th>
 			    <th>Corsa</th>
 			    <th>Note</th>
-			    <th>Prezzo lordo</th>
+			    <th>Prezzo {% if PREZZO_NETTO %}netto{% else %}lordo{% endif %}</th>
 			    <th>Conducente</th>
 			</tr>
 		</thead>

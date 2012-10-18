@@ -212,6 +212,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 	# prendo i viaggi da fatturare
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
 	gruppo_fatture = []
+	PREZZO_NETTO = getattr(settings, 'PREZZO_NETTO', True)
 	for fatturazione in DEFINIZIONE_FATTURE:
 		if not fatturazione.generabile: continue
 		selezione = fatturazione.origine.objects
@@ -251,7 +252,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 								"mediabundleCSS": ('tamUI.css',),
 
 								"gruppo_fatture": gruppo_fatture,
-
+								'PREZZO_NETTO': PREZZO_NETTO,
                               },
                               context_instance=RequestContext(request))
 
@@ -265,6 +266,7 @@ def genera_fatture(request, fatturazione):
 	order_by = fatturazione.order_by
 	filtro = fatturazione.filtro
 	keys = fatturazione.keys
+	PREZZO_NETTO = getattr(settings, 'PREZZO_NETTO', True)
 
 	ids = request.POST.getlist("id")
 	plurale = nomi_plurale[tipo]
@@ -409,13 +411,17 @@ def genera_fatture(request, fatturazione):
 								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y"),
 									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
 					riga_fattura.qta = 1
-					riga_fattura.prezzo = viaggio.prezzo
+					riga_fattura.iva = 0 if fatturazione.esente_iva else 10
+					if PREZZO_NETTO:
+						riga_fattura.prezzo = viaggio.prezzo
+					else:
+						# prezzo lordo, scorporo l'iva
+						riga_fattura.prezzo = viaggio.prezzo * 100 / (100 + riga_fattura.iva)
 
 					if viaggio.prezzo_sosta > 0:	# se ho una sosta, aggiungo il prezzo della sosta in fattura
 						riga_fattura.prezzo += viaggio.prezzo_sosta
 						riga_fattura.descrizione += " + sosta"
 
-					riga_fattura.iva = 0 if fatturazione.esente_iva else 10
 					riga_fattura.viaggio = viaggio
 
 				fattura.righe.add(riga_fattura)	# salvo la riga
@@ -442,5 +448,6 @@ def genera_fatture(request, fatturazione):
 								'conducenti_ricevute':conducenti_ricevute,
 								'data_generazione':data_generazione,
 								'fatturazione':fatturazione,
+								'PREZZO_NETTO': PREZZO_NETTO,
                               },
                               context_instance=RequestContext(request))
