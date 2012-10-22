@@ -16,7 +16,8 @@ from modellog.actions import logAction
 from django.db import transaction
 from decimal import Decimal
 from django.contrib import messages
-from fatturazione.views.generazione import DEFINIZIONE_FATTURE
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE, \
+	FATTURE_PER_TIPO
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5_lista-fatture.djhtml"):
@@ -242,7 +243,6 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 								'bigEdit': bigEdit,
 								'smallEdit': smallEdit,
 								'logo_url': settings.OWNER_LOGO,
-								'invoices_footer': settings.INVOICES_FOOTERS.get(fattura.tipo, []),
                               },
                               context_instance=RequestContext(request))
 
@@ -296,7 +296,6 @@ def exportfattura(request, id_fattura, export_type='html'):
 				"readonly":True,
 				'export_type':export_type,
 				'logo_url': settings.OWNER_LOGO,
-				'invoices_footer': settings.INVOICES_FOOTERS.get(fattura.tipo, []),
 				}
 	template_name = 'fat_model/export_fattura_1.djhtml'
 #	tamFatturaPdf(fattura, response)	# popola la response con il file
@@ -308,3 +307,40 @@ def exportfattura(request, id_fattura, export_type='html'):
 		return render_to_response(template_name, context,
                               context_instance=RequestContext(request))
 
+
+@permission_required('fatturazione.view', '/')
+def exportmultifattura(request, tipo, export_type='html'):
+	data_start = parseDateString(# dal primo del mese scorso
+									request.GET.get("data_start"),
+									default=None
+								)
+	data_end = parseDateString(# all'ultimo del mese scorso
+									request.GET.get("data_end"),
+									default=None
+								)
+	if not (data_start and data_end):
+		messages.error(request, "Specifica le date dell'intervallo da stampare.")
+		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
+	fatture = Fattura.objects.filter(tipo=tipo,
+									 data__gte=data_start, data__lte=data_end)
+	if len(fatture) == 0:
+		messages.error(request, "Nessuna fattura da stampare.")
+		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
+
+	# TODO: orderonview
+	fatturazione = FATTURE_PER_TIPO[tipo]
+	order_on_view = getattr(fatturazione, 'order_on_view', ['emessa_da', 'data', 'emessa_a'])
+	fatture = fatture.order_by(*order_on_view)	# ordinamento delle fatture in visualizzazione
+
+	context = {	"fatture":fatture,
+				"readonly":True,
+				'export_type':export_type,
+				'logo_url': settings.OWNER_LOGO,
+				}
+	print "Esporto %d fatture in %s" % (len(fatture), export_type)
+	if export_type == 'pdf':
+		return render_to_reportlab(context)
+	else:	# html output by default
+		template_name = 'fat_model/export_fattura_1.djhtml'
+		return render_to_response(template_name, context,
+                              context_instance=RequestContext(request))

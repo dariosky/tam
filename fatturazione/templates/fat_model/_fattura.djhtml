@@ -37,7 +37,7 @@
 		</tbody>
 	</table>
 	
-	<div id='fat_footer' class='pre privacy'>{% for footer_row in invoices_footer %}{{ footer_row|striptags }}
+	<div id='fat_footer' class='pre privacy'>{% for footer_row in fattura.footer %}{{ footer_row|striptags }}
  		{% endfor %}
 	</div>
 </div>

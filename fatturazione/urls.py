@@ -12,7 +12,13 @@ urlpatterns = patterns ('fatturazione.views',
 
 	url(r'archivio/(?P<id_fattura>\d*)/$', 'fattura', name='tamFatturaId'),
 
-	url(r'archivio/export/(?P<id_fattura>\d*)/(?P<export_type>pdf|html)/$', 'exportfattura', name='tamExportFattura'),
+	url(r'archivio/export/(?P<id_fattura>\d*)/(?P<export_type>pdf|html)/$',
+		'exportfattura',
+		name='tamExportFattura'),
+
+	url(r'archivio/export/group/(?P<tipo>.*?)/(?P<export_type>pdf|html)/$',
+		'exportmultifattura',
+		name='tamExportMultiFattura'),
 
 )
 

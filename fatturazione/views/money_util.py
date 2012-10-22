@@ -59,6 +59,10 @@ class NumberedCanvas(canvas.Canvas):
 #		oldTemplate = None	# reset count at any template change
 
 	def showPage(self):
+		#pagina = getattr(self, 'pagina', 1)
+		#print "pagina %d" % pagina
+		#self.pagina = pagina + 1
+
 		self._saved_page_states.append(dict(self.__dict__))
 		self._startPage()
 
