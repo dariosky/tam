@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load media humanize l10n %}
+{% load url from future %}
 {% block title %}Visualizzazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
@@ -17,8 +18,11 @@
  	{% if lista  %}
 	<div>
 		<h2 class='accordhead fatturaTipo{{ f.d.codice }}'>{{ f.d.nome }}</h2>
-		{{ lista.count }} {{ f.d.nome|lower }}.
 		{% include f.d.template_visualizzazione %}
+		{{ lista.count }} {{ f.d.nome|lower }}.
+		<a href='{% url "tamExportMultiFattura" tipo=f.d.codice export_type="pdf" %}?data_start={{ data_start|date:"d/m/Y" }}&data_end={{ data_end|date:"d/m/Y" }}'>
+			<img src='{% media_url 'fatture/print_icon_small.png' %}' title='Stampa' alt='Stampa' />
+		</a>
 	</div>
 	{%endif%}
 	{% endwith %}

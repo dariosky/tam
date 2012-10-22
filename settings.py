@@ -4,7 +4,7 @@ import logging
 from socket import gethostname
 host = gethostname().lower()
 
-TAM_VERSION = "4.0.2"
+TAM_VERSION = "4.0.3"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido"):

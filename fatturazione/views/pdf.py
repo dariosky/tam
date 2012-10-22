@@ -25,11 +25,15 @@ normalStyle = copy.deepcopy(styles['Normal'])
 normalStyle.fontSize = 8
 normalStyle.fontName = 'Helvetica'
 
-def onPage(canvas, doc, da, a):
+
+def onPage(canvas, doc, da=None, a=None):
 	width, height = canvas._doctemplate.pagesize
 	canvas.saveState()
-	fattura = doc.fattura
-	fatturazione = doc.fatturazione
+	fattura = doc.fatture[doc.fattura_corrente]
+	if da is None: da = fattura.emessa_da
+	if a is None: a = fattura.emessa_a
+	fatturazione = FATTURE_PER_TIPO[fattura.tipo]
+	
 	stondata_style = ParagraphStyle("IntestazioneStondata", fontName='Helvetica', fontSize=8, leading=10,
 								 borderRadius=5, borderWidth=1, borderColor=colors.silver, borderPadding=5)
 	a_style = ParagraphStyle("Titolo della fattura", fontName='Helvetica', fontSize=8, leading=10)
@@ -121,7 +125,7 @@ def onPage(canvas, doc, da, a):
 		canvas.drawPath(p)
 
 	note_finali_lines = []
-	for footer_row in fattura.footer:
+	for footer_row in fattura.footer():
 		note_finali_lines.append(footer_row)
 
 	note_finali = Paragraph("<br/>".join(note_finali_lines), normalStyle)
@@ -151,8 +155,13 @@ def onPage(canvas, doc, da, a):
 
 
 def onPageNormal(canvas, doc):
-	#print "Normal"
-	onPage(canvas, doc, da=doc.fattura.emessa_da, a=doc.fattura.emessa_a)
+	#print "Current template:", doc.pageTemplate.id, "coming from", doc.lastTemplateID
+	if doc.pageTemplate.id <> doc.lastTemplateID:
+		doc.lastTemplateID = doc.pageTemplate.id
+		canvas.apply_page_numbers()
+		doc.fattura_corrente += 1
+	onPage(canvas, doc)
+
 
 def onPageConducenteConsorzio(canvas, doc):
 	templateID = "ConducenteConsorzio"
@@ -166,6 +175,7 @@ def onPageConducenteConsorzio(canvas, doc):
 	doc.fattura.descrittore = lambda:""	# non specifico conducente
 	onPage(canvas, doc, da=doc.fattura.emessa_da, a=settings.DATI_CONSORZIO)
 	doc.fattura.descrittore = descrittore_fattura
+
 
 def onPageConsorzioConducente(canvas, doc):
 	templateID = "ConsorzioConducente"
@@ -182,120 +192,166 @@ def onPageConsorzioConducente(canvas, doc):
 
 
 def render_to_reportlab(context):
-	fattura = context.get('fattura')
-	fattura.footer = context['invoices_footer']
+	"""
+		In context dictionary we could have a 'fattura'
+		or a list of fatture in 'fatture'.
+		
+		Everything will be appended to a pdf returned as Django response.
+		
+		To reset page counter between different invoices, we'll use
+		2 "Normale" templates, one for even and one for odds, so every times
+		the template changes we'll reset the NumberedCanvas 
+	"""
+	if "fattura" in context and "fatture" in context:
+		raise Exception("Please create PDF choosing between a fattura or multiple fatture")
+	if "fattura" in context:
+		fatture = [context.get('fattura')]
+	else:
+		fatture = context.get('fatture')
 
 	response = http.HttpResponse(mimetype='application/pdf')
-	ricevutaMultipla = (fattura.tipo == "3") and fattura.data >= data_ricevute_sdoppiate
+	NormalTemplates = ['Normale0', 'Normale1']
 
-	if ricevutaMultipla:
-		pageTemplates = [PageTemplate(id='ConducenteConsorzio', onPage=onPageConducenteConsorzio),
-						 PageTemplate(id='ConsorzioConducente', onPage=onPageConsorzioConducente)
-						]
+	fatture_rimanenti = len(fatture)
+	story = []
+
+	pageTemplates = [
+					 PageTemplate(id='Normale0', onPage=onPageNormal),
+					 PageTemplate(id='Normale1', onPage=onPageNormal),
+					 PageTemplate(id='ConducenteConsorzio', onPage=onPageConducenteConsorzio),
+					 PageTemplate(id='ConsorzioConducente', onPage=onPageConsorzioConducente),
+					]
+	# scelgo il template della prima pagina come primo della lista
+	if fatture[0].is_ricevuta_sdoppiata():
+		lastTemplateID = 'ConducenteConsorzio'
+		pageTemplates = pageTemplates[2:] + pageTemplates[:2]
 	else:
-		pageTemplates = [PageTemplate(id='Normale', onPage=onPageNormal)]
+		lastTemplateID = 'Normale0'
 
 	width, height = portrait(A4)
+	doc = BaseDocTemplate(
+						response,
+						pagesize=(width, height),
+						leftMargin=1 * cm,
+						rightMargin=1 * cm,
+						bottomMargin=1.5 * cm,
+						topMargin=1 * cm,
+						showBoundary=test,
+						pageTemplates=pageTemplates,
+					)
+	doc.fatture = fatture
+	doc.lastTemplateID = lastTemplateID
+	doc.fattura_corrente = 0
 
-	doc = BaseDocTemplate(response,
-							pagesize=(width, height),
-							leftMargin=1 * cm,
-							rightMargin=1 * cm,
-							bottomMargin=1.5 * cm,
-							topMargin=1 * cm,
-							showBoundary=test,
-							pageTemplates=pageTemplates,
-						)
-	fatturazione = FATTURE_PER_TIPO[fattura.tipo]
-	doc.fattura = fattura
-	doc.fatturazione = fatturazione
+	for fattura in fatture:
+		ricevutaMultipla = fattura.is_ricevuta_sdoppiata()
+		story_fattura = []
+		fatturazione = FATTURE_PER_TIPO[fattura.tipo]
 
-	righeFattura = [
-					('Descrizione', 'Q.tà', 'Prezzo', 'IVA %', 'Importo'),
-				]
+		righeFattura = [
+						('Descrizione', 'Q.tà', 'Prezzo', 'IVA %', 'Importo'),
+					]
 
-	righe = fattura.righe.all()
+		righe = fattura.righe.all()
 
-	if fatturazione.codice == "5" and not "Imposta di bollo" in [r.descrizione for r in righe]:
-		#print "5 esente iva con barbatrucco"
-		totale = sum([r.val_totale() for r in righe])
-		netto = totale / Decimal(1.1)
-		class RigaTotaleIvata(object):	# una riga che fa corrispondere il totale
-			descrizione = "Servizi per consorzio."
-			note = None
-			qta = 1
-			prezzo = netto
-			iva = 10
-			def val_imponibile(self):
-				return self.prezzo
-			def val_iva(self):
-				return totale - netto
-			def val_totale(self):
-				return totale
+		if fatturazione.codice == "5" and not "Imposta di bollo" in [r.descrizione for r in righe]:
+			#print "5 esente iva con barbatrucco"
+			totale = sum([r.val_totale() for r in righe])
+			netto = totale / Decimal(1.1)
+			class RigaTotaleIvata(object):	# una riga che fa corrispondere il totale
+				descrizione = "Servizi per consorzio."
+				note = None
+				qta = 1
+				prezzo = netto
+				iva = 10
+				def val_imponibile(self):
+					return self.prezzo
+				def val_iva(self):
+					return totale - netto
+				def val_totale(self):
+					return totale
 
-		riga = RigaTotaleIvata()
-		# la fattura ha totale pari al totale di tutte le righe
-		# l'iva è fissa al 10% e il netto è calcolato di conseguenza
-		imponibile = netto
-		iva = totale - netto
-		righe = [riga]
+			riga = RigaTotaleIvata()
+			# la fattura ha totale pari al totale di tutte le righe
+			# l'iva è fissa al 10% e il netto è calcolato di conseguenza
+			imponibile = netto
+			iva = totale - netto
+			righe = [riga]
 
-	else:
-		imponibile = fattura.val_imponibile()
-		iva = fattura.val_iva()
+		else:
+			imponibile = fattura.val_imponibile()
+			iva = fattura.val_iva()
 
 
-	for riga in righe:
-		descrizione = riga.descrizione
-		if riga.note: descrizione += " (%s)" % riga.note
-		righeFattura.append((
-							Paragraph(descrizione, normalStyle),
-							Paragraph("%s" % riga.qta, normalStyle),
-							moneyfmt(riga.prezzo), riga.iva, moneyfmt(riga.val_totale())
+		for riga in righe:
+			descrizione = riga.descrizione
+			if riga.note: descrizione += " (%s)" % riga.note
+			righeFattura.append((
+								Paragraph(descrizione, normalStyle),
+								Paragraph("%s" % riga.qta, normalStyle),
+								moneyfmt(riga.prezzo), riga.iva, moneyfmt(riga.val_totale())
+								))
+		righeTotali = []
+		righeTotali.append((
+							'Imponibile', moneyfmt(imponibile)
 							))
-	righeTotali = []
-	righeTotali.append((
-						'Imponibile', moneyfmt(imponibile)
-						))
-	righeTotali.append((
-						'IVA', moneyfmt(iva)
-						))
-	righeTotali.append((
-						'TOTALE', moneyfmt(fattura.val_totale())
-						))
-	righeStyle = TableStyle([
-					('VALIGN', (0, 0), (-1, -1), 'TOP'),
-					('ALIGN', (0, 0), (-1, -1), 'RIGHT'), 	# globalmente allineato a destra...
-					('ALIGN', (0, 0), (1, -1), 'LEFT'), 	# tranne la prima colonna (con la descrizione)
-					('GRID', (0, 1), (-1, -1), 0.1, colors.grey),
-					('FACE', (0, 0), (-1, -1), 'Helvetica'),
+		righeTotali.append((
+							'IVA', moneyfmt(iva)
+							))
+		righeTotali.append((
+							'TOTALE', moneyfmt(fattura.val_totale())
+							))
+		righeStyle = TableStyle([
+						('VALIGN', (0, 0), (-1, -1), 'TOP'),
+						('ALIGN', (0, 0), (-1, -1), 'RIGHT'), 	# globalmente allineato a destra...
+						('ALIGN', (0, 0), (1, -1), 'LEFT'), 	# tranne la prima colonna (con la descrizione)
+						('GRID', (0, 1), (-1, -1), 0.1, colors.grey),
+						('FACE', (0, 0), (-1, -1), 'Helvetica'),
 
-					('FACE', (0, 0), (-1, 0), 'Helvetica-Bold'), 	# header
-					('SIZE', (0, 0), (-1, -1), 8),
+						('FACE', (0, 0), (-1, 0), 'Helvetica-Bold'), 	# header
+						('SIZE', (0, 0), (-1, -1), 8),
 
-					#('SPAN', (0, -1), (3, -1)),	# anziché mettere lo span qui aggiungo in coda una tabella diversa
-			])
-	totaliStyle = TableStyle([
-							('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
-							('GRID', (-1, 0), (-1, -1), 0.1, colors.grey),
+						#('SPAN', (0, -1), (3, -1)),	# anziché mettere lo span qui aggiungo in coda una tabella diversa
+				])
+		totaliStyle = TableStyle([
+								('ALIGN', (0, 0), (-1, -1), 'RIGHT'),
+								('GRID', (-1, 0), (-1, -1), 0.1, colors.grey),
 
-							('FACE', (0, 0), (-1, -1), 'Helvetica'), 	# header
-							('FACE', (0, -1), (-1, -1), 'Helvetica-Bold'), 	# Totale
-							('SIZE', (0, 0), (-1, -1), 8),
+								('FACE', (0, 0), (-1, -1), 'Helvetica'), 	# header
+								('FACE', (0, -1), (-1, -1), 'Helvetica-Bold'), 	# Totale
+								('SIZE', (0, 0), (-1, -1), 8),
 
-						])
+							])
 
-	colWidths = ((width - doc.leftMargin - doc.rightMargin) - (1.6 * 4) * cm,) + (1.6 * cm,) * 4
-	story = [ Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths) ]
-	story.append(KeepTogether(Table(righeTotali, style=totaliStyle,
-									colWidths=(width - doc.leftMargin - doc.rightMargin - 1.6 * cm, 1.6 * cm))))
+		colWidths = ((width - doc.leftMargin - doc.rightMargin) - (1.6 * 4) * cm,) + (1.6 * cm,) * 4
+		story_fattura = [ Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths) ]
+		story_fattura.append(KeepTogether(Table(righeTotali, style=totaliStyle,
+										colWidths=(width - doc.leftMargin - doc.rightMargin - 1.6 * cm, 1.6 * cm))))
 
-	if ricevutaMultipla:	# le ricevute si raddoppiano con 2 template diversi
-		story = story + [NextPageTemplate("ConsorzioConducente"), PageBreak()] + story
+		if ricevutaMultipla:	# le ricevute si raddoppiano con 2 template diversi
+			# raddoppio lo story di questa fattura cambiando template
+			story_fattura = story_fattura + [NextPageTemplate("ConsorzioConducente"), PageBreak()] + story_fattura
+		fatture_rimanenti -= 1
+		if fatture_rimanenti:
+			story_fattura += [NextPageTemplate(NormalTemplates[-1]), PageBreak()]
+
+		NormalTemplates.reverse()	# reverse current, next normal template
+
+		story = story + story_fattura
+
 	doc.build(story, canvasmaker=NumberedCanvas)
 	return response
 
+
 if __name__ == '__main__':
 	from fatturazione.models import Fattura
-	fattura = Fattura.objects.get(id=211)
-	render_to_reportlab(context={"fattura":fattura, 'invoices_footer':settings.INVOICES_FOOTERS})
+	#fattura = Fattura.objects.get(id=183)
+	#render_to_reportlab(context={"fattura":fattura})
+	fatture = Fattura.objects.filter(data__gte=datetime.date(2012, 9, 1),
+									 data__lte=datetime.date(2012, 10, 22),
+									 tipo='1',
+									 )[:4]
+	print "Esporto %d fatture" % len(fatture)
+	response = render_to_reportlab(context={"fatture":fatture})
+
+	print "end"

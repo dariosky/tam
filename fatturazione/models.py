@@ -4,14 +4,15 @@ from tam.models import Viaggio, Conducente, Cliente, Passeggero
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
-import datetime
+from django.conf import settings
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi",
 				'4': "Fattura consorzio esente IVA", '5':"Fattura conducente esente IVA"}
 nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute taxi",
 				'4': "fatture consorzio esente IVA", '5':"fatture conducente esente IVA"}
 
-data_ricevute_sdoppiate = datetime.date(2012, 4, 29)	# da questa data le ricevute create sono sdoppiate
+DATA_RICEVUTE_SDOPPIATE = getattr(settings, 'DATA_RICEVUTE_SDOPPIATE', None)
+INVOICES_FOOTERS = getattr(settings, "INVOICES_FOOTERS", {})
 
 
 class Fattura(models.Model):
@@ -83,13 +84,19 @@ class Fattura(models.Model):
 			return "%s%s/%s" % (prefissiFattura.get(self.tipo, ""), self.anno, self.progressivo)
 		return "%s%s" % (self.anno or "", self.progressivo or "")
 
+	def is_ricevuta_sdoppiata(self):
+		return (self.tipo == "3") and DATA_RICEVUTE_SDOPPIATE and (self.data >= DATA_RICEVUTE_SDOPPIATE)
+		
 	def note_fisse(self):
 		if self.tipo == '3':
-			ricevutaMultipla = self.data >= data_ricevute_sdoppiate
 			testo_fisso = "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
-			if ricevutaMultipla:
+			if self.is_ricevuta_sdoppiata():
 				testo_fisso = testo_fisso.replace("Servizio trasporto emodializzato", "Servizio di trasporto di tipo collettivo per emodializzato")
 			return testo_fisso
+		
+	def footer(self):
+		# ritorna una lista di righe che vanno nel footer di questa fattura
+		return INVOICES_FOOTERS.get(self.tipo, [])
 
 
 
