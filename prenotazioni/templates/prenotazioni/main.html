@@ -1,0 +1,9 @@
+{% extends 'prenotazioni/base.html' %}
+{% block content %}
+	{{ utentePrenotazioni.nome_operatore }} per
+	{{ utentePrenotazioni.cliente }}
+	<form action='' method="post">
+		{{ form.as_p }}
+		<input type='submit' name='prenota' value='Invia prenotazione' />
+	</form>
+{% endblock content %}

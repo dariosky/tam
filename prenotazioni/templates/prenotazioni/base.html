@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<meta name="description" content="TaM - Sistema di prenotazione online" />
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link rel="shortcut icon" href="{{ STATIC_URL }}prenotazioni/favicon.ico" type="image/x-icon" />
+		<link rel="stylesheet" href="{{ STATIC_URL }}css/prenotazioni.css" />
+		<script src="{{ MEDIA_URL }}js/jquery.min.js"></script>
+	</head>
+	<body>
+		<div id='header'>
+			{% block header %}
+			<h1>Servizio prenotazioni Taxi Abano-Montegrotto</h1>
+			<img id='taxilogo' src='/media/fatture/taxilogo.jpg' />
+			{{ utentePrenotazione.nome_operatore }}
+			{% endblock header %}
+		</div>
+
+		<div id='mainContent'>
+			{% block content %}
+			{% endblock content %}
+		</div>
+
+		<div id='footer'>
+			{% block footer %}
+			Accesso effettuato con nome utente: {{ request.user }}
+			{% endblock footer %}
+		</div>
+	</body>
+</html>

@@ -3,14 +3,14 @@
 {% block title %}Impostazione dei permessi &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Impostazioni permessi.</h1>
+<h1>Impostazioni permessi</h1>
 
 <form method="get" action=".">
 <p>
 	Seleziona l'utente da gestire.
 	<select name="selectedUser">
 	{% for iterUser in users %}
-		<option{% ifequal selectedUsername iterUser.username%} selected="selected"{% endifequal %}>{{ iterUser.username }}</option>
+		<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %}>{{ iterUser.username }}</option>
 	{% endfor %}
 	</select>
 	<input type="submit" value="Seleziona" />
@@ -23,7 +23,7 @@
 		<p>
 			Nuova password <input type="password" name="password"> riconferma: <input type="password" name="passwordbis">
 		</p>
-		<p>
+		<p id='user_group' {% if selectedUser.prenotazioni %}style="display:none"{% endif %}>
 			Gruppo di appartenenza:
 			<select name="selectedGroup" multiple="multiple">
 			{% for iterGroup in groups %}
@@ -32,8 +32,83 @@
 			</select>
 		</p>
 		<p><a href="{% url delUser username=selectedUser.username %}">Cancellazione utente</a></p>
-		<p><input type="submit" name="change" value="Applica" /></p>
+		
+		{% if perms.prenotazioni.manage_permissions %}
+			<h2>Prenotazioni</h2>
+			<p>
+				
+			<ul id='esclusivoBlock'>
+				<li>
+					<input type="radio" name='tipo_prenotazioni'
+					       id="tipo_prenotazioni_0" value="c"
+					       name="counducente"
+					       {% if not selectedUser.prenotazioni %}checked="checked"{% endif %}
+					 />
+					<label for="tipo_prenotazioni_0">Consorziato</label>
+				</li>
+				<li>
+					<input type="radio" name='tipo_prenotazioni'
+						   id="tipo_prenotazioni_1" value="p"
+						   name="utente prenotazioni"
+						   {% if selectedUser.prenotazioni %}checked="checked"{% endif %}
+					/>
+					<label for="tipo_prenotazioni_1">Utente prenotazioni</label>
+				</li>
+			</ul>
+			</p>
+			<div id='configuratore_prenotazioni' {% if not selectedUser.prenotazioni %}style="display:none"{% endif %}>
+				<select name='prenotazioni_cliente'>
+					{% for cliente in clienti %}
+						<option value='{{cliente.id}}'
+								{% if selectedUser.prenotazioni.cliente == cliente %}selected="selected"{% endif %}>
+							{{ cliente }}
+						</option>
+					{% endfor %}
+				</select>
+				<select name='prenotazioni_luogo'>
+					{% for luogo in luoghi %}
+						<option value='{{luogo.id}}'
+								{% if selectedUser.prenotazioni.luogo == luogo %}selected="selected"{% endif %}>
+							{{ luogo }}
+						</option>
+					{% endfor %}
+				</select>
+				<br />
+				<p>
+					<label for="operatore">Operatore:</label>
+					<input type='text' name='operatore' id='operatore' value='{{ selectedUser.prenotazioni.nome_operatore }}' />
+				</p>
+				<p>
+					<label for="email">Email:</label>
+					<input type='text' name='email' id='email' value='{{ selectedUser.prenotazioni.email }}' />
+				</p>
+			</div>
+		{% endif %}
+		
+		<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
 	</form>
 {% endif %}
 
 {% endblock %}
+
+{% block bottom %}
+	{{ block.super }}
+	<script type="text/javascript">
+		$('#esclusivoBlock input').change(
+			function(){
+				var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
+				if (utente_prenotazioni) {
+					$('#configuratore_prenotazioni').show('slow');
+					$('#user_group').hide('slow');
+					
+				}
+				else {
+					$('#configuratore_prenotazioni').hide('slow');
+					$('#user_group').show('slow');
+				}
+					
+			}
+		);
+		$('#esclusivoBlock input').change();
+	</script>
+{% endblock bottom %}
