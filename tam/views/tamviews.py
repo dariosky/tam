@@ -909,7 +909,6 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 	context_vars = locals()
 	if fields_descriptions:
 		#context_vars.extend(extra_dict)
-		#print form.fields.keys()
 		for field_name, description in fields_descriptions.items():
 			form.fields[field_name].label = description
 	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
@@ -940,7 +939,6 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 
 	class GenericModelForm(forms.ModelForm):
 		def clean(self):
-			print unique
 			for constraintList in unique:
 				query = self.Meta.model.objects	# get all objects
 				for field in constraintList:	# and filter all with the fields=contraints
@@ -999,7 +997,6 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 	context_vars = locals()
 	if fields_descriptions:
 		#context_vars.extend(extra_dict)
-		#print form.fields.keys()
 		for field_name, description in fields_descriptions.items():
 			form.fields[field_name].label = description
 	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
@@ -1289,6 +1286,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	if not user.has_perm('auth.change_user'):
 			messages.error(request, "Non hai l'autorizzazione a modificare i permessi.")
 			return HttpResponseRedirect("/")
+	manage_permissions = request.user.has_perm('prenotazioni.manage_permissions')
 	users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
 
 	getUsername = request.GET.get("selectedUser", None)
@@ -1314,17 +1312,48 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 				messages.success(request, "Modificata la password all'utente %s." % selectedUser.username)
 				resetUserSession(selectedUser)
 
-			newGroups = request.POST.getlist("selectedGroup")
-			selectedUser.groups.clear()
-			logging.debug("clearing groups")
-			for groupName in newGroups:
-				group = Group.objects.get(name=groupName)
-				selectedUser.groups.add(group)
+			tipo_utente = request.POST.get('tipo_prenotazioni', 'c')
+			if tipo_utente == 'c':	# utente conducente	
+				logging.debug("resetting groups for a normal user")
+				newGroups = request.POST.getlist("selectedGroup")
+				selectedUser.groups.clear()
+				for groupName in newGroups:
+					group = Group.objects.get(name=groupName)
+					selectedUser.groups.add(group)
 
-
+			if manage_permissions: # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
+				if tipo_utente == 'c':	# utente conducente	
+					if selectedUser.prenotazioni:
+						messages.warning(request, "Faccio diventare l\'utente '%s' un conducente. Attenzione se aveva accesso esterno." % selectedUser)
+						# elimino l'utente prenotazioni
+						selectedUser.prenotazioni.delete()
+				else:
+					# utente prenotazioni
+					from prenotazioni.models import UtentePrenotazioni
+					logging.debug("clearing groups for user prenotazioni")
+					selectedUser.groups.clear()
+					try:
+						attuale_prenotazione = selectedUser.prenotazioni
+					except UtentePrenotazioni.DoesNotExist:
+						messages.info(request, "Faccio diventare il conducente '%s' un utente per le prenotazioni." % selectedUser)
+						attuale_prenotazione = UtentePrenotazioni()
+					attuale_prenotazione.user = selectedUser
+					attuale_prenotazione.cliente_id = request.POST.get('prenotazioni_cliente')
+					attuale_prenotazione.luogo_id = request.POST.get('prenotazioni_luogo')
+					attuale_prenotazione.nome_operatore = request.POST.get('operatore')
+					attuale_prenotazione.email = request.POST.get('email')
+					attuale_prenotazione.save()
 			return HttpResponseRedirect(reverse("tamManage", kwargs={"username":selectedUser.username}))
+			# fine delle azioni per il submit
+
+		if manage_permissions:
+			# preparo il dizionario dei clienti e dei luoghi per poterli scegliere
+			clienti = Cliente.objects.filter(attivo=True)
+			luoghi = Luogo.objects.all()
+
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def newUser(request, template_name="utils/newUser.html"):
 	user = request.user
