@@ -269,6 +269,10 @@ CACHES = {
 # Usiamo le sessioni su cookies per evitare di importunare il DB
 #SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
+NOMI_DEFINIZIONE_FATTURE = [ "FattureConsorzio", "FattureNoIVA",
+							 "FattureConducente", "FattureConducenteNoIva",
+							 "Ricevute"]
+
 try:
 	from settings_local import * #@UnusedWildImport
 except ImportError:

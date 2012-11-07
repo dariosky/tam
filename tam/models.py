@@ -877,7 +877,7 @@ class Cliente(models.Model):
 	dati = models.TextField(null=True, blank=True, help_text='Stampati nelle fattura conducente')
 	tipo = models.CharField("Tipo cliente", max_length=1, choices=TIPICLIENTE)
 	fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
-	pagamento_differito = models.BooleanField(default=False)
+	pagamento_differito = models.BooleanField("Fatturazione esente IVA", default=False)
 	incassato_albergo = models.BooleanField("Conto fine mese", default=False)
 	listino = models.ForeignKey("Listino", verbose_name="Listino cliente", null=True, blank=True)
 	commissione = models.DecimalField("Quota consorzio", max_digits=9, decimal_places=2, default=0)	#fissa in euro
