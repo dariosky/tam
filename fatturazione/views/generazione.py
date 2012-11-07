@@ -10,15 +10,13 @@ from modellog.actions import logAction
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from fatturazione.models import Fattura, RigaFattura, nomi_fatture, nomi_plurale
-from django.db.models import Q
-from fatturazione.views.util import ultimoProgressivoFattura
 from django.db import transaction
 from django.db.models.aggregates import Max
 from django.contrib.auth.decorators import permission_required
 from decimal import Decimal
-import random
-import logging
 from django.contrib import messages
+import tipi_fatturazione
+from fatturazione.views.util import ultimoProgressivoFattura
 
 """
 Generazione fatture:
@@ -48,152 +46,13 @@ from django.template.context import RequestContext
 from tam.views.tamviews import parseDateString
 from django.conf import settings
 
-class ModelloFattura(object):
-	ask_progressivo = False
-	generabile = True
-	order_by = []
+PREZZO_NETTO = getattr(settings, 'PREZZO_NETTO', True)
+NOMI_DEFINIZIONE_FATTURE = getattr(settings, 'NOMI_DEFINIZIONE_FATTURE')
 
-	@classmethod
-	def urlname_generazione(cls):
-		""" Restituisce il nome dell'url che rimanda alla generazione di queste fatture"""
-		return "tamFatGenerazione%s" % cls.codice
+DEFINIZIONE_FATTURE = []
+for nome_classe in NOMI_DEFINIZIONE_FATTURE:
+	DEFINIZIONE_FATTURE.append(getattr(tipi_fatturazione, nome_classe))
 
-	@classmethod
-	def urlname_manuale(cls):
-		""" Restituisce il nome dell'url che rimanda alla generazione manuale di una fattura"""
-		return "tamFatManuale%s" % cls.codice
-
-	@staticmethod
-	def update_context(data_start, data_end):
-		result = {}
-		result["data_generazione"] = data_end
-		return result
-
-#	@classmethod
-#	def 
-
-
-class FattureConsorzio(ModelloFattura):
-	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
-
-	nome = "Fatture Consorzio"
-	descrizione = """Le fatture che il consorzio fa ai clienti.
-					 Dai viaggi confermati con il flag della fatturazione richiesta."""
-	codice = "1"
-	origine = Viaggio
-	filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
-			~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True)) # tolgo le corse assegnate al conducente annullato
-	keys = ["cliente"]	 							# come dividere una fattura dall'altra
-	order_by = ["cliente", "data"]	 				# ordinamento per generazione
-	order_on_view = ["anno", "progressivo"]			# ordinamento in visualizzazione
-	url_generazione = r'^genera/consorzio/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	ask_progressivo = True
-	template_scelta = "1.perCliente.djhtml"
-	template_generazione = "2.perCliente.djhtml"
-	template_visualizzazione = "5.perCliente.djhtml"
-	codice_fattura = "FC"
-	destinatario = "cliente"
-	mittente = "consorzio"
-	esente_iva = False
-
-	@staticmethod
-	def update_context(data_start, data_end):
-		result = ModelloFattura.update_context(data_start, data_end)
-		result["anno_consorzio"] = data_end.year
-		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "1") + 1	# ultimo progressivo '1'
-		return result
-
-
-class FattureNoIVA(ModelloFattura):
-	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
-
-	nome = "Fatture esenti IVA"
-	descrizione = """Le fatture che i consorziati fanno ai clienti, ma esentate IVA (ex ricevute).
-					 Per i soli viaggi con il flag "Fatturazione esente IVA"
-				  """
-	codice = "4"
-	origine = Viaggio
-	filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False, riga_fattura=None) & \
-					~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True))
-	keys = ["cliente", "passeggero"]				# come dividere una fattura dall'altra
-	order_by = ["cliente", "data"]	 				# ordinamento per generazione
-	order_on_view = ["anno", "progressivo"]			# ordinamento in visualizzazione
-	url_generazione = r'^genera/esentiIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	ask_progressivo = True
-	template_scelta = "1.perCliente.djhtml"
-	template_generazione = "2.perCliente.djhtml"
-	template_visualizzazione = "5.perCliente.djhtml"
-	codice_fattura = "FE"
-	destinatario = "cliente"
-	mittente = "consorzio"
-	esente_iva = True
-
-	@staticmethod
-	def update_context(data_start, data_end):
-		result = ModelloFattura.update_context(data_start, data_end)
-		result["anno_consorzio"] = data_end.year
-		result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"], "4") + 1	# ultimo progressivo '4'
-		return result
-
-
-class FattureConducente(ModelloFattura):
-	# Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
-
-	nome = "Fatture Conducente"
-	descrizione = """Le fatture che il conducente fa al consorzio.
-					 Generate dalle fatture consorzio."""
-	codice = "2"
-	origine = RigaFattura
-	filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None) & \
-					~ Q(conducente__nick__istartswith='ANNUL')
-	keys = ["conducente"]	 							# come dividere una fattura dall'altra
-	order_by = ["conducente", "viaggio__data", "viaggio__cliente"]	 				# ordinamento
-	url_generazione = r'^genera/conducente/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_scelta = "1.perConducente.djhtml"
-	template_generazione = "2.perConducente.djhtml"
-	template_visualizzazione = "5.perConducente.djhtml"
-	destinatario = "consorzio"
-	mittente = "conducente"
-	esente_iva = False
-
-
-class FattureConducenteNoIva(ModelloFattura):
-	# Fatture conducente: tutte le fatture consorzio senza una fattura_conducente_collegata
-
-	nome = "Fatture Conducente esenti IVA"
-	descrizione = """Le fatture che il conducente fa al consorzio.
-					 Generate dalle fatture consorzio esenti IVA."""
-	codice = "5"
-	origine = RigaFattura
-	filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & \
-					~ Q(conducente__nick__istartswith='ANNUL')
-	keys = ["conducente"]	 							# come dividere una fattura dall'altra
-	order_by = ["conducente", "fattura__data", "viaggio__data", "viaggio__cliente"]	 				# ordinamento
-	url_generazione = r'^genera/conducenteNoIVA/$'		# ci si aggiunge $ per la generazione "manuale/" per la creazione
-	template_scelta = "1.perConducente.djhtml"
-	template_generazione = "2.perConducente.djhtml"
-	template_visualizzazione = "5.perConducente.djhtml"
-	destinatario = "consorzio"
-	mittente = "conducente"
-	esente_iva = True
-
-
-class Ricevute(ModelloFattura):
-	""" Le ricevute, ora non più generabili
-		producevano una ricevuta divisa a livello di PDF da consorzio a cliente, e da conducente a consorzio 
-	"""
-
-	nome = "Ricevute"
-	descrizione = """Ricevute per emodializzati, divise in 2 a livello di stampa."""
-	codice = "3"
-	template_visualizzazione = "5.perConducenteCliente.djhtml"
-
-	mittente = "conducente"
-	destinatario = "cliente"
-	generabile = False
-
-
-DEFINIZIONE_FATTURE = [ FattureConsorzio, FattureNoIVA, FattureConducente, FattureConducenteNoIva, Ricevute]
 FATTURE_PER_TIPO = {}
 for fatturazione in DEFINIZIONE_FATTURE:
 	FATTURE_PER_TIPO[fatturazione.codice] = fatturazione
@@ -212,14 +71,14 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 	# prendo i viaggi da fatturare
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
 	gruppo_fatture = []
-	PREZZO_NETTO = getattr(settings, 'PREZZO_NETTO', True)
+
 	for fatturazione in DEFINIZIONE_FATTURE:
 		if not fatturazione.generabile: continue
 		selezione = fatturazione.origine.objects
 		selezione = selezione.filter(fatturazione.filtro)
 
 		if fatturazione.origine == Viaggio:
-#			selezione = selezione.filter(id=81833)	#TMP:
+#			selezione = selezione.filter(id=81833)	#DEBUG:
 			selezione = selezione.filter(data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1))
 
 			selezione = selezione.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
@@ -256,6 +115,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
                               },
                               context_instance=RequestContext(request))
 
+
 @transaction.commit_on_success
 @permission_required('fatturazione.generate', '/')
 # template_name, tipo, filtro, keys, order_by, manager
@@ -266,7 +126,6 @@ def genera_fatture(request, fatturazione):
 	order_by = fatturazione.order_by
 	filtro = fatturazione.filtro
 	keys = fatturazione.keys
-	PREZZO_NETTO = getattr(settings, 'PREZZO_NETTO', True)
 
 	ids = request.POST.getlist("id")
 	plurale = nomi_plurale[tipo]
@@ -371,6 +230,7 @@ def genera_fatture(request, fatturazione):
 					fatture_generate += 1
 					riga = 10
 
+					
 					if fatturazione.esente_iva and (fatturazione.codice <> '5' or elemento.conducente.emette_ricevute):
 						# alle esenti IVA metto l'imposta di bollo
 						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("1.81"), riga=riga)
