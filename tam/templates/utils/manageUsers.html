@@ -23,7 +23,7 @@
 		<p>
 			Nuova password <input type="password" name="password"> riconferma: <input type="password" name="passwordbis">
 		</p>
-		<p id='user_group' {% if selectedUser.prenotazioni %}style="display:none"{% endif %}>
+		<p id='user_group' {% if utentePrenotazioni %}style="display:none"{% endif %}>
 			Gruppo di appartenenza:
 			<select name="selectedGroup" multiple="multiple">
 			{% for iterGroup in groups %}
@@ -42,7 +42,7 @@
 					<input type="radio" name='tipo_prenotazioni'
 					       id="tipo_prenotazioni_0" value="c"
 					       name="counducente"
-					       {% if not selectedUser.prenotazioni %}checked="checked"{% endif %}
+					       {% if not utentePrenotazioni %}checked="checked"{% endif %}
 					 />
 					<label for="tipo_prenotazioni_0">Consorziato</label>
 				</li>
@@ -50,17 +50,17 @@
 					<input type="radio" name='tipo_prenotazioni'
 						   id="tipo_prenotazioni_1" value="p"
 						   name="utente prenotazioni"
-						   {% if selectedUser.prenotazioni %}checked="checked"{% endif %}
+						   {% if utentePrenotazioni %}checked="checked"{% endif %}
 					/>
 					<label for="tipo_prenotazioni_1">Utente prenotazioni</label>
 				</li>
 			</ul>
 			</p>
-			<div id='configuratore_prenotazioni' {% if not selectedUser.prenotazioni %}style="display:none"{% endif %}>
+			<div id='configuratore_prenotazioni' {% if not utentePrenotazioni %}style="display:none"{% endif %}>
 				<select name='prenotazioni_cliente'>
 					{% for cliente in clienti %}
 						<option value='{{cliente.id}}'
-								{% if selectedUser.prenotazioni.cliente == cliente %}selected="selected"{% endif %}>
+								{% if utentePrenotazioni.cliente == cliente %}selected="selected"{% endif %}>
 							{{ cliente }}
 						</option>
 					{% endfor %}
@@ -68,7 +68,7 @@
 				<select name='prenotazioni_luogo'>
 					{% for luogo in luoghi %}
 						<option value='{{luogo.id}}'
-								{% if selectedUser.prenotazioni.luogo == luogo %}selected="selected"{% endif %}>
+								{% if utentePrenotazioni.luogo == luogo %}selected="selected"{% endif %}>
 							{{ luogo }}
 						</option>
 					{% endfor %}
@@ -76,11 +76,11 @@
 				<br />
 				<p>
 					<label for="operatore">Operatore:</label>
-					<input type='text' name='operatore' id='operatore' value='{{ selectedUser.prenotazioni.nome_operatore }}' />
+					<input type='text' name='operatore' id='operatore' value='{{ utentePrenotazioni.nome_operatore }}' />
 				</p>
 				<p>
 					<label for="email">Email:</label>
-					<input type='text' name='email' id='email' value='{{ selectedUser.prenotazioni.email }}' />
+					<input type='text' name='email' id='email' value='{{ utentePrenotazioni.email }}' />
 				</p>
 			</div>
 		{% endif %}

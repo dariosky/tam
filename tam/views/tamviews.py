@@ -1297,6 +1297,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 		if user == selectedUser:
 			messages.error(request, "Non puoi modificare te stesso.")
 			return HttpResponseRedirect(reverse("tamManage"))
+		if hasattr(selectedUser, "prenotazioni"):
+			utentePrenotazioni = selectedUser.prenotazioni
 		selectedGroups = selectedUser.groups.all()
 		groups = Group.objects.all()
 		for group in groups:
@@ -1323,17 +1325,17 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 
 			if manage_permissions: # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
 				if tipo_utente == 'c':	# utente conducente	
-					if selectedUser.prenotazioni:
+					if utentePrenotazioni:
 						messages.warning(request, "Faccio diventare l\'utente '%s' un conducente. Attenzione se aveva accesso esterno." % selectedUser)
 						# elimino l'utente prenotazioni
-						selectedUser.prenotazioni.delete()
+						utentePrenotazioni.delete()
 				else:
 					# utente prenotazioni
 					from prenotazioni.models import UtentePrenotazioni
 					logging.debug("clearing groups for user prenotazioni")
 					selectedUser.groups.clear()
 					try:
-						attuale_prenotazione = selectedUser.prenotazioni
+						attuale_prenotazione = utentePrenotazioni
 					except UtentePrenotazioni.DoesNotExist:
 						messages.info(request, "Faccio diventare il conducente '%s' un utente per le prenotazioni." % selectedUser)
 						attuale_prenotazione = UtentePrenotazioni()
