@@ -817,6 +817,11 @@ class Viaggio(models.Model):
 		else:
 			return ""
 
+	def prezzo_netto(self, iva=10):
+		if PREZZO_VIAGGIO_NETTO:
+			return self.prezzo
+		else:
+			return self.prezzo * 100 / (100 + iva)
 
 
 class Conducente(models.Model):
@@ -1058,6 +1063,8 @@ startAllLog()
 from tam.views.classifiche import descrizioneDivisioneClassifiche
 process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 process_value = settings.GET_VALUE_FUNCTION
+
+PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
 
 # load models required for the tasks
 from tam.tasks import TaskBackup, TaskMovelog, TaskArchive #@UnusedImport
