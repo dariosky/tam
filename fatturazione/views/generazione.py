@@ -46,7 +46,7 @@ from django.template.context import RequestContext
 from tam.views.tamviews import parseDateString
 from django.conf import settings
 
-PREZZO_NETTO = getattr(settings, 'PREZZO_NETTO', True)
+PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
 NOMI_DEFINIZIONE_FATTURE = getattr(settings, 'NOMI_DEFINIZIONE_FATTURE')
 
 DEFINIZIONE_FATTURE = []
@@ -111,7 +111,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 								"mediabundleCSS": ('tamUI.css',),
 
 								"gruppo_fatture": gruppo_fatture,
-								'PREZZO_NETTO': PREZZO_NETTO,
+								'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
                               },
                               context_instance=RequestContext(request))
 
@@ -217,11 +217,11 @@ def genera_fatture(request, fatturazione):
 					else:
 						raise Exception("%s non è un valido destinatario." % fatturazione.destinatario)
 
+					if getattr(fatturazione, 'note', ""):
+							fattura.note = fatturazione.note
+
 					if fatturazione.mittente == "consorzio":
 						fattura.emessa_da = settings.DATI_CONSORZIO
-						fattura.note = 'Pagamento: Bonifico bancario 30 giorni data fattura'
-						if fatturazione.codice == '4':
-							fattura.note += "\n" + "Servizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
 					elif fatturazione.mittente == "conducente":
 						fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
 					else:
@@ -230,8 +230,12 @@ def genera_fatture(request, fatturazione):
 					fatture_generate += 1
 					riga = 10
 
-					
-					if fatturazione.esente_iva and (fatturazione.codice <> '5' or elemento.conducente.emette_ricevute):
+					if callable(fatturazione.esente_iva):
+						esente_iva = fatturazione.esente_iva(elemento)
+					else:
+						esente_iva = fatturazione.esente_iva
+
+					if esente_iva:
 						# alle esenti IVA metto l'imposta di bollo
 						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("1.81"), riga=riga)
 						fattura.righe.add(riga_fattura)
@@ -249,16 +253,16 @@ def genera_fatture(request, fatturazione):
 					for campo in campi_da_riportare:
 						setattr(riga_fattura, campo, getattr(elemento, campo))
 
-					if fatturazione.codice == "5" and elemento.conducente.emette_ricevute == False:
+					if not esente_iva and hasattr(fatturazione, 'iva_forzata'):
 						# le fatture senza IVA per i conducenti che non le emettono, hanno IVA comunque
-						riga_fattura.iva = 10
+						riga_fattura.iva = fatturazione.iva_forzata
 					else:
 						# altrimenti riporto l'iva dalla fattura di origine
 						riga_fattura.iva = elemento.iva
 
 					if viaggio:
 						# uso il prezzo del viaggio, non della fattura consorzio
-						riga_fattura.prezzo = viaggio.prezzo if viaggio else elemento.prezzo
+						riga_fattura.prezzo =  viaggio.prezzo_netto(riga_fattura.iva)
 						if viaggio.cliente:
 							riga_fattura.note = viaggio.cliente.nome
 						elif viaggio.passeggero:
@@ -266,17 +270,15 @@ def genera_fatture(request, fatturazione):
 					else:
 						riga_fattura.prezzo = elemento.prezzo	# ... a meno che il viaggio non manchi
 					riga_fattura.riga_fattura_consorzio = elemento
+
 				else:	# fattura da un viaggio
+
 					riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
 								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y"),
 									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
 					riga_fattura.qta = 1
 					riga_fattura.iva = 0 if fatturazione.esente_iva else 10
-					if PREZZO_NETTO:
-						riga_fattura.prezzo = viaggio.prezzo
-					else:
-						# prezzo lordo, scorporo l'iva
-						riga_fattura.prezzo = viaggio.prezzo * 100 / (100 + riga_fattura.iva)
+					riga_fattura.prezzo = viaggio.prezzo_netto(riga_fattura.iva)
 
 					if viaggio.prezzo_sosta > 0:	# se ho una sosta, aggiungo il prezzo della sosta in fattura
 						riga_fattura.prezzo += viaggio.prezzo_sosta
@@ -308,6 +310,6 @@ def genera_fatture(request, fatturazione):
 								'conducenti_ricevute':conducenti_ricevute,
 								'data_generazione':data_generazione,
 								'fatturazione':fatturazione,
-								'PREZZO_NETTO': PREZZO_NETTO,
+								'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
                               },
                               context_instance=RequestContext(request))

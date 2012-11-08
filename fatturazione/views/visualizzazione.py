@@ -96,7 +96,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 				fattura.delete()
 			except:
 				return HttpResponse('Non sono riuscito a cancellare la fattura.', status=400)
-			messages.error(request, message)
+			messages.success(request, message)
 			return HttpResponse(reverse('tamVisualizzazioneFatture'), status=200)
 
 		if action == 'delete-row':
@@ -327,7 +327,6 @@ def exportmultifattura(request, tipo, export_type='html'):
 		messages.error(request, "Nessuna fattura da stampare.")
 		return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
 
-	# TODO: orderonview
 	fatturazione = FATTURE_PER_TIPO[tipo]
 	order_on_view = getattr(fatturazione, 'order_on_view', ['emessa_da', 'data', 'emessa_a'])
 	fatture = fatture.order_by(*order_on_view)	# ordinamento delle fatture in visualizzazione

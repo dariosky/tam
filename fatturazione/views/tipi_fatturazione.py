@@ -26,6 +26,8 @@ class ModelloFattura(object):
 		result = {}
 		result["data_generazione"] = data_end
 		return result
+	
+	#esente_iva può essere True o False o un callable con parametro l'oggetto origine
 
 #	@classmethod
 #	def 
@@ -52,6 +54,7 @@ class FattureConsorzio(ModelloFattura):
 	codice_fattura = "FC"
 	destinatario = "cliente"
 	mittente = "consorzio"
+	note = 'Pagamento: Bonifico bancario 30 giorni data fattura'
 	esente_iva = False
 
 	@staticmethod
@@ -84,6 +87,8 @@ class FattureNoIVA(ModelloFattura):
 	codice_fattura = "FE"
 	destinatario = "cliente"
 	mittente = "consorzio"
+	note = 'Pagamento: Bonifico bancario 30 giorni data fattura'+ \
+		   "\nServizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
 	esente_iva = True
 
 	@staticmethod
@@ -133,7 +138,14 @@ class FattureConducenteNoIva(ModelloFattura):
 	template_visualizzazione = "5.perConducente.djhtml"
 	destinatario = "consorzio"
 	mittente = "conducente"
-	esente_iva = True
+	
+	@staticmethod
+	def esente_iva(source):
+		if source.conducente.emette_ricevute:
+			return True
+		else:
+			return False
+	iva_forzata = 10	# quando non è esente_iva, imposto l'iva a 10	
 	
 class FattureConducenteNoIvaSenzaFiltri(FattureConducenteNoIva):
 	filtro = Q(fattura__tipo__in=("1", "4"), fattura_conducente_collegata=None)
