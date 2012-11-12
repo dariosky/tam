@@ -14,6 +14,10 @@ class RequireLoginMiddleware(object):
 		if public_view or view_func.func_name == "serve":
 			return None
 		else:
+			# not a public view, if not authenticaded ask for login
+			if not request.user.is_authenticated():
+				return login_required(view_func)(request, *view_args, **view_kwargs)
+				
 			prenotazioni_view = getattr(view_func, 'prenotazioni', False)
 			try:
 				prenotazioni_user = request.user.prenotazioni
@@ -21,7 +25,7 @@ class RequireLoginMiddleware(object):
 				prenotazioni_user = False
 
 			if prenotazioni_user and not prenotazioni_view:
-				messages.error(request, "Gli utenti del servizio prenotazioni non hanno accesso a questa pagina.")
+				#messages.error(request, "Gli utenti del servizio prenotazioni non hanno accesso a questa pagina.")
 				return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
 			elif not prenotazioni_user and prenotazioni_view:

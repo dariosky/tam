@@ -1,6 +1,15 @@
+#coding: utf-8
 from django.db import models
 from django.contrib.auth.models import User
 from tam.models import Cliente, Luogo, Viaggio
+
+"""
+	Regole da rispettare:
+		non mostro i prezzi
+		creo/modifico solo se >=24h da ora
+		non posso modificare se il viaggio è già confermato
+"""
+
 
 TIPI_PAGAMENTO = (
 					('D', 'Diretto'),
@@ -31,22 +40,23 @@ class UtentePrenotazioni(models.Model):
 
 
 class Prenotazione(models.Model):
-	owner = models.ForeignKey(UtentePrenotazioni)
+	owner = models.ForeignKey(UtentePrenotazioni, editable=False)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
 	data_corsa = models.DateTimeField()
 
 	pax = models.IntegerField(default=1)
 	is_collettivo = models.BooleanField("Servizio collettivo", default=False)
+	
+	is_arrivo = models.BooleanField(default=True)
+	luogo = models.ForeignKey(Luogo)
+	
 	pagamento = models.CharField(max_length=1,
 								 choices=TIPI_PAGAMENTO,
 								 default="D")
 
-	is_arrivo = models.BooleanField(default=True)
-	luogo = models.ForeignKey(Luogo)
-
-	note_camera = models.CharField(max_length=20, blank=True)
-	note_cliente = models.CharField(max_length=40, blank=True)
+	note_camera = models.CharField("Numero di camera", max_length=20, blank=True)
+	note_cliente = models.CharField("Nome del cliente", max_length=40, blank=True)
 	note = models.TextField(blank=True)
 
 	viaggio = models.OneToOneField(Viaggio,
