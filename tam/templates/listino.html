@@ -1,4 +1,4 @@
-{% extends "clienti_e_listini.html" %}
+{% extends "clienti_e_listini.html" %}{% load url from future %}
 
 {% block title %}Listino &raquo; {{ block.super }}{% endblock %}
 
@@ -12,8 +12,8 @@
     	{% with form.nome as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %}
     	<input name="new_name" type="submit" value="{% if listino %}Rinomina{% else %}Crea{% endif %} listino" />
 	{% if not nuovo %}
-		<a href="{% url tamListinoIdDel listino.pk%}">Elimina il listino</a>
-		<a href="{% url tamClonaListinoId listino.pk%}">Clona il listino</a>
+		<a href="{% url "tamListinoIdDel" listino.pk%}">Elimina il listino</a>
+		<a href="{% url "tamClonaListinoId" listino.pk%}">Clona il listino</a>
 
 	{% endif %}
     </p>
@@ -59,7 +59,7 @@
 		    <td>{% ifchanged prezzo.tratta.da %}{{ prezzo.tratta.da }}{% endifchanged %}</td>
 		    <td>{% ifchanged prezzo.tratta.a %}{{ prezzo.tratta.a }}{% endifchanged %}</td>
 		    <td>
-			    <a href="{% url tamListinoPrezzoId listino.id,prezzo.id %}"><img src="/media/matita.ico" alt="edit" /></a>
+			    <a href="{% url "tamListinoPrezzoId" listino.id prezzo.id %}"><img src="/media/matita.ico" alt="edit" /></a>
 			    {{ prezzo.prezzo_diurno }}€ / {{ prezzo.prezzo_notturno }}€
 			    {% if prezzo.commissione %}
 				    commissione: {{ prezzo.commissione }}
@@ -89,7 +89,7 @@
 <script type="text/javascript">
 	$(	function() {
 			// $(".tablesorter").tablesorter({sortList:[[0,0]], widgets: ['zebra']});
-			//$("#id_da, #id_a").autocomplete( "{% url tamGetLuogo %}", {cacheLength:10, matchContains:1} );
+			//$("#id_da, #id_a").autocomplete( "{% url "tamGetLuogo" %}", {cacheLength:10, matchContains:1} );
 			function show_hide_delprezzo() {
 			    if ( ($("#id_da").val()=="") || ($("#id_a").val()=="") )
 					$('#id_delprezzo').hide();

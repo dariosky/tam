@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Changelog &raquo; {{ block.super }}{% endblock %}
 
@@ -320,5 +320,5 @@
 	</tr>
 </table>
 
-<p><a href="{% url tam_rules %}">Regole</a></p>
+<p><a href="{% url "tam_rules" %}">Regole</a></p>
 {% endblock content %}

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 {% load humanize %}
 
 {% block title %}Corse archiviate &raquo; {{ block.super }}{% endblock %}
@@ -9,7 +9,7 @@
 
 {% block content %}
 <h1>Archivio</h1>
-<a href="{% url tamArchiveUtil %}">Torna agli strumenti di archiviazione</a>
+<a href="{% url "tamArchiveUtil" %}">Torna agli strumenti di archiviazione</a>
 
 <div class="countblock">
 			{% if thisPage.has_other_pages %}

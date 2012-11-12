@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Strumenti per l'archiviazione &raquo; {{ block.super }}{% endblock %}
 
@@ -6,21 +6,21 @@
 <h1>Archiviazione.</h1>
 
 {% if perms.tamArchive.archive %}
-<form method="post" action="{% url tamArchiveAction  %}">
+<form method="post" action="{% url "tamArchiveAction"  %}">
 <div>
 	<h2>Archivio corse</h2>
 	
 		Archivia tutte le corse ed i log fino al {{ form.end_date }} mantenendo le classifiche inalterate.<br/>
 		<input type="submit" name="preview" value="Anteprima archiviazione" /><br/>
 	
-	<a href="{% url tamArchiveView %}"><strong>Consulta qui tutte le corse archiviate.</strong></a>
+	<a href="{% url "tamArchiveView" %}"><strong>Consulta qui tutte le corse archiviate.</strong></a>
 </div>
 </form>
 <br/>
 {% endif %}
 
 {% if perms.tamArchive.flat %}
-<form method="get" action="{% url tamArchiveFlat %}">
+<form method="get" action="{% url "tamArchiveFlat" %}">
 <div>
 	<h2>Appianamento delle classifiche</h2>
 	Minimizza tutte le classifiche.<br/>

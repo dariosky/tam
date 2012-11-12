@@ -1,7 +1,7 @@
-<div>
+{% load url from future %}<div>
 	<h2>Conducenti</h2>
 	<div>
-	<a href="{% url tamNuovoConducente %}">
+	<a href="{% url "tamNuovoConducente" %}">
 		<img src="/media/addbtn.png" alt="" /> Nuovo Conducente
 	</a><br/>
 	{% if tuttiConducenti %}
@@ -17,7 +17,7 @@
 			{% for conducente in tuttiConducenti %}
 			<tr {% if not conducente.attivo %} class="inattivo"{% endif %}>
 				<td>
-					<a href="{% url tamConducenteId conducente.id %}">{{ conducente.nome }}</a>
+					<a href="{% url "tamConducenteId" conducente.id %}">{{ conducente.nome }}</a>
 					{% if not conducente.attivo %}NON ATTIVO{% endif %}
 				</td>
 				<td>{{ conducente.nick }} [{{ conducente.max_persone }}]</td>
