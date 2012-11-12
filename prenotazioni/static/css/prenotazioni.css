@@ -1,0 +1,102 @@
+#taxilogo {
+	float: right;
+	width: 200px;
+	top: 0;
+	right: 0;
+}
+
+body {
+	padding-bottom: 20px;
+	background: #ddd;
+	background-repeat: repeat-x;
+	background-position: bottom left;
+	background-attachment: fixed;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	line-height: 20px;
+}
+.loghetto {
+	margin-right: 15px;
+}
+#mainContent {
+	max-width: 500px;
+	margin: 0 auto;
+}
+
+.box {
+	padding: 19px 29px 0 29px;
+	margin: 0 auto 20px;
+	background-color: #fff;
+	border: 1px solid #999;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+	-moz-box-shadow: 0 1px 2px rgba(0,0,0,.05);
+	box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.box .form-signin-heading, .box .checkbox {
+	margin-bottom: 10px;
+}
+
+#footer {
+	font-size: 0.8em;
+	text-align: right;
+}
+label {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+input[type="text"], input[type="password"], textarea, select {
+	border: 1px solid #CCCCCC;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
+	transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
+}
+
+input[type="text"], input[type="password"], input[type="submit"], textarea, select, btn-group {
+	font-size: 16px;
+	height: auto;
+	margin-bottom: 15px;
+	padding: 7px 9px;
+	width: 100%;
+	padding: 7px 0;
+}
+
+textarea {
+	height:5em;
+}
+
+.chzn-container-single .chzn-single, .chzn-container-single li {
+	height: 2em;
+	line-height: 2em;
+	font-size: 16px;
+}
+
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+ul li {
+	display: inline-block;
+	padding: 15px;
+}
+li label {
+	display: inline;
+}
+
+ul.errorlist li {
+	/* form errors */
+	color: red;
+	font-weight: bolder;
+	padding: 0;
+	margin-top: 15px;
+}
+input.date-widget, input.time-widget {
+	width:40%;
+	max-width: 150px;
+	margin-right: 15px;
+	display: inline !important;
+}

@@ -1299,6 +1299,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 			return HttpResponseRedirect(reverse("tamManage"))
 		if hasattr(selectedUser, "prenotazioni"):
 			utentePrenotazioni = selectedUser.prenotazioni
+		else:
+			utentePrenotazioni = None
 		selectedGroups = selectedUser.groups.all()
 		groups = Group.objects.all()
 		for group in groups:
@@ -1334,9 +1336,9 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 					from prenotazioni.models import UtentePrenotazioni
 					logging.debug("clearing groups for user prenotazioni")
 					selectedUser.groups.clear()
-					try:
+					if utentePrenotazioni:
 						attuale_prenotazione = utentePrenotazioni
-					except UtentePrenotazioni.DoesNotExist:
+					else:
 						messages.info(request, "Faccio diventare il conducente '%s' un utente per le prenotazioni." % selectedUser)
 						attuale_prenotazione = UtentePrenotazioni()
 					attuale_prenotazione.user = selectedUser
