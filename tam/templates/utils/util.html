@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Strumenti &raquo; {{ block.super }}{% endblock %}
 
@@ -7,36 +7,36 @@
 
 {% if perms.tam.get_backup or perms.tam.can_backup %}
 	<div class="btnbox">
-		<a href="{% url tamBackup %}"><img src="/media/buuf/backup.png" alt=""/>Backup</a>
+		<a href="{% url "tamBackup" %}"><img src="/media/buuf/backup.png" alt=""/>Backup</a>
 	</div>
 {% endif %}
 
 <div class="btnbox">
-	<a href="{% url actionLog %}"><img src="/media/buuf/log.png" alt="" />Log degli accessi</a>
+	<a href="{% url "actionLog" %}"><img src="/media/buuf/log.png" alt="" />Log degli accessi</a>
 </div>
 
 {% if perms.auth.add_user %}
 	<div class="btnbox">
-		<a href="{%url tamManage%}"><img src="/media/buuf/Man-Brown-icon.png" alt="" />Gestione utenti</a>
+		<a href="{% url "tamManage" %}"><img src="/media/buuf/Man-Brown-icon.png" alt="" />Gestione utenti</a>
 	</div>
 {% endif %}
 
 {% if perms.auth.is_superuser %}
 	<div class="btnbox super">
-		<a href="{%url tamResetSessions%}"><img src="/media/buuf/Hatchet-icon.png" alt="" />Reset sessioni utente</a>
+		<a href="{%url "tamResetSessions" %}"><img src="/media/buuf/Hatchet-icon.png" alt="" />Reset sessioni utente</a>
 	</div>
-	<div class="btnbox super"><a href="{%url fix_action%}"><img src="/media/buuf/Dildo-icon.png" alt="" />Azione correttiva</a></div>
+	<div class="btnbox super"><a href="{% url "fix_action" %}"><img src="/media/buuf/Dildo-icon.png" alt="" />Azione correttiva</a></div>
 {% endif %}
 
 {% if perms.tamArchive.archive or perms.tamArchive.flat %}
-	<div class="btnbox"><a href="{% url tamArchiveUtil %}"><img src="/media/buuf/File-Manager-icon.png" alt="" />Archiviazione</a></div>
+	<div class="btnbox"><a href="{% url "tamArchiveUtil" %}"><img src="/media/buuf/File-Manager-icon.png" alt="" />Archiviazione</a></div>
 {% endif %}
 
-{% if perms.fatturazione.generate %}	<div class="btnbox"><a href="{% url tamGenerazioneFatture %}"><img src="/media/buuf/Calculator-icon.png" alt="" />Generazione fatture</a></div>
+{% if perms.fatturazione.generate %}	<div class="btnbox"><a href="{% url "tamGenerazioneFatture" %}"><img src="/media/buuf/Calculator-icon.png" alt="" />Generazione fatture</a></div>
 {% endif %}
 
 {% if perms.fatturazione.view %}
-	<div class="btnbox"><a href="{% url tamVisualizzazioneFatture %}"><img src="/media/fatture/invoice-icon.png" alt="" />Visualizzazione Fatture</a></div>
+	<div class="btnbox"><a href="{% url "tamVisualizzazioneFatture" %}"><img src="/media/fatture/invoice-icon.png" alt="" />Visualizzazione Fatture</a></div>
 {% endif %}
 
 <br style="clear:both" />

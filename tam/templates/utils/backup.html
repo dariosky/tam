@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Gestione backup &raquo; {{ block.super }}{% endblock %}
 
@@ -28,7 +28,7 @@
 								{% if backup.size == "zero" %}
 									{{ backup.date|date:"D j F, H:i" }}
 								{% else %}
-									<a href='{% url tamGetBackup f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
+									<a href='{% url "tamGetBackup" f_date %}'>{{ backup.date|date:"D j F, H:i" }}</a>
 								{% endif %}
 							{% endwith %}
 						</td>

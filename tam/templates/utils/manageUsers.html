@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Impostazione dei permessi &raquo; {{ block.super }}{% endblock %}
 
@@ -16,7 +16,7 @@
 	<input type="submit" value="Seleziona" />
 </p>
 </form>
-<p><a href="{% url newUser %}">Nuovo utente</a></p>
+<p><a href="{% url "newUser" %}">Nuovo utente</a></p>
 {% if selectedUser %}
 	<form method="post" action=".">
 		dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
@@ -31,7 +31,7 @@
 			{% endfor %}
 			</select>
 		</p>
-		<p><a href="{% url delUser username=selectedUser.username %}">Cancellazione utente</a></p>
+		<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
 		
 		{% if perms.prenotazioni.manage_permissions %}
 			<h2>Prenotazioni</h2>

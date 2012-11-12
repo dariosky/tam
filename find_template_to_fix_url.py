@@ -25,7 +25,7 @@ for dirpath, dirnames, filenames in os.walk('.'):
 					warning = []
 					future_url = re.search(future_url_pattern, content)
 					if not future_url:
-						error.append("Future URL missing")
+						error.append("Future URL missing: {% load url from future %}")
 					parameters = re.findall(url_comma_parameters, content)
 					for parameter in parameters:
 						#print parameter

@@ -1,4 +1,4 @@
-{% extends "clienti_e_listini.html" %}
+{% extends "clienti_e_listini.html" %}{% load url from future %}
 
 {% block title %}Gestione cliente &raquo; {{ block.super }}{% endblock %}
 
@@ -6,7 +6,7 @@
 
 {% block content %}
 	<h1>Gestione cliente</h1>
-	Se non hai ancora definito un listino adatto al cliente devi prima <a href="{% url tamNuovoListino%}">crearlo</a>.
+	Se non hai ancora definito un listino adatto al cliente devi prima <a href="{% url "tamNuovoListino" %}">crearlo</a>.
 	<form action="" method="post">
 		<table>
 			{{ form.as_table }}
