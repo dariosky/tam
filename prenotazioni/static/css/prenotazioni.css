@@ -49,13 +49,16 @@ label {
 	padding: 0;
 }
 
-input[type="text"], input[type="password"], textarea, select {
+input[type="text"], input[type="password"], input[type="number"]
+	textarea, select {
 	border: 1px solid #CCCCCC;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
 	transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
 }
 
-input[type="text"], input[type="password"], input[type="submit"], textarea, select, btn-group {
+input[type="text"], input[type="password"], input[type="submit"],
+input[type="number"],
+textarea, select, btn-group {
 	font-size: 16px;
 	height: auto;
 	margin-bottom: 15px;

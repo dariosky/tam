@@ -216,6 +216,9 @@ class Viaggio(models.Model):
 	prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	date_start = models.DateTimeField(editable=False, default=datetime.datetime(2009, 01, 01, 0, 0, 0))
 	annullato = models.BooleanField('Corsa annullata', default=False, editable=True)
+	
+	# per non dover fare query quando visualizzo il viaggio, mi imposto che deriva da una prenotazione
+	is_prenotazione = models.BooleanField('Derivato da prenotazione', default=False, editable=False)
 
 	""" Nel listare i viaggi, mostro solo quelli padre, con sottolistati i loro eventuali viaggi figli """
 	class Meta:

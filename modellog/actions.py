@@ -14,7 +14,7 @@ def logAction(action, instance=None, description='', user=None, log_date=None):
 
 	modification = ActionLog (
 							  data=log_date,
-							  user_id=user.id,
+							  user_id=user.id if user else None,
 							  action_type=action,
 							  description=description,
 							  modelName=content_type.model if instance else None,

@@ -124,7 +124,10 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 	# ------------------ raccolgo tutti i possibili filtri
 	filtriTipo = [
-			u"Partenze", u"Arrivi", u"Fuori classifica", u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
+			u"Partenze", u"Arrivi",
+			u"Fuori classifica",
+			u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
+			"Prenotazioni",
 	]
 	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito',
 				  u'Quote consorzio', u'No quota consorzio',
@@ -283,6 +286,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		viaggi = viaggi.filter(punti_abbinata__gt=0) | viaggi.filter(padre__punti_abbinata__gt=0)
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
+	elif filterType == "Prenotazioni":
+		viaggi = viaggi.filter(prenotazione__isnull=False)
 
 	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 
