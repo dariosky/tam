@@ -46,11 +46,17 @@ class Prenotazione(models.Model):
 	data_corsa = models.DateTimeField()
 
 	pax = models.IntegerField(default=1)
-	is_collettivo = models.BooleanField("Servizio collettivo", default=False)
-	
-	is_arrivo = models.BooleanField(default=True)
+	is_collettivo = models.BooleanField(
+									"Individuale o collettivo?",
+									choices=((False, 'Individuale'), (True, 'Collettivo')),
+									default=False
+									)
+
+	is_arrivo = models.BooleanField("Arrivo o partenza?",
+									choices=((True, 'Arrivo'), (False, 'Partenza')),
+									default=True)
 	luogo = models.ForeignKey(Luogo)
-	
+
 	pagamento = models.CharField(max_length=1,
 								 choices=TIPI_PAGAMENTO,
 								 default="D")

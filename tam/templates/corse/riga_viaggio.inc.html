@@ -1,6 +1,6 @@
 {% load utilTag %}
 {% load media %}
-<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'> 
+<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}{% if viaggio.is_prenotazione %} prenotazione{% endif %}'> 
 	<td>
 		{% if not distinct %}
 			{% if not viaggio.conducente_confermato %}

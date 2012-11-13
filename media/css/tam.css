@@ -494,6 +494,9 @@ h2.fatturaTipo5 {
 	background-position: bottom !important;
 }
 
+.prenotazione td {
+	background-color:#FE9 !important;
+}
 .annullato td{
 	background-color:#DDD !important;
 }
