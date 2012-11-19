@@ -2,6 +2,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from tam.models import Cliente, Luogo, Viaggio
+import datetime
+from prenotazioni.util import preavviso_ore, prenotaCorsa
 
 """
 	Regole da rispettare:
@@ -41,6 +43,7 @@ class UtentePrenotazioni(models.Model):
 
 class Prenotazione(models.Model):
 	owner = models.ForeignKey(UtentePrenotazioni, editable=False)
+	cliente = models.ForeignKey(Cliente, editable=False)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
 	data_corsa = models.DateTimeField()
@@ -71,7 +74,45 @@ class Prenotazione(models.Model):
 
 	class Meta:
 		verbose_name_plural = "Prenotazioni"
-		ordering = ("data_registrazione", "owner")
+		ordering = ("cliente", "-data_corsa", "owner")
 
 	def __unicode__(self):
-		return "Prenotazione del %(data_registrazione)s" % self.__dict__
+		result = "%s - %s" % (self.cliente, self.owner.user.username)
+		result += " - " + ("arrivo" if self.is_arrivo else "partenza")
+		result += " %s" % self.luogo
+		result += " del %s" % self.data_corsa.strftime('%d/%m/%Y %H:%M')
+		return result
+
+	def is_editable(self):
+		" True se la corsa è ancora modificabile "
+		ora = datetime.datetime.now()
+		inTempo = ora < (self.data_corsa - datetime.timedelta(hours=preavviso_ore))
+		if not inTempo: return False
+		if self.viaggio and self.viaggio.conducente_confermato:
+			return False
+		return True
+
+	def save(self):
+		if self.viaggio:
+			nuovoViaggio = prenotaCorsa(self, dontsave=True)
+			chiavi_da_riportare = [
+				'data', 'da', 'a', 'numero_passeggeri', 'esclusivo',
+				'incassato_albergo', 'fatturazione', 'pagamento_differito',
+				'note'
+			]
+			for chiave in chiavi_da_riportare:
+				setattr(self.viaggio, chiave, getattr(nuovoViaggio, chiave))
+			self.viaggio.save()
+			self.viaggio.updatePrecomp()
+		super(Prenotazione, self).save()
+
+	def delete(self):
+		if self.viaggio:
+			# annullo il viaggio
+			self.viaggio.annullato = True
+			self.viaggio.padre = None
+			self.viaggio.save()
+			self.viaggio.updatePrecomp()
+
+
+		super(Prenotazione, self).delete()

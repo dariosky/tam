@@ -3,13 +3,17 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from markViews import prenotazioni
 from django import forms
-from prenotazioni.models import Prenotazione, TIPI_PAGAMENTO
+from prenotazioni.models import Prenotazione
 from tam.widgets import MySplitDateTimeField, MySplitDateWidget
 from django.utils.translation import ugettext as _
 from django.forms.widgets import Input
 import datetime
 from prenotazioni.util import preavviso_ore, prenotaCorsa
 from django.db import transaction
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+from django.contrib import messages
+from django.forms.fields import TypedChoiceField
 
 class NumberInput(Input):
 	input_type = 'number'
@@ -28,7 +32,7 @@ class FormPrenotazioni(forms.ModelForm):
 		ora = datetime.datetime.now()
 
 		oraMinima = ora + datetime.timedelta(hours=preavviso_ore) # bisogna prenotare 48 ore prima
-		if cleaned_data['data_corsa'] < oraMinima:
+		if 'data_corsa' in cleaned_data and cleaned_data['data_corsa'] < oraMinima:
 			raise forms.ValidationError("Devi prenotare almeno %d ore prima. " % preavviso_ore)
 
 		return cleaned_data
@@ -67,21 +71,117 @@ def prenota(request, template_name='prenotazioni/main.html'):
 
 	utentePrenotazioni = request.user.prenotazioni
 	form = FormPrenotazioni(request.POST or None)
-
 	if form.is_valid():
 		prenotazione = Prenotazione(
-								owner=request.user.prenotazioni,
+								owner=utentePrenotazioni,
+								cliente=utentePrenotazioni.cliente,
 								**form.cleaned_data
 								)
-		
+
 		viaggio = prenotaCorsa(prenotazione)
-		prenotazione.viaggio=viaggio
+		prenotazione.viaggio = viaggio
 		prenotazione.save()
+		messages.success(
+			request,
+			"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
+		)
+		#return HttpResponseRedirect(reverse('tamPrenotazioni')) #TMP: per prenotare a raffica
 
 	return render_to_response(
 							template_name,
 							{
 								"utentePrenotazioni":utentePrenotazioni,
 								"form":form,
+								"editable":True,
 							},
 							context_instance=RequestContext(request))
+
+
+@prenotazioni
+def cronologia(request, template_name='prenotazioni/cronologia.html'):
+	utentePrenotazioni = request.user.prenotazioni
+
+	prenotazioni = Prenotazione.objects.filter(cliente=utentePrenotazioni.cliente)
+
+
+	return render_to_response(
+							template_name,
+							{
+								"utentePrenotazioni":utentePrenotazioni,
+								"prenotazioni":prenotazioni,
+							},
+							context_instance=RequestContext(request))
+
+
+@prenotazioni
+def edit(request, id_prenotazione, template_name='prenotazioni/main.html'):
+	utentePrenotazioni = request.user.prenotazioni
+
+	prenotazione = Prenotazione.objects.get(id=id_prenotazione)
+	if prenotazione.owner <> utentePrenotazioni:
+		messages.error(
+			request,
+			"La prenotazione non è stata fatta da te, non puoi accedervi."
+		)
+		return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+	editable = prenotazione.is_editable()
+	if not editable:
+		messages.warning(
+			request,
+			"La prenotazione non è più modificabile."
+		)
+		#return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+
+	form = FormPrenotazioni(request.POST or None, instance=prenotazione)
+	previous_values = {}
+	if request.method == "POST":
+		for key in form.fields:
+			previous_values[key] = getattr(prenotazione, key)
+
+	if form.is_valid() and editable:
+		changes = {}	# dizionario con i cambiamenti al form
+		for key in form.cleaned_data:
+			def humanValue(pythonValue, choices):
+				for k, v in choices:
+					if k == pythonValue:
+						return v
+			oldValue = previous_values.get(key)
+			newValue = form.cleaned_data[key]
+
+			field = form.fields[key]
+			if isinstance(field, TypedChoiceField):
+				oldValue = humanValue(oldValue, field.choices)
+				newValue = humanValue(newValue, field.choices)
+
+			if newValue <> oldValue:
+				changes[key] = (field.label, oldValue, newValue)
+#				messages.success(
+#						request,
+#						"Cambiato %s da %s a %s" % (form.fields[key].label,
+#													oldValue,
+#													newValue)
+#						)
+		if changes:
+			messages.success(request, "Modifica eseguita.")
+		prenotazione.save()	# TMP: va solo se changes	
+		
+		return HttpResponseRedirect(
+								reverse('tamPrenotazioni-edit',
+										kwargs={"id_prenotazione":prenotazione.id}
+								),
+
+							)
+
+	return render_to_response(
+							template_name,
+							{
+								"utentePrenotazioni":utentePrenotazioni,
+								"form":form,
+								"prenotazione":prenotazione,
+								"editable":editable,
+							},
+							context_instance=RequestContext(request))
+
+#TODO: Modifica e cancellazione (con annullamento della corsa)
+#TODO: Log delle operazioni
+#TODO: Email di conferma in creazione e modifica

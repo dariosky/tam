@@ -18,8 +18,11 @@ class MySplitDateWidget(forms.widgets.SplitDateTimeWidget):
 
 	def __init__(self, *args, **kwargs):
 		super(MySplitDateWidget, self).__init__(*args, **kwargs)
-		self.widgets[0].attrs['class']="date-widget"
-		self.widgets[1].attrs['class']="time-widget"
+		self.widgets[0].attrs['class'] = "date-widget"
+		self.widgets[0].attrs['placeholder'] = 'Data'
+		
+		self.widgets[1].attrs['placeholder'] = 'Ora'
+		self.widgets[1].attrs['class'] = "time-widget"
 		self.widgets[1].attrs['maxlength'] = "5" # time max length
 
 	def decompress(self, value):
