@@ -4,7 +4,7 @@ from tam.views.tamUtils import getDefault
 
 preavviso_ore = 48
 
-def prenotaCorsa(prenotazione):
+def prenotaCorsa(prenotazione, dontsave=False):
 	" Crea il viaggio e lo associa alla corsa "
 
 	utentePrenotazioni = prenotazione.owner
@@ -50,13 +50,19 @@ def prenotaCorsa(prenotazione):
 		setattr(viaggio, attribute_name, default[attribute_name])
 
 	viaggio.is_prenotazione = True
+	pagamento =prenotazione.pagamento 
+
+	if pagamento=='F':
+		viaggio.fatturazione=True
+	elif pagamento=='H':
+		viaggio.incassato_albergo = True
 
 	#TODO:
 	# imposto il flag di fatturazione, incassato hotel o differito in base
 	# alla prenotazione
-
-	viaggio.save()
-	viaggio.updatePrecomp()
+	if dontsave is False:
+		viaggio.save()
+		viaggio.updatePrecomp()
 	return viaggio
 
 if __name__ == '__main__':

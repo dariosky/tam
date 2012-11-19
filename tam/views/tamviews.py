@@ -287,7 +287,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
 	elif filterType == "Prenotazioni":
-		viaggi = viaggi.filter(prenotazione__isnull=False)
+		viaggi = viaggi.filter(is_prenotazione=True)
 
 	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 

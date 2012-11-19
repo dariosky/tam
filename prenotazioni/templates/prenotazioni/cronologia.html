@@ -1,0 +1,46 @@
+{% extends 'prenotazioni/base.html' %}{% load media %}{% load url from future %}
+{% block content %}
+	<h3>Prenotazioni effettuate</h3>
+	per {{ utentePrenotazioni.cliente }}
+	{% if not prenotazioni %}
+		<div>Nessuna prenotazione in archivio</div>
+	{% else %}
+	<table class='prenotazioni'>
+		<tr><th>Corsa</th>
+			<th>orario</th>
+			<th>note</th>
+		</tr>
+		{% for prenotazione in prenotazioni %}
+			<tr>
+				<td class='{% if prenotazione.is_arrivo %}arrivo{% else %}partenza{% endif %}'>
+					{% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %}
+					{{ prenotazione.luogo }}<br />
+					
+					{{ prenotazione.pax }} pax
+					{% if prenotazione.is_collettivo %}
+						<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
+					{% else %}
+						<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
+					{% endif %}
+				</td>
+				<td>{{ prenotazione.data_corsa|date:"j/m, H:i" }}</td>
+				<td class='note'>
+						{% if prenotazione.note_camera %}Camera: {{ prenotazione.note_camera }}<br />{% endif %}
+						{% if prenotazione.note_cliente %}Cliente: {{ prenotazione.note_cliente }}<br />{% endif %}
+						{% if prenotazione.note %}{{ prenotazione.note }}{% endif %}
+				</td>
+				<td>
+					<a href='{% url 'tamPrenotazioni-edit' prenotazione.id %}'>
+						{% if prenotazione.is_editable %}
+							modifica
+						{% else %}	
+							visualizza
+						{% endif %}
+					</a>
+				</td>
+			</tr>
+		{% endfor %}
+	</table>
+	{% endif %}
+	
+{% endblock content %}

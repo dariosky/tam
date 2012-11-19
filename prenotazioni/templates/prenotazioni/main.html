@@ -1,9 +1,38 @@
-{% extends 'prenotazioni/base.html' %}
+{% extends 'prenotazioni/base.html' %}{% load url from future %}
 {% block content %}
-	{{ utentePrenotazioni.nome_operatore }} per
-	{{ utentePrenotazioni.cliente }}
+	{% if prenotazione %}
+		<h3>Prenotazione {{ prenotazione.id }}</h3>
+	{% endif %}
+	
+	{{ utentePrenotazioni.nome_operatore }} per {{ utentePrenotazioni.cliente }}
+	
 	<form action='' method="post">
 		{{ form.as_p }}
-		<input type='submit' name='prenota' class='btn' value='Invia prenotazione' />
+		
+		{% if editable %}
+			<input type='submit'
+				   name='prenota'
+				   class='btn'
+				   value='{% if prenotazione %}Modifica{%else%}Invia{%endif%} prenotazione'
+			/>
+			{% if prenotazione %}
+				<input type='submit'
+				   name='cancella'
+				   class='btn'
+				   value='Cancella prenotazione'
+			/>
+			{% endif %}
+		{% else %}
+			<script type="text/javascript">
+				$("form input,form textarea, form select").attr("disabled",true);
+			</script>
+		{% endif %}
 	</form>
+	
+	<a href='{% url 'tamCronoPrenotazioni' %}'>
+
+	<div style='text-align:center'>
+		vai alla cronologia delle prenotazioni effettuate
+	</div>
+	</a>
 {% endblock content %}
