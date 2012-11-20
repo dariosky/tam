@@ -1,0 +1,10 @@
+La prenotazione è stata effettuata.
+
+I dettagli della corsa:
+{% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %} {{ prenotazione.luogo }} alle ore {{ prenotazione.data_corsa|date:"H:i" }} del {{ prenotazione.data_corsa|date:"j/m/Y" }}
+{% if prenotazione.is_collettivo %}collettivo{% else %}individuale{% endif %} {{ prenotazione.pax }} pax
+
+{% if prenotazione.note_camera %}Numero di camera: {{ prenotazione.note_camera }}{% endif %}
+{% if prenotazione.note_cliente %}Nome del cliente: {{ prenotazione.note_cliente }}{% endif %}
+{% if prenotazione.note %}Note:
+{{ prenotazione.note }}{% endif %}
