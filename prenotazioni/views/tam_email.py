@@ -9,7 +9,7 @@ import logging
 from prenotazioni.models import Prenotazione
 from django.utils.safestring import mark_safe
 
-ADMIN_MAIL = "dariosky@gmail.com"
+ADMIN_MAIL = ",".join(["%s <%s>" % (name, email) for (name, email) in settings.ADMINS])
 
 def notifyByMail(
 		to=None,
@@ -65,7 +65,7 @@ def notifyByMail(
 
 	emailMessage.attach_alternative(htmlMessage, "text/html")
 
-	f = open(os.path.join(settings.MEDIA_ROOT, 'brand/taxilogo_small.jpg'), 'rb')
+	f = open(os.path.join(settings.MEDIA_ROOT, settings.EMAIL_SMALL_LOGO), 'rb')
 	logo_content = f.read()
 	f.close()
 	emailMessage.attach_related("logo", logo_content, 'image/jpeg')
@@ -83,7 +83,7 @@ def notifyByMail(
 	if settings.DEBUG:
 		print("In test, don't send mail to %s" % to)
 		emailMessage.send()
-		print htmlMessage
+		#print htmlMessage
 	else:
 		logging.debug("Sending mail to %s" % to)
 		emailMessage.send()

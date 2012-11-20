@@ -20,15 +20,28 @@ from django.conf import settings
 class NumberInput(Input):
 	input_type = 'number'
 
-def inviaMailPrenotazione(prenotazione, subject_prefix="Conferma",
+def inviaMailPrenotazione(prenotazione,
+						  azione,
 						  extra_context=None):
-	subject = "%s prenotazione TaM n° %d" % (subject_prefix,
-											 prenotazione.id)
+	if azione == "create":
+		subject = "Conferma prenotazione TaM n° %d" % prenotazione.id
+		prenotazione_suffix = "effettuata"
+	elif azione == "update":
+		subject = "Modifica prenotazione TaM n° %d" % prenotazione.id
+		prenotazione_suffix = "modificata"
+	elif azione == "delete":
+		subject = "Annullamento prenotazione TaM n° %d" % prenotazione.id
+		prenotazione_suffix = "cancellata"
+	else:
+		raise Exception ("Azione mail non valida %s" % azione)
+
+	azione = ""
 	context = { "prenotazione":prenotazione,
-				"azione":"effettuata" if subject_prefix=="Conferma" else "modificata", 
+				"azione":prenotazione_suffix,
 			  }
 	if extra_context:
 		context.update(extra_context)
+
 	notifyByMail(
 		to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
 		subject=subject,
@@ -106,7 +119,7 @@ def prenota(request, template_name='prenotazioni/main.html'):
 			request,
 			"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
 		)
-		inviaMailPrenotazione(prenotazione, subject_prefix="Conferma")
+		inviaMailPrenotazione(prenotazione, "create")
 		return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
 	return render_to_response(
@@ -160,6 +173,13 @@ def edit(request, id_prenotazione, template_name='prenotazioni/main.html'):
 		for key in form.fields:
 			previous_values[key] = getattr(prenotazione, key)
 
+		if "delete" in request.POST:
+			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
+			inviaMailPrenotazione(prenotazione, "delete")
+			prenotazione.delete()
+			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+
+
 	if form.is_valid() and editable:
 		changes = {}	# dizionario con i cambiamenti al form
 		for key in form.cleaned_data:
@@ -190,8 +210,7 @@ def edit(request, id_prenotazione, template_name='prenotazioni/main.html'):
 				stringhe_cambiamenti.append("Cambiato %s da %s a %s" % (label, oldValue, newValue))
 
 			cambiamenti = "\n".join(stringhe_cambiamenti)
-			inviaMailPrenotazione(prenotazione,
-								  subject_prefix="Modificata",
+			inviaMailPrenotazione(prenotazione, "update",
 								  extra_context={"cambiamenti":cambiamenti})
 			messages.success(request, "Modifica eseguita.")
 			prenotazione.save()

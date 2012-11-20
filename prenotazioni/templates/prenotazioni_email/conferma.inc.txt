@@ -8,3 +8,5 @@ I dettagli della corsa:
 {% if prenotazione.note_cliente %}Nome del cliente: {{ prenotazione.note_cliente }}{% endif %}
 {% if prenotazione.note %}Note:
 {{ prenotazione.note }}{% endif %}
+
+Prenotazione effettuata dall'utente {{ prenotazione.owner.user.username }} per {{ prenotazione.cliente.nome }}
