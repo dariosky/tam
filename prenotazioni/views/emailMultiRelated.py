@@ -78,31 +78,3 @@ class EmailMultiRelated(EmailMultiAlternatives):
 			attachment.add_header('Content-Type', mimetype, name=filename)
 			attachment.add_header('Content-ID', '<%s>' % filename)
 		return attachment
-
-if __name__ == '__main':
-	# snipped from http://djangosnippets.org/snippets/2215/
-	msg = EmailMultiRelated('Subject', 'Plain text version', 'dario varotto <varotto@mion.com>', ['<varotto@mion.com>'])
-
-	html = '<html><body><p>This is my nicely <strong>formatted</strong> message. <a href="mailto:john@foo.com">Email</a> me back.</p><img src="logo.png"></body></html'
-
-	msg.attach_alternative(html, 'text/html')
-
-	msg.attach_related_file('logo.png')
-
-	ics_data = '''BEGIN:VCALENDAR
-	PRODID:-//HunterFord//EN
-	VERSION:2.0
-	BEGIN:VEVENT
-	URL:http://example.com
-	DTSTART:20101001T200000
-	DTEND:20101001T235959
-	SUMMARY:Fall is in the Air
-	ORGANIZER;CN=John Foo:MAILTO:john@foo.com
-	LOCATION:Home
-	DESCRIPTION:
-	PRIORITY:3
-	END:VEVENT
-	END:VCALENDAR'''
-
-	msg.attach('event.ics', ics_data, 'text/calendar')
-	msg.send()
