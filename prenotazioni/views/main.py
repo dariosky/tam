@@ -14,9 +14,29 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 from django.forms.fields import TypedChoiceField
+from prenotazioni.views.tam_email import notifyByMail
+from django.conf import settings
 
 class NumberInput(Input):
 	input_type = 'number'
+
+def inviaMailPrenotazione(prenotazione, subject_prefix="Conferma",
+						  extra_context=None):
+	subject = "%s prenotazione TaM n° %d" % (subject_prefix,
+											 prenotazione.id)
+	context = { "prenotazione":prenotazione,
+				"azione":"effettuata" if subject_prefix=="Conferma" else "modificata", 
+			  }
+	if extra_context:
+		context.update(extra_context)
+	notifyByMail(
+		to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
+		subject=subject,
+		context=context,
+
+		messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
+		messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
+	)
 
 class FormPrenotazioni(forms.ModelForm):
 	def clean_pax(self):
@@ -81,11 +101,13 @@ def prenota(request, template_name='prenotazioni/main.html'):
 		viaggio = prenotaCorsa(prenotazione)
 		prenotazione.viaggio = viaggio
 		prenotazione.save()
+
 		messages.success(
 			request,
 			"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
 		)
-		#return HttpResponseRedirect(reverse('tamPrenotazioni')) #TMP: per prenotare a raffica
+		inviaMailPrenotazione(prenotazione, subject_prefix="Conferma")
+		return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
 	return render_to_response(
 							template_name,
@@ -162,9 +184,18 @@ def edit(request, id_prenotazione, template_name='prenotazioni/main.html'):
 #													newValue)
 #						)
 		if changes:
+			stringhe_cambiamenti = []
+			for key in changes:
+				(label, oldValue, newValue) = changes[key]
+				stringhe_cambiamenti.append("Cambiato %s da %s a %s" % (label, oldValue, newValue))
+
+			cambiamenti = "\n".join(stringhe_cambiamenti)
+			inviaMailPrenotazione(prenotazione,
+								  subject_prefix="Modificata",
+								  extra_context={"cambiamenti":cambiamenti})
 			messages.success(request, "Modifica eseguita.")
-		prenotazione.save()	# TMP: va solo se changes	
-		
+			prenotazione.save()
+
 		return HttpResponseRedirect(
 								reverse('tamPrenotazioni-edit',
 										kwargs={"id_prenotazione":prenotazione.id}
@@ -182,6 +213,4 @@ def edit(request, id_prenotazione, template_name='prenotazioni/main.html'):
 							},
 							context_instance=RequestContext(request))
 
-#TODO: Modifica e cancellazione (con annullamento della corsa)
-#TODO: Log delle operazioni
 #TODO: Email di conferma in creazione e modifica

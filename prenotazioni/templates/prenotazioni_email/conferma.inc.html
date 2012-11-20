@@ -1,0 +1,14 @@
+{% extends "prenotazioni_email/htmlMailTemplate.html" %}
+
+{% block message %}<h1>La prenotazione è stata {{ azione }}.</h1>
+
+I dettagli della corsa:
+<b>{% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %} {{ prenotazione.luogo }}</b> alle ore {{ prenotazione.data_corsa|date:"H:i" }} del {{ prenotazione.data_corsa|date:"j/m/Y" }}
+{% if prenotazione.is_collettivo %}collettivo{% else %}individuale{% endif %} {{ prenotazione.pax }} pax
+
+{% if prenotazione.note_camera %}Numero di camera: <i>{{ prenotazione.note_camera }}</i>{% endif %}
+{% if prenotazione.note_cliente %}Nome del cliente: <i>{{ prenotazione.note_cliente }}</i>{% endif %}
+{% if prenotazione.note %}Note:
+<i>{{ prenotazione.note }}</i>{% endif %}
+{% if cambiamenti %}<div style='color:red; margin:20px 0'>{{ cambiamenti }}</div>{% endif %}
+{% endblock message %}

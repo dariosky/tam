@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+	<META http-equiv="content-type" content="text/html; charset=UTF-8">
+	<style type="text/css">
+		a { color: #686; }
+		* { margin:0; padding:0; }
+		body {margin:10px;}
+	</style>
+</head>
+
+<body style="background-color:white; color:#103d2d; font-size:11pt; font-family:Arial;">
+	<div id="header" style="text-align:left; margin:5px; margin-bottom:30px; ">
+		<img alt="TaM" src="cid:logo">
+	</div>
+
+<pre wrap="" style='font-family:arial;'>{% block message %}{{ message }}{% endblock message %}</pre>
+
+<div id="sign" style="white-space: pre-line; font-size:smaller;">
+	{{ signatureHTML }}
+</div>
+
+</body>
+</html>
