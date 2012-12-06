@@ -100,9 +100,31 @@ class FormPrenotazioni(forms.ModelForm):
 
 @prenotazioni
 @transaction.commit_on_success	# commit solo se tutto OK
-def prenota(request, template_name='prenotazioni/main.html'):
+def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html'):
 	utentePrenotazioni = request.user.prenotazioni
-	form = FormPrenotazioni(request.POST or None)
+
+	previous_values = {}
+	if id_prenotazione:
+		prenotazione = Prenotazione.objects.get(id=id_prenotazione)
+		if prenotazione.owner <> utentePrenotazioni:
+			messages.error(
+				request,
+				"La prenotazione non è stata fatta da te, non puoi accedervi."
+			)
+			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+		editable = prenotazione.is_editable()
+		if not editable:
+			messages.warning(
+				request,
+				"La prenotazione non è più modificabile."
+			)
+			#return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+	else:
+		prenotazione = None
+		editable = True
+
+	form = FormPrenotazioni(request.POST or None, instance=prenotazione)
+	
 	# deciso se mostrare o meno la scelta dei clienti:
 	clienti_attivi = utentePrenotazioni.clienti
 	if clienti_attivi.count() == 0:
@@ -121,32 +143,83 @@ def prenota(request, template_name='prenotazioni/main.html'):
 		#del forms.fields['cliente']
 		del form.fields['cliente']
 		cliente_unico = clienti_attivi.all()[0]
+	
+	if request.method == "POST":
+		for key in form.fields:
+			previous_values[key] = getattr(prenotazione, key)
 
-	if form.is_valid():
-		prenotazione = Prenotazione(
-								owner=utentePrenotazioni,
-								**form.cleaned_data
-								)
-		if clienti_attivi.count() == 1:
-			prenotazione.cliente = cliente_unico
+		if "delete" in request.POST:
+			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
+			inviaMailPrenotazione(prenotazione, "delete")
+			prenotazione.delete()
+			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))	
 
-		viaggio = prenotaCorsa(prenotazione)
-		prenotazione.viaggio = viaggio
-		prenotazione.save()
+	if form.is_valid() and editable:
+		if id_prenotazione is None:
+			prenotazione = Prenotazione(
+									owner=utentePrenotazioni,
+									**form.cleaned_data
+									)
+			if clienti_attivi.count() == 1:
+				prenotazione.cliente = cliente_unico
 
-		messages.success(
-			request,
-			"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
-		)
-		inviaMailPrenotazione(prenotazione, "create")
-		return HttpResponseRedirect(reverse('tamPrenotazioni'))
+			viaggio = prenotaCorsa(prenotazione)
+			prenotazione.viaggio = viaggio
+			prenotazione.save()
+
+			messages.success(
+				request,
+				"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
+			)
+			inviaMailPrenotazione(prenotazione, "create")
+			return HttpResponseRedirect(reverse('tamPrenotazioni'))
+		else:	# salvo la modifica
+			changes = {}	# dizionario con i cambiamenti al form
+			for key in form.cleaned_data:
+				def humanValue(pythonValue, choices):
+					for k, v in choices:
+						if k == pythonValue:
+							return v
+				oldValue = previous_values.get(key)
+				newValue = form.cleaned_data[key]
+	
+				field = form.fields[key]
+				if isinstance(field, TypedChoiceField):
+					oldValue = humanValue(oldValue, field.choices)
+					newValue = humanValue(newValue, field.choices)
+	
+				if newValue <> oldValue:
+					changes[key] = (field.label, oldValue, newValue)
+	#				messages.success(
+	#						request,
+	#						"Cambiato %s da %s a %s" % (form.fields[key].label,
+	#													oldValue,
+	#													newValue)
+	#						)
+			if changes:
+				stringhe_cambiamenti = []
+				for key in changes:
+					(label, oldValue, newValue) = changes[key]
+					stringhe_cambiamenti.append("Cambiato %s da %s a %s" % (label, oldValue, newValue))
+	
+				cambiamenti = "\n".join(stringhe_cambiamenti)
+				inviaMailPrenotazione(prenotazione, "update",
+									  extra_context={"cambiamenti":cambiamenti})
+				messages.success(request, "Modifica eseguita.")
+				prenotazione.save()
+			return HttpResponseRedirect(
+						reverse('tamPrenotazioni-edit',
+								kwargs={"id_prenotazione":prenotazione.id}
+						),
+					)
 
 	return render_to_response(
 							template_name,
 							{
 								"utentePrenotazioni":utentePrenotazioni,
 								"form":form,
-								"editable":True,
+								"editable":editable,
+								"prenotazione":prenotazione,
 								"cliente_unico":cliente_unico,
 							},
 							context_instance=RequestContext(request))
@@ -155,6 +228,11 @@ def prenota(request, template_name='prenotazioni/main.html'):
 @prenotazioni
 def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	utentePrenotazioni = request.user.prenotazioni
+	clienti_attivi = utentePrenotazioni.clienti
+	if clienti_attivi.count() == 1:
+		cliente_unico = clienti_attivi.all()[0]
+	else:
+		cliente_unico = None
 
 	prenotazioni = Prenotazione.objects.filter(
 							cliente__in=utentePrenotazioni.clienti.all()
@@ -166,92 +244,6 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 							{
 								"utentePrenotazioni":utentePrenotazioni,
 								"prenotazioni":prenotazioni,
+								"cliente_unico":cliente_unico,
 							},
 							context_instance=RequestContext(request))
-
-
-@prenotazioni
-def edit(request, id_prenotazione, template_name='prenotazioni/main.html'):
-	utentePrenotazioni = request.user.prenotazioni
-
-	prenotazione = Prenotazione.objects.get(id=id_prenotazione)
-	if prenotazione.owner <> utentePrenotazioni:
-		messages.error(
-			request,
-			"La prenotazione non è stata fatta da te, non puoi accedervi."
-		)
-		return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
-	editable = prenotazione.is_editable()
-	if not editable:
-		messages.warning(
-			request,
-			"La prenotazione non è più modificabile."
-		)
-		#return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
-
-	form = FormPrenotazioni(request.POST or None, instance=prenotazione)
-	previous_values = {}
-	if request.method == "POST":
-		for key in form.fields:
-			previous_values[key] = getattr(prenotazione, key)
-
-		if "delete" in request.POST:
-			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
-			inviaMailPrenotazione(prenotazione, "delete")
-			prenotazione.delete()
-			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
-
-
-	if form.is_valid() and editable:
-		changes = {}	# dizionario con i cambiamenti al form
-		for key in form.cleaned_data:
-			def humanValue(pythonValue, choices):
-				for k, v in choices:
-					if k == pythonValue:
-						return v
-			oldValue = previous_values.get(key)
-			newValue = form.cleaned_data[key]
-
-			field = form.fields[key]
-			if isinstance(field, TypedChoiceField):
-				oldValue = humanValue(oldValue, field.choices)
-				newValue = humanValue(newValue, field.choices)
-
-			if newValue <> oldValue:
-				changes[key] = (field.label, oldValue, newValue)
-#				messages.success(
-#						request,
-#						"Cambiato %s da %s a %s" % (form.fields[key].label,
-#													oldValue,
-#													newValue)
-#						)
-		if changes:
-			stringhe_cambiamenti = []
-			for key in changes:
-				(label, oldValue, newValue) = changes[key]
-				stringhe_cambiamenti.append("Cambiato %s da %s a %s" % (label, oldValue, newValue))
-
-			cambiamenti = "\n".join(stringhe_cambiamenti)
-			inviaMailPrenotazione(prenotazione, "update",
-								  extra_context={"cambiamenti":cambiamenti})
-			messages.success(request, "Modifica eseguita.")
-			prenotazione.save()
-
-		return HttpResponseRedirect(
-								reverse('tamPrenotazioni-edit',
-										kwargs={"id_prenotazione":prenotazione.id}
-								),
-
-							)
-
-	return render_to_response(
-							template_name,
-							{
-								"utentePrenotazioni":utentePrenotazioni,
-								"form":form,
-								"prenotazione":prenotazione,
-								"editable":editable,
-							},
-							context_instance=RequestContext(request))
-
-#TODO: Email di conferma in creazione e modifica

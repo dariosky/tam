@@ -98,6 +98,7 @@ class Prenotazione(models.Model):
 			chiavi_da_riportare = [
 				'data', 'da', 'a', 'numero_passeggeri', 'esclusivo',
 				'incassato_albergo', 'fatturazione', 'pagamento_differito',
+				'cliente',
 				'note'
 			]
 			for chiave in chiavi_da_riportare:
