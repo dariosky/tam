@@ -23,7 +23,7 @@ def prenotaCorsa(prenotazione, dontsave=False):
 		note_complete = ("Camera: %s\n" % prenotazione.note_camera) + note_complete
 	if prenotazione.note_cliente:
 		note_complete = ("Cliente: %s\n" % prenotazione.note_cliente) + note_complete
-	cliente = utentePrenotazioni.cliente
+	cliente = prenotazione.cliente
 	viaggio = Viaggio(
 					data=prenotazione.data_corsa,
 

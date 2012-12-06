@@ -54,7 +54,7 @@ def notifyByMail(
 
 
 	if signatureTXT:
-		messageText += "\n-- \n" + signatureTXT
+		messageText += u"\n-- \n" + signatureTXT
 
 	emailMessage = EmailMultiRelated(
 							  body=messageText,

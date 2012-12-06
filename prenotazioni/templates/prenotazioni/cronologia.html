@@ -1,7 +1,9 @@
 {% extends 'prenotazioni/base.html' %}{% load media %}{% load url from future %}
 {% block content %}
 	<h3>Prenotazioni effettuate</h3>
-	per {{ utentePrenotazioni.cliente }}
+	{% if utentePrenotazioni.clienti.count == 1 %}
+		per {{ utentePrenotazioni.clienti.all.0 }}
+	{% endif %}
 	{% if not prenotazioni %}
 		<div>Nessuna prenotazione in archivio</div>
 	{% else %}

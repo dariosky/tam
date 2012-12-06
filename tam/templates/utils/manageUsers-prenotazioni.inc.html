@@ -1,0 +1,55 @@
+{% load url from future %}
+
+<h2>Prenotazioni</h2>
+<p>
+<ul id='esclusivoBlock'>
+	<li>
+		<input type="radio" name='tipo_prenotazioni'
+		       id="tipo_prenotazioni_0" value="c"
+		       name="counducente"
+		       {% if not utentePrenotazioni %}checked="checked"{% endif %}
+		 />
+		<label for="tipo_prenotazioni_0">Consorziato</label>
+	</li>
+	<li>
+		<input type="radio" name='tipo_prenotazioni'
+			   id="tipo_prenotazioni_1" value="p"
+			   name="utente prenotazioni"
+			   {% if utentePrenotazioni %}checked="checked"{% endif %}
+		/>
+		<label for="tipo_prenotazioni_1">Utente prenotazioni</label>
+	</li>
+</ul>
+</p>
+<div id='configuratore_prenotazioni' {% if not utentePrenotazioni %}style="display:none"{% endif %}>
+	Clienti associati:<br>
+	<select name='prenotazioni_clienti' multiple="multiple" title="Che clienti può usare?">
+		{% for cliente in clienti %}
+			<option value='{{cliente.id}}'
+					{% if cliente in utentePrenotazioni.clienti.all  %}selected="selected"{% endif %}>
+				{{ cliente }}
+			</option>
+		{% endfor %}
+	</select>
+	
+	<p>
+	Luogo in cui si trova il cliente:
+	<select name='prenotazioni_luogo'>
+		{% for luogo in luoghi %}
+			<option value='{{luogo.id}}'
+					{% if utentePrenotazioni.luogo == luogo %}selected="selected"{% endif %}>
+				{{ luogo }}
+			</option>
+		{% endfor %}
+	</select>
+	</p>
+	
+	<p>
+		<label for="operatore">Nome dell'operatore:</label>
+		<input type='text' name='operatore' id='operatore' value='{{ utentePrenotazioni.nome_operatore }}' />
+	</p>
+	<p>
+		<label for="email">Indirizzo email per le conferme:</label>
+		<input type='text' name='email' id='email' value='{{ utentePrenotazioni.email }}' />
+	</p>
+</div>

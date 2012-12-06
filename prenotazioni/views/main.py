@@ -101,15 +101,34 @@ class FormPrenotazioni(forms.ModelForm):
 @prenotazioni
 @transaction.commit_on_success	# commit solo se tutto OK
 def prenota(request, template_name='prenotazioni/main.html'):
-
 	utentePrenotazioni = request.user.prenotazioni
 	form = FormPrenotazioni(request.POST or None)
+	# deciso se mostrare o meno la scelta dei clienti:
+	clienti_attivi = utentePrenotazioni.clienti
+	if clienti_attivi.count() == 0:
+		messages.error(
+			request,
+			"Non hai alcun cliente abilitato."
+		)
+		return HttpResponseRedirect(reverse('login'))
+
+	if clienti_attivi.count() > 1:
+		form.fields["cliente"].editable = True
+		form.fields["cliente"].queryset = utentePrenotazioni.clienti
+		form.fields["cliente"].label = ''
+		cliente_unico = None
+	else:
+		#del forms.fields['cliente']
+		del form.fields['cliente']
+		cliente_unico = clienti_attivi.all()[0]
+
 	if form.is_valid():
 		prenotazione = Prenotazione(
 								owner=utentePrenotazioni,
-								cliente=utentePrenotazioni.cliente,
 								**form.cleaned_data
 								)
+		if clienti_attivi.count() == 1:
+			prenotazione.cliente = cliente_unico
 
 		viaggio = prenotaCorsa(prenotazione)
 		prenotazione.viaggio = viaggio
@@ -128,6 +147,7 @@ def prenota(request, template_name='prenotazioni/main.html'):
 								"utentePrenotazioni":utentePrenotazioni,
 								"form":form,
 								"editable":True,
+								"cliente_unico":cliente_unico,
 							},
 							context_instance=RequestContext(request))
 
@@ -136,7 +156,9 @@ def prenota(request, template_name='prenotazioni/main.html'):
 def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	utentePrenotazioni = request.user.prenotazioni
 
-	prenotazioni = Prenotazione.objects.filter(cliente=utentePrenotazioni.cliente)
+	prenotazioni = Prenotazione.objects.filter(
+							cliente__in=utentePrenotazioni.clienti.all()
+				   )
 
 
 	return render_to_response(
