@@ -1,19 +1,20 @@
 {% extends 'prenotazioni/base.html' %}{% load media %}{% load url from future %}
 {% block content %}
 	<h3>Prenotazioni effettuate</h3>
-	{% if utentePrenotazioni.clienti.count == 1 %}
-		per {{ utentePrenotazioni.clienti.all.0 }}
-	{% endif %}
+	{% if cliente_unico %}per {{ cliente_unico }}{% endif %}
 	{% if not prenotazioni %}
 		<div>Nessuna prenotazione in archivio</div>
 	{% else %}
 	<table class='prenotazioni'>
-		<tr><th>Corsa</th>
+		<tr>
+			{% if not cliente_unico %}<th>Cliente</th>{% endif %}
+			<th>Corsa</th>
 			<th>orario</th>
 			<th>note</th>
 		</tr>
 		{% for prenotazione in prenotazioni %}
 			<tr>
+				{% if not cliente_unico %}<td>{{ prenotazione.cliente }}</td>{% endif %}
 				<td class='{% if prenotazione.is_arrivo %}arrivo{% else %}partenza{% endif %}'>
 					{% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %}
 					{{ prenotazione.luogo }}<br />
