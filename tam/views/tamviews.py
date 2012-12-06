@@ -1341,17 +1341,24 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 					from prenotazioni.models import UtentePrenotazioni
 					logging.debug("clearing groups for user prenotazioni")
 					selectedUser.groups.clear()
-					if utentePrenotazioni:
-						attuale_prenotazione = utentePrenotazioni
-					else:
+					if not utentePrenotazioni:
 						messages.info(request, "Faccio diventare il conducente '%s' un utente per le prenotazioni." % selectedUser)
-						attuale_prenotazione = UtentePrenotazioni()
-					attuale_prenotazione.user = selectedUser
-					attuale_prenotazione.cliente_id = request.POST.get('prenotazioni_cliente')
-					attuale_prenotazione.luogo_id = request.POST.get('prenotazioni_luogo')
-					attuale_prenotazione.nome_operatore = request.POST.get('operatore')
-					attuale_prenotazione.email = request.POST.get('email')
-					attuale_prenotazione.save()
+						utentePrenotazioni = UtentePrenotazioni()
+					else:
+						# era già un utente prenotazioni
+						logging.debug("clearing clients for user prenotazioni")
+						utentePrenotazioni.clienti.clear()	
+					utentePrenotazioni.user = selectedUser
+					#attuale_prenotazione.cliente_id = request.POST.getlist('prenotazioni_clienti')
+					utentePrenotazioni.luogo_id = request.POST.get('prenotazioni_luogo')
+					utentePrenotazioni.nome_operatore = request.POST.get('operatore')
+					utentePrenotazioni.email = request.POST.get('email')
+					utentePrenotazioni.save()
+					logging.debug("Setting clients to user prenotazioni")
+					for cliente_id in request.POST.getlist('prenotazioni_clienti'):
+						cliente = Cliente.objects.get(id=cliente_id)
+						utentePrenotazioni.clienti.add(cliente)
+						logging.debug("adding %s" % cliente)
 			return HttpResponseRedirect(reverse("tamManage", kwargs={"username":selectedUser.username}))
 			# fine delle azioni per il submit
 

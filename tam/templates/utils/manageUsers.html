@@ -10,7 +10,9 @@
 	Seleziona l'utente da gestire.
 	<select name="selectedUser">
 	{% for iterUser in users %}
-		<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %}>{{ iterUser.username }}</option>
+		<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %} value="{{ iterUser.username }}">
+			{{ iterUser.username }}{% if iterUser.prenotazioni %} - prenotazioni{% endif %}
+		</option>
 	{% endfor %}
 	</select>
 	<input type="submit" value="Seleziona" />
@@ -34,81 +36,47 @@
 		<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
 		
 		{% if perms.prenotazioni.manage_permissions %}
-			<h2>Prenotazioni</h2>
-			<p>
-				
-			<ul id='esclusivoBlock'>
-				<li>
-					<input type="radio" name='tipo_prenotazioni'
-					       id="tipo_prenotazioni_0" value="c"
-					       name="counducente"
-					       {% if not utentePrenotazioni %}checked="checked"{% endif %}
-					 />
-					<label for="tipo_prenotazioni_0">Consorziato</label>
-				</li>
-				<li>
-					<input type="radio" name='tipo_prenotazioni'
-						   id="tipo_prenotazioni_1" value="p"
-						   name="utente prenotazioni"
-						   {% if utentePrenotazioni %}checked="checked"{% endif %}
-					/>
-					<label for="tipo_prenotazioni_1">Utente prenotazioni</label>
-				</li>
-			</ul>
-			</p>
-			<div id='configuratore_prenotazioni' {% if not utentePrenotazioni %}style="display:none"{% endif %}>
-				<select name='prenotazioni_cliente'>
-					{% for cliente in clienti %}
-						<option value='{{cliente.id}}'
-								{% if utentePrenotazioni.cliente == cliente %}selected="selected"{% endif %}>
-							{{ cliente }}
-						</option>
-					{% endfor %}
-				</select>
-				<select name='prenotazioni_luogo'>
-					{% for luogo in luoghi %}
-						<option value='{{luogo.id}}'
-								{% if utentePrenotazioni.luogo == luogo %}selected="selected"{% endif %}>
-							{{ luogo }}
-						</option>
-					{% endfor %}
-				</select>
-				<br />
-				<p>
-					<label for="operatore">Operatore:</label>
-					<input type='text' name='operatore' id='operatore' value='{{ utentePrenotazioni.nome_operatore }}' />
-				</p>
-				<p>
-					<label for="email">Email:</label>
-					<input type='text' name='email' id='email' value='{{ utentePrenotazioni.email }}' />
-				</p>
-			</div>
+			{% include "utils/manageUsers-prenotazioni.inc.html" %}
 		{% endif %}
 		
 		<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
 	</form>
 {% endif %}
 
-{% endblock %}
+{% endblock content %}
 
 {% block bottom %}
 	{{ block.super }}
+	{% if perms.prenotazioni.manage_permissions %}
+		<script type="text/javascript" src="/static/js/jquery.asmselect.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/css/jquery.asmselect.css" />
+	{% endif %}	
 	<script type="text/javascript">
-		$('#esclusivoBlock input').change(
-			function(){
-				var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
-				if (utente_prenotazioni) {
-					$('#configuratore_prenotazioni').show('slow');
-					$('#user_group').hide('slow');
-					
+		$(document).ready(function(){
+			
+			$('#esclusivoBlock input').change(
+				function(){
+					var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
+					if (utente_prenotazioni) {
+						$('#configuratore_prenotazioni').show('slow');
+						$('#user_group').hide('slow');
+						
+					}
+					else {
+						$('#configuratore_prenotazioni').hide('slow');
+						$('#user_group').show('slow');
+					}
+						
 				}
-				else {
-					$('#configuratore_prenotazioni').hide('slow');
-					$('#user_group').show('slow');
-				}
-					
-			}
-		);
-		$('#esclusivoBlock input').change();
+			);
+			$('#esclusivoBlock input').change();
+			
+			$("#configuratore_prenotazioni select[multiple]").asmSelect({
+				highlight:true,
+				removeLabel:"rimuovi",
+				highlightAddedLabel:"Aggiunto: ",
+				highlightRemovedLabel:"Rimosso: ",
+			});
+		});
 	</script>
 {% endblock bottom %}

@@ -22,20 +22,20 @@ TIPI_PAGAMENTO = (
 # Create your models here.
 class UtentePrenotazioni(models.Model):
 	user = models.OneToOneField(User, related_name='prenotazioni')
-	cliente = models.ForeignKey(Cliente)
+	clienti = models.ManyToManyField(Cliente)
 	luogo = models.ForeignKey(Luogo)
 	nome_operatore = models.CharField(max_length=40, null=True)
 	email = models.EmailField(null=True)
 
 	class Meta:
 		verbose_name_plural = "Utenti prenotazioni"
-		ordering = ("cliente", "user")
+		ordering = ("user",)
 		permissions = (('manage_permissions', 'Gestisci utenti prenotazioni'),)
 
 	def __unicode__(self):
-		return "%(user)s - %(cliente)s da '%(luogo)s' - %(email)s" % {
+		return "%(user)s - %(clienti)s da '%(luogo)s' - %(email)s" % {
 											"user": self.user.username,
-											"cliente": self.cliente.nome,
+											"clienti": ", ".join([c.nome for c in self.clienti.all()]),
 											"luogo": self.luogo.nome,
 											"email": self.email,
 										}
@@ -43,7 +43,7 @@ class UtentePrenotazioni(models.Model):
 
 class Prenotazione(models.Model):
 	owner = models.ForeignKey(UtentePrenotazioni, editable=False)
-	cliente = models.ForeignKey(Cliente, editable=False)
+	cliente = models.ForeignKey(Cliente)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
 	data_corsa = models.DateTimeField()
