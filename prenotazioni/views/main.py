@@ -105,7 +105,14 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 	previous_values = {}
 	if id_prenotazione:
-		prenotazione = Prenotazione.objects.get(id=id_prenotazione)
+		try:
+			prenotazione = Prenotazione.objects.get(id=id_prenotazione)
+		except Prenotazione.DoesNotExist:
+			messages.error(
+				request,
+				"La prenotazione non esiste."
+			)
+			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 		if prenotazione.owner <> utentePrenotazioni:
 			messages.error(
 				request,
