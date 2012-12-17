@@ -659,10 +659,10 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 		def clean(self):
 			if 'nome' in self.cleaned_data:
 				self.cleaned_data['nome'] = self.cleaned_data['nome'].strip()
-			queryset = Cliente.objects.filter(nome__iexact=self.cleaned_data['nome'])
-			if id_cliente: queryset = queryset.exclude(id=id_cliente)	# exclude current id if editing
-			if queryset.count() > 0:
-				raise forms.ValidationError(u"Esiste già un cliente con questo nome.")
+				queryset = Cliente.objects.filter(nome__iexact=self.cleaned_data['nome'])
+				if id_cliente: queryset = queryset.exclude(id=id_cliente)	# exclude current id if editing
+				if queryset.count() > 0:
+					raise forms.ValidationError(u"Esiste già un cliente con questo nome.")
 			return self.cleaned_data
 
 		class Meta:
