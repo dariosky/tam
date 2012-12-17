@@ -23,7 +23,7 @@ TIPI_PAGAMENTO = (
 class UtentePrenotazioni(models.Model):
 	user = models.OneToOneField(User, related_name='prenotazioni')
 	clienti = models.ManyToManyField(Cliente)
-	luogo = models.ForeignKey(Luogo)
+	luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
 	nome_operatore = models.CharField(max_length=40, null=True)
 	email = models.EmailField(null=True)
 
@@ -42,8 +42,8 @@ class UtentePrenotazioni(models.Model):
 
 
 class Prenotazione(models.Model):
-	owner = models.ForeignKey(UtentePrenotazioni, editable=False)
-	cliente = models.ForeignKey(Cliente)
+	owner = models.ForeignKey(UtentePrenotazioni, editable=False, on_delete=models.CASCADE)
+	cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
 	data_corsa = models.DateTimeField()
@@ -58,7 +58,7 @@ class Prenotazione(models.Model):
 	is_arrivo = models.BooleanField("Arrivo o partenza?",
 									choices=((True, 'Arrivo'), (False, 'Partenza')),
 									default=True)
-	luogo = models.ForeignKey(Luogo)
+	luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
 
 	pagamento = models.CharField(max_length=1,
 								 choices=TIPI_PAGAMENTO,
@@ -70,7 +70,9 @@ class Prenotazione(models.Model):
 
 	viaggio = models.OneToOneField(Viaggio,
 								   null=True,
-								   editable=False)
+								   editable=False,
+								   on_delete=models.PROTECT,
+								  )
 
 	class Meta:
 		verbose_name_plural = "Prenotazioni"

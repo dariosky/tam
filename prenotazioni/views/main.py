@@ -151,7 +151,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		del form.fields['cliente']
 		cliente_unico = clienti_attivi.all()[0]
 	
-	if request.method == "POST":
+	if request.method == "POST" and prenotazione:
+		# salvo i valori precedenti e consento la cancellazione
 		for key in form.fields:
 			previous_values[key] = getattr(prenotazione, key)
 
