@@ -1,6 +1,6 @@
 {% load utilTag %}
 {% load media %}
-<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}{% if viaggio.is_prenotazione %} prenotazione{% endif %}'> 
+<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'> 
 	<td>
 		{% if not distinct %}
 			{% if not viaggio.conducente_confermato %}
@@ -20,7 +20,7 @@
 		{% include "corse/cella_ora_e_percorso.inc.html" %}
 	</td>
 
-	<td>
+	<td{% if viaggio.is_prenotazione %} class='prenotazione'{% endif %}>
 		{% include "corse/cella_cliente.inc.html" %}
 	</td>
 
