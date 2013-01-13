@@ -1,8 +1,9 @@
-#coding:utf-8
+# coding:utf-8
 from tam.models import Viaggio, ProfiloUtente
 from tam.views.tamUtils import getDefault
+from django.conf import settings
 
-preavviso_ore = 48
+preavviso_ore = getattr(settings, "PRENOTAZIONI_PREAVVISO_ORE", 24)
 
 def prenotaCorsa(prenotazione, dontsave=False):
 	" Crea il viaggio e lo associa alla corsa "
@@ -29,7 +30,7 @@ def prenotaCorsa(prenotazione, dontsave=False):
 
 					da=partenza,
 					a=arrivo,
-					luogoDiRiferimento=profilo.luogo, # è il riferimento di chi ha creato l'utente
+					luogoDiRiferimento=profilo.luogo,  # è il riferimento di chi ha creato l'utente
 
 					numero_passeggeri=prenotazione.pax,
 					esclusivo=not prenotazione.is_collettivo,
@@ -50,16 +51,13 @@ def prenotaCorsa(prenotazione, dontsave=False):
 		setattr(viaggio, attribute_name, default[attribute_name])
 
 	viaggio.is_prenotazione = True
-	pagamento =prenotazione.pagamento 
+	pagamento = prenotazione.pagamento
 
-	if pagamento=='F':
-		viaggio.fatturazione=True
-	elif pagamento=='H':
+	if pagamento == 'F':
+		viaggio.fatturazione = True
+	elif pagamento == 'H':
 		viaggio.incassato_albergo = True
 
-	#TODO:
-	# imposto il flag di fatturazione, incassato hotel o differito in base
-	# alla prenotazione
 	if dontsave is False:
 		viaggio.save()
 		viaggio.updatePrecomp()
