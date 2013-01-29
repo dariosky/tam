@@ -26,6 +26,7 @@ from django.utils import simplejson
 from django.core.urlresolvers import reverse
 import logging
 from django.db.models.query_utils import Q
+from django.db.models.deletion import ProtectedError
 for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
@@ -391,8 +392,11 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		else:
 			if request.method == "POST":
 				if u"OK" in request.POST:
-					viaggio.delete()
-					messages.success(request, "Cancellata la corsa %s." % viaggio)
+					try:
+						viaggio.delete()
+						messages.success(request, "Cancellata la corsa %s." % viaggio)
+					except ProtectedError:
+						messages.error(request, "Non è possibile cancellare la corsa.")
 					return HttpResponseRedirect(redirectOk)
 				else:
 					return HttpResponseRedirect(redirectOk)
