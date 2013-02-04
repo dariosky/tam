@@ -16,12 +16,17 @@ from django.contrib import messages
 from django.forms.fields import TypedChoiceField
 from prenotazioni.views.tam_email import notifyByMail
 from django.conf import settings
+#import tempfile
+from email.MIMEBase import MIMEBase
+from email import Encoders
+import os
 
 class NumberInput(Input):
 	input_type = 'number'
 
 def inviaMailPrenotazione(prenotazione,
 						  azione,
+						  attachments=[],
 						  extra_context=None):
 	if azione == "create":
 		subject = "Conferma prenotazione TaM n° %d" % prenotazione.id
@@ -46,7 +51,7 @@ def inviaMailPrenotazione(prenotazione,
 		to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
 		subject=subject,
 		context=context,
-
+		attachments=attachments,
 		messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
 		messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
 	)
@@ -72,6 +77,12 @@ class FormPrenotazioni(forms.ModelForm):
 
 	def __init__(self, *args, **kwargs):
 		super(FormPrenotazioni, self).__init__(*args, **kwargs)
+		self.fields['attachment'] = forms.FileField(
+												label="Allegato",
+												required=False,
+												help_text="Allega un file alla richiesta (opzionale)"
+									)
+
 		for field_name in self.fields:
 			field = self.fields.get(field_name)
 			if field:
@@ -130,8 +141,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		prenotazione = None
 		editable = True
 
-	form = FormPrenotazioni(request.POST or None, instance=prenotazione)
-	
+	form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
+
 	# deciso se mostrare o meno la scelta dei clienti:
 	clienti_attivi = utentePrenotazioni.clienti
 	if clienti_attivi.count() == 0:
@@ -150,19 +161,39 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		#del forms.fields['cliente']
 		del form.fields['cliente']
 		cliente_unico = clienti_attivi.all()[0]
-	
+
 	if request.method == "POST" and prenotazione:
 		# salvo i valori precedenti e consento la cancellazione
 		for key in form.fields:
-			previous_values[key] = getattr(prenotazione, key)
+			if key <> "attachment":
+				previous_values[key] = getattr(prenotazione, key)
 
 		if "delete" in request.POST:
 			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
 			inviaMailPrenotazione(prenotazione, "delete")
 			prenotazione.delete()
-			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))	
+			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	if form.is_valid() and editable:
+		request_attachment = form.cleaned_data['attachment']
+		attachment = None
+		del form.cleaned_data['attachment']
+		
+		if request_attachment:
+			#destination = tempfile.NamedTemporaryFile(delete=False)
+			attachment = MIMEBase('application', "octet-stream")
+			#print "Write to %s" % destination.name
+			attachment.set_payload(request_attachment.read())
+			Encoders.encode_base64(attachment)
+			attachment.add_header(
+					'Content-Disposition',
+					'attachment; filename="%s"' % os.path.basename(request_attachment.name)
+				)
+			#for chunk in attachment.chunks():
+			#	destination.write(chunk)
+			#destination.close()
+
+		#assert(False)
 		if id_prenotazione is None:
 			prenotazione = Prenotazione(
 									owner=utentePrenotazioni,
@@ -179,7 +210,10 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				request,
 				"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
 			)
-			inviaMailPrenotazione(prenotazione, "create")
+			inviaMailPrenotazione(prenotazione,
+								  "create",
+								  attachments=[attachment] if attachment else []
+								 )
 			return HttpResponseRedirect(reverse('tamPrenotazioni'))
 		else:	# salvo la modifica
 			changes = {}	# dizionario con i cambiamenti al form
@@ -190,12 +224,12 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 							return v
 				oldValue = previous_values.get(key)
 				newValue = form.cleaned_data[key]
-	
+
 				field = form.fields[key]
 				if isinstance(field, TypedChoiceField):
 					oldValue = humanValue(oldValue, field.choices)
 					newValue = humanValue(newValue, field.choices)
-	
+
 				if newValue <> oldValue:
 					changes[key] = (field.label, oldValue, newValue)
 	#				messages.success(
@@ -204,15 +238,18 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 	#													oldValue,
 	#													newValue)
 	#						)
-			if changes:
+			if changes or attachment:
 				stringhe_cambiamenti = []
 				for key in changes:
 					(label, oldValue, newValue) = changes[key]
 					stringhe_cambiamenti.append("Cambiato %s da %s a %s" % (label, oldValue, newValue))
-	
+
 				cambiamenti = "\n".join(stringhe_cambiamenti)
-				inviaMailPrenotazione(prenotazione, "update",
-									  extra_context={"cambiamenti":cambiamenti})
+				inviaMailPrenotazione(prenotazione,
+									  "update",
+									  attachments=[attachment] if attachment else [],
+									  extra_context={"cambiamenti":cambiamenti}
+									 )
 				messages.success(request, "Modifica eseguita.")
 				prenotazione.save()
 			return HttpResponseRedirect(

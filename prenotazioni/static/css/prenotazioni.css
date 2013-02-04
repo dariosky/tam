@@ -158,3 +158,9 @@ table.prenotazioni td {
 	border-color: #3a87ad;
 	color: #3a87ad;
 }
+.helptext {
+	display:block;
+	margin:0;
+	font-size:smaller;
+	
+}
