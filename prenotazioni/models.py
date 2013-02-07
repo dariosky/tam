@@ -52,12 +52,13 @@ class Prenotazione(models.Model):
 	is_collettivo = models.BooleanField(
 									"Individuale o collettivo?",
 									choices=((False, 'Individuale'), (True, 'Collettivo')),
-									default=False
+									default=None
 									)
 
 	is_arrivo = models.BooleanField("Arrivo o partenza?",
 									choices=((True, 'Arrivo'), (False, 'Partenza')),
-									default=True)
+									default=None
+									)
 	luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
 
 	pagamento = models.CharField(max_length=1,

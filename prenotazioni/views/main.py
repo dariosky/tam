@@ -63,6 +63,19 @@ class FormPrenotazioni(forms.ModelForm):
 		if value > 50:
 			raise forms.ValidationError("Sicuro del numero di persone?")
 		return value
+	
+	def clean_is_arrivo(self):
+		value = self.cleaned_data['is_arrivo']
+		if not value in (True, False):
+			raise forms.ValidationError("Devi specificare se la corsa è un arrivo o una partenza.")
+		return value
+	
+	def clean_is_collettivo(self):
+		value = self.cleaned_data['is_collettivo']
+		if not value in (True, False):
+			raise forms.ValidationError("Questo campo è obbligatorio.")
+		return value
+		
 
 	def clean(self):
 		""" Controlli di validità dell'intera form """
