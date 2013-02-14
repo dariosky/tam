@@ -31,6 +31,7 @@ for app in get_apps():
 from django.db import connections
 from django.contrib import messages
 from django.conf import settings
+import pdfListino
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -1374,3 +1375,17 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
 		return HttpResponseRedirect('/')
 #	response=password_change(request, template_name=template_name, post_change_redirect='/')
 	return render_to_response(template_name, {'form': form }, context_instance=RequestContext(request))
+
+
+def exportListino(request, id_listino):
+	try:
+		listino = Listino.objects.get(id=id_listino)
+	except Listino.DoesNotExist:
+		messages.error(request, "Questo listino non esiste.")
+		return HttpResponseRedirect(reverse("tamListini"))
+	profilo = ProfiloUtente.objects.get(user=request.user)
+	return pdfListino.export(
+							listino,
+							luogoDiRiferimento=profilo.luogo
+						)
+			

@@ -1,4 +1,4 @@
-{% extends "clienti_e_listini.html" %}
+{% extends "clienti_e_listini.html" %}{% load media %}
 
 {% block title %}Listino &raquo; {{ block.super }}{% endblock %}
 
@@ -14,10 +14,17 @@
 	{% if not nuovo %}
 		<a href="{% url tamListinoIdDel listino.pk%}">Elimina il listino</a>
 		<a href="{% url tamClonaListinoId listino.pk%}">Clona il listino</a>
-
 	{% endif %}
     </p>
 </form>
+
+{% if not nuovo %}
+<div class='noprint'>
+	<a href='{% url tamExportListino id_listino=listino.id %}' target='_blank'>
+		<img src='{% media_url 'fatture/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
+	</a>
+</div>
+{% endif %}
 
 {% if not nuovo %}
 <form action="." method="post">
