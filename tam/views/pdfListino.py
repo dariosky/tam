@@ -16,7 +16,6 @@ from reportlab.platypus.flowables import Spacer, KeepTogether
 from tam.models import Listino, Luogo
 
 test = settings.DEBUG
-test = False
 
 styles = getSampleStyleSheet()
 normalStyle = copy.deepcopy(styles['Normal'])
@@ -129,7 +128,6 @@ def getTabellaListino(doc, righe_prezzo, tipo_servizio, luogoDiRiferimento):
 		nome_tratta, diurno, notturno, pax = riga
 		if nome_tratta == precedente:
 			if sottoTratte == 0: # prima sottotratta, divido
-				print "raggruppo", nome_tratta
 				primaRiga = nuovaTabellaListino[-1]
 				# creo una nuova riga uguale alla prima, ma senza prezzi
 				nuovaTabellaListino.append([
