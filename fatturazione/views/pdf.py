@@ -159,7 +159,8 @@ def onPageNormal(canvas, doc):
 	if doc.pageTemplate.id <> doc.lastTemplateID:
 		doc.lastTemplateID = doc.pageTemplate.id
 		canvas.apply_page_numbers()
-		doc.fattura_corrente += 1
+		if hasattr(doc, "fattura_corrente"):
+			doc.fattura_corrente += 1
 	onPage(canvas, doc)
 
 
