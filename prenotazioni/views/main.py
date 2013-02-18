@@ -20,6 +20,9 @@ from django.conf import settings
 from email.MIMEBase import MIMEBase
 from email import Encoders
 import os
+from tam.models import Viaggio
+from django.core.paginator import Paginator
+from tam.views.tamviews import SmartPager
 
 class NumberInput(Input):
 	input_type = 'number'
@@ -63,19 +66,19 @@ class FormPrenotazioni(forms.ModelForm):
 		if value > 50:
 			raise forms.ValidationError("Sicuro del numero di persone?")
 		return value
-	
+
 	def clean_is_arrivo(self):
 		value = self.cleaned_data['is_arrivo']
 		if not value in (True, False):
 			raise forms.ValidationError("Devi specificare se la corsa è un arrivo o una partenza.")
 		return value
-	
+
 	def clean_is_collettivo(self):
 		value = self.cleaned_data['is_collettivo']
 		if not value in (True, False):
 			raise forms.ValidationError("Questo campo è obbligatorio.")
 		return value
-		
+
 
 	def clean(self):
 		""" Controlli di validità dell'intera form """
@@ -191,7 +194,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		request_attachment = form.cleaned_data['attachment']
 		attachment = None
 		del form.cleaned_data['attachment']
-		
+
 		if request_attachment:
 			#destination = tempfile.NamedTemporaryFile(delete=False)
 			attachment = MIMEBase('application', "octet-stream")
@@ -296,12 +299,36 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 							cliente__in=utentePrenotazioni.clienti.all()
 				   )
 
+	viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
+	oggi = datetime.date.today()
+	viaggi = viaggi.filter(data__gte=oggi-datetime.timedelta(days=60)).order_by("-data")
+	print "Ho %d viaggi da mostrare" % viaggi.count()
+
+	# divido viaggi in pagine
+	paginator = Paginator(viaggi, 50, orphans=5)	# pagine da tot viaggi
+	page = request.GET.get("page", 1)
+	try:page = int(page)
+	except: page = 1
+	s = SmartPager(page, paginator.num_pages)
+	paginator.smart_page_range = s.results
+	try:
+		thisPage = paginator.page(page)
+		viaggi = thisPage.object_list
+	except:
+		messages.warning(request, "La pagina %d è vuota." % page)
+		thisPage = None
+		viaggi = []
+	# ----------------------
 
 	return render_to_response(
 							template_name,
 							{
 								"utentePrenotazioni":utentePrenotazioni,
 								"prenotazioni":prenotazioni,
+								"viaggi":viaggi,
 								"cliente_unico":cliente_unico,
+
+								"paginator":paginator,
+								"thisPage":thisPage,
 							},
 							context_instance=RequestContext(request))

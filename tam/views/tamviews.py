@@ -47,8 +47,8 @@ class SmartPager(object):
 		self.results = []
 		self.currentPage, self.totalPages = currentPage, totalPages
 		self.addToResults(1, 2)
-		self.addToResults(currentPage - 2, 5)
-		self.addToResults(totalPages - 3, 4)
+		self.addToResults(currentPage - 1, 3)
+		self.addToResults(totalPages-1, 2)
 
 def parseDateString(s, default=None):
 	try:
