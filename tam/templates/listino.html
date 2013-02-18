@@ -63,7 +63,7 @@
 	<tbody>
 	    {% for prezzo in prezzi %}
 		<tr>
-		    <td>{% ifchanged prezzo.tratta.da %}{{ prezzo.tratta.da }}{% endifchanged %}</td>
+		    <td>{% ifchanged prezzo.tipo_servizio prezzo.tratta.da %}{{ prezzo.tratta.da }}{% endifchanged %}</td>
 		    <td>{% ifchanged prezzo.tratta.a %}{{ prezzo.tratta.a }}{% endifchanged %}</td>
 		    <td>
 			    <a href="{% url tamListinoPrezzoId listino.id,prezzo.id %}"><img src="/media/matita.ico" alt="edit" /></a>

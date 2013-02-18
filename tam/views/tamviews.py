@@ -792,23 +792,25 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 			messages.success(request, "Ho aggiunto il prezzo %s." % prezzo)
 			return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 
-	# tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
+#	# tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
+#	if listino:
+#		prezziset = listino.prezzolistino_set.select_related().all()
+#		dictDa = {}
+#		for prezzo in prezziset:
+#			listDa = dictDa.get("%s" % prezzo.tratta.da.nome, [])
+#			listDa.append((prezzo.tratta.a.nome, prezzo.max_pax, prezzo))
+#			dictDa[prezzo.tratta.da.nome] = listDa
+#		prezzi = []
+#		keys = dictDa.keys()[:]
+#		keys.sort()			# ordino per destinazione e per max_pax
+#		for da in keys:
+#			dictDa[da].sort()
+#			for a, maxpax, prezzo in dictDa[da]:
+#				prezzi.append(prezzo)
+#	else:
+#		prezzi = None
 	if listino:
-		prezziset = listino.prezzolistino_set.select_related().all()
-		dictDa = {}
-		for prezzo in prezziset:
-			listDa = dictDa.get("%s" % prezzo.tratta.da.nome, [])
-			listDa.append((prezzo.tratta.a.nome, prezzo.max_pax, prezzo))
-			dictDa[prezzo.tratta.da.nome] = listDa
-		prezzi = []
-		keys = dictDa.keys()[:]
-		keys.sort()			# ordino per destinazione e per max_pax
-		for da in keys:
-			dictDa[da].sort()
-			for a, maxpax, prezzo in dictDa[da]:
-				prezzi.append(prezzo)
-	else:
-		prezzi = None
+		prezzi =listino.prezzolistino_set.select_related().order_by("tipo_servizio", "tratta__da", "tratta__a", "max_pax")
 
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
