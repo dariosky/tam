@@ -2,50 +2,63 @@
 {% block content %}
 	<h3>Prenotazioni effettuate</h3>
 	{% if cliente_unico %}per {{ cliente_unico }}{% endif %}
-	{% if not prenotazioni %}
-		<div>Nessuna prenotazione in archivio</div>
-	{% else %}
+	{% if viaggi %}
+	{% if thisPage.has_other_pages %}
+		<div class="countblock noprint">
+				{% include "paginator.inc.html" %}
+		</div>
+		<br style="clear:both" />
+	{% endif %}
+	
 	<table class='prenotazioni'>
 		<tr>
 			{% if not cliente_unico %}<th>Cliente</th>{% endif %}
 			<th>Corsa</th>
 			<th>orario</th>
-			<th>note</th>
 		</tr>
-		{% for prenotazione in prenotazioni %}
+		{% for viaggio in viaggi %}
 			<tr>
-				{% if not cliente_unico %}<td>{{ prenotazione.cliente }}</td>{% endif %}
-				<td class='{% if prenotazione.is_arrivo %}arrivo{% else %}partenza{% endif %}'>
-					{% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %}
-					{{ prenotazione.luogo }}<br />
-					
-					{{ prenotazione.pax }} pax
-					{% if prenotazione.is_collettivo %}
+				{% include "corse/cella_partenza_arrivo.inc.html" %}
+				
+				<td>{{ viaggio.data|date:"j F Y, H:i" }}<br />
+					{{ viaggio.numero_passeggeri }} pax
+					{% if not viaggio.esclusivo %}
 						<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
 					{% else %}
 						<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
 					{% endif %}
 				</td>
-				<td>{{ prenotazione.data_corsa|date:"j F, H:i" }}</td>
-				<td class='note'>
-						{% if prenotazione.note_camera %}Camera: {{ prenotazione.note_camera }}<br />{% endif %}
-						{% if prenotazione.note_cliente %}Cliente: {{ prenotazione.note_cliente }}<br />{% endif %}
-						{% if prenotazione.note %}{{ prenotazione.note }}{% endif %}
-				</td>
-				<td>
-					{% if prenotazione.owner == request.user.prenotazioni %}
-						<a href='{% url 'tamPrenotazioni-edit' prenotazione.id %}'>
-							{% if prenotazione.is_editable %}
-								modifica
-							{% else %}
-								visualizza
-							{% endif %}
-						</a>
-					{% endif %}
-				</td>
+				{% if viaggio.is_prenotazione %}
+					{% with prenotazione=viaggio.prenotazione %}
+						<td class='note'>
+								{% if prenotazione.note_camera %}Camera: {{ prenotazione.note_camera }}<br />{% endif %}
+								{% if prenotazione.note_cliente %}Cliente: {{ prenotazione.note_cliente }}<br />{% endif %}
+								{% if prenotazione.note %}{{ prenotazione.note }}{% endif %}
+						</td>
+						{% if prenotazione.owner == request.user.prenotazioni %}
+							<td>
+								<a href='{% url 'tamPrenotazioni-edit' prenotazione.id %}'>
+									{% if prenotazione.is_editable %}
+										modifica
+									{% else %}
+										visualizza
+									{% endif %}
+								</a>
+							</td>
+						{% endif %}
+						
+					{% endwith %}
+				{% endif %}
 			</tr>
 		{% endfor %}
 	</table>
+	{% if thisPage.has_other_pages %}
+		<div class="countblock noprint">
+				{% include "paginator.inc.html" %}
+		</div>
+		<br style="clear:both" />
+	{% endif %}
+	
 	{% endif %}
 	
 {% endblock content %}

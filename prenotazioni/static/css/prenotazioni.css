@@ -126,7 +126,6 @@ table.prenotazioni td {
 }
 
 /* -------- messaggi ------------- */
-
 .messages div{
 	padding:3px 6px;
 	margin:2px;
@@ -163,4 +162,25 @@ table.prenotazioni td {
 	margin:0;
 	font-size:smaller;
 	
+}
+
+/* paginator */
+.countblock{
+	clear:both;
+	float:right;
+	font-size:smaller;
+}
+.countblock a{
+	text-decoration:none;
+}
+.countblock .page {
+	padding:5px 10px;
+	border:1px solid silver;
+}
+.countblock .blankpage {
+	padding:5px 10px;
+}
+.countblock .selected {
+	background:silver;
+	color:black;
 }

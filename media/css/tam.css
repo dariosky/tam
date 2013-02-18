@@ -263,6 +263,8 @@ td img {vertical-align: middle;}
 	left:2px;
 	border: silver 2px ridge;
 }
+
+/* paginator */
 .countblock{
 	clear:both;
 	float:right;
@@ -271,7 +273,6 @@ td img {vertical-align: middle;}
 .countblock a{
 	text-decoration:none;
 }
-
 .countblock .page {
 	padding-left:10px;
 	padding-right:10px;
@@ -281,12 +282,11 @@ td img {vertical-align: middle;}
 	padding-left:10px;
 	padding-right:10px;
 }
-
-
 .countblock .selected {
 	background:silver;
 	color:black;
 }
+
 #filterForm { margin:0; padding:0;}
 
 #id_note {
