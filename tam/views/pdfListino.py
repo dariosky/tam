@@ -16,7 +16,7 @@ from reportlab.platypus.flowables import Spacer, KeepTogether
 from tam.models import Listino, Luogo
 
 test = settings.DEBUG
-
+#test = False
 styles = getSampleStyleSheet()
 normalStyle = copy.deepcopy(styles['Normal'])
 normalStyle.fontSize = 8
@@ -63,22 +63,11 @@ def onPageListino(canvas, doc):
 
 	x = doc.leftMargin
 
-	# footer
-	footer_style = ParagraphStyle(name='Justify', alignment=TA_JUSTIFY, fontSize=8)
-
-	footer_height = 0
-	if LISTINO_FOOTER:
-		note_finali_lines = [LISTINO_FOOTER]
-		note_finali = Paragraph("<br/>".join(note_finali_lines),
-							footer_style)
-		note_finali.wrap(width - doc.rightMargin - doc.leftMargin, 5 * cm)
-		note_finali.drawOn(canvas, doc.leftMargin, doc.bottomMargin)
-		footer_height = note_finali.height
 	y = min(y1, y2)
 
 	doc.pageTemplate.frames = [
-			Frame(doc.leftMargin, doc.bottomMargin + footer_height,
-				   width - (doc.leftMargin + doc.rightMargin), y - doc.bottomMargin - footer_height,
+			Frame(doc.leftMargin, doc.bottomMargin,
+				   width - (doc.leftMargin + doc.rightMargin), y - doc.bottomMargin,
 				   showBoundary=test), #x,y, width, height
 		]
 	canvas.restoreState()
@@ -121,7 +110,7 @@ def getTabellaListino(doc, righe_prezzo, tipo_servizio, luogoDiRiferimento):
 							])
 
 	# -------- Creo la nuova Tabella Listino con i pax se necessari ------------------
-	nuovaTabellaListino = [('Destinazione', 'Importo', Paragraph('<b><font size="10">Notturno</font><br/>(dalle 22 alle 6)</b>', table_right))]
+	nuovaTabellaListino = [('Destinazione o presa', 'Importo', Paragraph('<b><font size="10">Notturno</font><br/>(dalle 22 alle 6)</b>', table_right))]
 	precedente = None
 	sottoTratte = 0
 	for riga in tabellaListino:	# ripasso il listino, aggiungo il numero di pax se necessario
@@ -217,6 +206,18 @@ def export(listino, luogoDiRiferimento):
 	if not listinoCollettivo and not listinoEsclusivo:
 		story.append("Non abbiamo nessuna corsa specificata nel listino.")
 
+	# footer
+	footer_style = ParagraphStyle(name='Justify', alignment=TA_JUSTIFY, fontSize=8)
+	#footer_height = 0
+	if LISTINO_FOOTER:
+		note_finali_lines = [LISTINO_FOOTER]
+		story.append(Spacer(1, 1 * cm))
+		note_finali = Paragraph("<br/>".join(note_finali_lines),
+							footer_style)
+		#note_finali.wrap(width - doc.rightMargin - doc.leftMargin, 5 * cm)
+		#note_finali.drawOn(canvas, doc.leftMargin, doc.bottomMargin)
+		#footer_height = note_finali.height
+		story.append(note_finali)
 
 	doc.build(story, canvasmaker=NumberedCanvas)
 	return response
