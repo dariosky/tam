@@ -79,6 +79,8 @@ urlpatterns = patterns('tam.views.tamviews',
 	url(r"^deluser/(?P<username>.*)/$", "delUser", name="delUser"),
 
 	url(r'^password/$', 'passwordChangeAndReset', name='change_password'),
+	
+	url(r'^changelog/$', 'changeLog', {}, name="tam_changelog"),
 
 )
 urlpatterns += patterns('tam.views',
@@ -94,7 +96,6 @@ urlpatterns += patterns('tam.views.login',
 )
 
 urlpatterns += patterns('',
-	url(r'^changelog/$', direct_to_template, {'template': 'static/changelog.html'}, name="tam_changelog"),
 	url(r'^rules/$', direct_to_template, {'template': 'static/rules.html'}, name="tam_rules"),
 )
 
