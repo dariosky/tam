@@ -18,6 +18,7 @@ def notifyByMail(
 		contextText=None, 	# if this is none I'll use the normal one
 		messageTxtTemplateName=None, messageHtmlTemplateName=None,
 		bcc=[ADMIN_MAIL],
+		reply_to=None,
 		attachments=[],
 		** kwargs
 	):
@@ -62,6 +63,8 @@ def notifyByMail(
 							  to=to,
 							  bcc=bcc,
 				)
+	if reply_to:
+		emailMessage.extra_headers['Reply-To']=reply_to
 
 	emailMessage.attach_alternative(htmlMessage, "text/html")
 
@@ -96,7 +99,7 @@ if __name__ == "__main__":
 		context={
 					"prenotazione":prenotazione,
 				},
-
+		reply_to=settings.EMAIL_CONSORZIO,
 		messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
 		messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
 	)

@@ -55,6 +55,7 @@ def inviaMailPrenotazione(prenotazione,
 		subject=subject,
 		context=context,
 		attachments=attachments,
+		reply_to=settings.EMAIL_CONSORZIO,
 		messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
 		messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
 	)
