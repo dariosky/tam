@@ -14,7 +14,9 @@
 		<link href="{{ STATIC_URL }}bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 		<link href="{{ MEDIA_URL }}js/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.css" rel="stylesheet">
 		<link href="{{ STATIC_URL }}chosen/chosen.css" rel="stylesheet" />
-		<link href="{{ STATIC_URL }}css/prenotazioni.css" rel="stylesheet" />
+		
+		{% include_media 'prenotazioni.css' %}
+		{% if tam_stealth %}{% include_media 'tam-stealth.css' %}{% endif %}
 		
 		<script src="{{ MEDIA_URL }}js/jquery.min.js"></script>
 
@@ -22,7 +24,7 @@
 	<body>
 		<div id='header'>
 			{% block header %}
-			<img id='taxilogo' src='/media/brand/taxilogo.png' />
+			<img id='taxilogo' src="{% media_url logo_consorzio %}" />
 			{% endblock header %}
 		</div>
 
