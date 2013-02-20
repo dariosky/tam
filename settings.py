@@ -138,6 +138,7 @@ GLOBAL_MEDIA_DIRS = (os.path.join(os.path.dirname(__file__), 'media'),)
 MEDIA_BUNDLES = (
 	# CSS *************
 	('tam.css', 'css/tam.css',),
+	('prenotazioni.css', 'css/prenotazioni.css',),
 	('tam-stealth.css', 'css/tam-stealth.css',),
 	('fatturaHtml.css', 'css/fatture.css',),
 	('tamUI.css',

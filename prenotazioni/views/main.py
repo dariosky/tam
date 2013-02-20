@@ -283,6 +283,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 								"editable":editable,
 								"prenotazione":prenotazione,
 								"cliente_unico":cliente_unico,
+								"logo_consorzio":settings.TRANSPARENT_SMALL_LOGO,
 							},
 							context_instance=RequestContext(request))
 
@@ -331,5 +332,6 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 
 								"paginator":paginator,
 								"thisPage":thisPage,
+								"logo_consorzio":settings.TRANSPARENT_SMALL_LOGO,
 							},
 							context_instance=RequestContext(request))
