@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from markViews import prenotazioni
@@ -16,11 +16,10 @@ from django.contrib import messages
 from django.forms.fields import TypedChoiceField
 from prenotazioni.views.tam_email import notifyByMail
 from django.conf import settings
-#import tempfile
 from email.MIMEBase import MIMEBase
 from email import Encoders
 import os
-from tam.models import Viaggio
+from tam.models import Viaggio, Cliente
 from django.core.paginator import Paginator
 from tam.views.tamviews import SmartPager
 
@@ -86,7 +85,7 @@ class FormPrenotazioni(forms.ModelForm):
 		cleaned_data = self.cleaned_data
 		ora = datetime.datetime.now()
 
-		oraMinima = ora + datetime.timedelta(hours=preavviso_ore) # bisogna prenotare 48 ore prima
+		oraMinima = ora + datetime.timedelta(hours=preavviso_ore)  # bisogna prenotare 48 ore prima
 		if 'data_corsa' in cleaned_data and cleaned_data['data_corsa'] < oraMinima:
 			raise forms.ValidationError("Devi prenotare almeno %d ore prima. " % preavviso_ore)
 
@@ -127,7 +126,7 @@ class FormPrenotazioni(forms.ModelForm):
 				}
 
 @prenotazioni
-@transaction.commit_on_success	# commit solo se tutto OK
+@transaction.commit_on_success  # commit solo se tutto OK
 def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html'):
 	utentePrenotazioni = request.user.prenotazioni
 
@@ -153,7 +152,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				request,
 				"La prenotazione non è più modificabile."
 			)
-			#return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+			# return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 	else:
 		prenotazione = None
 		editable = True
@@ -175,7 +174,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		form.fields["cliente"].label = ''
 		cliente_unico = None
 	else:
-		#del forms.fields['cliente']
+		# del forms.fields['cliente']
 		del form.fields['cliente']
 		cliente_unico = clienti_attivi.all()[0]
 
@@ -197,20 +196,20 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		del form.cleaned_data['attachment']
 
 		if request_attachment:
-			#destination = tempfile.NamedTemporaryFile(delete=False)
+			# destination = tempfile.NamedTemporaryFile(delete=False)
 			attachment = MIMEBase('application', "octet-stream")
-			#print "Write to %s" % destination.name
+			# print "Write to %s" % destination.name
 			attachment.set_payload(request_attachment.read())
 			Encoders.encode_base64(attachment)
 			attachment.add_header(
 					'Content-Disposition',
 					'attachment; filename="%s"' % os.path.basename(request_attachment.name)
 				)
-			#for chunk in attachment.chunks():
-			#	destination.write(chunk)
-			#destination.close()
+			# for chunk in attachment.chunks():
+			# 	destination.write(chunk)
+			# destination.close()
 
-		#assert(False)
+		# assert(False)
 		if id_prenotazione is None:
 			prenotazione = Prenotazione(
 									owner=utentePrenotazioni,
@@ -232,8 +231,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 								  attachments=[attachment] if attachment else []
 								 )
 			return HttpResponseRedirect(reverse('tamPrenotazioni'))
-		else:	# salvo la modifica
-			changes = {}	# dizionario con i cambiamenti al form
+		else:  # salvo la modifica
+			changes = {}  # dizionario con i cambiamenti al form
 			for key in form.cleaned_data:
 				def humanValue(pythonValue, choices):
 					for k, v in choices:
@@ -249,12 +248,12 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 				if newValue <> oldValue:
 					changes[key] = (field.label, oldValue, newValue)
-	#				messages.success(
-	#						request,
-	#						"Cambiato %s da %s a %s" % (form.fields[key].label,
-	#													oldValue,
-	#													newValue)
-	#						)
+	# 				messages.success(
+	# 						request,
+	# 						"Cambiato %s da %s a %s" % (form.fields[key].label,
+	# 													oldValue,
+	# 													newValue)
+	# 						)
 			if changes or attachment:
 				stringhe_cambiamenti = []
 				for key in changes:
@@ -291,23 +290,64 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 @prenotazioni
 def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	utentePrenotazioni = request.user.prenotazioni
-	clienti_attivi = utentePrenotazioni.clienti
-	if clienti_attivi.count() == 1:
-		cliente_unico = clienti_attivi.all()[0]
+	clienti_attivi = utentePrenotazioni.clienti.all()
+	if len(clienti_attivi) == 1:
+		cliente_unico = clienti_attivi[0]
 	else:
 		cliente_unico = None
 
-	prenotazioni = Prenotazione.objects.filter(
-							cliente__in=utentePrenotazioni.clienti.all()
-				   )
+	filtroCliente = request.GET.get('cliente', None)
+	cliente_selezionato = None
+	if filtroCliente is not None:
+		if filtroCliente <> "all":
+			try:
+				codice_cliente = int(filtroCliente)
+				cliente_selezionato = Cliente.objects.get(id=codice_cliente)
+				if cliente_selezionato not in clienti_attivi:
+					messages.error(request, 'Non sei abilitato a vedere questo cliente.')
+					return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+			except ValueError:
+				filtroCliente = None
+			except Cliente.DoesNotExist:
+				messages.error(request, 'Il cliente non esiste.')
+				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+
+
+	adesso = datetime.datetime.now()
+	data_inizio = (adesso - datetime.timedelta(days=60)).replace(hour=0, minute=0)
+	data_fine = None
+
+	filtroData = request.GET.get('data', None)
+	if filtroData is not None:
+		if filtroData == 'cur':  # mese corrente
+			data_inizio = adesso.replace(hour=0, minute=0, day=1)
+			data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0, minute=0, day=1)
+		if filtroData == 'prev':  # mese precedente
+			data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
+			data_inizio = (data_fine - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio del mese precedente
+		if filtroData == 'next':  # prossime corse
+			# prendo il minore tra 2 ore fa e mezzanotte scorsa e per i prossimi 15 giorni
+			data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
+			data_DueOreFa = adesso - datetime.timedelta(hours=2)
+			data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
+			data_fine = adesso + datetime.timedelta(days=15)
+
 
 	viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
-	oggi = datetime.date.today()
-	viaggi = viaggi.filter(data__gte=oggi-datetime.timedelta(days=60)).order_by("-data")
+
+	if cliente_selezionato:  # filtro ulteriormente
+		viaggi = viaggi.filter(cliente=cliente_selezionato)
+
+
+
+	viaggi = viaggi.filter(data__gte=data_inizio)
+	if data_fine: viaggi = viaggi.filter(data__lte=data_fine)
+	viaggi = viaggi.order_by("-data")
+	
 	print "Ho %d viaggi da mostrare" % viaggi.count()
 
 	# divido viaggi in pagine
-	paginator = Paginator(viaggi, 50, orphans=5)	# pagine da tot viaggi
+	paginator = Paginator(viaggi, 50, orphans=5)  # pagine da tot viaggi
 	page = request.GET.get("page", 1)
 	try:page = int(page)
 	except: page = 1
@@ -329,6 +369,9 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 								"prenotazioni":prenotazioni,
 								"viaggi":viaggi,
 								"cliente_unico":cliente_unico,
+								"clienti_attivi":clienti_attivi,
+								"cliente_selezionato":cliente_selezionato,
+								"current_date_filter":filtroData,
 
 								"paginator":paginator,
 								"thisPage":thisPage,
