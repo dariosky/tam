@@ -29,7 +29,7 @@ class RequireLoginMiddleware(object):
 				return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
 			elif not prenotazioni_user and prenotazioni_view:
-				messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
+				#messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
 				return HttpResponseRedirect(reverse('tamCorse'))
 			else:
 				return login_required(view_func)(request, *view_args, **view_kwargs)
