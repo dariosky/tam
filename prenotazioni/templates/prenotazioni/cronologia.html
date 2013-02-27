@@ -1,15 +1,40 @@
 {% extends 'prenotazioni/base.html' %}{% load media %}{% load url from future %}
 {% block content %}
-	<h3>Prenotazioni effettuate</h3>
-	{% if cliente_unico %}per {{ cliente_unico }}{% endif %}
-	{% if viaggi %}
 	{% if thisPage.has_other_pages %}
 		<div class="countblock noprint">
 				{% include "paginator.inc.html" %}
 		</div>
-		<br style="clear:both" />
 	{% endif %}
+	<div id='filtri' class='noprint'>
+	<form action='' method="get" name='filter'>
+	{% if cliente_unico %}
+		per {{ cliente_unico }}
+	{% else %}
+		<select name=cliente>
+			<option value='all'>Tutti i clienti</option>
+		{% for cliente in clienti_attivi %}
+			{% if cliente = cliente_selezionato%}
+				<option value="{{cliente.id}}" selected="selected"><b>{{ cliente.nome }}</b></option>
+			{% else %}	
+				<option value="{{cliente.id}}">{{ cliente.nome }}</option>
+			{% endif %}
+			
+		{% endfor %}
+		</select>
+	{% endif %}
+	<select name='data'>
+		<option value='all'>Tutte le date</option>
+		<option value='next'{% if current_date_filter = "next"%}  selected="selected"{% endif %}>Prossime corse</option>
+		<option value='cur'{% if current_date_filter = "cur"%}  selected="selected"{% endif %}>Mese corrente</option>
+		<option value='prev'{% if current_date_filter = "prev"%}  selected="selected"{% endif %}>Mese precedente</option>
+	</select>
 	
+		<a class="btn btn-mini" href="javascript:document.filter.submit()"><i class="icon-refresh"></i> Aggiorna</a>
+	</form>
+	</div>
+	
+	{% if viaggi %}
+
 	<table class='prenotazioni'>
 		<tr>
 			{% if not cliente_unico %}<th>Cliente</th>{% endif %}
@@ -18,6 +43,7 @@
 		</tr>
 		{% for viaggio in viaggi %}
 			<tr>
+				{% if not cliente_unico %}<td>{{viaggio.cliente}}</td>{% endif %}
 				{% include "corse/cella_partenza_arrivo.inc.html" %}
 				
 				<td>{{ viaggio.data|date:"j F Y, H:i" }}<br />

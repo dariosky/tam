@@ -55,7 +55,9 @@ textarea, select {
 	transition: border 0.2s linear 0s, box-shadow 0.2s linear 0s;
 }
 
-input[type="text"], input[type="password"], input[type="submit"], input[type="number"], textarea, select, btn-group {
+#preForm input[type="text"], #preForm input[type="password"],
+#preForm input[type="submit"], #preForm input[type="number"],
+#preForm textarea, #preForm select, #preForm btn-group {
 	font-size: 16px;
 	height: auto;
 	margin-bottom: 15px;
@@ -182,4 +184,18 @@ table.prenotazioni td {
 .countblock .selected {
 	background:silver;
 	color:black;
+}
+
+#filtri, #filtri select {
+	font-size:smaller;
+	margin-bottom:0 !important;
+}
+
+@media print {	/* print stylesheet */
+	* {font-size:8pt;}
+	body {
+		background: white;
+	}
+	.content { border: 0px; margin:0; padding:0; background:white;}
+	.noprint { display:none; }
 }

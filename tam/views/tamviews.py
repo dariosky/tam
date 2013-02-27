@@ -1529,6 +1529,8 @@ def changeLog(request, template_name='static/changelog.html'):
 													''')),
 					('4.6', '14/1/2013', 'File allegato alle prenotazioni.'),
 					('4.7', '19/2/2013', 'Gli utenti delle prenotazioni vedono le corse inserite dal consorzio oltre alle prenotazioni.'),
+					('4.8', '24/2/2013', 'Logo personalizzato nella pagina di login, filtri sulla visualizzazione delle prenotazioni.'),
+					('4.9', '24/2/2013', 'Seleziona rapida dei 2 mesi precedenti nella visualizzazione fatture.'),
 					#('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
