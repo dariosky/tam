@@ -344,7 +344,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	if data_fine: viaggi = viaggi.filter(data__lte=data_fine)
 	viaggi = viaggi.order_by("-data")
 	
-	print "Ho %d viaggi da mostrare" % viaggi.count()
+	#print "Ho %d viaggi da mostrare" % viaggi.count()
 
 	# divido viaggi in pagine
 	paginator = Paginator(viaggi, 50, orphans=5)  # pagine da tot viaggi
