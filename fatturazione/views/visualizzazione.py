@@ -241,7 +241,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 										# print "Converto in int:", object_value
 										object_value = int(object_value)
 								except Exception, e:
-									print e
+									#print e
 									return HttpResponse('Ho bisogno di un valore numerico.', status=500)
 						# print "cambio la riga %d" % riga_id
 						# print "imposto il valore %s" % object_value
@@ -357,7 +357,7 @@ def exportmultifattura(request, tipo, export_type='html'):
 				'export_type':export_type,
 				'logo_url': settings.OWNER_LOGO,
 				}
-	print "Esporto %d fatture in %s" % (len(fatture), export_type)
+	#print "Esporto %d fatture in %s" % (len(fatture), export_type)
 	if export_type == 'pdf':
 		return render_to_reportlab(context)
 	else:  # html output by default
