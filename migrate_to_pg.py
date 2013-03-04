@@ -1,4 +1,22 @@
 # coding: utf-8
+#===============================================================================
+# Migrate all indicated models from a DB to another using the Django ORM
+# this is useful to get some object manipulation in the while
+#
+# Steps for the migration
+# define in the setting.DATABASES the source and target database definition
+# (default 'sqlite' => 'postgre')
+# run syncdb and migrations on the empty db
+# in Tam we have:
+# 	manage.py syncdb
+# 	manage.py migrate tam
+# 	manage.py migrate fatturazione
+# 	manage.py migrate prenotazioni
+# 	manage.py migrate djangotasks
+#
+# run this script and wait
+#===============================================================================
+
 from django.core.management import setup_environ
 import settings
 from tam.models import stopAllLog
@@ -7,9 +25,9 @@ setup_environ(settings)
 
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from tam.models import * #@UnusedWildImport
+from tam.models import *  # @UnusedWildImport
 from fatturazione.models import Fattura, RigaFattura
-
+from prenotazioni.models import UtentePrenotazioni, Prenotazione
 objects = [
 			ContentType,
 			Permission,
@@ -29,11 +47,15 @@ objects = [
 			Viaggio,
 			Fattura,
 			RigaFattura,
+
+			UtentePrenotazioni,
+			Prenotazione
 		 ]
 
 manyToManyToSave = {
 					'Group':['permissions'],
-					'User':['groups', 'user_permissions']
+					'User':['groups', 'user_permissions'],
+					'UtentePrenotazioni':['clienti'],
 				}
 @transaction.commit_manually
 def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
@@ -44,27 +66,32 @@ def move_all_objects_of_model(Model, db_from='sqlite', db_to='postgre'):
 													  db_from,
 													  db_to)
 	kwargs = {}
-	if name in ('Luogo', 'Tratta', 'Viaggio'):
+	if name in ('Luogo', 'Tratta', 'Viaggio', 'Prenotazione'):
 		kwargs['updateViaggi'] = False
 	tutti = Model.objects.using(db_from).all()
-	#if name == 'Viaggio':
-	#	tutti = tutti.filter(id__in=(52489, 52479))
+	# if name == 'Viaggio':
+	# 	tutti = tutti.filter(id__in=(52489, 52479))
+	if name=='Prenotazione':
+		for field in Model._meta.local_fields:
+			if hasattr(field, 'auto_now_add') and field.auto_now_add==True:
+				print "Disabilito l'autoadd nel campo %s" % field.name
+				field.auto_now_add = False
 	try:
 		for obj in tutti:
-			#print obj.id, "\n ", obj
+			# print obj.id, "\n ", obj
 			if name in manyToManyToSave:
 				oldRelations = {}
 				for manyFieldName in manyToManyToSave[name]:
 					# keep the id list of all related objects
 					oldRelations[manyFieldName] = [e[0] for e in getattr(obj, manyFieldName).all().values_list('id')]
-					#print "copio le %d correlazioni %s con %s" % (len(oldRelations[manyFieldName]), manyFieldName, name),
+					# print "copio le %d correlazioni %s con %s" % (len(oldRelations[manyFieldName]), manyFieldName, name),
 				obj.save(using=db_to, **kwargs)
 				for manyFieldName in manyToManyToSave[name]:
 					for oldRelatedID in oldRelations[manyFieldName]:
 						newRelated = getattr(obj, manyFieldName).model.objects.using(db_to).get(id=oldRelatedID)
-						getattr(obj, manyFieldName).add(newRelated)	# add with the save DB
-					#print "ne ritrovo %d" % len(getattr(obj, manyFieldName).all()),
-				#print
+						getattr(obj, manyFieldName).add(newRelated)  # add with the save DB
+					# print "ne ritrovo %d" % len(getattr(obj, manyFieldName).all()),
+				# print
 			else:
 				if name == 'Permission' and len(obj.name) > 50:
 					print "Truncate permission name from %s to %s" % (obj.name, obj.name[:50])
