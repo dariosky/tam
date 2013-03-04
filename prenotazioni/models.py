@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from django.db import models
 from django.contrib.auth.models import User
 from tam.models import Cliente, Luogo, Viaggio
@@ -15,8 +15,8 @@ from prenotazioni.util import preavviso_ore, prenotaCorsa
 
 TIPI_PAGAMENTO = (
 					('D', 'Diretto'),
-					('H', 'Hotel'), 	# diventa "conto finemese"
-					('F', 'Fattura'), 	# fattura richiesta
+					('H', 'Hotel'),  # diventa "conto finemese"
+					('F', 'Fattura'),  # fattura richiesta
 				)
 
 # Create your models here.
@@ -95,8 +95,15 @@ class Prenotazione(models.Model):
 			return False
 		return True
 
-	def save(self):
-		if self.viaggio:
+	def save(self, **kwargs):
+		# posso forzare updateViaggi a False se non voglio aggiornare i viaggi
+		if 'updateViaggi' in kwargs:
+			updateViaggi = kwargs['updateViaggi']
+			del(kwargs['updateViaggi'])
+		else:
+			updateViaggi = True
+
+		if self.viaggio and updateViaggi:
 			nuovoViaggio = prenotaCorsa(self, dontsave=True)
 			chiavi_da_riportare = [
 				'data', 'da', 'a', 'numero_passeggeri', 'esclusivo',
@@ -108,7 +115,7 @@ class Prenotazione(models.Model):
 				setattr(self.viaggio, chiave, getattr(nuovoViaggio, chiave))
 			self.viaggio.save()
 			self.viaggio.updatePrecomp()
-		super(Prenotazione, self).save()
+		super(Prenotazione, self).save(**kwargs)
 
 	def delete(self):
 		if self.viaggio:
