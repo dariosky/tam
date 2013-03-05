@@ -1,8 +1,8 @@
 from django.db.models import signals
 from tam.middleware import threadlocals
-import datetime
 from django.contrib.contenttypes.models import ContentType
 from modellog.models import ActionLog
+from django.utils import timezone
 
 def logAction(action, instance=None, description='', user=None, log_date=None):
 	if instance:
@@ -10,7 +10,7 @@ def logAction(action, instance=None, description='', user=None, log_date=None):
 
 	if user is None:
 		user = threadlocals.get_current_user()
-	if log_date is None: log_date = datetime.datetime.now()
+	if log_date is None: log_date = timezone.now()
 
 	modification = ActionLog (
 							  data=log_date,

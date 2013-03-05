@@ -43,7 +43,7 @@ Generazione Ricevute (viaggi con pagamento posticipato)
 
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from tam.views.tamviews import parseDateString
+from tam.tamdates import parseDateString
 from django.conf import settings
 
 PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)

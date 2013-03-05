@@ -15,6 +15,14 @@ else:
 # DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 
+if DEBUG:
+	# set naive Datetime as errors
+	import warnings
+	warnings.filterwarnings(
+	        'error', r"DateTimeField received a naive datetime",
+	        RuntimeWarning, r'django\.db\.models\.fields')
+	#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+
 ADMINS = (
 	('Dario Varotto', 'dario.varotto@gmail.com'),
 )
@@ -31,7 +39,7 @@ DATABASE_ROUTERS = ['db_routers.TamArchiveRouter',
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
 TIME_ZONE = 'Europe/Rome'
-# USE_TZ = True
+USE_TZ = True
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -211,12 +219,6 @@ LOGIN_REDIRECT_URL = "/"
 # EMAIL_HOST_PASSWORD = 'xxx'
 # EMAIL_PORT = 587
 EMAIL_SUBJECT_PREFIX = "[TaM]"
-
-# if DEBUG:
-# 	logging.basicConfig(
-# 				level=logging.DEBUG,
-# 				format='%(asctime)s %(levelname)s %(message)s'
-# 			)
 
 if DEBUG:
 	SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 14 giorni in debug

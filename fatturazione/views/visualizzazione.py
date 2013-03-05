@@ -4,7 +4,7 @@ from django.template.context import RequestContext
 from django.shortcuts import render_to_response
 from fatturazione.models import Fattura, RigaFattura
 import datetime
-from tam.views.tamviews import parseDateString
+from tam.tamdates import parseDateString
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.aggregates import Max

@@ -6,12 +6,10 @@ from django.contrib.auth.models import User, Group
 from django import forms
 from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
-import datetime
 from tam.models import Luogo, get_classifiche, Cliente, \
 	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
 from modellog.actions import logAction
-import time
 from django.db import IntegrityError
 #from django.db import connection
 from django.core.paginator import Paginator
@@ -34,6 +32,9 @@ from django.db import connections
 from django.contrib import messages
 from django.conf import settings
 
+import tam.tamdates as tamdates
+import datetime
+
 class SmartPager(object):
 	def addToResults(self, start, count):
 		if start - self.lastPage > 1:
@@ -50,14 +51,6 @@ class SmartPager(object):
 		self.addToResults(1, 2)
 		self.addToResults(currentPage - 1, 3)
 		self.addToResults(totalPages - 1, 2)
-
-def parseDateString(s, default=None):
-	try:
-		t = time.strptime(s, '%d/%m/%Y')
-		return datetime.date(t.tm_year, t.tm_mon, t.tm_mday)
-	except:
-		#logging.debug("Errore nel parsing della data.")
-		return default
 
 def listaCorse(request, template_name="corse/lista.html"):
 	""" Schermata principale con la lista di tutte le corse """
@@ -121,7 +114,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
 	clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
 	today = datetime.date.today()	# today to compare with viaggio.date
-	adesso = datetime.datetime.now()
+	adesso = tamdates.ita_now()
 	distinct = False
 
 	# ------------------ raccolgo tutti i possibili filtri
@@ -206,7 +199,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		filtroWhenAvanzato = True
 		if request.GET.has_key('dstart'):
 			try:
-				data_inizio = parseDateString(request.GET.get('dstart'))
+				data_inizio = tamdates.parseDateString(request.GET.get('dstart'))
 				request.session["dstart"] = data_inizio
 			except:
 				pass
@@ -215,7 +208,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 		if request.GET.has_key('dend'):
 			try:
-				data_fine = parseDateString(request.GET.get('dend'))
+				data_fine = tamdates.parseDateString(request.GET.get('dend'))
 				request.session["dend"] = data_fine
 			except:
 				pass
@@ -226,10 +219,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		data_fine = data_inizio + datetime.timedelta(days=1)
 
 	if filterWhen == "next":       # prendo il minore tra 2 ore fa e mezzanotte scorsa
-		data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
-		data_DueOreFa = adesso - datetime.timedelta(hours=2)
-		data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
-		data_fine = adesso + datetime.timedelta(days=15)
+		data_inizio = tamdates.get_prossime_inizio()
+		data_fine = data_inizio + datetime.timedelta(days=15)
 	elif filterWhen == "thisM":
 		data_inizio = adesso.replace(hour=0, minute=0, day=1)
 		data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0, minute=0, day=1)
@@ -237,6 +228,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
 		data_inizio = (data_fine - datetime.timedelta(days=1)).replace(day=1)      # vado a inizio del mese precedente
 
+	data_inizio = tamdates.date_enforce(data_inizio)
+	data_fine = tamdates.date_enforce(data_fine)
 	# -----------------------------	filtro	------------------------------------
 	if filterFlag != "Tutti i  flag":
 		if filterFlag == u"Fatturate":
@@ -267,7 +260,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 	if filterPrivato:
 		viaggi = viaggi.filter(passeggero__nome=filterPrivato)
 
-	if data_inizio: viaggi = viaggi.filter(data__gt=data_inizio)
+	if data_inizio:
+		viaggi = viaggi.filter(data__gt=data_inizio)
 	if data_fine: viaggi = viaggi.filter(data__lt=data_fine) # prossimi 15 giorni
 
 	if filterType == u"Partenze":
@@ -568,7 +562,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	# ****************  VALIDAZIONE E CREAZIONE ********************
 	if form.is_valid():
 		if step == 1:		# Passo allo step2
-			if form.cleaned_data["data"] < datetime.datetime.now().replace(hour=0, minute=0):
+			if form.cleaned_data["data"] < tamdates.ita_now().replace(hour=0, minute=0):
 				if not user.has_perm('tam.change_oldviaggio'):
 					messages.error(request, "Non hai l'autorizzazione per inserire una corsa vecchia.")
 					return HttpResponseRedirect("/")
