@@ -56,7 +56,7 @@ def xlsResponse(request, querySet):
 
 	numViaggi = querySet.count()
 	logging.debug("Export to EXCEL %d viaggi." % numViaggi)
-	maxViaggi = 3000
+	maxViaggi = 1500
 	if numViaggi > maxViaggi:
 		messages.error(request, "Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
 		return HttpResponseRedirect("/")	# back home
