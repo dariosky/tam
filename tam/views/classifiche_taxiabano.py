@@ -41,7 +41,6 @@ from decimal import Decimal
 kmPuntoAbbinate = Decimal(120)
 
 def process_classifiche(viaggio, force_numDoppi=None):
-	da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)	# trovo i dettagli
 #	print "%d *****" % viaggio.id
 #
 #	for k in da:
@@ -49,6 +48,8 @@ def process_classifiche(viaggio, force_numDoppi=None):
 
 	if viaggio.padre_id is not None:
 		return
+	if viaggio.id is None: return
+	da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)	# trovo i dettagli
 
 	valoreTotale = viaggio.get_valuetot()
 #	print "Valore totale:", valoreTotale
@@ -95,6 +96,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
 #			
 #		# i figli non prendono nulla
 
+	
 	if viaggio.padre is None:	# padri e singoli possono avere i supplementi
 		for fascia, points in viaggio.disturbi().items():
 			if fascia == "night":
