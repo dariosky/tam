@@ -4,6 +4,7 @@ from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse	#to resolve named urls
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
+import tam.tamdates as tamdates
 import datetime
 from decimal import Decimal
 import logging
@@ -214,9 +215,9 @@ class Viaggio(models.Model):
 	prezzoPadova = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	prezzoDoppioPadova = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
-	date_start = models.DateTimeField(editable=False, default=datetime.datetime(2009, 01, 01, 0, 0, 0))
+	date_start = models.DateTimeField(editable=False, default=tamdates.date_enforce(datetime.datetime(2009, 01, 01, 0, 0, 0)))
 	annullato = models.BooleanField('Corsa annullata', default=False, editable=True)
-	
+
 	# per non dover fare query quando visualizzo il viaggio, mi imposto che deriva da una prenotazione
 	is_prenotazione = models.BooleanField('Derivato da prenotazione', default=False, editable=False)
 
@@ -262,11 +263,11 @@ class Viaggio(models.Model):
 			numDoppi se è diverso da None forza al numero di doppi indicato
 			con forceDontSave indico l'id che sto già salvando, e che non c'è bisogno di risalvare anche se cambia
 		"""
+		#print "updateprecomp:", self.id
 		if doitOnFather and self.padre_id:
 #			logging.debug("Ricorro al padre di %s: %s" % (self.pk, self.padre.pk))
 			self.padre.updatePrecomp(forceDontSave=forceDontSave)	# run update on father instead
 			return
-
 		changed = False
 
 		# lista dei campi che vengono ricalcolati
@@ -305,7 +306,6 @@ class Viaggio(models.Model):
 		self.punti_diurni = self.punti_notturni = Decimal(0)	# Precalcolo i punti disturbo della corsa
 		self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
 		self.punti_abbinata = self.prezzoPunti = 0
-
 		process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
 		self.html_tragitto = self.get_html_tragitto()
@@ -550,7 +550,8 @@ class Viaggio(models.Model):
 		"""
 		if self.conducente_richiesto:
 			return {}
-		if self.date_start < datetime.datetime(2012, 3, 1):
+		print "Tra", self.date_start, "e", tamdates.date_enforce(datetime.datetime(2012, 3, 1))
+		if self.date_start < tamdates.date_enforce(datetime.datetime(2012, 3, 1)):
 			metodo = fasce_uno_due
 		else:
 			metodo = getattr(settings, "METODO_FASCE", fasce_semilineari)
@@ -669,7 +670,7 @@ class Viaggio(models.Model):
 
 	def vecchioConfermato(self):
 #		logging.debug("Mi chiedo se e' un vecchio confermato. Parte alle %s rispetto alle %s." %(self.date_start,datetime.datetime.now().replace(hour=0, minute=0) ))
-		return self.conducente_confermato and self.date_start < datetime.datetime.now().replace(hour=0, minute=0)
+		return self.conducente_confermato and self.date_start < tamdates.ita_now().replace(hour=0, minute=0)
 
 	def prezzo_commissione(self):
 		""" Restituisce il valore in euro della commissione """
@@ -725,7 +726,7 @@ class Viaggio(models.Model):
 	def warning(self):
 		""" True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
 		return (not self.conducente_confermato
-				 and (self.date_start - datetime.timedelta(hours=2) < datetime.datetime.now())
+				 and (self.date_start - datetime.timedelta(hours=2) < tamdates.ita_now())
 				)
 
 	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
