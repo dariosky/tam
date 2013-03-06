@@ -22,6 +22,7 @@ import os
 from tam.models import Viaggio, Cliente
 from django.core.paginator import Paginator
 from tam.views.tamviews import SmartPager
+from tam import tamdates
 
 class NumberInput(Input):
 	input_type = 'number'
@@ -83,7 +84,7 @@ class FormPrenotazioni(forms.ModelForm):
 	def clean(self):
 		""" Controlli di validità dell'intera form """
 		cleaned_data = self.cleaned_data
-		ora = datetime.datetime.now()
+		ora = tamdates.ita_now()
 
 		oraMinima = ora + datetime.timedelta(hours=preavviso_ore)  # bisogna prenotare 48 ore prima
 		if 'data_corsa' in cleaned_data and cleaned_data['data_corsa'] < oraMinima:
@@ -313,7 +314,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 
-	adesso = datetime.datetime.now()
+	adesso = tamdates.ita_now()
 	data_inizio = (adesso - datetime.timedelta(days=60)).replace(hour=0, minute=0)
 	data_fine = None
 
