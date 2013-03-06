@@ -1,4 +1,4 @@
-{% load media %}
+{% load media %}{% load url from future %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it">
 <head>
@@ -27,15 +27,15 @@
 	{% block navBar %}
 		{% block corse %}<a href="/" class='menuGroup'>TaM</a>
 		{% if perms.tam.add_viaggio %}
-			<span style="margin-left:-1.8em;">&raquo; <a href="{% url tamNuovaCorsa %}" class='menuGroup'>
+			<span>&raquo; <a href="{% url "tamNuovaCorsa" %}" class='menuGroup'>
 			<img src="{% media_url "addbtn.png" %}" alt=""/> Nuova corsa</a>
 			</span>
 		{% endif %}
 		{% endblock corse%}
-		{% block luoghi %}<a href="{% url tamLuoghi %}" class='menuGroup'>Tratte e Luoghi</a>{% endblock %}
-		{% block clienti %}<a href="{% url tamListini %}" class='menuGroup'>Clienti</a>{% endblock %}
-		{% block conducenti %}<a href="{% url tamConducenti %}" class='menuGroup'>Classifiche</a>{% endblock %}
-		{% block util %}<a href="{% url tamUtil %}" class='menuGroup'>Strumenti</a>{% endblock %}
+		{% block luoghi %}<a href="{% url "tamLuoghi" %}" class='menuGroup'>Tratte e Luoghi</a>{% endblock %}
+		{% block clienti %}<a href="{% url "tamListini" %}" class='menuGroup'>Clienti</a>{% endblock %}
+		{% block conducenti %}<a href="{% url "tamConducenti" %}" class='menuGroup'>Classifiche</a>{% endblock %}
+		{% block util %}<a href="{% url "tamUtil" %}" class='menuGroup'>Strumenti</a>{% endblock %}
 
 		{% if not tam_stealth %}<img src="{% media_url "tam_16.png" %}" class="loghetto" alt="" />{% endif %}
 	{% endblock navBar %}
@@ -59,15 +59,15 @@
 <div id="footer" class='noprint'>
 	{% block authblock %}
     {% if request.user.is_authenticated %}
-		Sei connesso come <a href="{% url change_password %}">{{ request.user }}</a> - <a id='logout' href="{% url logout %}">disconnettiti</a>
+		Sei connesso come <a href="{% url "change_password" %}">{{ request.user }}</a> - <a id='logout' href="{% url "logout" %}">disconnettiti</a>
 		{% if user.is_superuser %} - <a href="/admin/" target="_blank">amministrazione</a>{% endif %}
     {% else %}
-		Stai accedendo come utente non registrato. <a href="{% url login %}">Fatti riconoscere</a>.
+		Stai accedendo come utente non registrato. <a href="{% url "login" %}">Fatti riconoscere</a>.
     {% endif %}
 	{% endblock authblock %}
 	
 	<p class="credits">
-		<a href="{% url tam_changelog %}">TaM v.{{ tam_version }}</a>.
+		<a href="{% url "tam_changelog" %}">TaM v.{{ tam_version }}</a>.
 	    {% if license_expiration %}
 				Versione di prova {% if license_valid %}valida fino al{% else %}scaduta il{% endif %} {{ license_expiration|date:"j F Y" }}.
         {% endif %}

@@ -1,4 +1,5 @@
 @echo off
+cd /d %~dp0
 call ..\environment\scripts\activate.bat
 set tamport=8000
 set DJANGO_SETTINGS_MODULE=settings

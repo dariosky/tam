@@ -76,8 +76,8 @@ a:hover{ color:blue; }
 	font-family: sans-serif;
 }
 
-.navBar .menuGroup {
-	margin-right:1.8em;
+.navBar .menuGroup:not(:first-child) {
+	margin-left:1.8em;
 }
 
 .content {
@@ -263,6 +263,8 @@ td img {vertical-align: middle;}
 	left:2px;
 	border: silver 2px ridge;
 }
+
+/* paginator */
 .countblock{
 	clear:both;
 	float:right;
@@ -271,7 +273,6 @@ td img {vertical-align: middle;}
 .countblock a{
 	text-decoration:none;
 }
-
 .countblock .page {
 	padding-left:10px;
 	padding-right:10px;
@@ -281,12 +282,11 @@ td img {vertical-align: middle;}
 	padding-left:10px;
 	padding-right:10px;
 }
-
-
 .countblock .selected {
 	background:silver;
 	color:black;
 }
+
 #filterForm { margin:0; padding:0;}
 
 #id_note {
@@ -494,6 +494,9 @@ h2.fatturaTipo5 {
 	background-position: bottom !important;
 }
 
+.prenotazione {
+	background-color:#FE9 !important;
+}
 .annullato td{
 	background-color:#DDD !important;
 }

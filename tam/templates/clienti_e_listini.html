@@ -1,11 +1,11 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Clienti e listini &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
 
-    <a href="{% url tamCliente %}"><img src="/media/addbtn.png" alt="" /> Nuovo Cliente</a><br/>
-    <a href="{% url tamPrivati %}">Elenco passeggeri privati</a><br/>
+    <a href="{% url "tamCliente" %}"><img src="/media/addbtn.png" alt="" /> Nuovo Cliente</a><br/>
+    <a href="{% url "tamPrivati" %}">Elenco passeggeri privati</a><br/>
     {% if clienti %}
 		<table id="clienti" class="tablesorter">
 			<thead>
@@ -20,7 +20,7 @@
 				<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
 	   				<td>
 	   				    <img style="float:right;" src="/media/tipiCliente/{{ cliente.tipo }}.png" title="{{ cliente.tipo }}" alt="{{ cliente.tipo }}" />
-						<a href="{% url tamClienteId cliente.id %}">{{ cliente.nome }}</a>
+						<a href="{% url "tamClienteId" cliente.id %}">{{ cliente.nome }}</a>
 						{% if not cliente.attivo %}NON ATTIVO{% endif %}
 					</td>
 					<td>
@@ -29,7 +29,7 @@
 						{% if cliente.incassato_albergo %}<img src="/media/flag/incassato.png" alt="fine mese" />{% endif %}
 						{% if cliente.commissione %} commissione: {{ cliente.commissione }}{% ifequal cliente.tipo_commissione "P" %}%{% else %}€{% endifequal %}{% endif %}
 					</td>
-					<td><a href="{% url tamListinoId cliente.listino.id %}">{{ cliente.listino.nome }}</a></td>
+					<td><a href="{% url "tamListinoId" cliente.listino.id %}">{{ cliente.listino.nome }}</a></td>
 				</tr>
 			{% endfor %}
 			</tbody>
@@ -38,7 +38,7 @@
 		<h3>Nessun cliente è stato definito.</h3>
 	{% endif %}
 
-	<a href="{% url tamNuovoListino %}"><img src="/media/addbtn.png" alt="" /> Nuovo Listino</a><br/>
+	<a href="{% url "tamNuovoListino" %}"><img src="/media/addbtn.png" alt="" /> Nuovo Listino</a><br/>
 	{% if listini %}
 		<table id="listini" class="tablesorter">
 			<thead>
@@ -50,7 +50,7 @@
 			<tbody>
 			{% for listino in listini %}
 				<tr>
-	   				<td><a href="{% url tamListinoId listino.id %}">{{ listino.nome }}</a></td>
+	   				<td><a href="{% url "tamListinoId" listino.id %}">{{ listino.nome }}</a></td>
 					<td>{{ listino.prezzolistino__count }}</td>
 				</tr>
 			{% endfor %}

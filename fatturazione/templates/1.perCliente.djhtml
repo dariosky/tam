@@ -4,7 +4,7 @@
 	    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
 	    <th>Corsa</th>
 	    <th>Note</th>
-	    <th>Prezzo {% if PREZZO_NETTO %}netto{% else %}lordo{% endif %}</th>
+	    <th>Prezzo {% if PREZZO_VIAGGIO_NETTO %}netto{% else %}lordo{% endif %}</th>
 	    <th>Conducente</th>
 	</tr>
 </thead>

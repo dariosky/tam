@@ -1,29 +1,31 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Impostazione dei permessi &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Impostazioni permessi.</h1>
+<h1>Impostazioni permessi</h1>
 
 <form method="get" action=".">
 <p>
 	Seleziona l'utente da gestire.
 	<select name="selectedUser">
 	{% for iterUser in users %}
-		<option{% ifequal selectedUsername iterUser.username%} selected="selected"{% endifequal %}>{{ iterUser.username }}</option>
+		<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %} value="{{ iterUser.username }}">
+			{{ iterUser.username }}{% if iterUser.prenotazioni %} - prenotazioni{% endif %}
+		</option>
 	{% endfor %}
 	</select>
 	<input type="submit" value="Seleziona" />
 </p>
 </form>
-<p><a href="{% url newUser %}">Nuovo utente</a></p>
+<p><a href="{% url "newUser" %}">Nuovo utente</a></p>
 {% if selectedUser %}
 	<form method="post" action=".">
 		dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
 		<p>
 			Nuova password <input type="password" name="password"> riconferma: <input type="password" name="passwordbis">
 		</p>
-		<p>
+		<p id='user_group' {% if utentePrenotazioni %}style="display:none"{% endif %}>
 			Gruppo di appartenenza:
 			<select name="selectedGroup" multiple="multiple">
 			{% for iterGroup in groups %}
@@ -31,9 +33,50 @@
 			{% endfor %}
 			</select>
 		</p>
-		<p><a href="{% url delUser username=selectedUser.username %}">Cancellazione utente</a></p>
-		<p><input type="submit" name="change" value="Applica" /></p>
+		<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
+		
+		{% if perms.prenotazioni.manage_permissions %}
+			{% include "utils/manageUsers-prenotazioni.inc.html" %}
+		{% endif %}
+		
+		<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
 	</form>
 {% endif %}
 
-{% endblock %}
+{% endblock content %}
+
+{% block bottom %}
+	{{ block.super }}
+	{% if perms.prenotazioni.manage_permissions %}
+		<script type="text/javascript" src="/static/js/jquery.asmselect.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/css/jquery.asmselect.css" />
+	{% endif %}	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+			$('#esclusivoBlock input').change(
+				function(){
+					var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
+					if (utente_prenotazioni) {
+						$('#configuratore_prenotazioni').show('slow');
+						$('#user_group').hide('slow');
+						
+					}
+					else {
+						$('#configuratore_prenotazioni').hide('slow');
+						$('#user_group').show('slow');
+					}
+						
+				}
+			);
+			$('#esclusivoBlock input').change();
+			
+			$("#configuratore_prenotazioni select[multiple]").asmSelect({
+				highlight:true,
+				removeLabel:"rimuovi",
+				highlightAddedLabel:"Aggiunto: ",
+				highlightRemovedLabel:"Rimosso: ",
+			});
+		});
+	</script>
+{% endblock bottom %}

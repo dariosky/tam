@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 {% load humanize %}
 
 {% block title %}Appianamento &raquo; {{ block.super }}{% endblock %}
@@ -34,5 +34,5 @@
 </div>
 </form>
 
-<a href="{% url tamArchiveUtil %}">Torna agli strumenti di archiviazione</a>
+<a href="{% url "tamArchiveUtil" %}">Torna agli strumenti di archiviazione</a>
 {% endblock content %}
