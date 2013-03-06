@@ -33,9 +33,9 @@ from django.contrib import messages
 from django.conf import settings
 import pdfListino
 
-import tam.tamdates as tamdates
+from tam import tamdates
 import datetime
-from tam.views.changelog import changeLog
+from tam.views.changelog import changeLog	#@UnusedImport
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -115,7 +115,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #	logging.debug("Comincio a caricare la lista corse")
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
 	clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
-	today = datetime.date.today()	# today to compare with viaggio.date
+	today = tamdates.ita_today()	# today to compare with viaggio.date
 	adesso = tamdates.ita_now()
 	distinct = False
 
@@ -978,7 +978,7 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 		viaggi = Viaggio.objects.filter(passeggero=id)
 		viaggi_con_passeggero = viaggi.count()
 		permessi_cancellazione = user.has_perm("tam.delete_passeggero")
-		no_corse_future = viaggi.filter(data__gte=datetime.date.today()).count() == 0
+		no_corse_future = viaggi.filter(data__gte=tamdates.ita_today()).count() == 0
 	else:
 		no_corse_future = False
 
@@ -1177,7 +1177,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 	form = RecurrenceForm(request.POST or None)
 	mediabundleJS = ('tamUI.js',)
 	mediabundleCSS = ('tamUI.css',)
-	dataIniziale = max(datetime.date.today(), corsa.data.date()) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
+	dataIniziale = max(tamdates.ita_today(), corsa.data.date()) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
 	form.initial["start"] = dataIniziale.strftime('%d/%m/%Y')
 	form.initial["end"] = dataIniziale.strftime('%d/%m/%Y')
 	form.fields["start"].widget.attrs["id"] = "datastart"

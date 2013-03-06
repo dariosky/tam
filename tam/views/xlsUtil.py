@@ -5,10 +5,11 @@ from xlwt import Workbook #@UnusedImport
 import datetime
 from decimal import Decimal
 import logging
-logging.basicConfig(
-				level=logging.DEBUG,
-				format='%(message)s'
-			)
+from django.utils import timezone
+#logging.basicConfig(
+#				level=logging.DEBUG,
+#				format='%(message)s'
+#			)
 
 knownStyles = {}	# list of already cached prepared Styles
 knownPattern = {}
@@ -147,6 +148,9 @@ def styleFromField(field, stile=sty(), **kwargs):
 def myWrite(sheet, y, x, field, style=sty()):
 	if isinstance(field, Decimal):
 		field = float(field)
+	elif isinstance(field, datetime.datetime):
+		field = timezone.localtime(field)	# keep the date naive
+		field = field.replace(tzinfo=None)
 	elif field is None:
 		field = ""
 	try:

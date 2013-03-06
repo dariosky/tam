@@ -11,9 +11,9 @@ import copy
 import os
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT, TA_RIGHT
-import datetime
 from reportlab.platypus.flowables import Spacer, KeepTogether
 from tam.models import Listino, Luogo
+from tam import tamdates
 
 test = settings.DEBUG
 test = False
@@ -36,7 +36,7 @@ table_normal_right = ParagraphStyle(name='TableNormalLeft', alignment=TA_RIGHT, 
 def onPageListino(canvas, doc):
 	width, height = canvas._doctemplate.pagesize
 	canvas.saveState()
-	anno = datetime.date.today().year
+	anno = tamdates.ita_today().year
 	setPdfProperties(canvas, 'Listino %d' % anno)
 
 	# in alto a sinistra

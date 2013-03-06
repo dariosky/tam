@@ -21,6 +21,7 @@ from django.utils.datastructures import SortedDict # there are Python 2.4 Ordere
 from django.contrib import messages
 from modellog.models import ActionLog
 from modellog.actions import logAction, stopLog, startLog
+from tam import tamdates
 
 archiveNotBefore_days = 180
 
@@ -67,7 +68,7 @@ def action(request, template_name="archive/action.html"):
 	if (end_date is None):
 		messages.error(request, "Devi specificare una data valida per archiviare.")
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))
-	max_date = datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)
+	max_date = tamdates.ita_today() - datetime.timedelta(days=archiveNotBefore_days)
 	if end_date > max_date:
 		messages.error(request, "La data che hai scelto è troppo recente. Deve essere al massimo il %s." % max_date)
 		return HttpResponseRedirect(reverse("tamArchiveUtil"))

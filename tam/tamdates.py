@@ -7,12 +7,12 @@ import logging
 def parseDateString(s, default=None):
 	""" Parse datestring as it was in Italy """
 	try:
-		logging.debug("Estraggo la data inizio da %s" % s)
+		print ("Estraggo la data inizio da %s" % s)
 		t = time.strptime(s, '%d/%m/%Y')
 		r = tz_italy.localize(datetime.datetime(t.tm_year, t.tm_mon, t.tm_mday))
 		return r
-	except Exception, e:
-		logging.debug("Errore nel parsing della data. %s" % e)
+	except Exception:
+#		print "Errore nel parsing della data. %s" % e
 		return default
 
 def ita_now():
@@ -20,6 +20,10 @@ def ita_now():
 		return timezone.now().astimezone(tz_italy)
 	else:
 		return timezone.now()
+	
+def ita_today():
+	""" Use a localize datetime (at midnight) instead of a date """
+	return ita_now().replace(hour=0, minute=0, second=0, microsecond=0)
 
 def get_prossime_inizio():
 	""" Restituisce la data di inizio delle prossime corse """

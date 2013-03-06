@@ -18,13 +18,15 @@ from decimal import Decimal
 from django.contrib import messages
 from fatturazione.views.generazione import DEFINIZIONE_FATTURE, \
 	FATTURE_PER_TIPO
+import tam.tamdates as tamdates
+
 month_names = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
 			   "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 	get_mese_fatture = request.GET.get('mese', None)
-	oggi = datetime.date.today()
+	oggi = tamdates.ita_today()
 	quick_month_names = [month_names[(oggi.month - 3) % 12],
 						 month_names[(oggi.month - 2) % 12],
 						 month_names[(oggi.month - 1) % 12]]  # current month
@@ -33,21 +35,21 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 	if get_mese_fatture:
 		if get_mese_fatture == "cur":
 			data_start = oggi.replace(day=1)
-			data_end = (data_start + datetime.timedelta(days=32)).replace(day=1)
+			data_end = (data_start + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
 		elif get_mese_fatture == 'prev':
-			data_end = oggi.replace(day=1)  # vado a inizio mese
-			data_start = (data_end - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio del mese precedente
+			data_end = oggi.replace(day=1) - datetime.timedelta(days=1)  # vado a fine mese scorso
+			data_start = data_end.replace(day=1)  # vado a inizio del mese precedente
 		elif get_mese_fatture == 'prevprev':  # due mesi fa
-			data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio mese scorso
-			data_start = (data_end - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio di due mesi fa
+			data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(day=1) - datetime.timedelta(days=1)  # vado a inizio mese scorso
+			data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
 	else:
 		data_start = parseDateString(# dal primo del mese scorso
 										request.GET.get("data_start"),
-										default=(datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+										default=(tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 									)
 		data_end = parseDateString(# all'ultimo del mese scorso
 										request.GET.get("data_end"),
-										default=datetime.date.today()
+										default=tamdates.ita_today()
 									)
 
 	gruppo_fatture = []
