@@ -112,6 +112,7 @@ def changeLog(request, template_name='static/changelog.html'):
 					('4.7', '19/2/2013', 'Gli utenti delle prenotazioni vedono le corse inserite dal consorzio oltre alle prenotazioni.') if not getattr(settings, "PRENOTAZIONI_BLOCCATE", False) else "",
 					('4.8', '24/2/2013', 'Logo personalizzato nella pagina di login, più filtri sulla visualizzazione.'),
 					('4.9', '24/2/2013', 'Seleziona rapida dei 2 mesi precedenti nella visualizzazione fatture.'),
+					('5.0', '6/3/2013', 'Supporto a timezone differenti sul server. Fix e miglioramenti vari.'),
 					#('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
