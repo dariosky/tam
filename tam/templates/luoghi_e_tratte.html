@@ -1,10 +1,10 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 
 {% block title %}Luoghi e tratte &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
 <div id="accordion">
-	<a href="{% url tamNuovaTratta %}"><img src="/media/addbtn.png" alt=""/> Nuova Tratta</a><br/>
+	<a href="{% url "tamNuovaTratta" %}"><img src="/media/addbtn.png" alt=""/> Nuova Tratta</a><br/>
 	{% if tratte %}
 		<div>
 		<h2><a href="#">Tratte</a></h2>
@@ -22,7 +22,7 @@
 					<td>{% ifchanged %}{{ tratta.da }}{% endifchanged %}</td>
 					<td>{{ tratta.a }}</td>
 					<td {% if not tratta.is_valid %} class="errorlist" {% endif %}>
-						<a  href="{% url tamTrattaId tratta.id %}">
+						<a  href="{% url "tamTrattaId" tratta.id %}">
 							{{ tratta.minuti }} min.
 							{% if tratta.is_long %}<strong>{% endif %}	{{ tratta.km }} km. {% if tratta.is_long %}</strong>{% endif %}
 							{% if tratta.costo_autostrada %}{{ tratta.costo_autostrada }}€{% endif %}
@@ -38,8 +38,8 @@
     {% endif %}
 
 
-    <a href="{% url tamNuovoBacino %}"><img src="/media/addbtn.png" alt=""/> Nuovo Bacino</a><br/>
-    <a href="{% url tamNuovoLuogo %}"><img src="/media/addbtn.png" alt=""/> Nuovo Luogo</a><br/>
+    <a href="{% url "tamNuovoBacino" %}"><img src="/media/addbtn.png" alt=""/> Nuovo Bacino</a><br/>
+    <a href="{% url "tamNuovoLuogo" %}"><img src="/media/addbtn.png" alt=""/> Nuovo Luogo</a><br/>
 
     {% if bacini or unbacined %}
 		<div>
@@ -57,7 +57,7 @@
 			{% for luogo in unbacined %}
 			    <tr>	<td></td>
 						<td>
-							<a href="{% url tamLuogoId luogo.id %}">{{ luogo }}</a>
+							<a href="{% url "tamLuogoId" luogo.id %}">{{ luogo }}</a>
 							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" alt="air" />{%endif%}
 							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" alt="train"/>{%endif%}							
 						</td>
@@ -68,14 +68,14 @@
 			{% for bacino in bacini %}
 				<tr>
 					<td>
-						<strong><a href="{% url tamBacinoId bacino.id %}">{{ bacino.nome }}</a></strong>
+						<strong><a href="{% url "tamBacinoId" bacino.id %}">{{ bacino.nome }}</a></strong>
 					</td>
 				</tr>
 				{% for luogo in bacino.luogo_set.all %}
 	                <tr>
 	                    <td></td>
 						<td>
-                            <a href="{% url tamLuogoId luogo.id %}">{{ luogo }}</a>
+                            <a href="{% url "tamLuogoId" luogo.id %}">{{ luogo }}</a>
 							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" alt="air"/>{%endif%}
 							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" alt="train"/>{%endif%}	
 						</td>

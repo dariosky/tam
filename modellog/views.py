@@ -13,6 +13,7 @@ import logging
 from django.contrib.sessions.models import Session
 from django.contrib import messages
 from tam.models import Viaggio
+from django.utils import timezone
 
 
 def getTrace():
@@ -26,7 +27,7 @@ def getTrace():
 
 def logAndCleanExpiredSessions():
 	""" Clear all the expired sessions and log the disconnection of the users """
-	for s in Session.objects.filter(expire_date__lt=datetime.datetime.now()):
+	for s in Session.objects.filter(expire_date__lt=timezone.now()):
 		data = s.get_decoded()
 		if data.has_key('_auth_user_id'):
 			user = User.objects.get(id=data['_auth_user_id'])

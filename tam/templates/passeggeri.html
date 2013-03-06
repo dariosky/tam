@@ -1,4 +1,4 @@
-{% extends "clienti_e_listini.html" %}
+{% extends "clienti_e_listini.html" %}{% load url from future %}
 
 {% block title %}Elenco privati &raquo; {{ block.super }}{% endblock %}
 
@@ -6,7 +6,7 @@
 
 {% block content %}
     <h1>Elenco privati.</h1>
-    <a href="{% url tamNuovoPrivato %}"><img src="/media/addbtn.png" alt="" /> Nuovo Privato</a><br/>
+    <a href="{% url "tamNuovoPrivato" %}"><img src="/media/addbtn.png" alt="" /> Nuovo Privato</a><br/>
     <table class="tablesorter">
         <thead>
             <tr>
@@ -18,7 +18,7 @@
 		<tbody>
 		    {% for privato in privati %}
 		        <tr>
-					<td><a href="{% url tamPrivatoId privato.id %}">{{ privato.nome }}</a></td>
+					<td><a href="{% url "tamPrivatoId" privato.id %}">{{ privato.nome }}</a></td>
 					<td>{% with privato.dati as dati %}{% if dati %}{{ privato.dati }}{% endif %}{% endwith %}</td>
 				</tr>
 		    {% endfor %}

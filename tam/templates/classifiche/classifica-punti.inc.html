@@ -1,4 +1,4 @@
-{% load humanize %}
+{% load humanize %}{% load url from future %}
 <div>
 <h2><a href="#">
 		{{ classifica_definita.nome }}
@@ -43,7 +43,7 @@
 					<input type="submit" name="conguaglia" value="Memorizza" style='width:100%'>
 				</form>
 			{% else %}
-				<a href="{% url tamConguaglio %}">CONGUAGLIA</a>
+				<a href="{% url "tamConguaglio" %}">CONGUAGLIA</a>
 				TOTALE: {{ classifica_definita.totaleConguaglio|intcomma }} €
 				MEDIA: {{ classifica_definita.mediaAbbinate|intcomma }} €
 			{% endif %}

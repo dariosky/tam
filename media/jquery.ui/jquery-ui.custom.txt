@@ -1,2 +1,0 @@
-Core, Widget
-Accordion, Datepicker

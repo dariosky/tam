@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load media %}
+{% extends "base.html" %}{% load media %}{% load url from future %}
 
 {% block title %}{% if viaggio.id %} Modifica {% else %} Nuova {% endif %} corsa &raquo; {{ block.super }}{% endblock %}
 
@@ -95,8 +95,8 @@
 																			{% else %}"Avanti {% if id %}e salva{% endif %}"{% endifequal %} />
             {% if not new %}
 				{% ifnotequal step 1 %}
-					<a href="{% url tamCorsaCopy viaggio.pk %}">copia</a>
-					<a href="{% url actionLog %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
+					<a href="{% url "tamCorsaCopy" viaggio.pk %}">copia</a>
+					<a href="{% url "actionLog" %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
 				{% endifnotequal %}
                 {% with viaggio.delete_url as deleteUrl %}
                     {% if deleteUrl %}
@@ -114,10 +114,10 @@
 			<div>
 				<div style="font-family:monospace; ">
 						{% if viaggio.cliente %}
-							<a href="{% url tamClienteId viaggio.cliente.id %}?next={{ full_request_path }}">{{viaggio.cliente}}</a>
+							<a href="{% url "tamClienteId" viaggio.cliente.id %}?next={{ full_request_path }}">{{viaggio.cliente}}</a>
 						{% else %}
 							privato
-							{% if viaggio.passeggero %}: <a href="{% url tamPrivatoId viaggio.passeggero.pk %}?next={{ full_request_path }}">{{ viaggio.passeggero }}</a>{% endif %}
+							{% if viaggio.passeggero %}: <a href="{% url "tamPrivatoId" viaggio.passeggero.pk %}?next={{ full_request_path }}">{{ viaggio.passeggero }}</a>{% endif %}
 						{% endif %}
 						da {{viaggio.da}} a {{viaggio.a}} <strong>{{viaggio.data|date:"D j F, H:i"}}</strong>
 						{{viaggio.numero_passeggeri}} pax, {% if viaggio.esclusivo %}taxi{% else %}collettivo{% endif %}
@@ -132,7 +132,7 @@
 {% block bottom %}
 <script type="text/javascript">
 	$( function() {
-		$("#clear").click( function(){ document.location="{% url tamCorsaClear %}"; });
+		$("#clear").click( function(){ document.location="{% url "tamCorsaClear" %}"; });
 		var formChanged=false;
 		$("input").live('change', function(){
 			formChanged=true;

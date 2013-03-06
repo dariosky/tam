@@ -16,7 +16,7 @@ from reportlab.platypus.flowables import Spacer, KeepTogether
 from tam.models import Listino, Luogo
 
 test = settings.DEBUG
-#test = False
+test = False
 styles = getSampleStyleSheet()
 normalStyle = copy.deepcopy(styles['Normal'])
 normalStyle.fontSize = 8

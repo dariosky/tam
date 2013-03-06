@@ -8,7 +8,8 @@
 
 {% block superNavBar %}
 	<div class="mainlogo">
-		<img src="{% media_url "logo.png" %}" alt="TaM" />
+		{% comment %}<img src="{% media_url "logo.png" %}" alt="TaM" />{%endcomment%}
+		<img src="{% media_url logo_consorzio %}" alt="{{ nome_consorzio }}" />
 	</div>
 {% endblock superNavBar %}
 

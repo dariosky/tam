@@ -1,4 +1,4 @@
-{% load utilTag %}{% load media %}
+{% load utilTag %}{% load media %}{% load url from future %}
 <div class="trip_detail">
 {% if viaggio.punti_diurni or viaggio.punti_notturni %}
 <div class='supplementari'>
@@ -24,7 +24,7 @@
 		{% if tratta_start.is_valid %}
 			partenza alle {{ viaggio.date_start|date:"H:i" }}
 		{% else %}
-			<a href="{% url tamTrattaId tratta_start.id %}" class="errorlist">tratta {{tratta_start.da}}-{{tratta_start.a}} scononosciuta</a>
+			<a href="{% url "tamTrattaId" tratta_start.id %}" class="errorlist">tratta {{tratta_start.da}}-{{tratta_start.a}} scononosciuta</a>
 		{% endif %}
 		<br/>
     {% endif %}
@@ -35,7 +35,7 @@
 	        {{ viaggio.da }} {% if viaggio.da.speciale = 'A' %}<img src='{% media_url "flag/luogo-airport.png" %}' /> (attendo 30 minuti){% endif%}
 	        - {% if nextfratello %}{{ nextfratello.da }}{% else %}{{ viaggio.a }}{% endif %}
 	    {% else %}
-        	<a href="{% url tamTrattaId viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>
+        	<a href="{% url "tamTrattaId" viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>
     	{% endif %}
     <br/>
 	{% endif %}
@@ -45,7 +45,7 @@
 		{% if tratta_end.is_valid %}
 		    {% if nextfratello %}arrivo alle {{ viaggio.date_end|date:"H:i" }}{% endif %}
 		{% else %}
-			<a href="{% url tamTrattaId tratta_end.id %}" class="errorlist">tratta {{tratta_end.da}}-{{tratta_end.a}} scononosciuta</a>
+			<a href="{% url "tamTrattaId" tratta_end.id %}" class="errorlist">tratta {{tratta_end.da}}-{{tratta_end.a}} scononosciuta</a>
 		{% endif %}
     {% endif %}
 {% if nextfratello %}

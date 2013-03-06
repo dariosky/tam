@@ -6,12 +6,10 @@ from django.contrib.auth.models import User, Group
 from django import forms
 from django.utils.translation import ugettext as _
 from django.template.context import RequestContext	 # Context with steroid
-import datetime
 from tam.models import Luogo, get_classifiche, Cliente, \
 	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
 from modellog.actions import logAction
-import time
 from django.db import IntegrityError
 #from django.db import connection
 from django.core.paginator import Paginator
@@ -26,12 +24,18 @@ from django.utils import simplejson
 from django.core.urlresolvers import reverse
 import logging
 from django.db.models.query_utils import Q
+from django.db.models.deletion import ProtectedError
+from django.utils.safestring import mark_safe
 for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
 from django.contrib import messages
 from django.conf import settings
 import pdfListino
+
+import tam.tamdates as tamdates
+import datetime
+from tam.views.changelog import changeLog
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -47,16 +51,8 @@ class SmartPager(object):
 		self.results = []
 		self.currentPage, self.totalPages = currentPage, totalPages
 		self.addToResults(1, 2)
-		self.addToResults(currentPage - 2, 5)
-		self.addToResults(totalPages - 3, 4)
-
-def parseDateString(s, default=None):
-	try:
-		t = time.strptime(s, '%d/%m/%Y')
-		return datetime.date(t.tm_year, t.tm_mon, t.tm_mday)
-	except:
-		#logging.debug("Errore nel parsing della data.")
-		return default
+		self.addToResults(currentPage - 1, 3)
+		self.addToResults(totalPages - 1, 2)
 
 def listaCorse(request, template_name="corse/lista.html"):
 	""" Schermata principale con la lista di tutte le corse """
@@ -120,13 +116,17 @@ def listaCorse(request, template_name="corse/lista.html"):
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
 	clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
 	today = datetime.date.today()	# today to compare with viaggio.date
-	adesso = datetime.datetime.now()
+	adesso = tamdates.ita_now()
 	distinct = False
 
 	# ------------------ raccolgo tutti i possibili filtri
 	filtriTipo = [
-			u"Partenze", u"Arrivi", u"Fuori classifica", u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
+			u"Partenze", u"Arrivi",
+			u"Fuori classifica",
+			u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
 	]
+	if not getattr(settings, "PRENOTAZIONI_BLOCCATE", False): filtriTipo.append("Prenotazioni")
+	
 	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito',
 				  u'Quote consorzio', u'No quota consorzio',
 				  'Abbuoni',
@@ -202,7 +202,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 		filtroWhenAvanzato = True
 		if request.GET.has_key('dstart'):
 			try:
-				data_inizio = parseDateString(request.GET.get('dstart'))
+				data_inizio = tamdates.parseDateString(request.GET.get('dstart'))
 				request.session["dstart"] = data_inizio
 			except:
 				pass
@@ -211,7 +211,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
 		if request.GET.has_key('dend'):
 			try:
-				data_fine = parseDateString(request.GET.get('dend'))
+				data_fine = tamdates.parseDateString(request.GET.get('dend'))
 				request.session["dend"] = data_fine
 			except:
 				pass
@@ -222,10 +222,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		data_fine = data_inizio + datetime.timedelta(days=1)
 
 	if filterWhen == "next":       # prendo il minore tra 2 ore fa e mezzanotte scorsa
-		data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
-		data_DueOreFa = adesso - datetime.timedelta(hours=2)
-		data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
-		data_fine = adesso + datetime.timedelta(days=15)
+		data_inizio = tamdates.get_prossime_inizio()
+		data_fine = data_inizio + datetime.timedelta(days=15)
 	elif filterWhen == "thisM":
 		data_inizio = adesso.replace(hour=0, minute=0, day=1)
 		data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0, minute=0, day=1)
@@ -233,6 +231,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
 		data_inizio = (data_fine - datetime.timedelta(days=1)).replace(day=1)      # vado a inizio del mese precedente
 
+	data_inizio = tamdates.date_enforce(data_inizio)
+	data_fine = tamdates.date_enforce(data_fine)
 	# -----------------------------	filtro	------------------------------------
 	if filterFlag != "Tutti i  flag":
 		if filterFlag == u"Fatturate":
@@ -263,7 +263,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 	if filterPrivato:
 		viaggi = viaggi.filter(passeggero__nome=filterPrivato)
 
-	if data_inizio: viaggi = viaggi.filter(data__gt=data_inizio)
+	if data_inizio:
+		viaggi = viaggi.filter(data__gt=data_inizio)
 	if data_fine: viaggi = viaggi.filter(data__lt=data_fine) # prossimi 15 giorni
 
 	if filterType == u"Partenze":
@@ -284,6 +285,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		viaggi = viaggi.filter(punti_abbinata__gt=0) | viaggi.filter(padre__punti_abbinata__gt=0)
 #		viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
 #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
+	elif filterType == "Prenotazioni":
+		viaggi = viaggi.filter(is_prenotazione=True)
 
 	viaggi = viaggi.select_related("da", "a", "cliente", "conducente", "passeggero", "viaggio")
 
@@ -387,8 +390,11 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		else:
 			if request.method == "POST":
 				if u"OK" in request.POST:
-					viaggio.delete()
-					messages.success(request, "Cancellata la corsa %s." % viaggio)
+					try:
+						viaggio.delete()
+						messages.success(request, "Cancellata la corsa %s." % viaggio)
+					except ProtectedError:
+						messages.error(request, "Non è possibile cancellare la corsa.")
 					return HttpResponseRedirect(redirectOk)
 				else:
 					return HttpResponseRedirect(redirectOk)
@@ -559,7 +565,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	# ****************  VALIDAZIONE E CREAZIONE ********************
 	if form.is_valid():
 		if step == 1:		# Passo allo step2
-			if form.cleaned_data["data"] < datetime.datetime.now().replace(hour=0, minute=0):
+			if form.cleaned_data["data"] < tamdates.ita_now().replace(hour=0, minute=0):
 				if not user.has_perm('tam.change_oldviaggio'):
 					messages.error(request, "Non hai l'autorizzazione per inserire una corsa vecchia.")
 					return HttpResponseRedirect("/")
@@ -912,7 +918,6 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 	context_vars = locals()
 	if fields_descriptions:
 		#context_vars.extend(extra_dict)
-		#print form.fields.keys()
 		for field_name, description in fields_descriptions.items():
 			form.fields[field_name].label = description
 	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
@@ -943,7 +948,6 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 
 	class GenericModelForm(forms.ModelForm):
 		def clean(self):
-			print unique
 			for constraintList in unique:
 				query = self.Meta.model.objects	# get all objects
 				for field in constraintList:	# and filter all with the fields=contraints
@@ -1002,7 +1006,6 @@ def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/p
 	context_vars = locals()
 	if fields_descriptions:
 		#context_vars.extend(extra_dict)
-		#print form.fields.keys()
 		for field_name, description in fields_descriptions.items():
 			form.fields[field_name].label = description
 	return render_to_response(template_name, context_vars, context_instance=RequestContext(request))
@@ -1292,6 +1295,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	if not user.has_perm('auth.change_user'):
 			messages.error(request, "Non hai l'autorizzazione a modificare i permessi.")
 			return HttpResponseRedirect("/")
+	manage_permissions = request.user.has_perm('prenotazioni.manage_permissions')
 	users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
 
 	getUsername = request.GET.get("selectedUser", None)
@@ -1302,6 +1306,10 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 		if user == selectedUser:
 			messages.error(request, "Non puoi modificare te stesso.")
 			return HttpResponseRedirect(reverse("tamManage"))
+		if hasattr(selectedUser, "prenotazioni"):
+			utentePrenotazioni = selectedUser.prenotazioni
+		else:
+			utentePrenotazioni = None
 		selectedGroups = selectedUser.groups.all()
 		groups = Group.objects.all()
 		for group in groups:
@@ -1317,17 +1325,55 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 				messages.success(request, "Modificata la password all'utente %s." % selectedUser.username)
 				resetUserSession(selectedUser)
 
-			newGroups = request.POST.getlist("selectedGroup")
-			selectedUser.groups.clear()
-			logging.debug("clearing groups")
-			for groupName in newGroups:
-				group = Group.objects.get(name=groupName)
-				selectedUser.groups.add(group)
+			tipo_utente = request.POST.get('tipo_prenotazioni', 'c')
+			if tipo_utente == 'c':	# utente conducente	
+				logging.debug("resetting groups for a normal user")
+				newGroups = request.POST.getlist("selectedGroup")
+				selectedUser.groups.clear()
+				for groupName in newGroups:
+					group = Group.objects.get(name=groupName)
+					selectedUser.groups.add(group)
 
-
+			if manage_permissions: # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
+				if tipo_utente == 'c':	# utente conducente	
+					if utentePrenotazioni:
+						messages.warning(request, "Faccio diventare l\'utente '%s' un conducente. Attenzione se aveva accesso esterno." % selectedUser)
+						# elimino l'utente prenotazioni
+						utentePrenotazioni.delete()
+				else:
+					# utente prenotazioni
+					from prenotazioni.models import UtentePrenotazioni
+					logging.debug("clearing groups for user prenotazioni")
+					selectedUser.groups.clear()
+					if not utentePrenotazioni:
+						messages.info(request, "Faccio diventare il conducente '%s' un utente per le prenotazioni." % selectedUser)
+						utentePrenotazioni = UtentePrenotazioni()
+					else:
+						# era già un utente prenotazioni
+						logging.debug("clearing clients for user prenotazioni")
+						utentePrenotazioni.clienti.clear()
+					utentePrenotazioni.user = selectedUser
+					#attuale_prenotazione.cliente_id = request.POST.getlist('prenotazioni_clienti')
+					utentePrenotazioni.luogo_id = request.POST.get('prenotazioni_luogo')
+					utentePrenotazioni.nome_operatore = request.POST.get('operatore')
+					utentePrenotazioni.email = request.POST.get('email')
+					utentePrenotazioni.save()
+					logging.debug("Setting clients to user prenotazioni")
+					for cliente_id in request.POST.getlist('prenotazioni_clienti'):
+						cliente = Cliente.objects.get(id=cliente_id)
+						utentePrenotazioni.clienti.add(cliente)
+						logging.debug("adding %s" % cliente)
 			return HttpResponseRedirect(reverse("tamManage", kwargs={"username":selectedUser.username}))
+			# fine delle azioni per il submit
+
+		if manage_permissions:
+			# preparo il dizionario dei clienti e dei luoghi per poterli scegliere
+			clienti = Cliente.objects.filter(attivo=True)
+			luoghi = Luogo.objects.all()
+
 
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+
 
 def newUser(request, template_name="utils/newUser.html"):
 	user = request.user

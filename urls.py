@@ -12,6 +12,7 @@ urlpatterns = patterns ('',
 	(r'^archive/', include('tamArchive.urls')),
 	#( r'', include( 'license.urls' ) ),
 	(r'^fatture/', include('fatturazione.urls')),
+	(r'^prenotazioni/', include('prenotazioni.urls')),
  )
 
 from django.contrib import admin
