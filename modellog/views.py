@@ -14,6 +14,7 @@ from django.contrib.sessions.models import Session
 from django.contrib import messages
 from tam.models import Viaggio
 from django.utils import timezone
+from tam import tamdates
 
 
 def getTrace():
@@ -117,7 +118,7 @@ def actionLog(request, template_name="actionLog.html"):
 	return render_to_response(template_name,
 							  {
 								"actions":actions,
-								"today": datetime.date.today(),
+								"today": tamdates.ita_today(),
 								"thisPage":thisPage,
 								"paginator":paginator,
 								"utenti":utenti,

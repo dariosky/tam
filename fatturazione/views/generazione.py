@@ -45,6 +45,7 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from tam.tamdates import parseDateString
 from django.conf import settings
+import tam.tamdates as tamdates
 
 PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
 NOMI_DEFINIZIONE_FATTURE = getattr(settings, 'NOMI_DEFINIZIONE_FATTURE')
@@ -62,11 +63,12 @@ for fatturazione in DEFINIZIONE_FATTURE:
 def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 	data_start = parseDateString(# dal primo del mese scorso
 									request.GET.get("data_start"),
-									default=(datetime.date.today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+									default=(tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 								)
+	print tamdates.ita_now()
 	data_end = parseDateString(# all'ultimo del mese scorso
 									request.GET.get("data_end"),
-									default=datetime.date.today().replace(day=1) - datetime.timedelta(days=1)
+									default=tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)
 								)
 	# prendo i viaggi da fatturare
 	# dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
@@ -96,7 +98,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 		else:
 			dictFatturazione["parametri"] = {}
 		gruppo_fatture.append(dictFatturazione)
-	oggi = datetime.date.today()
+	oggi = tamdates.ita_today()
 
 	profile = ProfiloUtente.objects.get(user=request.user)
 	luogoRiferimento = profile.luogo

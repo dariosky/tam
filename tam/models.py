@@ -550,7 +550,6 @@ class Viaggio(models.Model):
 		"""
 		if self.conducente_richiesto:
 			return {}
-		print "Tra", self.date_start, "e", tamdates.date_enforce(datetime.datetime(2012, 3, 1))
 		if self.date_start < tamdates.date_enforce(datetime.datetime(2012, 3, 1)):
 			metodo = fasce_uno_due
 		else:
