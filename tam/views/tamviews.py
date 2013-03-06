@@ -430,6 +430,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 			form.initial["esclusivo"] = "c"
 
 		if step == 1:
+			form.initial["data"] = viaggio.data.astimezone(tamdates.tz_italy)
 			if viaggio.is_abbinata: # ai figli non si può cambiare lo step1...
 				# 21/2/2012 ... anche ai padri non lascio cambiare la prima pagina. Non voglio che cambi la data.
 				messages.info(request, "Non puoi cambiare la prima pagina di dettagli finché la corsa è abbinata.")
