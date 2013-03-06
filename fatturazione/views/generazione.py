@@ -65,7 +65,6 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 									request.GET.get("data_start"),
 									default=(tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
 								)
-	print tamdates.ita_now()
 	data_end = parseDateString(# all'ultimo del mese scorso
 									request.GET.get("data_end"),
 									default=tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)

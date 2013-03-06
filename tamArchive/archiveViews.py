@@ -33,7 +33,7 @@ def menu(request, template_name="archive/menu.html"):
 
 	class ArchiveForm(forms.Form):
 		""" Form che chiede una data non successiva a 30 giorni fa """
-		end_date_suggested = (datetime.date.today() - datetime.timedelta(days=archiveNotBefore_days)).replace(month=1, day=1).strftime('%d/%m/%Y')
+		end_date_suggested = (tamdates.ita_today() - datetime.timedelta(days=archiveNotBefore_days)).replace(month=1, day=1).strftime('%d/%m/%Y')
 		end_date = forms.DateField(
 								   label="Data finale",
 								   input_formats=[_('%d/%m/%Y')],
