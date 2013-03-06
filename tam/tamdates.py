@@ -7,7 +7,7 @@ import logging
 def parseDateString(s, default=None):
 	""" Parse datestring as it was in Italy """
 	try:
-		print ("Estraggo la data inizio da %s" % s)
+		#print ("Estraggo la data inizio da %s" % s)
 		t = time.strptime(s, '%d/%m/%Y')
 		r = tz_italy.localize(datetime.datetime(t.tm_year, t.tm_mon, t.tm_mday))
 		return r
