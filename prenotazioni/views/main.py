@@ -50,15 +50,18 @@ def inviaMailPrenotazione(prenotazione,
 	if extra_context:
 		context.update(extra_context)
 
-	notifyByMail(
-		to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
-		subject=subject,
-		context=context,
-		attachments=attachments,
-		reply_to=settings.EMAIL_CONSORZIO,
-		messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
-		messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
-	)
+	if settings.DEBUG:
+		print "Sono in test. non invio la mail."
+	else:	
+		notifyByMail(
+			to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
+			subject=subject,
+			context=context,
+			attachments=attachments,
+			reply_to=settings.EMAIL_CONSORZIO,
+			messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
+			messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
+		)
 
 class FormPrenotazioni(forms.ModelForm):
 	def clean_pax(self):
@@ -186,9 +189,9 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				previous_values[key] = getattr(prenotazione, key)
 
 		if "delete" in request.POST:
-			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
 			inviaMailPrenotazione(prenotazione, "delete")
 			prenotazione.delete()
+			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	if form.is_valid() and editable:
@@ -223,14 +226,14 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 			prenotazione.viaggio = viaggio
 			prenotazione.save()
 
-			messages.success(
-				request,
-				"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
-			)
 			inviaMailPrenotazione(prenotazione,
 								  "create",
 								  attachments=[attachment] if attachment else []
 								 )
+			messages.success(
+				request,
+				"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
+			)
 			return HttpResponseRedirect(reverse('tamPrenotazioni'))
 		else:  # salvo la modifica
 			changes = {}  # dizionario con i cambiamenti al form
@@ -267,8 +270,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 									  attachments=[attachment] if attachment else [],
 									  extra_context={"cambiamenti":cambiamenti}
 									 )
-				messages.success(request, "Modifica eseguita.")
 				prenotazione.save()
+				messages.success(request, "Modifica eseguita.")
 			return HttpResponseRedirect(
 						reverse('tamPrenotazioni-edit',
 								kwargs={"id_prenotazione":prenotazione.id}
