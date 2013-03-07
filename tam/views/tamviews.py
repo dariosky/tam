@@ -390,6 +390,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		else:
 			if request.method == "POST":
 				if u"OK" in request.POST:
+					if viaggio.is_abbinata:
+						messages.error(request, "Non puoi cancellare le corse abbinate, scollegale prima.")
+						return HttpResponseRedirect(redirectOk)
+						
 					try:
 						viaggio.delete()
 						messages.success(request, "Cancellata la corsa %s." % viaggio)
