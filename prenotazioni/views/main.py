@@ -162,7 +162,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		editable = True
 
 	form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
-	form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(tamdates.tz_italy)	# inizialmente forzo la corsa
+	if prenotazione:
+		form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(tamdates.tz_italy)	# inizialmente forzo la corsa
 
 	# deciso se mostrare o meno la scelta dei clienti:
 	clienti_attivi = utentePrenotazioni.clienti
@@ -191,8 +192,9 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 		if "delete" in request.POST:
 			inviaMailPrenotazione(prenotazione, "delete")
+			id_prenotazione = prenotazione.id	# salvo per il messaggio finale
 			prenotazione.delete()
-			messages.success(request, "Prenotazione n°%d annullata." % prenotazione.id)
+			messages.success(request, "Prenotazione n°%d annullata." % id_prenotazione)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	if form.is_valid() and editable:
