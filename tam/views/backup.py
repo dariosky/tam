@@ -15,6 +15,7 @@ from django.contrib import messages
 from tam.tasks import doBackupTask
 import sys
 import subprocess
+from tam import tamdates
 
 
 def humanizeSize(size):
@@ -137,7 +138,7 @@ def doBackup(user):
 
 	dbType = settings.DATABASES['default']['ENGINE']
 
-	n = datetime.datetime.now()
+	n = tamdates.ita_now()
 	newBackupFilename = "%s - tam - %s" % (n.strftime('%Y-%m-%d %H%M'), username)
 	backupPath = os.path.join(backupInfo["backupdir"], newBackupFilename)
 	logging.debug("%s ===> %s" % (backupInfo["dbname"], backupPath))

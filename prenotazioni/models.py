@@ -84,7 +84,7 @@ class Prenotazione(models.Model):
 		result = "%s - %s" % (self.cliente, self.owner.user.username)
 		result += " - " + ("arrivo" if self.is_arrivo else "partenza")
 		result += " %s" % self.luogo
-		result += " del %s" % self.data_corsa.strftime('%d/%m/%Y %H:%M')
+		result += " del %s" % self.data_corsa.astimezone(tamdates.tz_italy).strftime('%d/%m/%Y %H:%M')
 		return result
 
 	def is_editable(self):
