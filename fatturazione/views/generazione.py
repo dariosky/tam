@@ -275,7 +275,7 @@ def genera_fatture(request, fatturazione):
 				else:	# fattura da un viaggio
 
 					riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
-								(viaggio.da, viaggio.a, viaggio.data.strftime("%d/%m/%Y"),
+								(viaggio.da, viaggio.a, viaggio.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y"),
 									viaggio.numero_passeggeri, "taxi" if viaggio.esclusivo else "collettivo")
 					riga_fattura.qta = 1
 					riga_fattura.iva = 0 if fatturazione.esente_iva else 10
