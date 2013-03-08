@@ -44,7 +44,7 @@ class Fattura(models.Model):
 		progressivo = self.progressivo or "-"
 		if not self.data: return "fattura-senza-data"
 		return u"%s %s/%s del %s emessa a %s. %d righe" % (nomi_fatture[self.tipo], anno, progressivo,
-															self.data.strftime("%d/%m/%Y %H:%M"),
+															self.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y %H:%M"),
 															self.destinatario(),
 															self.righe.count()
 														  )
