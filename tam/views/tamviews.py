@@ -115,7 +115,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #	logging.debug("Comincio a caricare la lista corse")
 	conducenti = Conducente.objects.all()	# list of all conducenti (even inactive ones) to filter
 	clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
-	today = tamdates.ita_today()	# today to compare with viaggio.date
+	today = tamdates.ita_today().date()	# today to compare with viaggio.date (on template)
 	adesso = tamdates.ita_now()
 	distinct = False
 
