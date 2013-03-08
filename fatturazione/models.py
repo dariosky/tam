@@ -5,6 +5,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from tam import tamdates
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi",
 				'4': "Fattura consorzio esente IVA", '5':"Fattura conducente esente IVA"}
