@@ -1,3 +1,8 @@
+#===============================================================================
+# This born on march 2013 when webfaction servers went to UTC
+# It contains some helper to keep dates sane on indicated timezone
+#===============================================================================
+
 from django.utils import timezone
 import datetime, time
 import pytz
