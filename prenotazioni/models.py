@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from tam.models import Cliente, Luogo, Viaggio
 import datetime
 from prenotazioni.util import preavviso_ore, prenotaCorsa
+from tam import tamdates
 
 """
 	Regole da rispettare:
@@ -83,12 +84,12 @@ class Prenotazione(models.Model):
 		result = "%s - %s" % (self.cliente, self.owner.user.username)
 		result += " - " + ("arrivo" if self.is_arrivo else "partenza")
 		result += " %s" % self.luogo
-		result += " del %s" % self.data_corsa.strftime('%d/%m/%Y %H:%M')
+		result += " del %s" % self.data_corsa.astimezone(tamdates.tz_italy).strftime('%d/%m/%Y %H:%M')
 		return result
 
 	def is_editable(self):
 		" True se la corsa è ancora modificabile "
-		ora = datetime.datetime.now()
+		ora = tamdates.ita_now()
 		inTempo = ora < (self.data_corsa - datetime.timedelta(hours=preavviso_ore))
 		if not inTempo: return False
 		if self.viaggio and self.viaggio.conducente_confermato:

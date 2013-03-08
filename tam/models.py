@@ -231,7 +231,7 @@ class Viaggio(models.Model):
 		return reverse("tamNuovaCorsaId", kwargs={"id":self.id})
 
 	def __unicode__(self):
-		result = u"%s da %s a %s." % (self.data.strftime("%d/%m/%Y %H:%M"), self.da, self.a)
+		result = u"%s da %s a %s." % (self.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y %H:%M"), self.da, self.a)
 		if self.cliente: result += u" Per %s:" % self.cliente
 		else: result += u" Per privato:"
 		result += u" %spax %s." % (self.numero_passeggeri, self.esclusivo and u"taxi" or u"collettivo")
@@ -668,7 +668,6 @@ class Viaggio(models.Model):
 			return False
 
 	def vecchioConfermato(self):
-#		logging.debug("Mi chiedo se e' un vecchio confermato. Parte alle %s rispetto alle %s." %(self.date_start,datetime.datetime.now().replace(hour=0, minute=0) ))
 		return self.conducente_confermato and self.date_start < tamdates.ita_now().replace(hour=0, minute=0)
 
 	def prezzo_commissione(self):
