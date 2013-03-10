@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import * #@UnusedWildImport
+from django.conf.urls import url, patterns
 
 urlpatterns = patterns('modellog.views',
 	url(r"^log/$", "actionLog", name="actionLog"),

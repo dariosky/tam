@@ -3,7 +3,7 @@ Created on 11/set/2011
 
 @author: Dario Varotto
 '''
-from django.conf.urls.defaults import * #@UnusedWildImport
+from django.conf.urls import url, patterns
 
 urlpatterns = patterns ('fatturazione.views',
     url(r'^$', 'lista_fatture_generabili', name="tamGenerazioneFatture"),
