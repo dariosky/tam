@@ -57,7 +57,7 @@ class Prenotazione(models.Model):
 									)
 
 	is_arrivo = models.BooleanField("Arrivo o partenza?",
-									choices=((True, 'Arrivo'), (False, 'Partenza')),
+									choices=((True, 'Arrivo da...'), (False, 'Partenza per...')),
 									default=None
 									)
 	luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
