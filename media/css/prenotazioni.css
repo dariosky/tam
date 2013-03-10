@@ -85,9 +85,6 @@ ul li {
 	display: inline-block;
 	padding: 15px;
 }
-li label {
-	display: inline;
-}
 
 ul.errorlist li {
 	/* form errors */
@@ -96,6 +93,8 @@ ul.errorlist li {
 	padding: 0;
 	margin-top: 15px;
 }
+
+input[type="radio"], input[type="checkbox"]{ margin:0 0 4px !important;}
 input.date-widget, input.time-widget {
 	width: 40%;
 	max-width: 150px;
