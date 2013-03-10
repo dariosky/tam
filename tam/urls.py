@@ -1,7 +1,6 @@
-from django.conf.urls.defaults import * #@UnusedWildImport
-from django.views.generic.simple import direct_to_template
+from django.conf.urls import url, patterns
+from django.shortcuts import render
 from tam.models import * #@UnusedWildImport
-#import django.contrib.auth.views
 
 urlpatterns = patterns('tam.views.tamviews',
     url(r'^$', 'listaCorse', name="tamCorse"),
@@ -98,7 +97,7 @@ urlpatterns += patterns('tam.views.login',
 )
 
 urlpatterns += patterns('',
-	url(r'^rules/$', direct_to_template, {'template': 'static/rules.html'}, name="tam_rules"),
+	url(r'^rules/$', render, {'template_name': 'static/rules.html'}, name="tam_rules"),
 )
 
 

@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import * #@UnusedWildImport
+from django.conf.urls import url, patterns, include
 from django.conf import settings
 import os
 

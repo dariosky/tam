@@ -185,3 +185,8 @@ if __name__ == '__main__':
 	setAllSequencesToMax()
 	print "Fine."
 
+"""
+Final notes:
+	per avere l'ordinamento per byte dei luoghi:
+	alter table tam_luogo alter column nome TYPE character varying(25) COLLATE pg_catalog."C";
+"""
