@@ -1182,7 +1182,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 	form = RecurrenceForm(request.POST or None)
 	mediabundleJS = ('tamUI.js',)
 	mediabundleCSS = ('tamUI.css',)
-	dataIniziale = max(tamdates.ita_today(), corsa.data.date()) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
+	dataIniziale = max(tamdates.ita_today(), corsa.data) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
 	form.initial["start"] = dataIniziale.strftime('%d/%m/%Y')
 	form.initial["end"] = dataIniziale.strftime('%d/%m/%Y')
 	form.fields["start"].widget.attrs["id"] = "datastart"
