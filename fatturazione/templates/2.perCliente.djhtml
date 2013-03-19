@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load media %}
+{% load media %}{% load url from future %}
 {% block title %}Generazione {{ fatturazione.nome }} &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
@@ -39,11 +39,11 @@
 				<td>
 				<input type='hidden' name='id' value='{{viaggio.id}}' >
 				{% ifchanged viaggio.cliente_id viaggio.passeggero_id %}
-					{% if viaggio.cliente %}<a href="{% url tamClienteId viaggio.cliente.id%}" target='_blank'>{{ viaggio.cliente }}</a>
+					{% if viaggio.cliente %}<a href="{% url "tamClienteId" viaggio.cliente.id%}" target='_blank'>{{ viaggio.cliente }}</a>
 						{% if viaggio.cliente.dati %}<div class='dati'>{{ viaggio.cliente.dati }}</div>{% endif %}
 					{% else %}
 						<i>Privato</i>
-						{% if viaggio.passeggero %}:<br/><a href="{% url tamPrivatoId viaggio.passeggero.id %}" target='_blank'>{{ viaggio.passeggero }}{% if viaggio.passeggero.dati %}</a><div class='dati'>{{ viaggio.passeggero.dati }}</div>{% endif %}{%endif%}
+						{% if viaggio.passeggero %}:<br/><a href="{% url "tamPrivatoId" viaggio.passeggero.id %}" target='_blank'>{{ viaggio.passeggero }}{% if viaggio.passeggero.dati %}</a><div class='dati'>{{ viaggio.passeggero.dati }}</div>{% endif %}{%endif%}
 					{% endif %}
 				{% endifchanged %}
 				</td>

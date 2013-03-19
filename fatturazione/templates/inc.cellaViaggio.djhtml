@@ -1,5 +1,5 @@
-{% load media %}
-<div><a href='{% url tamNuovaCorsaId viaggio.id %}'>{{viaggio.da}}-{{viaggio.a}}</a></div>
+{% load media %}{% load url from future %}
+<div><a href='{% url "tamNuovaCorsaId" viaggio.id %}'>{{viaggio.da}}-{{viaggio.a}}</a></div>
 {% include "corse/cella_ora_e_percorso.inc.html" %}
 <div>
 	{{ viaggio.numero_passeggeri }} pax

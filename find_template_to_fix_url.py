@@ -13,7 +13,7 @@ for dirpath, dirnames, filenames in os.walk('.'):
 		continue
 	for filename in filenames:
 		name, ext = os.path.splitext(filename)
-		if ext in ('.html', '.htm', 'djhtml'):
+		if ext in ('.html', '.htm', '.djhtml'):
 			#if not "base" in name: continue
 			path = os.path.join(dirpath, filename)
 			with file(path, 'r') as f:
@@ -43,11 +43,7 @@ for dirpath, dirnames, filenames in os.walk('.'):
 						if warning:
 							print "  WARNING: %s" % ", ".join(warning)
 							warnings += len(warning)
-						
+
 print
 print "%d files with url. %d errors, %d warnings" % (url_files_count, errors, warnings)
 # errato: {% url "orderImage" order.tipo_doc, order.anno_doc, order.numero_doc, order.progressivo_riga %}">
-
-
-
-
