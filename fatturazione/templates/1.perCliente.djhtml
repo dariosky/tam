@@ -1,4 +1,4 @@
-<thead>
+{% load url from future %}<thead>
 	<tr>
 		<th>Cliente</th>
 	    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
@@ -12,7 +12,7 @@
 	{% with riga as viaggio %}
 	<tr>
 		<td>{% ifchanged riga.cliente_id riga.passeggero_id %}
-			<div class='cliente'>{% if riga.cliente %}{{ riga.cliente }}{% else %}<i>Privato</i>{% if riga.passeggero %}:<br/><a href="{% url tamPrivatoId riga.passeggero.pk %}?next={{ full_request_path }}">{{ riga.passeggero }}</a>{% endif %}{% endif %}</div>
+			<div class='cliente'>{% if riga.cliente %}{{ riga.cliente }}{% else %}<i>Privato</i>{% if riga.passeggero %}:<br/><a href="{% url "tamPrivatoId" riga.passeggero.pk %}?next={{ full_request_path }}">{{ riga.passeggero }}</a>{% endif %}{% endif %}</div>
 			<a href="#" class='clientSelect'>seleziona tutto</a>
 			{% endifchanged %}
 		</td>

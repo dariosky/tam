@@ -30,7 +30,7 @@
 			{% with rigafattura.viaggio as viaggio %}
 			<tr>
 				<td>{% ifchanged rigafattura.conducente_id %}
-						<strong><a href='{% url tamConducenteId rigafattura.conducente.id %}' target='_blank'>{{rigafattura.conducente.nick}}</a></strong>
+						<strong><a href='{% url "tamConducenteId" rigafattura.conducente.id %}' target='_blank'>{{rigafattura.conducente.nick}}</a></strong>
 						{%if rigafattura.conducente.dati%}<div class='dati'>{{ rigafattura.conducente.dati }}</div>{%endif%}
 					{%endifchanged%}
 				</td>

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load url from future %}
 {% load media %}
 {% block title %}{{fattura.nome_fattura}} {{fattura.descrittore}} &raquo; {{ block.super }} {% endblock %}
 
@@ -15,12 +15,12 @@
 {% endblock css %}
 
 {% block content %}
-<a href="{% url tamVisualizzazioneFatture %}" class='noprint'>Torna all'elenco fatture</a>
+<a href="{% url "tamVisualizzazioneFatture" %}" class='noprint'>Torna all'elenco fatture</a>
 <h1 class='noprint'>{{fattura.nome_fattura}} {{fattura.descrittore}}</h1>
 
 {% include "fat_model/_fattura.djhtml" %}
 
-<a href='{% url tamExportFattura id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
+<a href='{% url "tamExportFattura" id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
 	<div style="text-align: center">
 		<img src='{% media_url 'fatture/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
 	</div>
