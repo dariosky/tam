@@ -6,19 +6,18 @@ import datetime
 from prenotazioni.util import preavviso_ore, prenotaCorsa
 from tam import tamdates
 
-"""
-	Regole da rispettare:
-		non mostro i prezzi
-		creo/modifico solo se >=24h da ora
-		non posso modificare se il viaggio è già confermato
-"""
+# Regole da rispettare:
+# 	non mostro i prezzi
+# 	creo/modifico solo se ad almeno TOT ore dalla data prenotazione
+# 	non posso modificare se il viaggio è già confermato
+
 
 
 TIPI_PAGAMENTO = (
-					('D', 'Diretto'),
-					('H', 'Hotel'),  # diventa "conto finemese"
-					('F', 'Fattura'),  # fattura richiesta
-				)
+	('D', 'Diretto'),
+	('H', 'Hotel'), # diventa "conto finemese"
+	('F', 'Fattura'),  # fattura richiesta
+)
 
 # Create your models here.
 class UtentePrenotazioni(models.Model):
@@ -35,11 +34,11 @@ class UtentePrenotazioni(models.Model):
 
 	def __unicode__(self):
 		return "%(user)s - %(clienti)s da '%(luogo)s' - %(email)s" % {
-											"user": self.user.username,
-											"clienti": ", ".join([c.nome for c in self.clienti.all()]),
-											"luogo": self.luogo.nome,
-											"email": self.email,
-										}
+		"user": self.user.username,
+		"clienti": ", ".join([c.nome for c in self.clienti.all()]),
+		"luogo": self.luogo.nome,
+		"email": self.email,
+		}
 
 
 class Prenotazione(models.Model):
@@ -47,34 +46,35 @@ class Prenotazione(models.Model):
 	cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
-	data_corsa = models.DateTimeField()
+	data_corsa = models.DateTimeField("Data e ora",
+	                                  help_text="Nelle partenze indica l'ora della presa in hotel. Negli arrivi è l'ora al luogo indicato.")
 
 	pax = models.IntegerField(default=1)
 	is_collettivo = models.BooleanField(
-									"Individuale o collettivo?",
-									choices=((False, 'Individuale'), (True, 'Collettivo')),
-									default=None
-									)
+		"Individuale o collettivo?",
+		choices=((False, 'Individuale'), (True, 'Collettivo')),
+		default=None
+	)
 
 	is_arrivo = models.BooleanField("Arrivo o partenza?",
-									choices=((True, 'Arrivo da...'), (False, 'Partenza per...')),
-									default=None
-									)
+	                                choices=((True, 'Arrivo da...'), (False, 'Partenza per...')),
+	                                default=None
+	)
 	luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
 
 	pagamento = models.CharField(max_length=1,
-								 choices=TIPI_PAGAMENTO,
-								 default="D")
+	                             choices=TIPI_PAGAMENTO,
+	                             default="D")
 
 	note_camera = models.CharField("Numero di camera", max_length=20, blank=True)
 	note_cliente = models.CharField("Nome del cliente", max_length=40, blank=True)
 	note = models.TextField(blank=True)
 
 	viaggio = models.OneToOneField(Viaggio,
-								   null=True,
-								   editable=False,
-								   on_delete=models.PROTECT,
-								  )
+	                               null=True,
+	                               editable=False,
+	                               on_delete=models.PROTECT,
+	)
 
 	class Meta:
 		verbose_name_plural = "Prenotazioni"
@@ -100,7 +100,7 @@ class Prenotazione(models.Model):
 		# posso forzare updateViaggi a False se non voglio aggiornare i viaggi
 		if 'updateViaggi' in kwargs:
 			updateViaggi = kwargs['updateViaggi']
-			del(kwargs['updateViaggi'])
+			del (kwargs['updateViaggi'])
 		else:
 			updateViaggi = True
 
@@ -118,7 +118,7 @@ class Prenotazione(models.Model):
 			self.viaggio.updatePrecomp()
 		super(Prenotazione, self).save(**kwargs)
 
-	def delete(self):
+	def delete(self, *args, **kwargs):
 		if self.viaggio:
 			# annullo il viaggio
 			self.viaggio.annullato = True
@@ -126,5 +126,4 @@ class Prenotazione(models.Model):
 			self.viaggio.save()
 			self.viaggio.updatePrecomp()
 
-
-		super(Prenotazione, self).delete()
+		super(Prenotazione, self).delete(*args, **kwargs)

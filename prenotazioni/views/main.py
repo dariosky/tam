@@ -24,13 +24,15 @@ from django.core.paginator import Paginator
 from tam.views.tamviews import SmartPager
 from tam import tamdates
 
+
 class NumberInput(Input):
 	input_type = 'number'
 
+
 def inviaMailPrenotazione(prenotazione,
-						  azione,
-						  attachments=[],
-						  extra_context=None):
+                          azione,
+                          attachments=[],
+                          extra_context=None):
 	if azione == "create":
 		subject = "Conferma prenotazione TaM n° %d" % prenotazione.id
 		prenotazione_suffix = "effettuata"
@@ -41,18 +43,18 @@ def inviaMailPrenotazione(prenotazione,
 		subject = "Annullamento prenotazione TaM n° %d" % prenotazione.id
 		prenotazione_suffix = "cancellata"
 	else:
-		raise Exception ("Azione mail non valida %s" % azione)
+		raise Exception("Azione mail non valida %s" % azione)
 
 	azione = ""
-	context = { "prenotazione":prenotazione,
-				"azione":prenotazione_suffix,
-			  }
+	context = {"prenotazione": prenotazione,
+	           "azione": prenotazione_suffix,
+	}
 	if extra_context:
 		context.update(extra_context)
 
 	if settings.DEBUG:
 		print "Sono in test. non invio la mail."
-	else:	
+	else:
 		notifyByMail(
 			to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
 			subject=subject,
@@ -62,6 +64,7 @@ def inviaMailPrenotazione(prenotazione,
 			messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
 			messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
 		)
+
 
 class FormPrenotazioni(forms.ModelForm):
 	def clean_pax(self):
@@ -98,36 +101,38 @@ class FormPrenotazioni(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(FormPrenotazioni, self).__init__(*args, **kwargs)
 		self.fields['attachment'] = forms.FileField(
-												label="Allegato",
-												required=False,
-												help_text="Allega un file alla richiesta (opzionale)"
-									)
+			label="Allegato",
+			required=False,
+			help_text="Allega un file alla richiesta (opzionale)"
+		)
 
 		for field_name in self.fields:
 			field = self.fields.get(field_name)
 			if field:
 				if field_name == 'pax':
-					field.widget = NumberInput(attrs={'min':"1", 'max':"50"})
+					field.widget = NumberInput(attrs={'min': "1", 'max': "50"})
 				if type(field.widget) in (forms.TextInput, forms.DateInput):
 					field.widget = forms.TextInput(attrs={'placeholder': field.label})
 				elif type(field.widget) in (forms.DateTimeInput,):
 					data = MySplitDateTimeField(
-									label="Data e ora",
-									date_input_formats=[_('%d/%m/%Y')],
-									time_input_formats=[_('%H:%M')],
-									widget=MySplitDateWidget()
-							)
+						label=field.label,
+						date_input_formats=[_('%d/%m/%Y')],
+						time_input_formats=[_('%H:%M')],
+						help_text=field.help_text,
+						widget=MySplitDateWidget()
+					)
 					data.widget.widgets[0].format = '%d/%m/%Y'
 					self.fields[field_name] = data
-					field.widget = 	MySplitDateTimeField()
+					field.widget = MySplitDateTimeField()
 
 	class Meta:
 		model = Prenotazione
 		widgets = {
-				'is_arrivo': forms.RadioSelect,
-				'is_collettivo': forms.RadioSelect,
-				'pagamento': forms.RadioSelect,
-				}
+		'is_arrivo': forms.RadioSelect,
+		'is_collettivo': forms.RadioSelect,
+		'pagamento': forms.RadioSelect,
+		}
+
 
 @prenotazioni
 @transaction.commit_on_success  # commit solo se tutto OK
@@ -156,14 +161,15 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				request,
 				"La prenotazione non è più modificabile."
 			)
-			# return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+		# return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 	else:
 		prenotazione = None
 		editable = True
 
 	form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
 	if prenotazione:
-		form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(tamdates.tz_italy)	# inizialmente forzo la corsa
+		form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(
+			tamdates.tz_italy)    # inizialmente forzo la corsa
 
 	# deciso se mostrare o meno la scelta dei clienti:
 	clienti_attivi = utentePrenotazioni.clienti
@@ -192,7 +198,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 		if "delete" in request.POST:
 			inviaMailPrenotazione(prenotazione, "delete")
-			id_prenotazione = prenotazione.id	# salvo per il messaggio finale
+			id_prenotazione = prenotazione.id    # salvo per il messaggio finale
 			prenotazione.delete()
 			messages.success(request, "Prenotazione n°%d annullata." % id_prenotazione)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
@@ -209,19 +215,19 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 			attachment.set_payload(request_attachment.read())
 			Encoders.encode_base64(attachment)
 			attachment.add_header(
-					'Content-Disposition',
-					'attachment; filename="%s"' % os.path.basename(request_attachment.name)
-				)
-			# for chunk in attachment.chunks():
-			# 	destination.write(chunk)
-			# destination.close()
+				'Content-Disposition',
+				'attachment; filename="%s"' % os.path.basename(request_attachment.name)
+			)
+		# for chunk in attachment.chunks():
+		# 	destination.write(chunk)
+		# destination.close()
 
 		# assert(False)
 		if id_prenotazione is None:
 			prenotazione = Prenotazione(
-									owner=utentePrenotazioni,
-									**form.cleaned_data
-									)
+				owner=utentePrenotazioni,
+				**form.cleaned_data
+			)
 			if clienti_attivi.count() == 1:
 				prenotazione.cliente = cliente_unico
 
@@ -230,9 +236,9 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 			prenotazione.save()
 
 			inviaMailPrenotazione(prenotazione,
-								  "create",
-								  attachments=[attachment] if attachment else []
-								 )
+			                      "create",
+			                      attachments=[attachment] if attachment else []
+			)
 			messages.success(
 				request,
 				"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
@@ -245,6 +251,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 					for k, v in choices:
 						if k == pythonValue:
 							return v
+
 				oldValue = previous_values.get(key)
 				newValue = form.cleaned_data[key]
 
@@ -255,12 +262,12 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 				if newValue <> oldValue:
 					changes[key] = (field.label, oldValue, newValue)
-	# 				messages.success(
-	# 						request,
-	# 						"Cambiato %s da %s a %s" % (form.fields[key].label,
-	# 													oldValue,
-	# 													newValue)
-	# 						)
+				# 				messages.success(
+				# 						request,
+				# 						"Cambiato %s da %s a %s" % (form.fields[key].label,
+				# 													oldValue,
+				# 													newValue)
+				# 						)
 			if changes or attachment:
 				stringhe_cambiamenti = []
 				for key in changes:
@@ -269,29 +276,29 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 				cambiamenti = "\n".join(stringhe_cambiamenti)
 				inviaMailPrenotazione(prenotazione,
-									  "update",
-									  attachments=[attachment] if attachment else [],
-									  extra_context={"cambiamenti":cambiamenti}
-									 )
+				                      "update",
+				                      attachments=[attachment] if attachment else [],
+				                      extra_context={"cambiamenti": cambiamenti}
+				)
 				prenotazione.save()
 				messages.success(request, "Modifica eseguita.")
 			return HttpResponseRedirect(
-						reverse('tamPrenotazioni-edit',
-								kwargs={"id_prenotazione":prenotazione.id}
-						),
-					)
+				reverse('tamPrenotazioni-edit',
+				        kwargs={"id_prenotazione": prenotazione.id}
+				),
+			)
 
 	return render_to_response(
-							template_name,
-							{
-								"utentePrenotazioni":utentePrenotazioni,
-								"form":form,
-								"editable":editable,
-								"prenotazione":prenotazione,
-								"cliente_unico":cliente_unico,
-								"logo_consorzio":settings.TRANSPARENT_SMALL_LOGO,
-							},
-							context_instance=RequestContext(request))
+		template_name,
+		{
+		"utentePrenotazioni": utentePrenotazioni,
+		"form": form,
+		"editable": editable,
+		"prenotazione": prenotazione,
+		"cliente_unico": cliente_unico,
+		"logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+		},
+		context_instance=RequestContext(request))
 
 
 @prenotazioni
@@ -319,7 +326,6 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 				messages.error(request, 'Il cliente non esiste.')
 				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
-
 	adesso = tamdates.ita_now()
 	data_inizio = (adesso - datetime.timedelta(days=60)).replace(hour=0, minute=0)
 	data_fine = None
@@ -339,25 +345,24 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 			data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
 			data_fine = adesso + datetime.timedelta(days=15)
 
-
 	viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
 
 	if cliente_selezionato:  # filtro ulteriormente
 		viaggi = viaggi.filter(cliente=cliente_selezionato)
 
-
-
 	viaggi = viaggi.filter(data__gte=data_inizio)
 	if data_fine: viaggi = viaggi.filter(data__lte=data_fine)
 	viaggi = viaggi.order_by("-data")
-	
+
 	#print "Ho %d viaggi da mostrare" % viaggi.count()
 
 	# divido viaggi in pagine
 	paginator = Paginator(viaggi, 50, orphans=5)  # pagine da tot viaggi
 	page = request.GET.get("page", 1)
-	try:page = int(page)
-	except: page = 1
+	try:
+		page = int(page)
+	except:
+		page = 1
 	s = SmartPager(page, paginator.num_pages)
 	paginator.smart_page_range = s.results
 	try:
@@ -370,18 +375,18 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	# ----------------------
 
 	return render_to_response(
-							template_name,
-							{
-								"utentePrenotazioni":utentePrenotazioni,
-								"prenotazioni":prenotazioni,
-								"viaggi":viaggi,
-								"cliente_unico":cliente_unico,
-								"clienti_attivi":clienti_attivi,
-								"cliente_selezionato":cliente_selezionato,
-								"current_date_filter":filtroData,
+		template_name,
+		{
+		"utentePrenotazioni": utentePrenotazioni,
+		"prenotazioni": prenotazioni,
+		"viaggi": viaggi,
+		"cliente_unico": cliente_unico,
+		"clienti_attivi": clienti_attivi,
+		"cliente_selezionato": cliente_selezionato,
+		"current_date_filter": filtroData,
 
-								"paginator":paginator,
-								"thisPage":thisPage,
-								"logo_consorzio":settings.TRANSPARENT_SMALL_LOGO,
-							},
-							context_instance=RequestContext(request))
+		"paginator": paginator,
+		"thisPage": thisPage,
+		"logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+		},
+		context_instance=RequestContext(request))
