@@ -16,6 +16,7 @@ Desktop.ini
 /.pydevproject
 .settings/
 /nbproject/
+/.idea/
 
 /querylog.sql
 _generated_media
