@@ -1,0 +1,58 @@
+{% extends "base.html" %}{% load url from future %}
+
+{% block css %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="/static/css/bacheca.css" />
+{% endblock %}
+
+{% block content %}
+<h1>Backeca</h1>
+
+<div>
+	<form id='boardForm' action='' method='post'>
+		<div id='board'>
+			{% for message in board_messages %}
+				<div class='message'>
+                    <div class='date'>
+                        {{ message.date }}
+                    </div>
+                    <div class='author'>
+                        {{ message.author }}
+                    </div>
+					{% if message.file %}attachment{% endif %}
+					<div class='m'>
+						{{ message.message }}
+					</div>
+				</div>
+			{% endfor %}
+
+			<div class='message'>
+				<div class='date'>
+					18/3/2013
+				</div>
+				<div class='author'>
+					dariovarotto
+				</div>
+				<div class='m'>	Raddoppiare la percorrenza annua considerando la tautologia applicata.
+                    Considerare il resto del conto come sovrapplicato al bacino di utenza minimo.</div>
+			</div>
+		</div>
+
+		<div id='newMessageBoard'>
+			<div>
+				<label for='m'>Nuovo messaggio:</label><br>
+				<textarea name='m' id='m'></textarea>
+			</div>
+			<input type="submit" value='Invia messaggio' disabled="disabled" />
+			<span id="status" class='warning'>Connessione in corso...</span>
+		</div>
+	</form>
+</div>
+
+{% endblock content %}
+
+{% block bottom %}
+	{{block.super}}
+	<script type="text/javascript" src="/static/socket.io.min.js"></script>
+	<script type="text/javascript" src="/static/board/board.js"></script>
+{% endblock bottom %}
