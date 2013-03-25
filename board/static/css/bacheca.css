@@ -1,0 +1,60 @@
+#board .message {
+    border: 1px solid black;
+    margin: 5px auto;
+    padding: 10px;
+    border-radius: 5px;
+    float: left;
+    max-width:30%;
+}
+
+#board .message .author {
+    float: left;
+    background-color: #DFF0D8;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+#board .message .date {
+    float: right;
+    background-color: #DFF0D8;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+#board .message .m{
+    padding:0 100px;
+    white-space: pre-line;
+}
+
+#newMessageBoard {
+    clear: both;
+}
+
+#newMessageBoard #m {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+#newMessageBoard input[type=submit] {
+}
+
+#status {
+    padding: 3px 10px;
+}
+
+#status.error {
+    background-color: indianred;
+    color: white;
+    font-weight: bold;
+}
+
+#status.warning {
+    background-color: lightgoldenrodyellow;
+    color: black;
+}
+
+#status.success {
+    background-color: #008000;
+    color: white;
+}
