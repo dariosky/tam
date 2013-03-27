@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import Cookie
 from django.utils import timezone
+from board.models import BoardMessage
 
 
 def getUserFromSession(sid):
@@ -60,8 +61,19 @@ class MessageBoardNamespace(BaseNamespace):
 			self.emit('error', "Devi essere autenticato per mandare messaggi.")
 			return
 		user = self._users[ids]
+		newMessage = BoardMessage(
+			author=user,
+			message=message,
+			date=timezone.now(),
+			#attach
+		)
+		newMessage.save()
 		print "broadcasting '%s' from %s" % (message, user)
-		self._broadcast('message', dict(u=user.username, m=message))
+		self._broadcast('message', dict(a=user.username,
+		                                m=message,
+		                                i=newMessage.id,
+		                                d=newMessage.date.strftime("%d/%m/%Y")
+		))
 
 	def _broadcast(self, event, message):
 		for s in self._registry.values():
