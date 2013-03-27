@@ -28,4 +28,6 @@ settings_local.py
 win_settings.bat
 
 /static
-media/brand
+/media/brand
+/media_secured/
+

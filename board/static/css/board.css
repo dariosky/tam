@@ -1,28 +1,35 @@
 #board .message {
+    position: relative;
     border: 1px solid black;
     margin: 5px auto;
     padding: 10px;
     border-radius: 5px;
     float: left;
     max-width:30%;
+    margin: 10px 10px 5px;
 }
 
-#board .message .author {
-    float: left;
-    background-color: #DFF0D8;
-    padding: 1px 5px;
-    border-radius: 3px;
+#board .attachment-mark {
+    position:absolute;
+    left:-12px;
+    top:-12px;
 }
 
-#board .message .date {
-    float: right;
+#board .head {
     background-color: #DFF0D8;
-    padding: 1px 5px;
+    padding: 1px 0;
     border-radius: 3px;
+}
+#board .head>.date{
+    display: inline;
+    margin: 0 5px 0 0;
+}
+#board .head>.author{
+    display: inline;
 }
 
 #board .message .m{
-    padding:0 100px;
+    padding:0;
     white-space: pre-line;
 }
 

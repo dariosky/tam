@@ -15,7 +15,6 @@ $(function () {
                 $status.hide('slow');
             }, hideAfter);
             $status.data('timer', timer);
-            //$.data($status, 'timer', timer);
         }
     }
 
@@ -28,9 +27,6 @@ $(function () {
         //{ resource: 'backeca/socket.io' }
     );
 
-    // Bind the chat form
-
-
     $form.bind('submit', function () {
         var message = $message_input.val();
         //message = 'messaggio di prova';
@@ -41,10 +37,8 @@ $(function () {
     });
 
 
-    socket.on('message', function (data) {
-        var user = data['u'];
-        var message = data['m'];
-        console.log('Received chat from '+ user +':', message);
+    socket.on('message', function (message) {
+        addMessage(message);
     });
 
     socket.on('error', function (data) {
@@ -71,5 +65,14 @@ $(function () {
         $submit.prop('disabled', !result);
     });
 
-
 });
+
+addMessage = function(message) {
+    var messageDiv = $('<div/>', {class:'message', id:'message-'+message.id});
+    var headDiv = $('<div/>', {class:'head'}).appendTo(messageDiv);
+    headDiv.append($('<div/>', {class:'date'}).html(message.d));
+    headDiv.append($('<div/>', {class:'author'}).html(message.a))
+    console.log("message:", message.m, 'from:', message.a);
+    $('<div/>', {class:'m'}).text(message.m).appendTo(messageDiv);
+    $('#board').append(messageDiv);
+}
