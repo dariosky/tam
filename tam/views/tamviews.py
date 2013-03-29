@@ -20,7 +20,7 @@ from django.db import models
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
 from django.db.models.aggregates import Count
-from django.utils import simplejson
+import json
 from django.core.urlresolvers import reverse
 import logging
 from django.db.models.query_utils import Q
@@ -125,8 +125,9 @@ def listaCorse(request, template_name="corse/lista.html"):
 			u"Fuori classifica",
 			u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
 	]
-	if not getattr(settings, "PRENOTAZIONI_BLOCCATE", False): filtriTipo.append("Prenotazioni")
-	
+	if 'prenotazioni' in settings.PLUGGABLE_APPS:
+		filtriTipo.append("Prenotazioni")
+
 	filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese', u'Carta di credito',
 				  u'Quote consorzio', u'No quota consorzio',
 				  'Abbuoni',
@@ -393,7 +394,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					if viaggio.is_abbinata:
 						messages.error(request, "Non puoi cancellare le corse abbinate, scollegale prima.")
 						return HttpResponseRedirect(redirectOk)
-						
+
 					try:
 						viaggio.delete()
 						messages.success(request, "Cancellata la corsa %s." % viaggio)
@@ -441,7 +442,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				return HttpResponseRedirect(destination2)
 				#form.fields['data'].widget.attrs['readonly'] = True
 		else:	# sto modificando una corsa esistente, step2.
-			# Mi trovo il prezzo da listino per indicarlo 
+			# Mi trovo il prezzo da listino per indicarlo
 			if cliente:
 				prezzolistino = None
 				if cliente.listino:
@@ -649,7 +650,7 @@ def getList(request, model=Luogo.objects, field="nome", format="txt", fields=Non
 	if format == "json" and fields:
 		records = querySet.values(*fields)
 		results = [ [record[key] for key in fields] for record in records]
-		return HttpResponse(simplejson.dumps(results), mimetype="application/javascript")
+		return HttpResponse(json.dumps(results), mimetype="application/javascript")
 
 
 def clienti(request, template_name="clienti_e_listini.html"):
@@ -1300,7 +1301,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	if not user.has_perm('auth.change_user'):
 			messages.error(request, "Non hai l'autorizzazione a modificare i permessi.")
 			return HttpResponseRedirect("/")
-	manage_permissions = request.user.has_perm('prenotazioni.manage_permissions')
+
+	manage_prenotazioni = request.user.has_perm('prenotazioni.manage_permissions') and "prenotazioni" in settings.PLUGGABLE_APPS
 	users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
 
 	getUsername = request.GET.get("selectedUser", None)
@@ -1331,7 +1333,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 				resetUserSession(selectedUser)
 
 			tipo_utente = request.POST.get('tipo_prenotazioni', 'c')
-			if tipo_utente == 'c':	# utente conducente	
+			if tipo_utente == 'c':	# utente conducente
 				logging.debug("resetting groups for a normal user")
 				newGroups = request.POST.getlist("selectedGroup")
 				selectedUser.groups.clear()
@@ -1339,8 +1341,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 					group = Group.objects.get(name=groupName)
 					selectedUser.groups.add(group)
 
-			if manage_permissions: # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
-				if tipo_utente == 'c':	# utente conducente	
+			if manage_prenotazioni: # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
+				if tipo_utente == 'c':	# utente conducente
 					if utentePrenotazioni:
 						messages.warning(request, "Faccio diventare l\'utente '%s' un conducente. Attenzione se aveva accesso esterno." % selectedUser)
 						# elimino l'utente prenotazioni
@@ -1371,7 +1373,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 			return HttpResponseRedirect(reverse("tamManage", kwargs={"username":selectedUser.username}))
 			# fine delle azioni per il submit
 
-		if manage_permissions:
+		if manage_prenotazioni:
 			# preparo il dizionario dei clienti e dei luoghi per poterli scegliere
 			clienti = Cliente.objects.filter(attivo=True)
 			luoghi = Luogo.objects.all()
@@ -1441,4 +1443,4 @@ def exportListino(request, id_listino):
 							listino,
 							luogoDiRiferimento=profilo.luogo
 						)
-			
+

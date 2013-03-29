@@ -10,6 +10,7 @@ def changeLog(request, template_name='static/changelog.html'):
 	""" Return a list of changes with version <= current version """
 	current_version = settings.TAM_VERSION
 	changes = []
+	prenotazioni = 'prenotazioni' in settings.PLUGGABLE_APPS
 	known_changes = [
 					('1.0', '10/10/2009', mark_safe('<b>TAM diventa definitivo.</b>')),
 					('1.0.1', '29/10/2009', mark_safe('''	Gestione dettagliata dei permessi, ogni utente può avere accesso solo a determinate funzioni.
@@ -107,13 +108,13 @@ def changeLog(request, template_name='static/changelog.html'):
 					('4.1', '14/2/2012', mark_safe('''Stampa dei listini in PDF.''')),
 					('4.5', '15/12/2012', mark_safe('''<b>Sistema di prenotazioni online</b> gestione clienti prenotazioni multiple,
 														inserimento e modifiche prenotazioni con notifiche via email e inserimento in TAM.
-													''')) if not getattr(settings, "PRENOTAZIONI_BLOCCATE", False) else "",
-					('4.6', '14/1/2013', 'File allegato alle prenotazioni.') if not getattr(settings, "PRENOTAZIONI_BLOCCATE", False) else "",
-					('4.7', '19/2/2013', 'Gli utenti delle prenotazioni vedono le corse inserite dal consorzio oltre alle prenotazioni.') if not getattr(settings, "PRENOTAZIONI_BLOCCATE", False) else "",
+													''')) if prenotazioni else "",
+					('4.6', '14/1/2013', 'File allegato alle prenotazioni.') if prenotazioni else "",
+					('4.7', '19/2/2013', 'Gli utenti delle prenotazioni vedono le corse inserite dal consorzio oltre alle prenotazioni.') if prenotazioni else "",
 					('4.8', '24/2/2013', 'Logo personalizzato nella pagina di login, più filtri sulla visualizzazione.'),
 					('4.9', '24/2/2013', 'Seleziona rapida dei 2 mesi precedenti nella visualizzazione fatture.'),
 					('5.0', '6/3/2013', 'Supporto a timezone differenti sul server. Fix e miglioramenti vari.'),
-					#('', '', mark_safe('''''')),
+					#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
 		if not version: continue	# version può essere vuoto... salto la riga

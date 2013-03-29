@@ -4,9 +4,11 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
 
+
 class RequireLoginMiddleware(object):
 	"""Middleware that gets various objects from the
 	request object and saves them in thread local storage."""
+
 	def process_view(self, request, view_func, view_args, view_kwargs):
 		public_view = getattr(view_func, 'public', False)
 
@@ -17,7 +19,7 @@ class RequireLoginMiddleware(object):
 			# not a public view, if not authenticaded ask for login
 			if not request.user.is_authenticated():
 				return login_required(view_func)(request, *view_args, **view_kwargs)
-				
+
 			prenotazioni_view = getattr(view_func, 'prenotazioni', False)
 			try:
 				prenotazioni_user = request.user.prenotazioni

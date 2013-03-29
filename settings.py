@@ -4,7 +4,7 @@ import logging
 from socket import gethostname
 host = gethostname().lower()
 
-TAM_VERSION = "5.0"
+TAM_VERSION = "5.1"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario"):
@@ -183,7 +183,7 @@ if os.path.exists(YUICOMPRESSOR_PATH):
 	}
 # **************************
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
 	'django.contrib.sessions',
@@ -205,10 +205,9 @@ INSTALLED_APPS = (
 	'modellog',
 
 # 	'license',
-	'prenotazioni',
 
 	'djangotasks',  # let's use djangotasks instead of celery
-)
+]
 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -271,6 +270,7 @@ CACHES = {
 }
 
 # Usiamo le sessioni su cookies per evitare di importunare il DB
+# ha lo svantaggio che non sappiamo quali sessioni sono attive, per poter identificare quelle scadute
 # SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 NOMI_DEFINIZIONE_FATTURE = [ "FattureConsorzio", "FattureNoIVA",
@@ -282,6 +282,9 @@ try:
 except ImportError:
 	logging.warning("'settings_local.py' has not been found. Use this to keep out of VC secret settings.")
 	pass
+
+for app, desc in PLUGGABLE_APPS.items():
+	INSTALLED_APPS.append(app)
 
 # from celeryconfig import * #@UnusedWildImport
 # import djcelery

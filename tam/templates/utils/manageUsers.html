@@ -34,11 +34,11 @@
 			</select>
 		</p>
 		<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
-		
-		{% if perms.prenotazioni.manage_permissions %}
+
+		{% if manage_prenotazioni %}
 			{% include "utils/manageUsers-prenotazioni.inc.html" %}
 		{% endif %}
-		
+
 		<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
 	</form>
 {% endif %}
@@ -47,30 +47,30 @@
 
 {% block bottom %}
 	{{ block.super }}
-	{% if perms.prenotazioni.manage_permissions %}
+	{% if manage_prenotazioni %}
 		<script type="text/javascript" src="/static/js/jquery.asmselect.js"></script>
 		<link rel="stylesheet" type="text/css" href="/static/css/jquery.asmselect.css" />
-	{% endif %}	
+	{% endif %}
 	<script type="text/javascript">
 		$(document).ready(function(){
-			
+
 			$('#esclusivoBlock input').change(
 				function(){
 					var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
 					if (utente_prenotazioni) {
 						$('#configuratore_prenotazioni').show('slow');
 						$('#user_group').hide('slow');
-						
+
 					}
 					else {
 						$('#configuratore_prenotazioni').hide('slow');
 						$('#user_group').show('slow');
 					}
-						
+
 				}
 			);
 			$('#esclusivoBlock input').change();
-			
+
 			$("#configuratore_prenotazioni select[multiple]").asmSelect({
 				highlight:true,
 				removeLabel:"rimuovi",
