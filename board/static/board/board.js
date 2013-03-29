@@ -5,9 +5,8 @@ $(function () {
         if (oldTimeout) {
             clearTimeout(oldTimeout);
             $status.removeData('timer');
-            $.removeData($status, 'timer');
         }
-        console.log(message);
+        //console.log(message);
         $status.removeClass().text(message).show();
         if (class_name) $status.addClass(class_name);
         if (hideAfter) {
@@ -21,7 +20,7 @@ $(function () {
     var $form = $('#boardForm');
     var $message_input = $form.find('#m');
     var $status = $("#status");
-    var $submit = $("#newMessageBoard input[type=submit]");
+    var $submit = $("#submit_btn");
 
     socket = io.connect("http://localhost:8080/board"
         //{ resource: 'backeca/socket.io' }
@@ -38,7 +37,7 @@ $(function () {
 
 
     socket.on('message', function (message) {
-        addMessage(message);
+        addMessage(message, true);
     });
 
     socket.on('error', function (data) {
@@ -65,14 +64,48 @@ $(function () {
         $submit.prop('disabled', !result);
     });
 
+
+    $('.del-mark').live('click', function () {
+        var message = $(this).parent('.message')[0];
+        console.log(this);
+        console.log(message);
+        console.log(message.id);
+        if (message.id.substr(0, 8) != "message-") throw("Delete a non message?");
+        var id = message.id.substr(8);
+        console.log("deleting message", id);
+        socket.emit('deleteMessage', id);
+        // TODO: Nascondo il messaggio (lo cancellerò quando arriva la conferma)
+        return false;
+    });
+
 });
 
-addMessage = function(message) {
-    var messageDiv = $('<div/>', {class:'message', id:'message-'+message.id});
-    var headDiv = $('<div/>', {class:'head'}).appendTo(messageDiv);
-    headDiv.append($('<div/>', {class:'date'}).html(message.d));
-    headDiv.append($('<div/>', {class:'author'}).html(message.a))
+function addMessage(message, hilight) {
+    var newHilightDuration = 5000;
+    var messageDiv = $('<div/>', {class: 'message', id: 'message-' + message.id});
+    var headDiv = $('<div/>', {class: 'head'}).appendTo(messageDiv);
+    headDiv.append($('<div/>', {class: 'date'}).html(message.d));
+    headDiv.append($('<div/>', {class: 'author'}).html(message.a));
+    var attachment = message.f;
+    if (attachment) {
+        headDiv.append($("<div/>", {class: 'attachment-mark'}));
+    }
     console.log("message:", message.m, 'from:', message.a);
-    $('<div/>', {class:'m'}).text(message.m).appendTo(messageDiv);
-    $('#board').append(messageDiv);
-}
+    $('<div/>', {class: 'm'}).text(message.m).appendTo(messageDiv);
+    if (attachment) {
+        var attachDiv = $('<div/>', {class: 'attachment'});
+        attachDiv.append($('<a/>', {href: attachment.url}).html(attachment.name));
+        messageDiv.append(attachDiv);
+    }
+    messageDiv.append($('<div/>', {class: 'del-mark'}));
+    if (hilight) {
+        messageDiv.addClass('new').hide();
+    }
+    $('#board').prepend(messageDiv);
+    if (hilight) {
+        messageDiv.fadeIn('slow').css("display", "inline-block").delay(newHilightDuration).queue(function (next) {
+            $(this).removeClass("new");
+            next();
+        });
+    }
+};
