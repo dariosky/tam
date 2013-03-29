@@ -586,3 +586,7 @@ h2.fatturaTipo5 {
 .odd td {
     background-color: #FFF;
 }
+
+input[type="button"], input[type="submit"], input[type="reset"], input[type="file"]::-webkit-file-upload-button, button {
+    height: 30px
+}
