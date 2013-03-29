@@ -47,7 +47,7 @@ class Prenotazione(models.Model):
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
 	data_corsa = models.DateTimeField("Data e ora",
-	                                  help_text="Nelle partenze indica l'ora della presa in hotel. Negli arrivi è l'ora al luogo indicato.")
+	                                  help_text="Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora al luogo specificato.")
 
 	pax = models.IntegerField(default=1)
 	is_collettivo = models.BooleanField(
@@ -75,6 +75,9 @@ class Prenotazione(models.Model):
 	                               editable=False,
 	                               on_delete=models.PROTECT,
 	)
+
+	had_attachment = models.BooleanField("Allegato passato", editable=False, default=False)
+	# had_attachment è vero quando in qualche momento ho ottenuto un allegato
 
 	class Meta:
 		verbose_name_plural = "Prenotazioni"

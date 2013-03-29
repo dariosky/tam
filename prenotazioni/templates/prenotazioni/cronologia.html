@@ -13,26 +13,26 @@
 		<select name=cliente>
 			<option value='all'>Tutti i clienti</option>
 		{% for cliente in clienti_attivi %}
-			{% if cliente = cliente_selezionato%}
+			{% if cliente == cliente_selezionato%}
 				<option value="{{cliente.id}}" selected="selected"><b>{{ cliente.nome }}</b></option>
-			{% else %}	
+			{% else %}
 				<option value="{{cliente.id}}">{{ cliente.nome }}</option>
 			{% endif %}
-			
+
 		{% endfor %}
 		</select>
 	{% endif %}
 	<select name='data'>
 		<option value='all'>Tutte le date</option>
-		<option value='next'{% if current_date_filter = "next"%}  selected="selected"{% endif %}>Prossime corse</option>
-		<option value='cur'{% if current_date_filter = "cur"%}  selected="selected"{% endif %}>Mese corrente</option>
-		<option value='prev'{% if current_date_filter = "prev"%}  selected="selected"{% endif %}>Mese precedente</option>
+		<option value='next'{% if current_date_filter == "next"%}  selected="selected"{% endif %}>Prossime corse</option>
+		<option value='cur'{% if current_date_filter == "cur"%}  selected="selected"{% endif %}>Mese corrente</option>
+		<option value='prev'{% if current_date_filter == "prev"%}  selected="selected"{% endif %}>Mese precedente</option>
 	</select>
-	
+
 		<a class="btn btn-mini" href="javascript:document.filter.submit()"><i class="icon-refresh"></i> Aggiorna</a>
 	</form>
 	</div>
-	
+
 	{% if viaggi %}
 
 	<table class='prenotazioni'>
@@ -45,7 +45,7 @@
 			<tr>
 				{% if not cliente_unico %}<td>{{viaggio.cliente}}</td>{% endif %}
 				{% include "corse/cella_partenza_arrivo.inc.html" %}
-				
+
 				<td>{{ viaggio.data|date:"j F Y, H:i" }}<br />
 					{{ viaggio.numero_passeggeri }} pax
 					{% if not viaggio.esclusivo %}
@@ -70,9 +70,12 @@
 										visualizza
 									{% endif %}
 								</a>
+                                {% if prenotazione.had_attachment %}
+									<div><img src="{%  media_url "attachment.gif" %}" title="Un allegato è già stato inviato"/></div>
+                                {%  endif %}
 							</td>
 						{% endif %}
-						
+
 					{% endwith %}
 				{% endif %}
 			</tr>
@@ -84,7 +87,7 @@
 		</div>
 		<br style="clear:both" />
 	{% endif %}
-	
+
 	{% endif %}
-	
+
 {% endblock content %}
