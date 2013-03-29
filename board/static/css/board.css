@@ -1,35 +1,69 @@
 #board .message {
     position: relative;
     border: 1px solid black;
-    margin: 5px auto;
     padding: 10px;
     border-radius: 5px;
-    float: left;
-    max-width:30%;
-    margin: 10px 10px 5px;
+    /*float: left;*/
+    /*max-width:30%;*/
+    margin: 10px;
+    display: inline-block;
+    min-width: 200px;
+    vertical-align: middle;
+}
+
+.new {
+    border: 3px solid yellow;
+    background-color: lightgoldenrodyellow;
 }
 
 #board .attachment-mark {
-    position:absolute;
-    left:-12px;
-    top:-12px;
+    position: absolute;
+    left: -20px;
+    bottom: 10px;
+    width: 32px;
+    height: 32px;
+    background: url(/media/attachment.png)
+    /*top:-12px;*/
+}
+
+#board .attachment {
+    background-color: azure;
+    margin-top: 10px;
+    padding: 5px;
+}
+
+#board .del-mark {
+    width: 31px;
+    height: 31px;
+    background: url(/media/x_del.png);
+    cursor: pointer;
+    position: absolute;
+    right: -15px;
+    top: -12px;
 }
 
 #board .head {
     background-color: #DFF0D8;
     padding: 1px 0;
     border-radius: 3px;
+    position: relative;
 }
-#board .head>.date{
+
+#board .head>.date {
     display: inline;
     margin: 0 5px 0 0;
 }
-#board .head>.author{
-    display: inline;
+
+#board .head>.author {
+    /*display: inline;*/
+    /*float:right;*/
+    position: absolute;
+    right: 0;
+    top: 0;
 }
 
-#board .message .m{
-    padding:0;
+#board .message .m {
+    padding: 0;
     white-space: pre-line;
 }
 

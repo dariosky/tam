@@ -1,3 +1,4 @@
+# coding=utf-8
 from socketio.namespace import BaseNamespace
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
@@ -54,6 +55,18 @@ class MessageBoardNamespace(BaseNamespace):
 		if ids in self._users: del (self._users[ids])
 		super(MessageBoardNamespace, self).disconnect(*args, **kwargs)
 
+	def on_deleteMessage(self, message_id, *args, **kwargs):
+		print "deletemessage", message_id
+		ids = id(self)
+		if not ids in self._users:
+			self.emit('error', "Devi essere autenticato per mandare messaggi.")
+			return
+		user = self._users[ids]
+		message = BoardMessage(id=message_id)
+		if message.author != user:
+			self.emit('error', "Puoi cancellare solo i tuoi messaggi.", {"show": message_id})
+
+
 	def on_message(self, message):
 		print "MESSAGE: %s" % message
 		ids = id(self)
@@ -72,7 +85,9 @@ class MessageBoardNamespace(BaseNamespace):
 		self._broadcast('message', dict(a=user.username,
 		                                m=message,
 		                                i=newMessage.id,
-		                                d=newMessage.date.strftime("%d/%m/%Y")
+		                                d=newMessage.date.strftime("%d/%m/%Y"),
+		                                f={"name": newMessage.attachment_name(),
+		                                   "url": newMessage.attachment.url} if newMessage.attachment else None,
 		))
 
 	def _broadcast(self, event, message):
