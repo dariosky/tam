@@ -21,12 +21,13 @@ from tam import tamdates
 def humanizeSize(size):
 	size = float(size)
 	suffix = "byte"
-	if size == 0: return "zero"
+	if size == 0:
+		return "zero"
 	if size > 1024:
-		size = size / 1024
+		size /= 1024
 		suffix = "KB"
 		if size > 1024:
-			size = size / 1024
+			size /= 1024
 			suffix = "MB"
 	return "%.2f%s" % (size, suffix)
 
@@ -36,9 +37,9 @@ def getBackupInfo(doCleanup=False):
 		and current backup status.
 		doCleanup tell to keep at most backcount backups
 	"""
-	backcount = 20	# numero di backup da tenere
+	backcount = 10    # numero di backup da tenere
 	dbname = settings.DATABASES['default']['NAME']
-	backupdir = os.path.join(settings.PROJECT_PATH, 'backup')	# backup subfolder
+	backupdir = os.path.join(settings.PROJECT_PATH, 'backup')    # backup subfolder
 	if not os.path.isdir(backupdir):
 		os.makedirs(backupdir)
 
@@ -52,21 +53,21 @@ def getBackupInfo(doCleanup=False):
 		except:
 			return "anonimo"
 
-	backupFiles = glob(os.path.join(backupdir, '*.db3.gz'))	# sqlitefiles
-	backupFiles += glob(os.path.join(backupdir, '*.pgdump'))	# sqlitefiles
-	backups = [ {
-			"filename":filename,
-			"date":datetime.datetime.fromtimestamp(os.path.getmtime(filename)),
-			"size":humanizeSize(os.path.getsize(filename)),
-			"username": extractBackupUser(filename),
-			} for filename in backupFiles ]
+	backupFiles = glob(os.path.join(backupdir, '*.db3.gz'))    # sqlitefiles
+	backupFiles += glob(os.path.join(backupdir, '*.pgdump'))    # postgres
+	backups = [{
+	           "filename": filename,
+	           "date": datetime.datetime.fromtimestamp(os.path.getmtime(filename)),
+	           "size": humanizeSize(os.path.getsize(filename)),
+	           "username": extractBackupUser(filename),
+	           } for filename in backupFiles]
 	backups.sort()
 
 	if doCleanup and len(backups) > backcount:
 		for backup in backups[:-backcount + 1]:
 			logging.debug("Cancello il backup: %s" % os.path.basename(backup["filename"]))
 			os.unlink(backup["filename"])
-	return { "dbname": dbname, "backupdir":backupdir, "backups":backups, 	}
+	return {"dbname": dbname, "backupdir": backupdir, "backups": backups, }
 
 
 def getbackup(request, backupdate):
@@ -82,7 +83,7 @@ def getbackup(request, backupdate):
 			backup_filename = backup["filename"]
 			backupPath = os.path.join(backupInfo["backupdir"], backup_filename)
 			responseFile = file(backupPath, 'rb')
-			response = HttpResponse(responseFile.read(), mimetype='application/octet-stream') #'application/gzip'
+			response = HttpResponse(responseFile.read(), mimetype='application/octet-stream')  # 'application/gzip'
 			response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(backup_filename)
 			return response
 	else:
@@ -97,7 +98,7 @@ def doBackupSqlite(targetFile, sourceFile):
 	real_out = open(targetFile, 'wb')
 
 	dbname = os.path.split(sourceFile)[1]
-	f_out = gzip.GzipFile(dbname, fileobj=real_out)	# scrivo sul file Gzip il contenuto si chiama sempre tam.db3
+	f_out = gzip.GzipFile(dbname, fileobj=real_out)    # scrivo sul file Gzip il contenuto si chiama sempre tam.db3
 	f_out.write(f_in.read())
 	f_in.close()
 	f_out.close()
@@ -105,24 +106,28 @@ def doBackupSqlite(targetFile, sourceFile):
 
 
 def doBackupPostgre(targetFile, dbName,
-					host=None, port=None,
-				    username=None, password=None):
+                    host=None, port=None,
+                    username=None, password=None):
 	# SET PGPASSWORD=<PassWord>
 	#C:\Programmi\PostgreSQL\9.2\bin
 	# pg_dump.exe -F c -h localhost -p 5432 -U tam -f c:\artebackup.sql artetam
 	pg_dump_prefix = getattr(settings, 'PG_DUMP_PREFIX', '')
 	pgdump_command = 'pg_dump.exe' if 'win' in sys.platform else 'pg_dump'
 	args = []
-	if host: args.append('--username=%s' % username)
+	if host:
+		args.append('--username=%s' % username)
 	if password:
 		#args.append('--password')	# force password request
-		os.putenv('PGPASSWORD', password)	# use password from env
-	if host: args.append('--host=%s' % host)
-	if port: args.append('--port=%s' % port)
-	args.append('-F c')					# use the custom format
-	args.append("-w")					# no password prompt
-	args.append('-f "%s"' % targetFile)	# specify the output file path
-	if dbName: args.append(dbName)
+		os.putenv('PGPASSWORD', password)    # use password from env
+	if host:
+		args.append('--host=%s' % host)
+	if port:
+		args.append('--port=%s' % port)
+	args.append('-F c')                    # use the custom format
+	args.append("-w")                    # no password prompt
+	args.append('-f "%s"' % targetFile)    # specify the output file path
+	if dbName:
+		args.append(dbName)
 	command = "\"%s%s\" %s" % (pg_dump_prefix, pgdump_command, " ".join(args))
 	print "Starting process"
 	print command
@@ -146,13 +151,14 @@ def doBackup(user):
 	if dbType == 'django.db.backends.sqlite3':
 		doBackupSqlite(targetFile=backupPath + ".db3.gz", sourceFile=backupInfo["dbname"])
 	elif dbType == 'django.db.backends.postgresql_psycopg2':
-		doBackupPostgre(targetFile=backupPath + ".pgdump",
-						dbName=settings.DATABASES['default']['NAME'],
-						host=settings.DATABASES['default']['HOST'],
-						port=settings.DATABASES['default']['PORT'],
-						username=settings.DATABASES['default']['USER'],
-						password=settings.DATABASES['default']['PASSWORD'],
-					   )
+		doBackupPostgre(
+			targetFile=backupPath + ".pgdump",
+			dbName=settings.DATABASES['default']['NAME'],
+			host=settings.DATABASES['default']['HOST'],
+			port=settings.DATABASES['default']['PORT'],
+			username=settings.DATABASES['default']['USER'],
+			password=settings.DATABASES['default']['PASSWORD'],
+		)
 	else:
 		raise Exception("Impossibile fare backup di %s" % dbType)
 
@@ -169,10 +175,11 @@ def backup(request, template_name="utils/backup.html"):
 		messages.success(request, "Backup del database avviato... sarà pronto tra poco.")
 		return HttpResponseRedirect(reverse("tamBackup"))
 	backupInfo = getBackupInfo()
-	return render_to_response(template_name, {"backupInfo":backupInfo}, context_instance=RequestContext(request))
+	return render_to_response(template_name, {"backupInfo": backupInfo}, context_instance=RequestContext(request))
 
 
 if __name__ == '__main__':
 	from django.contrib.auth.models import User
+
 	user = User.objects.get(id=1)
 	doBackup(user)
