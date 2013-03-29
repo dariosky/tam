@@ -29,10 +29,8 @@ class NumberInput(Input):
 	input_type = 'number'
 
 
-def inviaMailPrenotazione(prenotazione,
-                          azione,
-                          attachments=[],
-                          extra_context=None):
+def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=None):
+	if not attachments: attachments = []
 	if azione == "create":
 		subject = "Conferma prenotazione TaM n° %d" % prenotazione.id
 		prenotazione_suffix = "effettuata"
@@ -103,7 +101,7 @@ class FormPrenotazioni(forms.ModelForm):
 		self.fields['attachment'] = forms.FileField(
 			label="Allegato",
 			required=False,
-			help_text="Allega un file alla richiesta (opzionale)"
+			help_text="Allega un file alla richiesta (facoltativo)."
 		)
 
 		for field_name in self.fields:
@@ -233,6 +231,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 			viaggio = prenotaCorsa(prenotazione)
 			prenotazione.viaggio = viaggio
+			if request_attachment:
+				prenotazione.had_attachment = True  # creata con allegato
 			prenotazione.save()
 
 			inviaMailPrenotazione(prenotazione,
@@ -280,6 +280,9 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				                      attachments=[attachment] if attachment else [],
 				                      extra_context={"cambiamenti": cambiamenti}
 				)
+
+				if request_attachment and not prenotazione.had_attachment:
+					prenotazione.had_attachment = True  # aggiunto l'allegato
 				prenotazione.save()
 				messages.success(request, "Modifica eseguita.")
 			return HttpResponseRedirect(

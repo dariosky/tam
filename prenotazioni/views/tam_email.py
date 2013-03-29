@@ -11,18 +11,15 @@ from django.utils.safestring import mark_safe
 
 ADMIN_MAIL = ",".join(["%s <%s>" % (name, email) for (name, email) in settings.ADMINS])
 
-def notifyByMail(
-		to=None,
-		subject="",
-		context={},
-		contextText=None, 	# if this is none I'll use the normal one
-		messageTxtTemplateName=None, messageHtmlTemplateName=None,
-		bcc=[ADMIN_MAIL],
-		reply_to=None,
-		attachments=[],
-		** kwargs
-	):
+
+def notifyByMail(to=None, subject="",
+                 context=None, contextText=None, messageTxtTemplateName=None,
+                 messageHtmlTemplateName=None, bcc=(ADMIN_MAIL,),
+                 reply_to=None, attachments=None, **kwargs):
 	""" Warn with a mail when some event occour """
+	if not context: context = {}
+	if not attachments: attachments = []
+
 	signatureTXT = settings.DATI_CONSORZIO
 
 	signatureHTML = getattr(settings, "DATI_CONSORZIO_HTML", None)
@@ -49,22 +46,21 @@ def notifyByMail(
 	if messageHtmlTemplateName:
 		htmlTemplate = get_template(messageHtmlTemplateName)
 		htmlMessage = htmlTemplate.render(context_html)
-	else:	# default html message
+	else:    # default html message
 		htmlTemplate = get_template("prenotazioni_email/htmlMailTemplate.html")
-		htmlMessage = htmlTemplate.render(Context({"message":messageText}))	# generic html message
-
+		htmlMessage = htmlTemplate.render(Context({"message": messageText}))    # generic html message
 
 	if signatureTXT:
 		messageText += u"\n-- \n" + signatureTXT
 
 	emailMessage = EmailMultiRelated(
-							  body=messageText,
-							  subject=subject,
-							  to=to,
-							  bcc=bcc,
-				)
+		body=messageText,
+		subject=subject,
+		to=to,
+		bcc=bcc,
+	)
 	if reply_to:
-		emailMessage.extra_headers['Reply-To']=reply_to
+		emailMessage.extra_headers['Reply-To'] = reply_to
 
 	emailMessage.attach_alternative(htmlMessage, "text/html")
 
@@ -86,10 +82,11 @@ def notifyByMail(
 	if settings.DEBUG:
 		print("In test, don't send mail to %s" % to)
 		emailMessage.send()
-		#print htmlMessage
+	#print htmlMessage
 	else:
 		logging.debug("Sending mail to %s" % to)
 		emailMessage.send()
+
 
 if __name__ == "__main__":
 	prenotazione = Prenotazione.objects.get(id=1)
@@ -97,8 +94,8 @@ if __name__ == "__main__":
 		to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
 		subject="Conferma prenotazione TaM n° %d" % prenotazione.id,
 		context={
-					"prenotazione":prenotazione,
-				},
+		"prenotazione": prenotazione,
+		},
 		reply_to=settings.EMAIL_CONSORZIO,
 		messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
 		messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
