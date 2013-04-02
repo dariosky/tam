@@ -334,7 +334,6 @@ def listaCorse(request, template_name="corse/lista.html"):
 	if outputFormat == 'xls':
 		from tamXml import xlsResponse
 		tuttiViaggi = tuttiViaggi.exclude(annullato=True)
-		logAction(action='X', description="Export in Excel.", user=request.user, log_date=None)
 		return xlsResponse(request, tuttiViaggi)
 	mediabundleJS = ('tamCorse.js',)
 	mediabundleCSS = ('tamUI.css',)

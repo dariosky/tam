@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-#-- coding: iso8859-15 --
+#-- coding: utf-8 --
 import xlwt
-from xlwt import Workbook #@UnusedImport
 import datetime
 from decimal import Decimal
 import logging
@@ -11,11 +10,12 @@ from django.utils import timezone
 #				format='%(message)s'
 #			)
 
-knownStyles = {}	# list of already cached prepared Styles
+knownStyles = {}    # list of already cached prepared Styles
 knownPattern = {}
 
+
 def styleCopy(style=None, **kwargs):
-	" Restituisce uno stile copia di quello passato con le propriet� indicate "
+	" Restituisce uno stile copia di quello passato con le proprietà  indicate "
 	# dallo stile passato ricreo propList, num_format, background_color e foreground_color
 	proplist = []
 	newParameters = {}
@@ -29,11 +29,11 @@ def styleCopy(style=None, **kwargs):
 		if style.alignment.wrap == xlwt.Alignment.WRAP_AT_RIGHT:
 			proplist.append("wrap")
 		if style.borders.left > 0:
-			proplist.append("border%s" % style.borders.left)	# tutti i bordi hanno lo stesso spessore
+			proplist.append("border%s" % style.borders.left)    # tutti i bordi hanno lo stesso spessore
 		if style.font.name <> 'Arial':
-			proplist.append(style.font.name)	# il nome del font
+			proplist.append(style.font.name)    # il nome del font
 		if style.font.height <> 200:
-			proplist.append('size%s' % style.font.height)	# dimensione
+			proplist.append('size%s' % style.font.height)    # dimensione
 		if style.pattern.pattern_fore_colour <> 64:
 			newParameters['background_color'] = style.pattern.pattern_fore_colour
 	newParameters.update(kwargs)
@@ -44,11 +44,11 @@ def sty(propList=None, num_format="general", background_color=None, foreground_c
 	""" Given a list of properties, create an Excel style """
 	if isinstance(propList, str): propList = [propList]
 	if propList is None: propList = []
-	propList.sort()	#sort so order is ininfluent
+	propList.sort()    #sort so order is ininfluent
 	stylename = "-".join(propList)
 	if num_format:
 		stylename += "-" + unicode(num_format)
-	if	background_color or foreground_color:
+	if background_color or foreground_color:
 		patternName = "%s/%s" % (foreground_color, background_color)
 		stylename += "-" + patternName
 	else:
@@ -59,11 +59,11 @@ def sty(propList=None, num_format="general", background_color=None, foreground_c
 
 	style = xlwt.XFStyle()
 	align = xlwt.Alignment()
-	align.vert = xlwt.Alignment.VERT_CENTER	# VERT_TOP, VERT_BOTTOM
+	align.vert = xlwt.Alignment.VERT_CENTER    # VERT_TOP, VERT_BOTTOM
 	font = xlwt.Font()
 	borders = xlwt.Borders()
 
-	style.num_format_str = num_format or 'general'	#numeric format
+	style.num_format_str = num_format or 'general'    #numeric format
 
 	if patternName:
 		if patternName in knownPattern:
@@ -75,7 +75,6 @@ def sty(propList=None, num_format="general", background_color=None, foreground_c
 			knownPattern[patternName] = pattern
 
 		style.pattern = pattern
-
 
 	for prop in propList:
 		if prop in ("b", "bold"):
@@ -89,18 +88,18 @@ def sty(propList=None, num_format="general", background_color=None, foreground_c
 		elif prop == "wrap":
 			align.wrap = xlwt.Alignment.WRAP_AT_RIGHT
 		elif prop.startswith("border"):
-			if prop[-1] != "r":	#"border2" give borderswidth 2
+			if prop[-1] != "r":    #"border2" give borderswidth 2
 				weight = int(prop[-1])
-			else:				#"border" gives width 1
+			else:                #"border" gives width 1
 				weight = 1
 			borders.left = weight
 			borders.right = weight
 			borders.top = weight
 			borders.bottom = weight
 		elif prop.startswith("size"):
-			if prop[4:]:	#"size2" give size 2
+			if prop[4:]:    #"size2" give size 2
 				size = int(prop[4:])
-			else:				#"size" gives size 10
+			else:                #"size" gives size 10
 				size = 10
 			font.height = size
 		else:
@@ -118,18 +117,23 @@ class XlsColors:
 	yellow = 51
 	purple = 37
 	violet = 0x24
+
+
 xlsColWidth = {}
+
 
 def resetSizes():
 	""" Reset sheet sizes """
 	global xlsColWidth
 	xlsColWidth = {}
 
+
 def updateSizes(sheet):
 	""" Apply suggested width to all columns """
-	for x, col in xlsColWidth.items():	# trovo le larghezze di colonna
+	for x, col in xlsColWidth.items():    # trovo le larghezze di colonna
 		#logging.debug( "setting col(%d) to %d" % (x, col))
-		sheet.col(x).width = min(col, 65535)	# set a max column width
+		sheet.col(x).width = min(col, 65535)    # set a max column width
+
 
 def styleFromField(field, stile=sty(), **kwargs):
 	" Restituisco uno stile dato dal campo, basato sullo stile indicato "
@@ -138,18 +142,19 @@ def styleFromField(field, stile=sty(), **kwargs):
 			field = field.date()
 		if isinstance(field, datetime.datetime):
 			return styleCopy(stile, num_format="DD/MM/YYYY HH:MM")
-#			stile.num_format_str="DD/MM/YYYY HH:MM"
+		#			stile.num_format_str="DD/MM/YYYY HH:MM"
 		elif isinstance(field, datetime.date):
 			return styleCopy(stile, num_format="DD/MM/YYYY")
-#			stile.num_format_str="DD/MM/YYYY"
+		#			stile.num_format_str="DD/MM/YYYY"
 
 	return stile
+
 
 def myWrite(sheet, y, x, field, style=sty()):
 	if isinstance(field, Decimal):
 		field = float(field)
 	elif isinstance(field, datetime.datetime):
-		field = timezone.localtime(field)	# keep the date naive
+		field = timezone.localtime(field)    # keep the date naive
 		field = field.replace(tzinfo=None)
 	elif field is None:
 		field = ""
@@ -167,10 +172,11 @@ def myWrite(sheet, y, x, field, style=sty()):
 	elif isinstance(field, datetime.date):
 		field_length = 10
 	elif isinstance(field, xlwt.Formula):
-		field_length = 10;
+		field_length = 10
 	else:
 		field_length = len(unicode(field))
-	xlsColWidth[x] = max(xlsColWidth.get(x, 3000), 310 * field_length)	# default width and computed column width
+	xlsColWidth[x] = max(xlsColWidth.get(x, 3000), 310 * field_length)  # default width and computed column width
+
 
 def row2dict(row, desc):
 	""" Trasforma una tupla estratta con fetchrow in un dizionario usando un cursore"""
@@ -183,9 +189,10 @@ def row2dict(row, desc):
 			result[field] = row[i]
 	return result
 
-def splitImageFormat(format):
+
+def splitImageFormat(format_line):
 	""" return a tuple with: fieldOfImage, maxX, maxY given a format """
-	tokens = format.split(",")
+	tokens = format_line.split(",")
 	numTokens = len(tokens)
 	imageField = None
 	maxX = None
@@ -202,13 +209,14 @@ def splitImageFormat(format):
 	if maxY: maxY = int(maxY)
 	return imageField, maxX, maxY
 
+
 def boxFit(dimensions, maxX, maxY=None):
 	""" Return scaled box of dimesion with maxsize=max mantaining aspect """
 	x, y = dimensions
 	if maxY == None: maxY = maxX
 	if maxX == None: maxX = maxY
 	if not (maxX or maxY): return dimensions
-	if x <= maxX and y <= maxY: return (x, y)	# lesser or equal, no need to resize
+	if x <= maxX and y <= maxY: return (x, y)    # lesser or equal, no need to resize
 	aspect = float(x) / y
 	rx, ry = x, y
 	if rx > maxX:
@@ -220,10 +228,12 @@ def boxFit(dimensions, maxX, maxY=None):
 	#	 "Ridimensiono x,y (%d,%d) a (%d,%d)," % (x,y, maxX, maxY), " = (%d,%d)" % (int(rx), int(ry))
 	return (int(rx), int(ry))
 
+
 def xlsRowHeight(foglio, y, height):
 	rowstyle = sty(['size%s' % height])
 	foglio.row(y).set_style(rowstyle)
 	foglio.row(y).height_mismatch = 0
+
 
 class Sql2xls(object):
 	"""
@@ -235,6 +245,7 @@ class Sql2xls(object):
 		--shortname: nome del foglio di lavoro
 		--imageField: campoCheIndicaIlNomeDelFile[, maxX[, maxY]]
 	"""
+
 	def __init__(self, doc, con=None, query=None, processRowCallback=None, additionalHeaders=None, **kwargs):
 		self.sheetCount = 0
 		self.query = query
@@ -247,7 +258,7 @@ class Sql2xls(object):
 		self.sheetNames = []
 		self.shortNames = []
 		self.imageFields = []
-		self.__dict__.update(kwargs)	# create new attr on class based on kwargs
+		self.__dict__.update(kwargs)    # create new attr on class based on kwargs
 
 	@staticmethod
 	def enumerateSQLTables(self):
@@ -257,10 +268,12 @@ class Sql2xls(object):
 		if not self.con:
 			return
 		query = self.query
-		import re	# used to parse special comment in query
+		import re    # used to parse special comment in query
+
 		self.sheetNames = [g.strip() for g in re.findall(r"--name:(.*?)\n", query)]
 		self.shortNames = [g.strip() for g in re.findall(r"--shortname:(.*?)\n", query)]
-		self.imageFields = [g.strip() for g in re.findall(r"--imageField:(.*?)\n", query)]	# field name wich will go through mimagoFilename
+		self.imageFields = [g.strip() for g in re.findall(r"--imageField:(.*?)\n",
+		                                                  query)]    # field name wich will go through mimagoFilename
 		cur = self.con.cursor()
 		cur.execute(self.query)
 		while True:
@@ -273,19 +286,22 @@ class Sql2xls(object):
 			if not cur.nextset(): break
 
 	def run(self):
-		import os	# used to check file existance
+		import os    # used to check file existance
+
 		defaultTableNumber = 1
 		for results in self.enumerateTables(self):
 			if self.sheetNames and self.sheetCount < len(self.sheetNames):
 				title = self.sheetNames[self.sheetCount]
-			else: title = None
+			else:
+				title = None
 			if self.shortNames and self.sheetCount < len(self.shortNames):
 				shorttitle = self.shortNames[self.sheetCount]
-			else: shorttitle = None
+			else:
+				shorttitle = None
 
 			if self.imageFields and self.sheetCount < len(self.imageFields):
 				imageField, imageMaxX, imageMaxY = splitImageFormat(self.imageFields[self.sheetCount])
-				from PIL import Image as PILImage	# used to write and convert embedded images @UnresolvedImport
+				from PIL import Image as PILImage    # used to write and convert embedded images @UnresolvedImport
 			else:
 				imageField = None
 
@@ -303,7 +319,7 @@ class Sql2xls(object):
 				headers += self.additionalHeaders
 			for header in headers:
 				myWrite(foglio, y, x, header, sty(["b", "center"]))
-#				foglio.write(y,x, header, sty(["b","center"]) )
+				#				foglio.write(y,x, header, sty(["b","center"]) )
 				x += 1
 
 			y += 1
@@ -313,6 +329,7 @@ class Sql2xls(object):
 			logging.debug("%s %d" % (title, len(results)))
 
 			tmpImgToRemove = False
+
 			for row in results:
 				self.drow = row2dict(row, self.queryDescriptor)
 				self.fields = list(row)
@@ -323,12 +340,12 @@ class Sql2xls(object):
 				if self.processRowCallback:
 					self.processRowCallback(self)
 				for field in self.fields:
-#					if hasattr(field, "__len__"):
-#						columnSizes[x]=max(columnSizes.get(x,3000), 300*len(field))	# default width and computed column width
-					myWrite(foglio, y, x, field)	# write fields
-#					columnSizes[x]=max( columnSizes.get(x,3000),
-#
-#									)
+				#					if hasattr(field, "__len__"):
+				#						columnSizes[x]=max(columnSizes.get(x,3000), 300*len(field))	# default width and computed column width
+					myWrite(foglio, y, x, field)    # write fields
+					#					columnSizes[x]=max( columnSizes.get(x,3000),
+					#
+					#									)
 					x += 1
 
 				tmpImg = '.tmp.bmp'
@@ -336,14 +353,16 @@ class Sql2xls(object):
 					if os.path.isfile(self.imagePath):
 						img = PILImage.open(file(self.imagePath, "rb"))
 						img = img.convert('RGB')
-						newsize = boxFit((img.size[0], img.size[1]), imageMaxX, imageMaxY) #make an Image a little bigger
-						img = img.resize(newsize, PILImage.ANTIALIAS) #resize inplace
+						newsize = boxFit((img.size[0], img.size[1]), imageMaxX,
+						                 imageMaxY) #  make an Image a little bigger
+						img = img.resize(newsize, PILImage.ANTIALIAS) #  resize inplace
 						try:
 							tmpImage = file(tmpImg, 'wb')
 							tmpImgToRemove = True
-							img.save(tmpImage, "BMP", quality=85)	# PNG is also valid
+							img.save(tmpImage, "BMP", quality=85)    #  PNG is also valid
 							tmpImage.close()
-							xlsRowHeight(foglio, y, int(newsize[1] * 13)) # l'altezza della riga è la dimensione dell'immagini in pixel * 13
+							xlsRowHeight(foglio, y, int(
+								newsize[1] * 13)) #  l'altezza della riga è la dimensione dell'immagini in pixel * 13
 							foglio.insert_bitmap(tmpImg, y, x)
 						except:
 							pass
