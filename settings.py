@@ -4,7 +4,7 @@ import logging
 from socket import gethostname
 host = gethostname().lower()
 
-TAM_VERSION = "5.1"
+TAM_VERSION = "5.5"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario"):
@@ -282,6 +282,9 @@ try:
 except ImportError:
 	logging.warning("'settings_local.py' has not been found. Use this to keep out of VC secret settings.")
 	pass
+
+SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
+SECURE_URL = "bacheca/"
 
 for app, desc in PLUGGABLE_APPS.items():
 	INSTALLED_APPS.append(app)
