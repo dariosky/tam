@@ -30,6 +30,7 @@ $(function () {
         var message = $message_input.val();
         //if (!message) return false;
         if (socket.socket.connected) {
+            //TODO: send via socket the attachment
             socket.emit('message', message);
             $message_input.val('');
             return false;

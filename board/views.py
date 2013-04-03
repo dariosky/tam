@@ -22,6 +22,7 @@ def main(request, template_name='board/bacheca.html'):
 					print "cancello il messaggio", message
 					message.delete()
 					messages.success(request, "Messaggio cancellato.")
+					# TODO: Warn via socket of the deleted message
 		else:
 			messageText = request.POST.get('m', None)
 			attachment = request.FILES.get('attach', None)
@@ -31,12 +32,11 @@ def main(request, template_name='board/bacheca.html'):
 				                          date=timezone.now(),
 				                          attachment=attachment)
 				newMessage.save()
+				# TODO: Warn via socket of the new message
 		return HttpResponseRedirect(reverse('board-home'))
 
 	board_messages = BoardMessage.objects.filter(active=True)
 
-
-	# TODO: Support send messages and attachments without socket.io
 	return render(
 		request,
 		template_name,
