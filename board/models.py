@@ -15,12 +15,12 @@ class BoardMessage(models.Model):
 	author = models.ForeignKey(User)
 	message = models.TextField('Messaggio', blank=True, null=True)
 	attachment = models.FileField(storage=fs,
-	                              upload_to='board/attachments/%Y/%m',
+	                              upload_to='board/%Y/%m',
 	                              null=True, blank=True)
 	active = models.BooleanField('Messaggio visibile', default=True)
 
 	def attachment_name(self):
-		if self.attachment:
+		if self.attachment is not None:
 			return os.path.split(self.attachment.name)[1]
 
 	def __unicode__(self):
