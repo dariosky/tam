@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load url from future %}
+{% extends "base.html" %}{% load url from future %}{% load staticfiles %}
 
 {% block title %}Strumenti &raquo; {{ block.super }}{% endblock %}
 
@@ -37,6 +37,10 @@
 
 {% if perms.fatturazione.view %}
 	<div class="btnbox"><a href="{% url "tamVisualizzazioneFatture" %}"><img src="/media/fatture/invoice-icon.png" alt="" />Visualizzazione Fatture</a></div>
+{% endif %}
+
+{% if perms.board.view %}
+	<div class="btnbox"><a href="{% url "board-home" %}"><img src="{%  static "img/bacheca.png" %}" alt="" />Bacheca messaggi</a></div>
 {% endif %}
 
 <br style="clear:both" />

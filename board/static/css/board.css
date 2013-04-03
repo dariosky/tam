@@ -40,6 +40,11 @@
     position: absolute;
     right: -15px;
     top: -12px;
+    display: none;
+}
+
+#board .message:hover .del-mark{
+    display: block;
 }
 
 #board .head {

@@ -34,3 +34,4 @@ class BoardMessage(models.Model):
 
 	class Meta:
 		ordering = ["-date"]
+		permissions = (('view', 'Visualizzazione bacheca'),)

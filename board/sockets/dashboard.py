@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 import Cookie
 from django.utils import timezone
+import time
 from board.models import BoardMessage
 
 
@@ -44,10 +45,18 @@ class MessageBoardNamespace(BaseNamespace):
 		if user:
 			self._users[id(self)] = user
 			self._registry[id(self)] = self
-			self.emit('connectStatus', user.username)    # tell the client we are connected
+			self.emit('protocol',
+			          [
+				          {"successMessage": "Connesso come %s" % user.username},
+				          {'enableSubmit': 1}
+			          ],
+			)    # tell the client we are connected
 		else:
-			self.emit('error', "Credenziali di accesso errate.")
-
+			self.emit('protocol',
+			          [
+				          {"errorMessage": "Credenziali di accesso errate."},
+				          {'disableSubmit': 1}
+			          ])
 
 	def disconnect(self, *args, **kwargs):
 		ids = id(self)
@@ -59,12 +68,24 @@ class MessageBoardNamespace(BaseNamespace):
 		print "deletemessage", message_id
 		ids = id(self)
 		if not ids in self._users:
-			self.emit('error', "Devi essere autenticato per mandare messaggi.")
+			self.emit('protocol', [{"errorMessage", "Devi essere autenticato per mandare messaggi."}])
 			return
 		user = self._users[ids]
-		message = BoardMessage(id=message_id)
+		message = BoardMessage.objects.get(id=message_id)
+		print "Messaggio:", message
+		print "autore:", message.author
+		print "cancellante:", user
+		messageSelector = "#message-%s" % message_id
 		if message.author != user:
-			self.emit('error', "Puoi cancellare solo i tuoi messaggi.", {"show": message_id})
+			print "cancellazione non permessa"
+			self.emit('protocol',
+			          [{"errorMessage": "Puoi cancellare solo i tuoi messaggi."},
+			           {"show": messageSelector}])
+			return
+		#time.sleep(3)
+		print "cancello"
+		message.delete()
+		self.emit('protocol', [{"remove": messageSelector}])
 
 
 	def on_message(self, message):
