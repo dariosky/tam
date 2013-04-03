@@ -9,39 +9,44 @@
     <h1>Bacheca messaggi</h1>
 
     <div>
-        <form id='boardForm' action='' method='post'>
+        <form id='boardForm' action='' method='post' enctype="multipart/form-data">
             <div id='board'>
-                {% comment %}{% for message in board_messages %}
-                    <div class='message' id="message-{{ message.id }}">
-                        <div class='head'>
-                            <div class='date'>
-                                {{ message.date|date:"SHORT_DATE_FORMAT" }}
+               {% comment %}
+                    {% for message in board_messages %}
+                        <div class='message' id="message-{{ message.id }}">
+                            <div class='head'>
+                                <div class='date'>
+                                    {{ message.date|date:"SHORT_DATE_FORMAT" }}
+                                </div>
+                                <div class='author'>
+                                    {{ message.author }}
+                                </div>
+                                {% if message.attachment %}
+                                    <img class='attachment-mark' src='{% media_url "attachment.png" %}' width="32"
+                                         height="32"/>
+                                {% endif %}
                             </div>
-                            <div class='author'>
-                                {{ message.author }}
-                            </div>
+                            <div class='m'>{{ message.message }}</div>
                             {% if message.attachment %}
-                                <img class='attachment-mark' src='{% media_url "attachment.png" %}' width="32"
-                                     height="32"/>
+                                <div class='attachment'>
+                                    <a href='{{ message.attachment.url }}'>{{ message.attachment_name }}</a>
+                                    {{ message.attachment.size|filesizeformat }}
+                                </div>
                             {% endif %}
                         </div>
-                        <div class='m'>{{ message.message }}</div>
-                        {% if message.attachment %}
-                            <div class='attachment'>
-                                <a href='{{ message.attachment.url }}'>{{ message.attachment_name }}</a>
-                                {{ message.attachment.size|filesizeformat }}
-                            </div>
-                        {% endif %}
-                    </div>
-                {% endfor %}{% endcomment %}
+                    {% endfor %}
+                {% endcomment %}
             </div>
 
             <div id='newMessageBoard'>
                 <div>
                     <label for='m'>Nuovo messaggio:</label><br>
                     <textarea name='m' id='m'></textarea>
+                    <label for="attach">Allegato: </label><input type="file" id="attach" name="attach">
                 </div>
-                <input id="submit_btn" type="submit" value='Invia messaggio' disabled="disabled"/>
+
+                <input id="submit_btn" type="submit" value='Invia messaggio'/>
+                <!-- TODO: Inserire l'invio degli attachment -->
                 <span id="status" class='warning'>Connessione in corso...</span>
             </div>
         </form>
@@ -59,9 +64,9 @@
                 m: "{{ message.message|escapejs }}",
                 a: "{{ message.author.username }}",
                 d: "{{ message.date|date:"SHORT_DATE_FORMAT" }}",
-			    {%  if message.attachment %}
-				    f: {name:'{{ message.attachment_name|escapejs }}', url:'{{ message.attachment.url|escapejs }}' },
-			    {% endif %}
+                {%  if message.attachment %}
+                    f: {name: '{{ message.attachment_name|escapejs }}', url: '{{ message.attachment.url|escapejs }}' },
+                {% endif %}
                 id: {{ message.id }}
             };
             messages.push(newMessage);

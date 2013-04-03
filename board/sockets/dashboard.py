@@ -48,14 +48,14 @@ class MessageBoardNamespace(BaseNamespace):
 			self.emit('protocol',
 			          [
 				          {"successMessage": "Connesso come %s" % user.username},
-				          {'enableSubmit': 1}
+				          #{'enableSubmit': 1}
 			          ],
 			)    # tell the client we are connected
 		else:
 			self.emit('protocol',
 			          [
 				          {"errorMessage": "Credenziali di accesso errate."},
-				          {'disableSubmit': 1}
+				          #{'disableSubmit': 1}
 			          ])
 
 	def disconnect(self, *args, **kwargs):
@@ -88,6 +88,16 @@ class MessageBoardNamespace(BaseNamespace):
 		self.emit('protocol', [{"remove": messageSelector}])
 
 
+	def broadcastNewMessage(self, message):
+		print "broadcasting '%s' from %s" % (message.message, message.author)
+		self._broadcast('message', dict(a=message.author.username,
+		                                m=message.message,
+		                                i=message.id,
+		                                d=message.date.strftime("%d/%m/%Y"),
+		                                f={"name": message.attachment_name(),
+		                                   "url": message.attachment.url} if message.attachment else None,
+		                                ))
+
 	def on_message(self, message):
 		print "MESSAGE: %s" % message
 		ids = id(self)
@@ -102,14 +112,8 @@ class MessageBoardNamespace(BaseNamespace):
 			#attach
 		)
 		newMessage.save()
-		print "broadcasting '%s' from %s" % (message, user)
-		self._broadcast('message', dict(a=user.username,
-		                                m=message,
-		                                i=newMessage.id,
-		                                d=newMessage.date.strftime("%d/%m/%Y"),
-		                                f={"name": newMessage.attachment_name(),
-		                                   "url": newMessage.attachment.url} if newMessage.attachment else None,
-		))
+		self.broadcastNewMessage(newMessage)
+
 
 	def _broadcast(self, event, message):
 		for s in self._registry.values():

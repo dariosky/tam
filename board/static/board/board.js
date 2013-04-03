@@ -11,7 +11,7 @@ $(function () {
         if (class_name) $status.addClass(class_name);
         if (hideAfter) {
             var timer = setTimeout(function () {
-                $status.hide('slow');
+                $status.fadeOut('slow');
             }, hideAfter);
             $status.data('timer', timer);
         }
@@ -28,11 +28,18 @@ $(function () {
 
     $form.bind('submit', function () {
         var message = $message_input.val();
+        //if (!message) return false;
+        if (socket.socket.connected) {
+            socket.emit('message', message);
+            $message_input.val('');
+            return false;
+        }
+        // using standard submit
+        console.log("Standard submit");
+        $submit.prop('disabled', true);
+        return true;
         //message = 'messaggio di prova';
-        if (!message) return false;
-        socket.emit('message', message);
-        $message_input.val('');
-        return false;
+
     });
 
 
@@ -50,7 +57,7 @@ $(function () {
                     $(arg).stop().fadeIn().css("display", "inline-block");    // show action
                 }
                 else if (action == 'hide') {
-                    $(arg).hide();    // hide action
+                    $(arg).fadeOut();    // hide action
                 }
                 else if (action == 'enableSubmit') {
                     $submit.prop('disabled', false);
@@ -100,9 +107,17 @@ $(function () {
         if (message.id.substr(0, 8) != "message-") throw("Delete a non message?");
         var id = message.id.substr(8);
         console.log("deleting message", id);
-        socket.emit('deleteMessage', id);
-        $(message).fadeOut('slow');
-        return false;
+        if (socket.socket.connected) {
+            socket.emit('deleteMessage', id);
+            $(message).fadeOut('slow');
+            return false;
+        }
+        else {
+            var tempForm = $('<form/>', {method:'POST', action:''}).css('display', 'none').appendTo($('body'));
+            tempForm.append($('<input/>', {name:'deleteMessage', value:id}));
+            tempForm.submit();
+            return false;
+        }
     });
 
 });

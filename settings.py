@@ -19,8 +19,8 @@ if DEBUG:
 	# set naive Datetime as errors
 	import warnings
 	warnings.filterwarnings(
-	        'error', r"DateTimeField received a naive datetime",
-	        RuntimeWarning, r'django\.db\.models\.fields')
+			'error', r"DateTimeField received a naive datetime",
+			RuntimeWarning, r'django\.db\.models\.fields')
 	#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 
 ADMINS = (
@@ -284,7 +284,7 @@ except ImportError:
 	pass
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
-SECURE_URL = "bacheca/"
+SECURE_URL = "/secure/"
 
 for app, desc in PLUGGABLE_APPS.items():
 	INSTALLED_APPS.append(app)

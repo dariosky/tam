@@ -6,12 +6,17 @@ import os
 #	url(r'^$', "django.views.generic.simple.direct_to_template", {'template':'main.html'}, name="main" ),
 #)
 
+secure_url_regex = settings.SECURE_URL
+if secure_url_regex[0] == '/':
+	secure_url_regex = '^' + secure_url_regex[1:]
+
 urlpatterns = patterns('',
                        (r'', include('tam.urls')),
                        (r'', include('modellog.urls')),
                        (r'^archive/', include('tamArchive.urls')),
                        #( r'', include( 'license.urls' ) ),
                        (r'^fatture/', include('fatturazione.urls')),
+                       (secure_url_regex, include('securestore.urls')),
 )
 
 # add pluggable apps URL
