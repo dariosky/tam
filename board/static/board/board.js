@@ -40,41 +40,68 @@ $(function () {
         addMessage(message, true);
     });
 
-    socket.on('error', function (data) {
-        if (data) {
-            statusMessage(data, 'error');
+    function processActions(actionList) {
+        for (var i = 0; i < actionList.length; i++) {
+            var actionDict = actionList[i];
+            for (var action in actionDict) {
+                console.log(action);
+                var arg = actionDict[action];
+                if (action == "show") {
+                    $(arg).stop().fadeIn().css("display", "inline-block");    // show action
+                }
+                else if (action == 'hide') {
+                    $(arg).hide();    // hide action
+                }
+                else if (action == 'enableSubmit') {
+                    $submit.prop('disabled', false);
+                }
+                else if (action == 'disableSubmit') {
+                    $submit.prop('disabled', true);
+                }
+                else if (action == 'successMessage') {
+                    statusMessage(arg, 'success', 1500);
+                }
+                else if (action == "errorMessage") {
+                    statusMessage(arg, 'error');
+                }
+                else if (action == "remove") {
+                    $(arg).remove();    // delete from DOM
+                }
+                else {
+                    alert("Unknown action " + action);
+                }
+            }
+        }
+    }
+
+    socket.on('error', function (message, actionList) {
+        if (message) {
+            statusMessage(message, 'error');
         }
         else {
             statusMessage('Errore di connessione.', 'error');
         }
-        $submit.prop('disabled', true);
+        if (actionList) {
+            processActions(actionList)
+        }
     });
 
     socket.on('connect', function () {
         //statusMessage('Controllo credenziali...');
     });
 
-    socket.on('connectStatus', function (result) {
-        if (result) {
-            statusMessage('Connesso come ' + result + '.', 'success', 1500);
-        }
-        else {
-            statusMessage('Credenziali non valide.', 'error');
-        }
-        $submit.prop('disabled', !result);
+    socket.on('protocol', function (actionList) {
+        processActions(actionList);
     });
 
-
+    /* Delete the message */
     $('.del-mark').live('click', function () {
         var message = $(this).parent('.message')[0];
-        console.log(this);
-        console.log(message);
-        console.log(message.id);
         if (message.id.substr(0, 8) != "message-") throw("Delete a non message?");
         var id = message.id.substr(8);
         console.log("deleting message", id);
         socket.emit('deleteMessage', id);
-        // TODO: Nascondo il messaggio (lo cancellerò quando arriva la conferma)
+        $(message).fadeOut('slow');
         return false;
     });
 
@@ -108,4 +135,4 @@ function addMessage(message, hilight) {
             next();
         });
     }
-};
+}
