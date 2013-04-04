@@ -332,7 +332,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 #		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
 	if outputFormat == 'xls':
-		from tamXml import xlsResponse
+		from tamXls import xlsResponse
 		tuttiViaggi = tuttiViaggi.exclude(annullato=True)
 		return xlsResponse(request, tuttiViaggi)
 	mediabundleJS = ('tamCorse.js',)
