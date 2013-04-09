@@ -28,7 +28,7 @@
 
 {% if not nuovo %}
 <form action="." method="post">
-    <h3> Crea una nuova voce in listino: </h3>
+    <h3>{% if not prezzoid %}Crea una nuova voce in listino:{%  else %}Modifica voce listino:{% endif %}</h3>
     <table>
 	<tr>
 		<td> {% with priceForm.da as field %} {{ field.label_tag }} {{ field }} {% if field.errors %}<div class="errorlist">{{ field.errors }}</div>{% endif %} {% endwith %} </td>

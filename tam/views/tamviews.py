@@ -730,19 +730,21 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 		except: a = None
 
 	if "deletePrezzo" in request.POST:
-		if da and a:
-			prezzoL = PrezzoListino.objects.filter(tratta__da=da, tratta__a=a, listino=listino)
-		else:
-			prezzoL = None
+		prezzoL = listino.prezzolistino_set.filter(id=prezzoid)
+		# if da and a:
+		# 	prezzoL = PrezzoListino.objects.filter(tratta__da=da, tratta__a=a, listino=listino)
+		# else:
+		# 	prezzoL = None
 		if prezzoL:
 			if not user.has_perm('tam.delete_prezzolistino'):
 				messages.error(request, "Non hai il permesso di cancellare i prezzi dal listino.")
 				return HttpResponseRedirect(reverse("tamListini"))
-			prezzoL[0].delete()
-			messages.success(request, "Cancellato il prezzo %s." % prezzoL[0])
+			message = "Cancellato il prezzo %s." % prezzoL
+			prezzoL.delete()
+			messages.success(request, message)
 			return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 		else:
-			messages.error(request, "Non esiste una tratta da %s a %s." % (da, a))
+			messages.error(request, "Questo prezzo non esiste più.")
 	if form.is_valid():
 		if u"new_name" in request.POST:
 			try:
