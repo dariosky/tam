@@ -60,11 +60,11 @@
         var messages = [];
         {% for message in board_messages %}
             var newMessage = {
-                m: "{{ message.message|escapejs }}",
-                a: "{{ message.author.username }}",
-                d: "{{ message.date|date:"SHORT_DATE_FORMAT" }}",
+                message: "{{ message.message|escapejs }}",
+                author: "{{ message.author.username }}",
+                date: "{{ message.date|date:"SHORT_DATE_FORMAT" }}",
                 {%  if message.attachment %}
-                    f: {name: '{{ message.attachment_name|escapejs }}', url: '{{ message.attachment.url|escapejs }}' },
+                    attachment: {name: '{{ message.attachment_name|escapejs }}', url: '{{ message.attachment.url|escapejs }}' },
                 {% endif %}
                 id: {{ message.id }}
             };
