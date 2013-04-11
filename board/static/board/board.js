@@ -104,6 +104,8 @@ $(function () {
 
     /* Delete the message */
     $('.del-mark').live('click', function () {
+        var confirmation = confirm('Sicuro di voler cancellare il messaggio?');
+        if (!confirmation) return;
         var message = $(this).parent('.message')[0];
         if (message.id.substr(0, 8) != "message-") throw("Delete a non message?");
         var id = message.id.substr(8);
@@ -127,14 +129,14 @@ function addMessage(message, hilight) {
     var newHilightDuration = 5000;
     var messageDiv = $('<div/>', {class: 'message', id: 'message-' + message.id});
     var headDiv = $('<div/>', {class: 'head'}).appendTo(messageDiv);
-    headDiv.append($('<div/>', {class: 'date'}).html(message.d));
-    headDiv.append($('<div/>', {class: 'author'}).html(message.a));
-    var attachment = message.f;
+    headDiv.append($('<div/>', {class: 'date'}).html(message.date));
+    headDiv.append($('<div/>', {class: 'author'}).html(message.author));
+    var attachment = message.attachment;
     if (attachment) {
         headDiv.append($("<div/>", {class: 'attachment-mark'}));
     }
-    console.log("message:", message.m, 'from:', message.a);
-    $('<div/>', {class: 'm'}).text(message.m).appendTo(messageDiv);
+    console.log("message:", message.message, 'from:', message.author);
+    $('<div/>', {class: 'm'}).text(message.message).appendTo(messageDiv);
     if (attachment) {
         var attachDiv = $('<div/>', {class: 'attachment'});
         attachDiv.append($('<a/>', {href: attachment.url}).html(attachment.name));

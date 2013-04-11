@@ -84,17 +84,17 @@ class MessageBoardNamespace(BaseNamespace):
 			return
 		#time.sleep(3)
 		print "cancello"
+		self._broadcast('protocol', [{"remove": messageSelector}])
 		message.delete()
-		self.emit('protocol', [{"remove": messageSelector}])
-
+		#self.emit('protocol', [{"remove": messageSelector}])
 
 	def broadcastNewMessage(self, message):
 		print "broadcasting '%s' from %s" % (message.message, message.author)
-		self._broadcast('message', dict(a=message.author.username,
-		                                m=message.message,
-		                                i=message.id,
-		                                d=message.date.strftime("%d/%m/%Y"),
-		                                f={"name": message.attachment_name(),
+		self._broadcast('message', dict(author=message.author.username,
+		                                message=message.message,
+		                                id=message.id,
+		                                date=message.date.strftime("%d/%m/%Y"),
+		                                attachment={"name": message.attachment_name(),
 		                                   "url": message.attachment.url} if message.attachment else None,
 		                                ))
 
