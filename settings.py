@@ -246,14 +246,14 @@ if use_debug_toolbar:
 	INSTALLED_APPS = INSTALLED_APPS + ('debug_toolbar',)
 #===============================================================================
 
-PASSWORD_HASHERS = (
-	'django.contrib.auth.hashers.SHA1PasswordHasher',  # Still use the old hashing until I pass to 1.4
-	'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-	'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-	'django.contrib.auth.hashers.BCryptPasswordHasher',
-	'django.contrib.auth.hashers.MD5PasswordHasher',
-	'django.contrib.auth.hashers.CryptPasswordHasher',
-)
+# PASSWORD_HASHERS = (
+# 	'django.contrib.auth.hashers.SHA1PasswordHasher',  # Still use the old hashing until I pass to 1.4
+# 	'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+# 	'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+# 	'django.contrib.auth.hashers.BCryptPasswordHasher',
+# 	'django.contrib.auth.hashers.MD5PasswordHasher',
+# 	'django.contrib.auth.hashers.CryptPasswordHasher',
+# )
 
 TAM_VIAGGI_PAGINA = 80
 
