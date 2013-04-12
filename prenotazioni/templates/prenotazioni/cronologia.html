@@ -78,6 +78,9 @@
 
 					{% endwith %}
 				{% endif %}
+                {% if viaggio.annullato %}
+				    <td>Anullato</td>
+			    {% endif %}
 			</tr>
 		{% endfor %}
 	</table>
