@@ -1,7 +1,9 @@
 #board .message {
+    font: 12px/20px 'Lucida Grande', Tahoma, Verdana, sans-serif;
     position: relative;
     border: 1px solid black;
     padding: 10px;
+    /*background-color: #ffe;*/
     border-radius: 5px;
     /*float: left;*/
     /*max-width:30%;*/
