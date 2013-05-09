@@ -568,7 +568,9 @@ h2.fatturaTipo5 {
 }
 
 .warning td {
-    background: white url(../v-grad-red.png) repeat-x bottom !important;
+    background-image: url(../v-grad-red.png) !important;
+    background-position:bottom  !important;
+    background-repeat: repeat-x  !important;
 }
 
 .prenotazione {
