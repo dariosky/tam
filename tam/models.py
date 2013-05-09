@@ -13,7 +13,7 @@ from django.db import connections
 from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
-from django.db.models.deletion import SET_NULL
+from django.db.models.deletion import SET_NULL, PROTECT
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -159,7 +159,7 @@ class Viaggio(models.Model):
 	numero_passeggeri = models.IntegerField(default=1)
 	esclusivo = models.BooleanField("Servizio taxi", default=True)	# se non è consentito il raggruppamento contemporaneo
 
-	cliente = models.ForeignKey("Cliente", null=True, blank=True, db_index=True)	# se null è un privato
+	cliente = models.ForeignKey("Cliente", null=True, blank=True, db_index=True, on_delete=PROTECT)	# se null è un privato
 	passeggero = models.ForeignKey("Passeggero", null=True, blank=True, on_delete=SET_NULL) # eventuale passeggero se cliente 'Privato'
 
 	prezzo = models.DecimalField(max_digits=9, decimal_places=2, default=0)	# fino a 9999.99
@@ -891,13 +891,20 @@ class Cliente(models.Model):
 	tipo_commissione = models.CharField("Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F")
 	attivo = models.BooleanField(default=True)
 	note = models.TextField(null=True, blank=True)
+
 	class Meta:
 		verbose_name_plural = _("Clienti")
 		ordering = ["nome"]
+
 	def __unicode__(self):
-		result = self.nome
-		if not self.attivo: result += "(inattivo)"
+		if self.nome.strip():
+			result = self.nome
+		else:
+			result = "(nessun nome)"
+		if not self.attivo:
+			result += "(inattivo)"
 		return result
+
 	def url(self):
 		return reverse("tamClienteId", kwargs={"id_cliente":self.id})
 

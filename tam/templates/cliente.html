@@ -14,9 +14,21 @@
 				<td>
 					<input type="submit" value="{% if nuovo %}Crea{% else %}Aggiorna{% endif %} cliente" />
 				</td>
+                {% if not nuovo %}
+                <td>
+                    {%  if viaggi_del_cliente %}
+                        Cliente con <a href='{% url "tamCorse" %}?filterCliente={{ cliente.pk }}&filterConducente=&filterType=Tutti+i+tipi&filterFlag=Tutti+i+flag&filterWhen=all' target='_blank'>
+                            {{ viaggi_del_cliente }}</a> corse
+                    {% else %}
+                        {%  if perms.tam.delete_cliente  %}
+                            <input name='delete' type="submit" value="Cancella cliente" />
+                        {%  endif %}
+                  {%  endif %}
+                </td>
+                {% endif %}
+
 			</tr>
 		</table>
 	</form>
-	
-
+    <p><a href='{% url 'tamListini' %}'>Torna alla lista dei clienti.</a></p>
 {% endblock %}

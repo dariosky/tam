@@ -13,19 +13,19 @@
 				<tr>
 					<td colspan="2">
 					<input type="submit" style='width: 100%' value="{% if nuovo %}Crea{% else %}Modifica{% endif %} passeggero" />
-					
+
 		<p>
 		{% if viaggi_con_passeggero %}
-			
-			Passeggero già usato in 
+
+			Passeggero già usato in
 			<a href='{% url "tamCorse" %}?filterPrivato={{ instance.nome }}&filterCliente=Privato&filterConducente=&filterType=Tutti+i+tipi&filterFlag=Tutti+i+flag&filterWhen=all'
-			   target='_blank" '>{{viaggi_con_passeggero}} viaggi</a>
+			   target='_blank'>{{viaggi_con_passeggero}} viaggi</a>
 			(clicca per vedere quali).
 		{% else %}
 			Passeggero non presente in alcun viaggio memorizzato.
 		{% endif %}
 		</p>
-					
+
 		{% if not nuovo and permessi_cancellazione %}
 			{% if no_corse_future %}
 					Non ci sono corse future per questo passeggero, puoi cancellarlo.<br>
@@ -36,13 +36,13 @@
 						</a>
 					</p>
 			{% else %}
-				Il passeggero ha delle corse future programmate, non puoi cancellarlo.		
-			{% endif %}		
+				Il passeggero ha delle corse future programmate, non puoi cancellarlo.
+			{% endif %}
 		{% endif %}
 				</td></tr>
 			</table>
 		</form>
-		
+
 	{% else %}
 		<h1>Cancellazione passeggero.</h1>
 		{% if note %}<h2>{{ note }}</h2>{% endif %}
