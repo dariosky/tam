@@ -37,7 +37,7 @@ urlpatterns = patterns('tam.views.tamviews',
     url(r'^listino/(?P<id>\d*)/del/$', 'listinoDelete', name="tamListinoIdDel"),
     url(r'^listino/(?P<id>\d*)/copia/$', 'clonaListino', name="tamClonaListinoId"),
     url(r'^listino/(?P<id_listino>\d*)/print/$', 'exportListino', name="tamExportListino"),
-    
+
 
     url(r'^luoghi/$', 'luoghi', name="tamLuoghi"), 	# elenco di bacini/luoghi e tratte
 
@@ -80,7 +80,7 @@ urlpatterns = patterns('tam.views.tamviews',
 	url(r"^deluser/(?P<username>.*)/$", "delUser", name="delUser"),
 
 	url(r'^password/$', 'passwordChangeAndReset', name='change_password'),
-	
+
 	url(r'^changelog/$', 'changeLog', {}, name="tam_changelog"),
 
 )

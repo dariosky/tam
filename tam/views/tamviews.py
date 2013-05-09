@@ -259,8 +259,12 @@ def listaCorse(request, template_name="corse/lista.html"):
 		if filterCliente == "Privato":
 			viaggi = viaggi.filter(cliente__isnull=True)	# solo i privati
 		else:
-			viaggi = viaggi.filter(cliente__id=filterCliente)	# cliente specifico
-			clienteFiltrato = Cliente.objects.get(id=filterCliente)
+			try:
+				clienteFiltrato = Cliente.objects.get(id=filterCliente)
+				viaggi = viaggi.filter(cliente__id=filterCliente)	# cliente specifico
+			except Cliente.DoesNotExist:
+				messages.error(request, "Il cliente cercato non esiste più.")
+
 	if filterPrivato:
 		viaggi = viaggi.filter(passeggero__nome=filterPrivato)
 
@@ -561,7 +565,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 			kmTot = viaggio.get_kmtot()
 			if kmTot:
 				maxDoppi = viaggio.get_kmtot() / 120
-			else: maxDoppi = 9	# imposto a 9 il numero massimo di casette nel caso per esempio non conosca le tratte
+			else:
+				maxDoppi = 9	# imposto a 9 il numero massimo di casette nel caso per esempio non conosca le tratte
 			form.fields["numDoppi"] = forms.IntegerField(label="Numero di doppi forzato",
 								   help_text="max %d" % maxDoppi) # aggiungo i doppi forza a Nulla
 			form.initial["numDoppi"] = viaggio.punti_abbinata
@@ -660,9 +665,11 @@ def clienti(request, template_name="clienti_e_listini.html"):
 
 def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=None):
 	nuovo = (nomeCliente is None) and (id_cliente is None)
-	if id_cliente: id_cliente = int(id_cliente)
+	if id_cliente:
+		id_cliente = int(id_cliente)
 	user = request.user
-	actionName = getActionName(delete=False, nuovo=nuovo)
+	do_delete = "delete" in request.POST
+	actionName = getActionName(delete=do_delete, nuovo=nuovo)
 	if not user.has_perm('tam.%s_cliente' % actionName):
 		messages.error(request, "Non hai il permesso di modificare i clienti.")
 		return HttpResponseRedirect(reverse("tamListini"))
@@ -681,13 +688,16 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 			model = Cliente
 
 	cliente = None
+	viaggi_del_cliente = None
 	if id_cliente:
 		try:
 			cliente = Cliente.objects.get(id=id_cliente)		# modifying an existing Client
 			logging.debug("Modifica di %s" % cliente)
+			viaggi_del_cliente = Viaggio.objects.filter(cliente=cliente).count()
 		except:
 			messages.error(request, "Cliente inesistente.")
 			return HttpResponseRedirect(reverse("tamListini"))
+
 	if nomeCliente:
 		try:
 			cliente = Cliente.objects.get(nome=nomeCliente)		# modifying an existing Client
@@ -695,6 +705,24 @@ def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=
 		except Cliente.DoesNotExist:
 #			ClientForm = forms.form_for_model(Cliente)
 			ClientForm.base_fields["nome"].initial = nomeCliente	# creating a new client with name
+
+	if do_delete:
+		logging.debug("Cancellerei il cliente %s" % cliente)
+		cliente_url = reverse("tamClienteId", kwargs={"id_cliente":cliente.id})
+		if not request.user.has_perm('tam.delete_cliente'):
+			messages.error(request, "Non hai i permessi necessari per cancellare i clienti.")
+			return HttpResponseRedirect(cliente_url)
+
+		if viaggi_del_cliente:
+			messages.error(request, "Devi cancellare le corse prima di poter cancellare il cliente.")
+			return HttpResponseRedirect(cliente_url)
+
+		message = "Cliente '%s' cancellato." % cliente
+		cliente.delete()
+		messages.success(request, message)
+		return HttpResponseRedirect(reverse("tamListini"))
+
+
 
 	form = ClientForm(request.POST or None, instance=cliente)
 

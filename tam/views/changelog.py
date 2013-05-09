@@ -118,8 +118,8 @@ def changeLog(request, template_name='static/changelog.html'):
 		('4.8', '24/2/2013', 'Logo personalizzato nella pagina di login, più filtri sulla visualizzazione.'),
 		('4.9', '24/2/2013', 'Seleziona rapida dei 2 mesi precedenti nella visualizzazione fatture.'),
 		('5.0', '6/3/2013', 'Supporto a timezone differenti sul server. Fix e miglioramenti vari.'),
-		(
-		'5.1', '29/3/2013', 'Memorizza quando nelle prenotazioni è stato inviato un allegato.' if prenotazioni else ""),
+		('5.1', '29/3/2013', 'Memorizza quando nelle prenotazioni è stato inviato un allegato.' if prenotazioni else ""),
+		('5.2', '9/5/2013', 'Possibilità di cancellare un cliente, dopo aver cancellato le sue corse.'),
 		('5.5', '1/4/2013',
 		 mark_safe('<b>Bacheca notizie in realtime.</b>') if 'board' in settings.PLUGGABLE_APPS else ""),
 		#  ('', '', mark_safe('''''')),
