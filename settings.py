@@ -255,7 +255,7 @@ if use_debug_toolbar:
 # 	'django.contrib.auth.hashers.CryptPasswordHasher',
 # )
 
-TAM_VIAGGI_PAGINA = 80
+TAM_VIAGGI_PAGINA = 100
 
 # ******************* CACHE
 CACHES = {

@@ -1,6 +1,6 @@
 {% load utilTag %}
 {% load media %}
-<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'> 
+<tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'>
 	<td>
 		{% if not distinct %}
 			{% if not viaggio.conducente_confermato %}
@@ -13,7 +13,7 @@
 					<img src="{% media_url "frecciagiu.png" %}" alt="." />
 				{% endif %}
 			{% endif %}
-		{% endif %}	
+		{% endif %}
 	</td>
 
 	<td>
@@ -30,13 +30,13 @@
 
 	<td class='cellaPrezzo'>
 		{% include "classifiche/descrizione-classifica-viaggio.inc.html" %}
-	
+
 		{% if viaggio.is_valid %}
 			{{ viaggio.km }} km.
 		{% else %}
 			<span class='errorlist'>{{ viaggio.km }} km.</span>
 		{% endif %}
-		
+
 		<br/>
 		{% include "corse/corse_prezzo_viaggio.inc.html" %}
 		{% include "corse/flags.inc.html" %}
