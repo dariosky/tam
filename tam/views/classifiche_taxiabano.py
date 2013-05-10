@@ -63,7 +63,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
 			else:
 				viaggio.punti_abbinata = 1
 			if viaggio.prezzo_sosta:
-				# se ho un prezzo sosta nei Venezia-Treviso lo conto nelle lunghe 
+				# se ho un prezzo sosta nei Venezia-Treviso lo conto nelle lunghe
 				viaggio.prezzoPunti = valoreTotale - viaggio.prezzo_sosta
 				viaggio.prezzoVenezia = viaggio.prezzo_sosta
 			else:
@@ -93,10 +93,10 @@ def process_classifiche(viaggio, force_numDoppi=None):
 #	elif viaggio.padre is None:	# corse non abbinate, o abbinate che non fanno alcun punto
 #		if viaggio.is_long():
 #			viaggio.prezzoVenezia = viaggio.prezzo_finale
-#			
+#
 #		# i figli non prendono nulla
 
-	
+
 	if viaggio.padre is None:	# padri e singoli possono avere i supplementi
 		for fascia, points in viaggio.disturbi().items():
 			if fascia == "night":
@@ -202,10 +202,10 @@ def get_value(viaggio, forzaSingolo=False):
 
 	ABBUONO_SOLO_SE_IMPORTO = getattr(settings, 'ABBUONO_SOLO_SE_IMPORTO', False)
 	if ABBUONO_SOLO_SE_IMPORTO and importoViaggio > 0:	# non do l'abbuono se non ho importo
-		if viaggio.abbuono_percentuale:
-			importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
 		if viaggio.abbuono_fisso:
 			importoViaggio -= viaggio.abbuono_fisso
+		if viaggio.abbuono_percentuale:
+			importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
 
 	importoViaggio = importoViaggio - viaggio.costo_sosta
 

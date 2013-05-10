@@ -200,18 +200,18 @@ def get_value(viaggio, forzaSingolo=False):
 					if renditaChilometrica < Decimal("0.8"):
 						importoViaggio *= renditaChilometrica / Decimal("0.8")
 #							logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
-	
+
 	if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:	# tolgo gli abbuoni (per differito o altro)
 		importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
-	if viaggio.abbuono_percentuale:
-		importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
 	if viaggio.abbuono_fisso:
 		importoViaggio -= viaggio.abbuono_fisso
+	if viaggio.abbuono_percentuale:
+		importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))	# abbuono in percentuale
 	importoViaggio = importoViaggio - viaggio.costo_sosta
 
 	if settings.SCONTO_SOSTA:
 		importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))	# aggiungo il prezzo della sosta scontato del 25%
-	else:	
+	else:
 		importoViaggio += viaggio.prezzo_sosta	# prezzo sosta intero
 	return importoViaggio.quantize(Decimal('.01'))
 
