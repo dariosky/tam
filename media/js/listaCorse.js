@@ -41,10 +41,43 @@ $(function() {
 	});
 
 	$(".viaggioId").click(function() {// ma lo mostro se seleziono qualche corsa
+        var adding = this.checked;
+        var riga = $(this).parents('tr');
+        var firstCell = riga.find("td:first");
+        var is_padre = firstCell.has("i.vfat").length;
+
+        if (is_padre || firstCell.has("i.vson").length) {
+            console.log((adding?"Selezionato":"Deselezionato")+" associato");
+
+            if (!is_padre) {
+                while (true) {
+                    riga = riga.prev("tr");
+                    if (!riga.length) break;
+                    firstCell = riga.find("td:first");
+                    is_padre = firstCell.has("i.vfat").length;
+                    firstCell.find(".viaggioId").prop("checked", adding);
+                    if (is_padre) break;
+                }
+            }
+
+            // in ogni caso scorro in giù finché trovo figli
+            while (true) {
+                riga = riga.next("tr");
+                if (!riga.length) break;
+                firstCell = riga.find("td:first");
+                var is_figlio = firstCell.has("i.vson").length;
+                if (!is_figlio) break;
+                firstCell.find(".viaggioId").prop("checked", adding);
+            }
+
+
+        }
+
+        var actionBox = $('#selActions');
 		if(this.checked || $(".viaggioId:checked").size() > 0)
-			$('#selActions').show();
+			actionBox.show();
 		else
-			$('#selActions').hide();
+			actionBox.hide();
 	});
 
 	$('#linkUrl').click(function() {
@@ -73,9 +106,9 @@ $(function() {
 		$(select).bind('click keydown focus', function() {
 			var select = $(this);
 			if (select.data('done')) return;
-			
+
 			select.data('done', true);	// mark the select as populated
-			
+
 			$.getJSON(address, function(result) {
 				var html="";
 				$.each(result, function(event) {
@@ -95,4 +128,4 @@ $(function() {
 });
 function showAdvancedFilter() {
 	$('.advFilters').show();
-};
+}

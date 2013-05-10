@@ -120,8 +120,8 @@ def changeLog(request, template_name='static/changelog.html'):
 		('5.0', '6/3/2013', 'Supporto a timezone differenti sul server. Fix e miglioramenti vari.'),
 		('5.1', '29/3/2013', 'Memorizza quando nelle prenotazioni è stato inviato un allegato.' if prenotazioni else ""),
 		('5.2', '9/5/2013', 'Possibilità di cancellare un cliente, dopo aver cancellato le sue corse.'),
-		('5.5', '1/4/2013',
-		 mark_safe('<b>Bacheca notizie in realtime.</b>') if 'board' in settings.PLUGGABLE_APPS else ""),
+	    ('5.3', '10/5/2013', 'Forzo la selezione di tutte le corse quando clicco su un\'abbinata.'),
+		('5.5', '1/4/2013', mark_safe('<b>Bacheca notizie in realtime.</b>') if 'board' in settings.PLUGGABLE_APPS else ""),
 		#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
