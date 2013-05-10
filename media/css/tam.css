@@ -592,3 +592,19 @@ h2.fatturaTipo5 {
 input[type="button"], input[type="submit"], input[type="reset"], input[type="file"]::-webkit-file-upload-button, button {
     height: 30px
 }
+
+/* viaggio figlio */
+i.vfat {
+    width:15px;
+    height:23px;
+    display:block;
+    margin:3px auto;
+    background-image:url(../frecciagiu.png);
+}
+i.vson {
+    width:24px;
+    height:17px;
+    margin:3px auto;
+    display:block;
+    background-image:url(../frecciaverde.png);
+}

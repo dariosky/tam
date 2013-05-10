@@ -1128,13 +1128,35 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 		Riceve assoType con indicato cosa va fatto e una lista di viaggioId
 		Azioni: link, unlink e bus
 	"""
+	viaggiIds = map(int, viaggiIds)
 	logging.debug("Gestisco le associazioni [%s] %s" % (assoType, viaggiIds))
 	user = request.user
 	if not user.has_perm('tam.change_viaggio'):
 		messages.error(request, "Non hai il permesso di modificare i viaggi.")
 		return HttpResponseRedirect(reverse("tamCorse"))
-	viaggi = Viaggio.objects.filter(pk__in=viaggiIds)
-	toUpdate = []
+
+	padri_ids = Viaggio.objects.filter(pk__in=viaggiIds).values_list('padre_id', flat=True) # ottengo tutti i padri
+	# Estendo ai padri
+	viaggiIds += padri_ids
+	viaggiIds = [pk for pk in set(viaggiIds) if pk is not None] # remove duplicates just to count
+	figli_ids = Viaggio.objects.filter(padre_id__in=viaggiIds).values_list('id', flat=True) # ottengo tutti i figli
+	# ... e ai figli
+	viaggiIds += figli_ids
+	viaggiIds = [pk for pk in set(viaggiIds) if pk is not None] # remove duplicates just to count
+
+	viaggi_selezionati = Viaggio.objects.filter(pk__in=viaggiIds)
+	# estendo la selezione a tutti i figli dei selezionati, e tutti i padri
+	viaggi = list(viaggi_selezionati)  # copia dei viaggi
+
+
+	# for viaggio in viaggi_selezionati:
+	# 	if viaggio.padre_id and (not viaggio.padre in viaggi): # segno i padri precedenti da aggiornare
+	# 		viaggi.append(viaggio.padre)
+	# 		print "Estendo la selezione al padre di %s, ovvero %s" % (viaggio.id, viaggio.padre.id)
+	# 	for figlio in viaggio.viaggio_set.all():    # anche tutti i figli vanno aggiornati
+	# 		if figlio not in viaggi:
+	# 			print "Estendo la selezione al figlio di %s, ovvero %s" % (viaggio.id, figlio.id)
+	# 			viaggi.append(figlio)
 
 	if len(viaggi) > 1:
 		primo = viaggi[0]
@@ -1147,12 +1169,11 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 	for viaggio in viaggi:
 		logging.debug("%2s: %s di %s a %s" % (contatore, assoType, viaggio.pk, primo and primo.pk or "None"))
 
-		if viaggio.padre_id and (not viaggio.padre in toUpdate): # segno i padri precedenti da aggiornare
-				toUpdate.append(viaggio.padre)
-
 		if assoType == 'unlink':
 			viaggio.padre = None
+
 			# rimetto l'associazione a un viaggio da stazione/aeroporto
+			# settings.ABBUONI_LUOGO_ABBINATI indica se gli abbinati da luoghi speciali hanno diritto a un abbuono
 			if viaggio.da.speciale != "-" and ABBUONI_LUOGO_ABBINATI == False:
 				logging.debug("Deassocio da un luogo speciale, rimetto l'eventuale abbuono speciale")
 				if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != settings.ABBUONO_AEROPORTI:
@@ -1180,14 +1201,12 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 					messages.info(request, "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 
-
-		if not viaggio in toUpdate:
-			toUpdate.append(viaggio)
-		viaggio.save()
+		viaggio.save()  # salvo i vari viaggi, poi farò il ricalcolo
 		contatore += 1
 
-	for viaggio in toUpdate:
-		if viaggio.padre_id is None:	# sia il reset che l'update ricorre sui figli
+	for viaggio in viaggi:
+		if viaggio.padre_id is None:	# sia il reset che l'update ricorre sui figli, lo faccio solo sui padri
+			#print "aggiorno", viaggio.pk
 			resetAssociatiToDefault(viaggio)
 			viaggio.updatePrecomp()
 

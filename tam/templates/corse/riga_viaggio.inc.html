@@ -7,10 +7,10 @@
 				<input class="viaggioId" type="checkbox" name="viaggioId" value="{{viaggio.id}}" />
 			{% endif %}
 			{% if viaggio.padre_id %}
-					<img src="{% media_url "frecciaverde.png" %}" alt="*" />
+                <i class='vson'></i>
 			{% else %}
 				{% if viaggio.is_abbinata %}
-					<img src="{% media_url "frecciagiu.png" %}" alt="." />
+                    <i class='vfat'></i>
 				{% endif %}
 			{% endif %}
 		{% endif %}
