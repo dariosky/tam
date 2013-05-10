@@ -329,11 +329,11 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 				messages.error(request, 'Il cliente non esiste.')
 				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
-	adesso = tamdates.ita_now()
+	adesso = tamdates.ita_now().replace(second=0, microsecond=0)
 	data_inizio = (adesso - datetime.timedelta(days=60)).replace(hour=0, minute=0)
 	data_fine = None
 
-	filtroData = request.GET.get('data', None)
+	filtroData = request.GET.get('data', 'next')
 	if filtroData is not None:
 		if filtroData == 'cur':  # mese corrente
 			data_inizio = adesso.replace(hour=0, minute=0, day=1)
@@ -341,6 +341,9 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 		if filtroData == 'prev':  # mese precedente
 			data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
 			data_inizio = (data_fine - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio del mese precedente
+		if filtroData == 'day':  # tutta oggi
+			data_inizio = adesso.replace(hour=0, minute=0)  # da mezzanotte...
+			data_fine = adesso.replace(hour=23, minute=59)  # fino a fine giornata
 		if filtroData == 'next':  # prossime corse
 			# prendo il minore tra 2 ore fa e mezzanotte scorsa e per i prossimi 15 giorni
 			data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
