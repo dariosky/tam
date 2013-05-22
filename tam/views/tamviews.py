@@ -1310,6 +1310,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def util(request, template_name="utils/util.html"):
+	PLUGGABLE_APPS = settings.PLUGGABLE_APPS
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def resetSessions(request, template_name="utils/resetSessions.html"):
