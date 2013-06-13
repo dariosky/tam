@@ -1,0 +1,42 @@
+{% extends "base.html" %}{% load url from future %}{% load media %}{% load staticfiles %}
+
+{% block css %}
+    {{ block.super }}
+    <link rel="stylesheet" type="text/css" href="{% static "css/codapresenze.css" %}"/>
+{% endblock %}
+
+{% block content %}
+    <h1>Coda Presenze</h1>
+
+    <div id='coda'></div>
+
+    <div id='codacomandi'>
+        <form action="" method="POST">
+            <h2>Accodati a:</h2>
+
+            {% for piazza in piazze %}
+                <div>{{ piazza }}</div>
+            {% endfor %}
+
+            <br style="clear: both"/>
+
+            <div id='dequeue'>Esci dalla coda</div>
+
+            <br style="clear: both"/>
+        </form>
+
+    </div>
+
+    <div id='counter'></div>
+
+{% endblock content %}
+
+{% block bottom %}
+    {{ block.super }}
+    <script type="text/javascript" src="{% static "codapresenze/codapresenze.js" %}"></script>
+    <script type="text/javascript">
+        var coda={{ codajson|safe }};
+        username = '{{ request.user.username|safe }}';
+        ricreaCoda(coda);
+    </script>
+{% endblock bottom %}

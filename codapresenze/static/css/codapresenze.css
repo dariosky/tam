@@ -1,0 +1,33 @@
+#coda {
+    background:#fbeed5;
+    padding: 30px 10px;
+}
+
+#coda div, #codacomandi div {
+    float:left;
+    border: 2px solid black;
+    padding:10px;
+    max-width: 200px;
+    white-space: pre-line;
+    margin:0 5px 5px 0;
+    background-color: white;
+    text-align: center;
+    border-radius: 5px;
+}
+
+#coda div.current {
+    background-color: springgreen;
+}
+
+#coda span {
+    display:block;
+}
+
+#coda span.place {
+    font-weight: bolder;
+}
+
+#codacomandi div {
+    cursor: pointer;
+    background-color:#eee;
+}

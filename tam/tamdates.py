@@ -25,7 +25,7 @@ def ita_now():
 		return timezone.now().astimezone(tz_italy)
 	else:
 		return timezone.now()
-	
+
 def ita_today():
 	""" Use a localize datetime (at midnight) instead of a date """
 	return ita_now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -53,7 +53,6 @@ def date_enforce(data):
 			return data
 		else:	# strip datetime timezone
 			return datetime.datetime(*data.timetuple()[:5])
-		return data
 
 if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
 	# if we are on sqlite, dates on DB are expressed as CET ...
