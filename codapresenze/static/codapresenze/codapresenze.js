@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    var auto_refresh_interval = 60;
+    var auto_refresh_interval = 20;
     var count = auto_refresh_interval;   // update every TOT seconds
     var countdown;
     var counter_object = $("#counter");
@@ -18,6 +18,7 @@ $(document).ready(function () {
 
     $("#codacomandi div").click(function () {
         count = auto_refresh_interval;  // will wait
+        counter_object.hide();
         var data = {place: $(this).html()};
         if (this.id == 'dequeue') {
             data = {dequeue: true};
@@ -30,9 +31,11 @@ $(document).ready(function () {
 
     countdown = setInterval(function () {
         if (count <= 10) {
+            counter_object.show();
             counter_object.html("Aggiornamento tra " + count + " secondi");
             if (count == 0) {
                 //window.location.reload();
+                counter_object.hide();
                 doRequestCoda();
                 count = auto_refresh_interval;
                 //clearInterval(countdown);
