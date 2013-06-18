@@ -122,6 +122,7 @@ def changeLog(request, template_name='static/changelog.html'):
 		('5.2', '9/5/2013', 'Possibilità di cancellare un cliente, dopo aver cancellato le sue corse.'),
 	    ('5.3', '10/5/2013', 'Forzo la selezione di tutte le corse quando clicco su un\'abbinata.'),
 		('5.5', '1/4/2013', mark_safe('<b>Bacheca notizie in realtime.</b>') if 'board' in settings.PLUGGABLE_APPS else ""),
+		('5.6', '18/6/2013', mark_safe('<b>Coda presenze.</b>') if 'codapresenze' in settings.PLUGGABLE_APPS else ""),
 		#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:

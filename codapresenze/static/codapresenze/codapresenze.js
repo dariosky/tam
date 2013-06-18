@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    var auto_refresh_interval = 20;
+    var auto_refresh_interval = 90;
     var count = auto_refresh_interval;   // update every TOT seconds
     var countdown;
     var counter_object = $("#counter");
@@ -54,11 +54,16 @@ function ricreaCoda(coda) {
     for (var i = coda.length - 1; i >= 0; i--) {
         var e = coda[i];
         var e_obj = $("<div />");
-        console.log(e);
         var data = new Date(e['data'])
         var testo = e['utente'];
         if (oggiString == data.toDateString()) {
-            testo += "\ndalle " + data.getHours() + ":" + data.getMinutes();
+            var timeFormat = function(data) {
+                var result = "";
+                result += ("00"+data.getHours()).slice(-2)+":";
+                result += ("00"+data.getMinutes()).slice(-2);
+                return result;
+            }
+            testo += "\ndalle " + timeFormat(data);
         }
         else {
             testo += "\ndal " + data.toLocaleString();
