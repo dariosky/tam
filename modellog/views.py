@@ -30,9 +30,12 @@ def logAndCleanExpiredSessions():
 	""" Clear all the expired sessions and log the disconnection of the users """
 	for s in Session.objects.filter(expire_date__lt=timezone.now()):
 		data = s.get_decoded()
-		if data.has_key('_auth_user_id'):
-			user = User.objects.get(id=data['_auth_user_id'])
-			logAction('O', user=user, description='Sessione scaduta', log_date=s.expire_date)
+		try:
+			if data.has_key('_auth_user_id'):
+				user = User.objects.get(id=data['_auth_user_id'])
+				logAction('O', user=user, description='Sessione scaduta', log_date=s.expire_date)
+		except:
+			pass
 		s.delete()
 
 

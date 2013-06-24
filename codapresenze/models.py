@@ -11,7 +11,10 @@ class CodaPresenze(models.Model):
 	class Meta:
 		verbose_name_plural = "Coda Presenze"
 		ordering = ["data_accodamento"]
-		permissions = (('view', 'Visualizzazione coda'),)
+		permissions = (
+			('view', 'Visualizzazione coda'),
+		    ('editall', 'Coda di tutti'),
+		)
 
 	def __unicode__(self):
 		return "%s %s a %s" % (self.data_accodamento.strftime("%d/%m/%Y %H:%M"), self.utente, self.luogo)

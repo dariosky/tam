@@ -19,10 +19,18 @@ $(document).ready(function () {
     $("#codacomandi div").click(function () {
         count = auto_refresh_interval;  // will wait
         counter_object.hide();
-        var data = {place: $(this).html()};
+        var data;
         if (this.id == 'dequeue') {
             data = {dequeue: true};
         }
+        else {
+            data = {place: $(this).html()};
+        }
+        var user_obj = $('#conducente option:selected');
+        if (user_obj) {
+            data['user'] = user_obj.html();
+        }
+
         doRequestCoda(data);
         return false;
     });

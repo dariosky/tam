@@ -1,13 +1,14 @@
 from django.contrib.auth.views import login as django_login
 from django.contrib.auth.views import logout_then_login as django_logout
 from django.conf import settings
+from django.http import HttpResponseServerError
 from markViews import public
 from modellog.actions import logAction
 
 @public
 def login(request):
 	logged = request.user.is_authenticated() and request.user.username
-	
+
 	response = django_login(request,
 							template_name="login.html",
 							extra_context={	'logo_consorzio':settings.TRANSPARENT_LOGO,
@@ -16,7 +17,10 @@ def login(request):
 						)
 	if request.user.is_authenticated() and request.user.username!=logged:	# just logged in
 		logAction('L', description='Accesso effettuato', user=request.user)
-		
+	else:
+		if request.is_ajax():
+			return HttpResponseServerError("Please login")
+
 	return response
 
 @public
