@@ -7,7 +7,7 @@ $(document).ready(function () {
     var doRequestCoda = function (data) {
         $.post('', data)
             .fail(function (data) {
-                console.log("I've got an error.");
+                alert("C'è stato un errore.");
                 console.log(data);
             })
             .done(function (coda) {
