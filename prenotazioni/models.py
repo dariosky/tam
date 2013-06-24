@@ -11,8 +11,6 @@ from tam import tamdates
 # 	creo/modifico solo se ad almeno TOT ore dalla data prenotazione
 # 	non posso modificare se il viaggio è già confermato
 
-
-
 TIPI_PAGAMENTO = (
 	('D', 'Diretto'),
 	('H', 'Hotel'), # diventa "conto finemese"
