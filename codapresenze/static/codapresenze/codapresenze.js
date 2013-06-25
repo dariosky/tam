@@ -59,25 +59,30 @@ function ricreaCoda(coda) {
     var coda_container_obj = $('#coda');
     coda_container_obj.empty();
     var oggiString = (new Date()).toDateString();
+
+    var timeFormat = function(data) {
+        var result = "";
+        result += ("00"+data.getHours()).slice(-2)+":";
+        result += ("00"+data.getMinutes()).slice(-2);
+        return result;
+    }
+
     for (var i = coda.length - 1; i >= 0; i--) {
         var e = coda[i];
+        console.log(e);
         var e_obj = $("<div />");
+        e_obj.append($("<div />").html(e['utente']).addClass('name'));
+
         var data = new Date(e['data'])
-        var testo = e['utente'];
+        var testo = "";
         if (oggiString == data.toDateString()) {
-            var timeFormat = function(data) {
-                var result = "";
-                result += ("00"+data.getHours()).slice(-2)+":";
-                result += ("00"+data.getMinutes()).slice(-2);
-                return result;
-            }
             testo += "\ndalle " + timeFormat(data);
         }
         else {
             testo += "\ndal " + data.toLocaleString();
         }
         //testo += "\n" + e['luogo'];
-        e_obj.html(testo);
+        e_obj.append($('<div />').html(testo));
         e_obj.append($("<span />", {class: "place"}).html(e['luogo']));
         if (e['utente'] == username) {    // global variable
             e_obj.addClass('current')

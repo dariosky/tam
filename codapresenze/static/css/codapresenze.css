@@ -3,7 +3,7 @@
     padding: 30px 10px;
 }
 
-#coda div, #codacomandi div {
+#coda>div, #codacomandi div {
     float:left;
     border: 2px solid black;
     padding:10px;
@@ -13,6 +13,14 @@
     background-color: white;
     text-align: center;
     border-radius: 5px;
+}
+
+#coda>div {
+    width: 180px;
+}
+
+#coda div.name {
+    font-size: larger;
 }
 
 #coda div.current {
