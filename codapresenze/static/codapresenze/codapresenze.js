@@ -11,21 +11,29 @@ $(document).ready(function () {
                 console.log(data);
             })
             .done(function (coda) {
-                console.log("Success", coda);
+                console.log("Success. Elementi:", coda.length);
                 ricreaCoda(coda);
             });
     }
 
     $("#codacomandi div").click(function () {
-        count = auto_refresh_interval;  // will wait
-        counter_object.hide();
         var data;
-        if (this.id == 'dequeue') {
+        if (this.id == "dequeue") {
             data = {dequeue: true};
+        }
+        else if (this.id == "refresh") {
+            data = {refresh: true};
+            if (count >= auto_refresh_interval-5){
+                // no a refresh troppo frequenti
+                console.log("Refresh troppo frequente");
+                return;
+            }
         }
         else {
             data = {place: $(this).html()};
         }
+        count = auto_refresh_interval;  // will wait
+        counter_object.hide();
         var user_obj = $('#conducente option:selected');
         if (user_obj) {
             data['user'] = user_obj.html();
@@ -69,7 +77,7 @@ function ricreaCoda(coda) {
 
     for (var i = coda.length - 1; i >= 0; i--) {
         var e = coda[i];
-        console.log(e);
+        //console.log(e);
         var e_obj = $("<div />");
         e_obj.append($("<div />").html(e['utente']).addClass('name'));
 
