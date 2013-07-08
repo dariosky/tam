@@ -1,4 +1,4 @@
-{% load media %}{% load url from future %}
+{% load staticfiles %}{% load url from future %}
 <div style='display:none;'>
 	<table class='tablesorter' style='text-align: center'>
 	<tr><th>Fattura</th><th>conducente</th><th>righe</th><th>Importo</th></tr>
@@ -7,7 +7,7 @@
 			<td>
 				{{fattura.descrittore}}
 				<a href='{% url "tamFatturaId" fattura.id %}' class='fatturaTipo{{f.d.codice}}Back fatturaIcon'>
-					<img src='{% media_url 'fatture/invoice-icon.png' %}' />
+					<img src='{% static 'fatturazione/invoice-icon.png' %}' />
 				</a>
 				emessa {{fattura.data|date:"l j F Y"}}
 			</td>
@@ -22,7 +22,7 @@
 	{% if perms.fatturazione.generate %}
 	<div>
 		<a href='{% url f.d.urlname_manuale %}'>
-		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova {{ f.d.nome }} manuale' />
+		<img src='{% static 'img/addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova {{ f.d.nome }} manuale' />
 		Nuova {{ f.d.nome }} manuale.
 		</a>
 	</div>

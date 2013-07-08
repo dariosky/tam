@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load url from future %}{% load media %}{% load staticfiles %}
+{% extends "base.html" %}{% load url from future %}{% load staticfiles %}
 
 {% block css %}
     {{ block.super }}
@@ -22,7 +22,7 @@
                                     {{ message.author }}
                                 </div>
                                 {% if message.attachment %}
-                                    <img class='attachment-mark' src='{% media_url "attachment.png" %}' width="32"
+                                    <img class='attachment-mark' src='{% static "img/attachment.png" %}' width="32"
                                          height="32"/>
                                 {% endif %}
                             </div>

@@ -339,8 +339,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 		from tamXls import xlsResponse
 		tuttiViaggi = tuttiViaggi.exclude(annullato=True)
 		return xlsResponse(request, tuttiViaggi)
-	mediabundleJS = ('tamCorse.js',)
-	mediabundleCSS = ('tamUI.css',)
+	mediabundleJS = ('tamCorse',)
+	mediabundleCSS = ('tamUI',)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def corsaClear(request, next=None):
@@ -355,8 +355,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 
-	mediabundleJS = ('tamCorse.js',)
-	mediabundleCSS = ('tamUI.css',)
+	mediabundleJS = ('tamCorse',)
+	mediabundleCSS = ('tamUI',)
 	if id and not user.has_perm('tam.change_viaggio'):
 		messages.error(request, "Non hai il permesso di modificare le corse.")
 		return HttpResponseRedirect("/")
@@ -859,8 +859,8 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
 	unbacined = Luogo.objects.filter(bacino__isnull=True)
 	bacini = Bacino.objects.all()
 	tratte = Tratta.objects.select_related()
-	mediabundleJS = ('tamUI.js',)
-	mediabundleCSS = ('tamUI.css',)
+	mediabundleJS = ('tamUI',)
+	mediabundleCSS = ('tamUI',)
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
@@ -1226,8 +1226,8 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 		end = forms.DateField(label="Data finale", input_formats=[_('%d/%m/%Y')])
 
 	form = RecurrenceForm(request.POST or None)
-	mediabundleJS = ('tamUI.js',)
-	mediabundleCSS = ('tamUI.css',)
+	mediabundleJS = ('tamUI',)
+	mediabundleCSS = ('tamUI',)
 	dataIniziale = max(tamdates.ita_today(), corsa.data) + datetime.timedelta(days=1)	# la data iniziale è quella della corsa + 1 e non prima di domani
 	form.initial["start"] = dataIniziale.strftime('%d/%m/%Y')
 	form.initial["end"] = dataIniziale.strftime('%d/%m/%Y')

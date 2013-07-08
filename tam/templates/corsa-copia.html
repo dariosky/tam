@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load staticfiles %}
 
 {% block title %}Ricorrenza corse &raquo; {{ block.super }}{% endblock %}
 
@@ -16,7 +16,7 @@
 		{% endfor %}
 		</ul>
 	{% endif %}
-	
+
 	{% if askForm %}
 		<p>Creerò le copie identiche, ma con il conducente da confermare.</p>
 		<p>Scegli la ricorrenza e l'intervallo per le copie:</p>
@@ -63,5 +63,5 @@
 {% endblock content %}
 
 {% block bottom %}
-<script type='text/javascript' src='/media/js/rangeCalendar.js'></script>
+<script type='text/javascript' src="{% static 'js/rangeCalendar.js' %}"></script>
 {% endblock %}

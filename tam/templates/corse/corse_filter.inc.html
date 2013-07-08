@@ -1,7 +1,7 @@
-{% load media %}
+{% load staticfiles %}
 <form action="" method="get" id="filterForm">
 	<div style="float:right;">
-		<a href="?format=xls"><img src='{% media_url "ico_excel.gif" %}' alt='Excel' /></a>
+		<a href="?format=xls"><img src='{% static "img/ico_excel.gif" %}' alt='Excel' /></a>
 		<select name="filterCliente" class="selectFilter" id='select_clienti' style="width:100px;">
 			{% if clienteFiltrato %}<option value="{{ clienteFiltrato.id }}" selected>{{ clienteFiltrato.nome }}</option>{% endif %}
 			<option value="">Tutti i clienti</option>

@@ -1,6 +1,6 @@
-{% load media %}
-{% if viaggio.fatturazione %}<br/><img src="{% media_url "flag/fattura.png" %}" alt="richiede fattura" />{% endif %}
-{% if viaggio.pagamento_differito %}<br/><img src="{% media_url "flag/timedelta.png" %}" alt="pagamento differito" />{% endif %}
-{% if viaggio.cartaDiCredito %}<br/><img src="{% media_url "flag/card.png" %}" alt="carta" />{% endif %}
+{% load staticfiles %}
+{% if viaggio.fatturazione %}<br/><img src="{% static "flag/fattura.png" %}" alt="richiede fattura" />{% endif %}
+{% if viaggio.pagamento_differito %}<br/><img src="{% static "flag/timedelta.png" %}" alt="pagamento differito" />{% endif %}
+{% if viaggio.cartaDiCredito %}<br/><img src="{% static "flag/card.png" %}" alt="carta" />{% endif %}
 {% if viaggio.incassato_albergo %}<br/>CONTO FINE MESE{% endif %}
 {% ifequal viaggio.is_abbinata "P" %}<br/>collettivo in partenza{% endifequal %}

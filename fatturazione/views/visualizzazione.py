@@ -73,8 +73,8 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 								"data_start":data_start,
 								"data_end":data_end,
 								"dontHilightFirst":True,
-								"mediabundleJS": ('tamUI.js',),
-								"mediabundleCSS": ('tamUI.css',),
+								"mediabundleJS": ('tamUI',),
+								"mediabundleCSS": ('tamUI',),
 
 								"gruppo_fatture":gruppo_fatture,
 								"quick_month_names":quick_month_names,

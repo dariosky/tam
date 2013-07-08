@@ -1,22 +1,22 @@
-{% load media %}{% load url from future %}
+{% load url from future %}{% load staticfiles %}{% load compressed %}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it">
 <head>
 	<title>{% block title %}TaM{% endblock %}{% if tam_stealth %} - Stealth version{% endif %}</title>
 	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>
 	<!--[if ie]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><![endif]-->
-	{% if not tam_stealth %}<link rel="icon" href="{% media_url "tam.ico" %}" type="image/ico"/>{% endif %}
-	
+	{% if not tam_stealth %}<link rel="icon" href="{% static "img/tam.ico" %}" type="image/ico"/>{% endif %}
+
 	{% if mediabundleCSS %}
-		{% for bundle in mediabundleCSS %}{%include_media bundle %}{% endfor %}
+		{% for bundle in mediabundleCSS %}{% compressed_css bundle %}{% endfor %}
 	{% else %}
-		{% include_media 'tam.css' %}
+		{% compressed_css 'tam' %}
 	{% endif %}
-	
+
 	{% block css %}
-		{% if tam_stealth %}{% include_media 'tam-stealth.css' %}{% endif %}
+		{% if tam_stealth %}{% compressed_css 'tam-stealth' %}{% endif %}
 	{% endblock %}
-	
+
 	{% block header %}{% endblock header %}
  </head>
 
@@ -28,7 +28,7 @@
 		{% block corse %}<a href="/" class='menuGroup'>TaM</a>
 		{% if perms.tam.add_viaggio %}
 			<span>&raquo; <a href="{% url "tamNuovaCorsa" %}" class='menuGroup'>
-			<img src="{% media_url "addbtn.png" %}" alt=""/> Nuova corsa</a>
+			<img src="{% static "img/addbtn.png" %}" alt=""/> Nuova corsa</a>
 			</span>
 		{% endif %}
 		{% endblock corse%}
@@ -37,7 +37,7 @@
 		{% block conducenti %}<a href="{% url "tamConducenti" %}" class='menuGroup'>Classifiche</a>{% endblock %}
 		{% block util %}<a href="{% url "tamUtil" %}" class='menuGroup'>Strumenti</a>{% endblock %}
 
-		{% if not tam_stealth %}<img src="{% media_url "tam_16.png" %}" class="loghetto" alt="" />{% endif %}
+		{% if not tam_stealth %}<img src="{% static "img/tam_16.png" %}" class="loghetto" alt="" />{% endif %}
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}
 </div>
@@ -65,7 +65,7 @@
 		Stai accedendo come utente non registrato. <a href="{% url "login" %}">Fatti riconoscere</a>.
     {% endif %}
 	{% endblock authblock %}
-	
+
 	<p class="credits">
 		<a href="{% url "tam_changelog" %}">TaM v.{{ tam_version }}</a>.
 	    {% if license_expiration %}
@@ -82,9 +82,9 @@
 {% endblock footer %}
 
 	{% if mediabundleJS %}
-		{% for bundle in mediabundleJS %}{%include_media bundle %}{% endfor %}
+		{% for bundle in mediabundleJS %}{% compressed_js bundle %}{% endfor %}
 	{% else %}
-		{% include_media 'tambase.js' %}
+		{% compressed_js 'tam' %}
 	{% endif %}
 	{% if form %}{{ form.media }}{% endif %}
 	{% block bottom %}{% endblock bottom %}

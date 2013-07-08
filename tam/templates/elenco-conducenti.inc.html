@@ -1,8 +1,8 @@
-{% load url from future %}<div>
+{% load url from future %}{% load staticfiles %}<div>
 	<h2>Conducenti</h2>
 	<div>
 	<a href="{% url "tamNuovoConducente" %}">
-		<img src="/media/addbtn.png" alt="" /> Nuovo Conducente
+		<img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo Conducente
 	</a><br/>
 	{% if tuttiConducenti %}
 		<table class="tablesorter">

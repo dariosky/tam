@@ -1,3 +1,4 @@
+from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
@@ -47,3 +48,7 @@ class ActionLog(models.Model):
 			return class_name.objects.get(id=self.instance_id)
 		except:
 			return None
+
+	def icon(self):
+		""" Ritorno l'icona associata al tipo cliente """
+		return staticfiles_storage.url('actionIcons/%s.png' % self.action_type)

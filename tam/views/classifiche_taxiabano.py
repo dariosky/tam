@@ -4,7 +4,7 @@ CLASSIFICHE = [
 			{"nome": "Supplementari serali",
 			 "mapping_field": "puntiNotturni",
 			 'type': 'supplementari',
-			 'image': "night.png",
+			 'image': "img/night.png",
 			},
 
 			{"nome": "Corte",

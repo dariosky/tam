@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load media %}
+{% load staticfiles %}
 
 {% comment %}
 {% block title %}Accesso &raquo; {{ block.super }}{% endblock %}
@@ -8,8 +8,7 @@
 
 {% block superNavBar %}
 	<div class="mainlogo">
-		{% comment %}<img src="{% media_url "logo.png" %}" alt="TaM" />{%endcomment%}
-		<img src="{% media_url logo_consorzio %}" alt="{{ nome_consorzio }}" />
+		<img src="{{ MEDIA_URL }}{{ logo_consorzio }}" alt="{{ nome_consorzio }}" />
 	</div>
 {% endblock superNavBar %}
 
@@ -43,7 +42,7 @@
 				</td>
 			</tr>
 		</table>
-		{% csrf_token %} 
+		{% csrf_token %}
 	</form>
 </div>
 {% endblock %}

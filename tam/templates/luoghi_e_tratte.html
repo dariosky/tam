@@ -1,10 +1,10 @@
-{% extends "base.html" %}{% load url from future %}
+{% extends "base.html" %}{% load url from future %}{% load staticfiles %}
 
 {% block title %}Luoghi e tratte &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
 <div id="accordion">
-	<a href="{% url "tamNuovaTratta" %}"><img src="/media/addbtn.png" alt=""/> Nuova Tratta</a><br/>
+	<a href="{% url "tamNuovaTratta" %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuova Tratta</a><br/>
 	{% if tratte %}
 		<div>
 		<h2><a href="#">Tratte</a></h2>
@@ -38,8 +38,8 @@
     {% endif %}
 
 
-    <a href="{% url "tamNuovoBacino" %}"><img src="/media/addbtn.png" alt=""/> Nuovo Bacino</a><br/>
-    <a href="{% url "tamNuovoLuogo" %}"><img src="/media/addbtn.png" alt=""/> Nuovo Luogo</a><br/>
+    <a href="{% url "tamNuovoBacino" %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo Bacino</a><br/>
+    <a href="{% url "tamNuovoLuogo" %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo Luogo</a><br/>
 
     {% if bacini or unbacined %}
 		<div>
@@ -58,8 +58,8 @@
 			    <tr>	<td></td>
 						<td>
 							<a href="{% url "tamLuogoId" luogo.id %}">{{ luogo }}</a>
-							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" alt="air" />{%endif%}
-							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" alt="train"/>{%endif%}							
+							{% if luogo.speciale == "A" %}<img src="{% static 'flag/luogo-airport.png' %}" alt="air" />{%endif%}
+							{% if luogo.speciale == "S" %}<img src="{% static 'flag/luogo-train.png' %}" alt="train"/>{%endif%}
 						</td>
 				</tr>
             {% endfor %}
@@ -76,8 +76,8 @@
 	                    <td></td>
 						<td>
                             <a href="{% url "tamLuogoId" luogo.id %}">{{ luogo }}</a>
-							{% if luogo.speciale = "A" %}<img src="/media/flag/luogo-airport.png" alt="air"/>{%endif%}
-							{% if luogo.speciale = "S" %}<img src="/media/flag/luogo-train.png" alt="train"/>{%endif%}	
+							{% if luogo.speciale == "A" %}<img src="{% static 'flag/luogo-airport.png' %}" alt="air" />{%endif%}
+							{% if luogo.speciale == "S" %}<img src="{% static 'flag/luogo-train.png' %}" alt="train"/>{%endif%}
 						</td>
 					</tr>
                 {% endfor %}

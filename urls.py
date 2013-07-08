@@ -2,21 +2,17 @@ from django.conf.urls import url, patterns, include
 from django.conf import settings
 import os
 
-#urlpatterns = patterns('',
-#	url(r'^$', "django.views.generic.simple.direct_to_template", {'template':'main.html'}, name="main" ),
-#)
-
 secure_url_regex = settings.SECURE_URL
 if secure_url_regex[0] == '/':
 	secure_url_regex = '^' + secure_url_regex[1:]
 
 urlpatterns = patterns('',
-                       (r'', include('tam.urls')),
-                       (r'', include('modellog.urls')),
-                       (r'^archive/', include('tamArchive.urls')),
-                       #( r'', include( 'license.urls' ) ),
-                       (r'^fatture/', include('fatturazione.urls')),
-                       (secure_url_regex, include('securestore.urls')),
+	(r'', include('tam.urls')),
+	(r'', include('modellog.urls')),
+	(r'^archive/', include('tamArchive.urls')),
+	#( r'', include( 'license.urls' ) ),
+	(r'^fatture/', include('fatturazione.urls')),
+	(secure_url_regex, include('securestore.urls')),
 )
 
 # add pluggable apps URL
@@ -36,15 +32,22 @@ urlpatterns += patterns('',
 # Serve media settings to simulate production, we know in REAL production this won't happend
 if settings.DEBUG:
 	urlpatterns += patterns('',
-	                        #mediaprod > _generated_media
-	                        ("^" + settings.PRODUCTION_MEDIA_URL[1:] + r'(?P<path>.*)$',
-	                         'django.views.static.serve',
-	                         {'document_root': os.path.join(os.path.dirname(__file__), '_generated_media')}),
+		#mediaprod > _generated_media
+		# 	                        ("^" + settings.PRODUCTION_MEDIA_URL[1:] + r'(?P<path>.*)$',
+		# 	                         'django.views.static.serve',
+		# 	                         {'document_root': os.path.join(os.path.dirname(__file__), '_generated_media')}),
 
-	                        #media > /media
-	                        ("^media/" + r'(?P<path>.*)$', 'django.views.static.serve',
-	                         {'document_root': os.path.join(os.path.dirname(__file__), "media")}),
+		#media > /media
+		("^media/" + r'(?P<path>.*)$', 'django.views.static.serve',
+			{'document_root': os.path.join(os.path.dirname(__file__), "media")}
+		),
 	)
+
+	# *** Per servire i staticfiles generati, come in produzione ***
+	# urlpatterns += patterns('',
+	#                         ("^static/" + r'(?P<path>.*)$', 'django.views.static.serve',
+	#                          {'document_root': os.path.join(os.path.dirname(__file__), "static")}),
+	# )
 
 
 def errorview(request):

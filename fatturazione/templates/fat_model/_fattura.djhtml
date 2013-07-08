@@ -1,8 +1,8 @@
-{% load media %}
+{% load staticfiles %}
 <div id='fatturaHtml' style='position:relative;'>
 	<div id='fat_header'>
 		{% if fattura.tipo == "1" %}
-			{% if not tam_sstealth %}<img id='fat_logo' src='{% media_url logo_url %}'>{%endif%}
+			{% if not tam_sstealth %}<img id='fat_logo' src='{{ MEDIA_URL }}{{ logo_url }}'>{%endif%}
 		{% endif %}
 		<div id='fat_mittente' class='{% if not fattura.tipo = "1" and bigEdit %}editable{%else%}pre{%endif%}'>{{ fattura.emessa_da_html }}</div>
 		<div id='fat_destinatario' class='{% if not fattura.tipo = "2" and bigEdit %}editable{%else%}pre{%endif%}'>{{fattura.emessa_a}}</div>
@@ -14,8 +14,8 @@
 		</div>
 		<div id='fat_note' class='{% if bigEdit or smallEdit %}editable{%endif%}'>{{fattura.note}}</div>
 	</div>
-	
-	
+
+
 	<table id='righe'>
 		<thead>
 			<tr>
@@ -28,7 +28,7 @@
 			{% endfor %}
 			{% if perms.fatturazione.generate and not readonly %}
 			<tr class='noprint'><td style='border:0'>
-				<img src='{% media_url 'addbtn.png' %}' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
+				<img src='{% static 'img/addbtn.png' %}' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
 			</td></tr>
 			{% endif %}
 			<tr style='text-align:right;'><td colspan=5 style='border:0'>Imponibile</td><td id='tot_imponibile'>{{fattura.val_imponibile|floatformat:"2"}}</td></tr>
@@ -36,7 +36,7 @@
 			<tr style='text-align:right; font-weight:bold;'><td colspan=5 style='border:0'>Totale</td><td id='tot_totale'>{{fattura.val_totale|floatformat:"2"}}</td></tr>
 		</tbody>
 	</table>
-	
+
 	<div id='fat_footer' class='pre privacy'>{% for footer_row in fattura.footer %}{{ footer_row|striptags }}
  		{% endfor %}
 	</div>

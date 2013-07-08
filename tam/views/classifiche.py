@@ -8,8 +8,8 @@ from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 import logging
 from django.utils.safestring import mark_safe
-from mediagenerator.utils import media_url
 from django.conf import settings
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 def conguaglia(classifica_definita):
 	kmPuntoAbbinate = settings.KM_PUNTO_ABBINATE
@@ -49,8 +49,8 @@ def conguaglia(classifica_definita):
 def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html", confirmConguaglio=False):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user) #@UnusedVariable
-	mediabundleJS = ('tamUI.js',)
-	mediabundleCSS = ('tamUI.css',)
+	mediabundleJS = ('tamUI',)
+	mediabundleCSS = ('tamUI',)
 
 	if not profilo.luogo:
 		messages.error(request, "Devi inserire il luogo preferito per poter calcolare i disturbi.")
@@ -154,7 +154,7 @@ def descrizioneDivisioneClassifiche(viaggio):
 			field = classifica.get('mapping_field')
 			punti = getattr(viaggio, field)
 			if punti > 0 :
-				result += ('<img src="%s" alt="DV" />' % media_url('casina.png')) * punti
+				result += ('<img src="%s" alt="DV" />' % staticfiles_storage.url('img/casina.png')) * punti
 				result += '<br/>'
 				result += "%(punti)d x %(valore)s nei %(nome)s.<br/>" % {"punti":punti,
 																		 "valore":viaggio.prezzoPunti,

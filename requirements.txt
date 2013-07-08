@@ -1,8 +1,8 @@
 django
 south
 distribute
-django-mediagenerator
 xlrd
 xlwt
 reportlab
 pytz
+django-pipeline

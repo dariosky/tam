@@ -14,6 +14,7 @@ from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 from django.db.models.deletion import SET_NULL, PROTECT
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))	# se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -911,6 +912,11 @@ class Cliente(models.Model):
 		if not self.attivo:
 			result += "(inattivo)"
 		return result
+
+	def icon(self):
+		""" Ritorno l'icona associata al tipo cliente """
+		return staticfiles_storage.url('tipiCliente/%s.png' % self.tipo)
+
 
 	def url(self):
 		return reverse("tamClienteId", kwargs={"id_cliente":self.id})

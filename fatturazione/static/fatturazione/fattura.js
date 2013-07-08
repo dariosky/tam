@@ -1,10 +1,6 @@
 function myParse(string) {
-	string = string.replace(",", ".")
+	string = string.replace(",", ".");
 	var result = parseFloat(string);
-	if (result==NaN) {
-		throw("Valore non valido.");
-		result=0;
-	}	
 	return result
 }
 function rowProcess(row){
@@ -41,7 +37,7 @@ function ricalcolaTotali(){
 	$('#tot_imponibile').text(imponibile.formatMoney(2, ',', '.' ));
 	$('#tot_iva').text(iva.formatMoney(2, ',', '.' ));
 	$('#tot_totale').text(totale.formatMoney(2, ',', '.' ));
-	
+
 }
 
 function editableSubmit(content) {
@@ -92,7 +88,7 @@ $('.delrow').live("click",
 									row.remove();
 									ricalcolaTotali();
 								});
-				
+
 			}
 			else {
 				messageBox(xhr.responseText);

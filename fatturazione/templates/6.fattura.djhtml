@@ -1,15 +1,15 @@
 {% extends "base.html" %}{% load url from future %}
-{% load media %}
+{% load staticfiles compressed %}
 {% block title %}{{fattura.nome_fattura}} {{fattura.descrittore}} &raquo; {{ block.super }} {% endblock %}
 
 {% block css %}
 {{ block.super }}
-	{% include_media 'fatturaHtml.css' %}
+	{% static 'fatturazione/fatture.css' %}
 	{% if not readonly %}
 	<style type="text/css">
 		.editable, .editable * {
 			background-color: #eee;
-		}	
+		}
 	</style>
 	{% endif %}
 {% endblock css %}
@@ -22,21 +22,21 @@
 
 <a href='{% url "tamExportFattura" id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
 	<div style="text-align: center">
-		<img src='{% media_url 'fatture/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
+		<img src='{% static 'fatturazione/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
 	</div>
 </a>
 {% if perms.fatturazione.generate %}
 	<div style="text-align: center">
-		<img src="{% media_url 'delbtn.png' %}" class='delfat actionButton noprint' title='cancella fattura' />
+		<img src="{% static 'img/delbtn.png' %}" class='delfat actionButton noprint' title='cancella fattura' />
 	</div>
 {% endif %}
-	
+
 {% endblock %}
 
 {% block bottom %}
 {% if not readonly %}
-	{% include_media 'jquery.editable-1.3.3.js' %}
-	{% include_media 'fattura.js' %}
+	{% compressed_js 'jquery.editable' %}
+	{% compressed_js 'fattura' %}
 {% else %}
 	<script type="text/javascript">
 		$('.editable').removeClass('editable');

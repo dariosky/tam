@@ -70,7 +70,7 @@ urlpatterns = patterns('tam.views.tamviews',
     url(r'^conducente/(?P<id>\d*)/$', 'conducente', {"Model": Conducente, "redirectOk":"/CC/" }, name="tamConducenteId"),
     url(r'^conducente/(?P<id>\d*)/delete/$', 'conducente', {"Model": Conducente, "redirectOk":"/CC/", "delete":True, "note":"Verranno eliminate tutte le corse di questo conducente." }, name="tamConducenteIdDel"),
 
-    url(r'^profilo/$', 'profilo', {"Model": ProfiloUtente, "unique":[] }, name="tamUserProfile"),
+    url(r'^profilo/$', 'profilo', {"Model": ProfiloUtente, "unique":[] }, name="tamUserserProfile"),
 
 	url(r"^util/$", "util", name="tamUtil"),
     url(r"^resetSessions/$", "resetSessions", name="tamResetSessions"),

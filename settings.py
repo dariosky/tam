@@ -4,7 +4,7 @@ import logging
 from socket import gethostname
 host = gethostname().lower()
 
-TAM_VERSION = "5.7"
+TAM_VERSION = "5.8"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario"):
@@ -80,9 +80,55 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
 	'django.contrib.staticfiles.finders.FileSystemFinder',
 	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-# 	'django.contrib.staticfiles.finders.DefaultStorageFinder',
+	#'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
+PIPELINE_CSS = {
+    'tam': {'source_filenames':['css/tam.css'], 'output_filename': 'css/tam.min.css'},
+    'tam-stealth': {'source_filenames':['css/tam-stealth.css'], 'output_filename': 'css/tam-stealth.min.css'},
+    'tamUI': {
+	    'source_filenames':(
+		                    'js/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.min.css',
+	                        'css/tam.css',
+	                       ),
+        'output_filename': 'css/tamUI.min.css',
+    },
+    'prenotazioni': {'source_filenames':('css/prenotazioni.css',), 'output_filename': 'css/prenotazioni.min.css'},
+    'codapresenze': {'source_filenames': ('css/codapresenze.css',), 'output_filename': 'css/codapresenze.min.css'},
+}
+
+PIPELINE_JS = {
+	'tam': {
+		'source_filenames': ['js/jquery.min.js', 'js/jquery.hotkeys.js', 'js/tam-common.js'],
+	    'output_filename': 'tam.min.js'
+	},
+	'tamUI': {
+		'source_filenames': ['js/jquery.min.js', 'js/jquery.hotkeys.js',
+			                 'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js', 'js/calendarPreferences.js',
+		                     'js/tam-common.js'],
+	    'output_filename': 'tamUI.min.js'
+	},
+	'tamCorse': {
+		'source_filenames': ['js/jquery.min.js', 'js/jquery.hotkeys.js',
+			                 'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js', 'js/calendarPreferences.js',
+		                     'js/tam-common.js',
+		                     'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
+	    'output_filename': 'tamCorse.min.js'
+	},
+    'jquery.editable': {
+	    'source_filenames': ['js/jquery.editable-1.3.3.js'],
+        'output_filename': 'js/jquery.editable.min.js',
+    },
+    'fattura': {
+        'source_filenames': ['fatturazione/fattura.js'],
+        'output_filename': 'js/fattura.min.js',
+    },
+    'codapresenze': {
+        'source_filenames': ['js/codapresenze.js'],
+        'output_filename': 'js/codapresenze.min.js',
+    },
+}
 
 # List of callables that know how to import templates from various sources.
 if not DEBUG:
@@ -93,10 +139,12 @@ if not DEBUG:
 			)
 		),
 	)
+#PIPELINE_ENABLED = True
 
+PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify')
 
 MIDDLEWARE_CLASSES = (
-	'mediagenerator.middleware.MediaMiddleware',
+#	'mediagenerator.middleware.MediaMiddleware',
 # 	'django.middleware.gzip.GZipMiddleware',
 	'django.middleware.common.CommonMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
@@ -139,50 +187,6 @@ DATI_CONSORZIO = """"""  # to be printed on the invoices
 OWNER_LOGO = 'fatture/logo.jpg'  # relative to media folder
 INVOICES_FOOTERS = {}  # a dictionary with <invoinces type>:<list of footers>
 
-# MEDIA GENERATOR **********
-MEDIA_DEV_MODE = DEBUG
-DEV_MEDIA_URL = '/mediadev/'
-PRODUCTION_MEDIA_URL = '/mediaprod/'
-GLOBAL_MEDIA_DIRS = (os.path.join(os.path.dirname(__file__), 'media'),)
-MEDIA_BUNDLES = (
-	# CSS *************
-	('tam.css', 'css/tam.css',),
-	('prenotazioni.css', 'css/prenotazioni.css',),
-	('tam-stealth.css', 'css/tam-stealth.css',),
-	('fatturaHtml.css', 'css/fatture.css',),
-	('tamUI.css',
-		'js/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.min.css',
-		'css/tam.css',
-	),
-	# JS **************
-	('tambase.js',
-		'js/jquery.min.js', 'js/jquery.hotkeys.js',
-		'js/tam-common.js',
-	),
-	('tamUI.js',
-		'js/jquery.min.js', 'js/jquery.hotkeys.js',
-		'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js', 'js/calendarPreferences.js',
-		'js/tam-common.js',
-	),
-	('tamCorse.js',
-		'js/jquery.min.js', 'js/jquery.hotkeys.js',
-		'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js', 'js/calendarPreferences.js',
-		'js/tam-common.js', 'js/jquery.scrollTo-min.js', 'js/listaCorse.js',
-	),
-	('selFatture.js', 'js/fatture/table_selector.js'),
-	('tamRules.css', 'css/tamrules.css'),
-	('jquery.editable-1.3.3.js', 'js/jquery.editable-1.3.3.js'),
-	('fattura.js', 'js/fatture/fattura.js'),
-
-)
-YUICOMPRESSOR_PATH = os.path.join(PROJECT_PATH, 'yuicompressor.jar')
-if os.path.exists(YUICOMPRESSOR_PATH):
-	ROOT_MEDIA_FILTERS = {
-		'js': 'mediagenerator.filters.yuicompressor.YUICompressor',
-		'css': 'mediagenerator.filters.yuicompressor.YUICompressor',
-	}
-# **************************
-
 INSTALLED_APPS = [
 	'django.contrib.auth',
 	'django.contrib.contenttypes',
@@ -194,7 +198,8 @@ INSTALLED_APPS = [
 	'django.contrib.admin',
 	'django.contrib.admindocs',
 	'django.contrib.humanize',
-	'mediagenerator',
+	#'mediagenerator',  # this assetmanager is not more developed and since django 1.2 it requires nothreading
+	'pipeline',
 
 	'tam',
 	'south',

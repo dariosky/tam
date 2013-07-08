@@ -1,15 +1,15 @@
-{% extends "base.html" %}{% load url from future %}{% load media %}{% load staticfiles %}
+{% extends "base.html" %}{% load url from future %}{% load staticfiles %}{% load compressed %}
 
 {% block css %}
     {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static "css/codapresenze.css" %}"/>
+    {% compressed_css 'codapresenze' %}
 {% endblock %}
 
 {% block content %}
     <h1>Coda Presenze</h1>
     <div>
         {% if perms.codapresenze.editall %}
-            <select id='conducente'>
+            <label for="conducente">Conducente:</label><select id='conducente'>
             {% for utente in utenti %}
                 <option{% if utente == request.user %} selected="selected"{% endif %}>
                     {{ utente.username }}
@@ -31,7 +31,7 @@
             <br style="clear: both"/>
 
             <div id='dequeue'>Esci dalla coda</div>
-            <div id='refresh'><img src="{% media_url "assoc.png" %}"/> Aggiorna</div>
+            <div id='refresh'><img src="{% static "img/assoc.png" %}"/> Aggiorna</div>
 
             <br style="clear: both"/>
         </form>
@@ -44,7 +44,7 @@
 
 {% block bottom %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static "codapresenze/codapresenze.js" %}"></script>
+    {% compressed_js 'codapresenze' %}
     <script type="text/javascript">
         var coda={{ codajson|safe }};
         username = '{{ request.user.username|safe }}';

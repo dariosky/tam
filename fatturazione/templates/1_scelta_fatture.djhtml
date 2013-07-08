@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load media %}
+{% load staticfiles %}
 {% load url from future %}
 {% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
@@ -19,11 +19,11 @@
 	{{ f.lista.count }} corse.
 	<div style='display:none;'>
 		<div id='goto{{f.d.codice}}' class='floatingBlock'>
-			<a href="#genera{{f.d.codice}}"><img src='{% media_url 'frecciagiu.png' %}' title='genera {{f.d.nome}}'></a>
+			<a href="#genera{{f.d.codice}}"><img src='{% static 'img/frecciagiu.png' %}' title='genera {{f.d.nome}}'></a>
 		</div>
 		<p style='white-space: pre-line;'>{{ f.d.descrizione}}</p>
 		{% with f.lista as lista %}
-		
+
 			{% if lista %}
 				<form method="post" action="{% url f.d.urlname_generazione %}">
 					<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
@@ -43,35 +43,35 @@
 					</div>
 				</form>
 			{% endif %}
-		
+
 		{% endwith %}
 	</div>
 {% endfor %}
-	
+
 </div>
 
 {% endblock %}
 
 {% block bottom %}
-	{% include_media 'selFatture.js' %}
+	<script type="text/javascript" src='{% static 'fatturazione/table_selector.js' %}'></script>
 	<script type="text/javascript">
 	    $(function() {
 			$(".accordhead").click(function(){
 					$(this).next().toggle();
 					return false;
 				});
-			
+
 			{% for f in gruppo_fatture %}
 				scrollableGoto($('#goto{{f.d.codice}}'));
 				table_selector('#check_{{f.d.codice}}', '#table_{{f.d.codice}}');
 			{% endfor %}
-		
+
 			$('#date_range input[type=text]').datepicker();
 			$('.clientSelect').click(function(){
 				// seleziono da qui al prossimo cliente indicato
 				selectCheckboxToNext(this);
 				return false;
-			});	
+			});
 	    });
 	</script>
 {% endblock bottom %}
