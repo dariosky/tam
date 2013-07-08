@@ -24,7 +24,7 @@
     bottom: 10px;
     width: 32px;
     height: 32px;
-    background: url(/media/attachment.png)
+    background: url(../img/attachment.png)
     /*top:-12px;*/
 }
 
@@ -37,7 +37,7 @@
 #board .del-mark {
     width: 31px;
     height: 31px;
-    background: url(/media/x_del.png);
+    background: url(../img/x_del.png);
     cursor: pointer;
     position: absolute;
     right: -15px;

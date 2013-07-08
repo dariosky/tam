@@ -21,17 +21,17 @@ class AutoCompleteForm(forms.ModelChoiceField):
 			return self.queryset.filter(**{self.widget.fieldname:value}).get()	# find the client given fielname
 		except self.queryset.model.DoesNotExist:
 			newobj=self.queryset.model.objects.create(**{self.widget.fieldname:value})
-			
+
 			return newobj # doesn't exist
 
 
 class AutoCompleteWidget(forms.widgets.Widget):
 	class Media:
-		js =('/media/js/jquery-autocomplete/jquery.autocomplete.min.js',)
+		js = [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.min.js')]
 		css = {
-            'all': ('/media/js/jquery-autocomplete/jquery.autocomplete.css',)
+            'all': [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.css')]
         }
-		
+
 	lookup_url = None
 
 	def __init__(self, lookup_url, Model, fieldname, **kwargs):
@@ -39,7 +39,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
 		self.lookup_url=lookup_url
 		self.Model=Model
 		self.fieldname=fieldname
-		
+
 	def render(self, name, value, attrs=None):
 		if value is None:
 			value=""
@@ -51,27 +51,27 @@ class AutoCompleteWidget(forms.widgets.Widget):
 		final_attrs = self.build_attrs(attrs, name=name, value=value)
 		final_attrs['class'] = 'autocomplete_widget'
 		id = final_attrs.get('id', 'id_%s' % name)
-		
+
 		js="""
 			<script type="text/javascript">
 				window.onload = function(){
 					$("#%(id)s").autocomplete( "%(lookup_url)s", {minChars:2} );
-				}	
+				}
 			</script>
 		""" % { "id": id, 'lookup_url':self.lookup_url }
 		return mark_safe("<input%(attrs)s /> %(js)s"% {"attrs":forms.widgets.flatatt(final_attrs), "js":js } )
 
 
 
-		
+
 class ViaggioForm(forms.ModelForm):
 	class Media:
-		js = ('/media/js/nuovaCorsaPag1.js',)
+		js = [staticfiles_storage.url('js/nuovaCorsaPag1.js')]
 
 	data=MySplitDateTimeField(label="Data e ora", date_input_formats=[_('%d/%m/%Y')], time_input_formats=[_('%H:%M')],
 						 widget=MySplitDateWidget())
 	data.widget.widgets[0].format='%d/%m/%Y'
-	
+
 	privato=forms.BooleanField(initial=False, required=False)	# privato checkbox
 #	cliente=AutoCompleteForm(queryset=Cliente.objects.filter(attivo=True), required=False,
 #									widget=AutoCompleteWidget(
@@ -95,7 +95,7 @@ class ViaggioForm(forms.ModelForm):
 				   widget=forms.RadioSelect
 				)
 
-	
+
 	def clean(self):
 		data=self.cleaned_data
 		if not data.get("privato") and not data["cliente"]:
@@ -106,7 +106,7 @@ class ViaggioForm(forms.ModelForm):
 	class Meta:
 		model=Viaggio
 		fields=["data", "da", "a", "cliente", "passeggero", "numero_passeggeri", "esclusivo", "privato", "padre"]
-		
+
 
 
 class ViaggioForm2(forms.ModelForm):

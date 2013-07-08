@@ -2,7 +2,7 @@ Notes about this deployment:
 
 Everything should go on virtualenv
 
-Pip requirements in deploy/requirements.txt
+Pip requirements in requirements.txt
 
 wsgi has "projects" folder on path, so settings is <appname>.settings
 
@@ -10,15 +10,15 @@ Webfaction folders
 	code in ~/projects/<appname>
 	wsgi app in ~/webapps/wsgi
 	httpd.conf has virtualenv python-path set
-	
+
 	**
 	14116  1860 /home/dariosky/webapps/wsgi/apache2/bin/httpd.worker -f /home/dariosky/webapps/wsgi/apache2/conf/httpd.conf -k start
 	14117  3796 /home/dariosky/webapps/wsgi/apache2/bin/httpd.worker -f /home/dariosky/webapps/wsgi/apache2/conf/httpd.conf -k start
 	14118  3796 /home/dariosky/webapps/wsgi/apache2/bin/httpd.worker -f /home/dariosky/webapps/wsgi/apache2/conf/httpd.conf -k start
 	14119  3812 /home/dariosky/webapps/wsgi/apache2/bin/httpd.worker -f /home/dariosky/webapps/wsgi/apache2/conf/httpd.conf -k start
 	14120  1504 /home/dariosky/webapps/wsgi/apache2/bin/httpd.worker -f /home/dariosky/webapps/wsgi/apache2/conf/httpd.conf -k start
-	**	
-	
+	**
+
 uwsgi test:
 	custom listening app on port 48871
 	nginx
@@ -38,8 +38,7 @@ uwsgi test:
 		  --http-proxy-temp-path=/home/dariosky/webapps/uwsgi/nginx/tmp/nginx/proxy/ \
 		  --http-fastcgi-temp-path=/home/dariosky/webapps/uwsgi/nginx/tmp/nginx/fcgi/
 		make && make install
-		
+
 
 	uwsgi:
 	http://projects.unbit.it/downloads/uwsgi-0.9.9.3.tar.gz
-	

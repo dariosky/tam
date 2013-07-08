@@ -1,5 +1,5 @@
 {% load utilTag %}
-{% load media %}
+{% load staticfiles %}
 <tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'>
 	<td>
 		{% if not distinct %}
@@ -44,7 +44,7 @@
 
 	<td>
 	{% if viaggio.padre_id and not distinct %}
-		<img src="{% media_url "arrow_join.png" %}" alt='' />
+		<img src="{% static "img/arrow_join.png" %}" alt='' />
 	{% else %}
 		{% if viaggio.annullato %}
 			{% if viaggio.conducente %}{{ viaggio.conducente }}{% endif %}
@@ -72,7 +72,7 @@
 						{% endwith %}
 					{% endif %}
 				{% endif %}
-				{% if confirmed %}<br/><img alt="confermato" src="{% media_url "ok.png" %}" /> {% endif %}
+				{% if confirmed %}<br/><img alt="confermato" src="{% static "img/ok.png" %}" /> {% endif %}
 			{% endwith %}
 		{% endif %}
 	{% endif %}

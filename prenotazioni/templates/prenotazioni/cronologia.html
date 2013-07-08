@@ -1,4 +1,4 @@
-{% extends 'prenotazioni/base.html' %}{% load media %}{% load url from future %}
+{% extends 'prenotazioni/base.html' %}{% load staticfiles %}{% load url from future %}
 {% block content %}
 	{% if thisPage.has_other_pages %}
 		<div class="countblock noprint">
@@ -50,9 +50,9 @@
 				<td>{{ viaggio.data|date:"j F Y, H:i" }}<br />
 					{{ viaggio.numero_passeggeri }} pax
 					{% if not viaggio.esclusivo %}
-						<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
+						<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo" />
 					{% else %}
-						<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
+						<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi" />
 					{% endif %}
 				</td>
 				{% if viaggio.is_prenotazione %}
@@ -72,7 +72,7 @@
 									{% endif %}
 								</a>
                                 {% if prenotazione.had_attachment %}
-									<div><img src="{%  media_url "attachment.gif" %}" title="Un allegato è già stato inviato"/></div>
+									<div><img src="{%  static "img/attachment.gif" %}" title="Un allegato è già stato inviato"/></div>
                                 {%  endif %}
 							</td>
 						{% endif %}

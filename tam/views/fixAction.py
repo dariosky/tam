@@ -136,9 +136,35 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		setperm.create_missing_permissions()
 		setperm.create_missing_groups()
 		setperm.setDefaultPermissions()
+
 	if request.POST.get("deleteAllCorse"):
 		messageLines.append("CANCELLO TUTTE LE CORSE")
 		Viaggio.objects.all().delete()
+
+	if request.POST.get("renewTragitto"):
+		messageLines.append("Aggiorno il tragitto precalcolato, senza toccare nient'altro.")
+		# passaggio da mediagenerator a django-pipeline... gli asset precalcolati li lascio senza timestamp
+		query_asset_sub = r"""
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(night[\d]*)-[a-z0-9]*', '/static/img/\1', 'g')
+							where html_tragitto like '%mediaprod%' and html_tragitto like '%night%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(morning[\d]*)-[a-z0-9]*', '/static/img/\1', 'g')
+							where html_tragitto like '%mediaprod%' and html_tragitto like '%morning%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right)-[a-z0-9]*', '/static/img/\1', 'g')
+							where html_tragitto like '%mediaprod%' and html_tragitto like '%arrow_right%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport)-[a-z0-9]*', '/static/\1', 'g')
+							where html_tragitto like '%mediaprod%' and html_tragitto like '%flag/luogo-airport%';
+						  """.replace("%", "%%")
+		from django.db import connection
+		cursor = connection.cursor()
+		cursor.execute(query_asset_sub)
+		connection.commit()
 
 	return render_to_response(template_name, {"messageLines":messageLines, "error":error},
 							context_instance=RequestContext(request))

@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% load media %}
-	
+{% load staticfiles %}
+
 {% block title %}{{fattura.nome_fattura}} {{fattura.anno}}/{{fattura.progressivo}}{% endblock %}
 
 {% block css %}
 	{{ block.super }}
-	<link rel="stylesheet" type="text/css" href="{% media_url 'css/fatture.css' %}" />
+	<link rel="stylesheet" type="text/css" href="{% static 'fatturazione/fatture.css' %}" />
 
 <style type="text/css">
 	/*.navBar, #footer {display:none}*/
@@ -28,18 +28,18 @@
 		-pdf-frame-content: fat_header;
 		-pdf-frame-border: 1;
 	}
-	
+
 	@frame footer {
 		bottom: 0;
 		height: 1.5cm;
-		
+
 		-pdf-frame-content: fat_footer;
 		-pdf-frame-border: 1;
 	}
 }
 </style>
 {% endif %}
-	
+
 {% endblock css %}
 
 {% block content %}
@@ -48,8 +48,8 @@
 
 <div style="text-align: center" class='noprint'>
 	<a href='javascript:window.print()' target='_blank'>
-		<img src='{% media_url 'fatture/print_icon.png' %}' title='Stampa' alt='Stampa' />
+		<img src='{% static 'fatturazione/print_icon.png' %}' title='Stampa' alt='Stampa' />
 	</a>
-</div>	
+</div>
 
 {%endblock content %}

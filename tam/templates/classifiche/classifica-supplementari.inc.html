@@ -1,4 +1,4 @@
-{% load utilTag %}{% load media %}
+{% load utilTag %}{% load staticfiles %}
 <div>
 <h2><a href="#">
 		{{ classifica_definita.nome }}
@@ -20,7 +20,7 @@
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td>{{ classifica.conducente }}</td>
 		<td>
-			{% if image %}<img src="{% media_url image %}" alt="*" />{% endif %} x {{ punti }}
+			{% if image %}<img src="{% static image %}" alt="*" />{% endif %} x {{ punti }}
 		</td>
 	    </tr>
 	{% endfor %}

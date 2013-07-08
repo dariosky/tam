@@ -1,4 +1,4 @@
-{% extends "clienti_e_listini.html" %}{% load media %}{% load url from future %}
+{% extends "clienti_e_listini.html" %}{% load staticfiles %}{% load url from future %}
 
 {% block title %}Listino &raquo; {{ block.super }}{% endblock %}
 
@@ -21,7 +21,7 @@
 {% if not nuovo %}
 <div class='noprint'>
 	<a href='{% url "tamExportListino" id_listino=listino.id %}' target='_blank'>
-		<img src='{% media_url 'fatture/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
+		<img src='{% static 'fatturazione/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
 	</a>
 </div>
 {% endif %}
@@ -66,7 +66,7 @@
 		    <td>{% ifchanged prezzo.tipo_servizio prezzo.tratta.da %}{{ prezzo.tratta.da }}{% endifchanged %}</td>
 		    <td>{% ifchanged prezzo.tratta.a %}{{ prezzo.tratta.a }}{% endifchanged %}</td>
 		    <td>
-			    <a href="{% url "tamListinoPrezzoId" listino.id prezzo.id %}"><img src="/media/matita.ico" alt="edit" /></a>
+			    <a href="{% url "tamListinoPrezzoId" listino.id prezzo.id %}"><img src="{% static 'img/matita.ico' %}" alt="edit" /></a>
 			    {{ prezzo.prezzo_diurno }}€ / {{ prezzo.prezzo_notturno }}€
 			    {% if prezzo.commissione %}
 				    commissione: {{ prezzo.commissione }}
@@ -75,13 +75,13 @@
 		    </td>
 		    <td>
 				{% ifequal prezzo.tipo_servizio "C" %}
-				    <img width="12px" height="12px" src="/media/c.ico" alt="collettivo" />
+				    <img width="12px" height="12px" src="{% static 'img/c.ico' %}" alt="collettivo" />
 				{% else %}
-				    <img width="12px" height="12px" src="/media/t.ico" alt="taxi" />
+				    <img width="12px" height="12px" src="{% static 'img/t.ico' %}" alt="taxi" />
 				{% endifequal %}
 				{{ prezzo.max_pax }}pax
-				{% if prezzo.flag_fatturazione = 'S' %}<img src='/media/flag/fat_on.png' title='Fatturazione forzata da listino' />{% endif %}
-				{% if prezzo.flag_fatturazione = 'N' %}<img src='/media/flag/fat_off.png' title='Fatturazione disattivata da listino'/>{% endif %}
+				{% if prezzo.flag_fatturazione == 'S' %}<img src='{% static 'flag/fat_on.png' %}' title='Fatturazione forzata da listino' />{% endif %}
+				{% if prezzo.flag_fatturazione == 'N' %}<img src='{% static 'flag/fat_off.png' %}' title='Fatturazione disattivata da listino'/>{% endif %}
 		    </td>
 		</tr>
 	    {% endfor %}

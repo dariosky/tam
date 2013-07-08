@@ -1,4 +1,4 @@
-{% load media %}{% load url from future %}
+{% load staticfiles %}{% load url from future %}
 <div style='display:none;'>
 	<table class='tablesorter' style='text-align: center'>
 	<tr><th>Fattura</th><th>cliente</th><th>righe</th><th>Importo</th></tr>
@@ -7,14 +7,14 @@
 			<td>
 				{{fattura.descrittore}}
 				<a href='{% url "tamFatturaId" fattura.id %}' class='fatturaTipo{{f.d.codice}}Back fatturaIcon'>
-					<img src='{% media_url 'fatture/invoice-icon.png' %}' />
+					<img src='{% static 'fatturazione/invoice-icon.png' %}' />
 				</a>
 				emessa {{fattura.data|date:"l j F Y"}}
 			</td>
 			<td>
 				{% if fattura.cliente %}
 					<a href='{%url "tamClienteId" fattura.cliente.id %}?next={{ full_request_path }}'>{{fattura.cliente.nome}}</a>
-				{% else %}	
+				{% else %}
 					{% if fattura.passeggero %}
 						Privato:<br/>
 						<a href='{%url "tamPrivatoId" fattura.passeggero.id %}?next={{ full_request_path }}'>{{fattura.passeggero.nome}}</a>
@@ -22,7 +22,7 @@
 						{{ fattura.destinatario }}
 					{% endif %}
 				{% endif %}
-				<div class='dati'>{{ fattura.emessa_a }}</div>	
+				<div class='dati'>{{ fattura.emessa_a }}</div>
 			</td>
 			<td>{{fattura.righe.count}}</td>
 			<td class='prezzo'>{{fattura.val_totale|floatformat:"-2"}} €</td>
@@ -32,7 +32,7 @@
 	{% if perms.fatturazione.generate %}
 	<div>
 		<a href='{% url f.d.urlname_manuale %}'>
-		<img src='{% media_url 'addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova {{ f.d.nome }} manuale' />
+		<img src='{% static 'img/addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova {{ f.d.nome }} manuale' />
 		Nuova {{ f.d.nome }} manuale.
 		</a>
 	</div>

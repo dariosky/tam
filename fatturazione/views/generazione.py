@@ -24,7 +24,7 @@ Chiedo di generare le fatture
 	_fino a_
 	anno
 	progressivo
-	
+
 Generazione Fatture consorzio (a cliente):
 	progressivo annuale, ma variabile
 	iva 10% sulle corse
@@ -34,7 +34,7 @@ Generazione Fatture consorzio (a cliente):
 Generazione Fatture Conducenti (a consorzio, tutte le corse fatturabili):
 	progressivo in bianco
 	(senza logo)
-	
+
 Generazione Ricevute (viaggi con pagamento posticipato)
 
 
@@ -108,8 +108,8 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 								"data_start":data_start,
 								"data_end":data_end,
 								"dontHilightFirst":True,
-								"mediabundleJS": ('tamUI.js',),
-								"mediabundleCSS": ('tamUI.css',),
+								"mediabundleJS": ('tamUI',),
+								"mediabundleCSS": ('tamUI',),
 
 								"gruppo_fatture": gruppo_fatture,
 								'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
@@ -302,8 +302,8 @@ def genera_fatture(request, fatturazione):
 								"progressivo_iniziale":progressivo_iniziale,
 
 								"lista":lista,
-								"mediabundleJS": ('tamUI.js',),
-								"mediabundleCSS": ('tamUI.css',),
+								"mediabundleJS": ('tamUI',),
+								"mediabundleCSS": ('tamUI',),
 								"singolare": nomi_fatture[tipo],
 								"fatture":fatture,
 								"plurale":plurale,

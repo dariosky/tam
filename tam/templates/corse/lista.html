@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load media %}
+{% load compressed staticfiles %}
 {% block topContent %}
 	{% include "corse/corse_filter.inc.html" %}
 {% endblock %}
@@ -15,8 +15,8 @@
 	<div id="selActions">
 		<div id="associa">
 			<strong>Link</strong><br/>
-			<a id="linkUrl" href="#"><img src="{% media_url "assoc.png" %}" alt="semplice" title="associazione semplice"/></a><br/>
-			<a id="unlinkUrl" href="#"><img src="{% media_url "smallX.png" %}" alt="x" title="disassocia" /></a><br/>
+			<a id="linkUrl" href="#"><img src="{% static "img/assoc.png" %}" alt="semplice" title="associazione semplice"/></a><br/>
+			<a id="unlinkUrl" href="#"><img src="{% static "img/smallX.png" %}" alt="x" title="disassocia" /></a><br/>
 		</div>
 	</div>
     {% if viaggi %}

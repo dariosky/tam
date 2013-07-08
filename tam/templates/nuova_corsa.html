@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load media %}{% load url from future %}
+{% extends "base.html" %}{% load staticfiles %}{% load url from future %}
 
 {% block title %}{% if viaggio.id %} Modifica {% else %} Nuova {% endif %} corsa &raquo; {{ block.super }}{% endblock %}
 
@@ -51,15 +51,15 @@
 			{% if prezzolistino %}
 				Prezzo da listino {{prezzolistino.listino}}
 				{% if viaggio.esclusivo %}
-					<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
+					<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi" />
 				{%else%}
-					<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
+					<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo" />
 				{%endif%}
-				{% if prezzoDaListinoDiurno %}<img src='{% media_url "morning.png" %}' />{%else%}<img src='{% media_url "night.png" %}' />{% endif %}
+				{% if prezzoDaListinoDiurno %}<img src='{% static "img/morning.png" %}' />{%else%}<img src='{% static "img/night.png" %}' />{% endif %}
 				{{ prezzo_da_listino|floatformat:"2" }}€
-			{% endif %}	
-			{% if fatturazione_forzata = 'S' %}<img src='{% media_url "flag/fat_on.png" %}' title='Fatturazione forzata da listino' />{% endif %}
-			{% if fatturazione_forzata = 'N' %}<img src='{% media_url "flag/fat_off.png" %}' title='Fatturazione disattivata da listino'/>{% endif %}
+			{% endif %}
+			{% if fatturazione_forzata = 'S' %}<img src='{% static "flag/fat_on.png" %}' title='Fatturazione forzata da listino' />{% endif %}
+			{% if fatturazione_forzata = 'N' %}<img src='{% static "flag/fat_off.png" %}' title='Fatturazione disattivata da listino'/>{% endif %}
 			<table style='text-align:left; margin:auto;'>
 				{{ form }}
 				{% if viaggio.passeggero %}
@@ -102,7 +102,7 @@
                     {% if deleteUrl %}
 							<br/>
 							<a href="{{ deleteUrl }}">
-								<img src="{% media_url "delbtn.png" %}" alt="Cancella corsa" />
+								<img src="{% static "img/delbtn.png" %}" alt="Cancella corsa" />
 		                    </a>
 					{% endif %}
                 {% endwith %}
@@ -143,10 +143,10 @@
 		}
 		window.onbeforeunload=askConfirm;
 		{% if da_speciale = "A" %}
-			$("#id_abbuono_fisso").parent().append('<img src="{% media_url "flag/luogo-airport.png" %}" />');
+			$("#id_abbuono_fisso").parent().append('<img src="{% static "flag/luogo-airport.png" %}" />');
 		{% endif%}
 		{% if da_speciale = "S" %}
-			$("#id_abbuono_fisso").parent().append('<img src="{% media_url "flag/luogo-train.png" %}" />');
+			$("#id_abbuono_fisso").parent().append('<img src="{% static "flag/luogo-train.png" %}" />');
 		{% endif%}
 	} );
 </script>

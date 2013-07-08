@@ -1,4 +1,4 @@
-{% load utilTag media %}
+{% load utilTag %}{% load staticfiles %}
 <tr>
 	<td>{{ viaggio.data|date:"D j F, H:i" }}<br>
 		{{ viaggio.path|safe }}
@@ -6,9 +6,9 @@
 	<td>{{ viaggio.cliente|default:"<i>Privato</i>" }}<br>
 		{{ viaggio.pax }} pax
 		{% if viaggio.flag_esclusivo%}
-			<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
+			<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi" />
 		{% else %}
-			<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
+			<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo" />
 		{% endif %}
 	</td>
 	{% if viaggio.flag_arrivo %}
@@ -16,7 +16,7 @@
 			{% ifequal viaggio.a luogoRiferimento %}
 				ARRIVO {{ viaggio.da }}
 			{% else %}
-				{{ viaggio.da }}<img src="{% media_url "fout.png" %}" alt="Arrivo" />{{ viaggio.a }}
+				{{ viaggio.da }}<img src="{% static "img/fout.png" %}" alt="Arrivo" />{{ viaggio.a }}
 			{% endifequal %}
 		</td>
 	{% else %}
@@ -24,7 +24,7 @@
 			{% ifequal viaggio.da luogoRiferimento %}
 				PARTENZA {{ viaggio.a }}
 			{% else %}
-				{{ viaggio.da }}<img src="{% media_url "fin.png" %}" alt="Partenza" />{{ viaggio.a }}
+				{{ viaggio.da }}<img src="{% static "img/fin.png" %}" alt="Partenza" />{{ viaggio.a }}
 			{% endifequal %}
 		</td>
 	{% endif %}
@@ -34,13 +34,13 @@
 	<td>
 		{% if viaggio.punti_abbinata %}
 			{% num_range viaggio.punti_abbinata as punti_abbinata %}
-			{% for punto in punti_abbinata %}<img src="{% media_url "casina.png" %}" alt='DV'>{% endfor %}
+			{% for punto in punti_abbinata %}<img src="{% static "img/casina.png" %}" alt='DV'>{% endfor %}
 			<br>
 		{% endif %}
 		{{ viaggio.prezzo }}<br>{{ viaggio.prezzo_detail|safe }}
-		{% if viaggio.flag_fatturazione %}<br/><img src="{% media_url "flag/fattura.png" %}" alt="richiede fattura" />{% endif %}
-		{% if viaggio.flag_pagamentoDifferito %}<br/><img src="{% media_url "flag/timedelta.png" %}" alt="pagamento differito" />{% endif %}
-		{% if viaggio.flag_cartaDiCredito %}<br/><img src="{% media_url "flag/card.png" %}" alt="carta" />{% endif %}
+		{% if viaggio.flag_fatturazione %}<br/><img src="{% static "flag/fattura.png" %}" alt="richiede fattura" />{% endif %}
+		{% if viaggio.flag_pagamentoDifferito %}<br/><img src="{% static "flag/timedelta.png" %}" alt="pagamento differito" />{% endif %}
+		{% if viaggio.flag_cartaDiCredito %}<br/><img src="{% static "flag/card.png" %}" alt="carta" />{% endif %}
 		{% if viaggio.flag_fineMese %}<br/>CONTO FINE MESE{% endif %}
 		{{ viaggio.numero_pratica|default:"" }}
 	</td>

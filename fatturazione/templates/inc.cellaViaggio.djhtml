@@ -1,11 +1,11 @@
-{% load media %}{% load url from future %}
+{% load staticfiles %}{% load url from future %}
 <div><a href='{% url "tamNuovaCorsaId" viaggio.id %}'>{{viaggio.da}}-{{viaggio.a}}</a></div>
 {% include "corse/cella_ora_e_percorso.inc.html" %}
 <div>
 	{{ viaggio.numero_passeggeri }} pax
 	{% if viaggio.esclusivo%}
-		<img width="12px" height="12px" src="{% media_url "t.ico" %}" alt="taxi" />
+		<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi" />
 	{% else %}
-		<img width="12px" height="12px" src="{% media_url "c.ico" %}" alt="collettivo" />
+		<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo" />
 	{% endif %}
 </div>

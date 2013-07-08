@@ -1,4 +1,4 @@
-<div>
+{% load staticfiles %}<div>
 <h2><a href="#">
 		{{ classifica_definita.nome }}
 		{% if classifica_definita.descrizione %}({{ classifica_definita.descrizione }}){% endif %}
@@ -18,7 +18,7 @@
 	{% for punti, nick, classifica in classifica_definita.dati %}
 	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
 		<td style="width:130px;">
-		    <img alt="" class="hbar" src="/media/hbar.png" width="{% widthratio punti classifica_definita.max 130 %}" />
+		    <img alt="" class="hbar" src="{% static 'img/hbar.png' %}" width="{% widthratio punti classifica_definita.max 130 %}" />
 		</td>
 		<td>{{ classifica.conducente }}</td>
 		<td>{{ punti|floatformat:"-2" }}€</td>

@@ -46,8 +46,8 @@ def menu(request, template_name="archive/menu.html"):
 			{
 				"dontHilightFirst": dontHilightFirst,
 				"form": form,
-				"mediabundleJS": ('tamUI.js',),
-				"mediabundleCSS": ('tamUI.css',),
+				"mediabundleJS": ('tamUI',),
+				"mediabundleCSS": ('tamUI',),
 			}
 			, context_instance=RequestContext(request))
 

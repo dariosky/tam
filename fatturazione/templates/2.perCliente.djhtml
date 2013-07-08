@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load media %}{% load url from future %}
+{% load staticfiles %}{% load url from future %}
 {% block title %}Generazione {{ fatturazione.nome }} &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
@@ -10,12 +10,12 @@
 		{% if lista %}
 		<form method="post" action="">
 		<div id='goto' class='floatingBlock'>
-			<a href="#genera"><img src='{% media_url 'frecciagiu.png' %}' title='genera {{ fatturazione.nome }}'></a>
+			<a href="#genera"><img src='{% static 'img/frecciagiu.png' %}' title='genera {{ fatturazione.nome }}'></a>
 		</div>
 		<input type='hidden' name='anno' value='{{anno}}'>
 		<input type='hidden' name='progressivo' value='{{progressivo_iniziale}}'>
 		<input type='hidden' name='data_generazione' value='{{ data_generazione|date:"d/m/Y" }}' />
-		
+
 		<table class='tablesorter' style="text-align:center" >
 		<thead>
 			<tr>
@@ -60,7 +60,7 @@
 			<input type="submit" name="generate" value="Genera {{ fatturazione.nome }}"/>
 		</a>
 		</form>
-		
+
 		{% endif %}
 </div>
 
