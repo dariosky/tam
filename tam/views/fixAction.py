@@ -160,6 +160,15 @@ def fixAction(request, template_name="utils/fixAction.html"):
 							update tam_viaggio
 							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport)-[a-z0-9]*', '/static/\1', 'g')
 							where html_tragitto like '%mediaprod%' and html_tragitto like '%flag/luogo-airport%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/media/(flag/luogo-airport)', '/static/\1', 'g')
+							where html_tragitto like '%/media/%' and html_tragitto like '%flag/luogo-airport%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/media/(night|morning|arrow_right)\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/media/%';
+
 						  """.replace("%", "%%")
 		from django.db import connection
 		cursor = connection.cursor()
