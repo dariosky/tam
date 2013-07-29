@@ -2,6 +2,7 @@
 import os
 import logging
 from socket import gethostname
+
 host = gethostname().lower()
 
 TAM_VERSION = "5.9"

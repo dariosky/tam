@@ -12,7 +12,7 @@ urlpatterns = patterns('',
 	(r'^archive/', include('tamArchive.urls')),
 	#( r'', include( 'license.urls' ) ),
 	(r'^fatture/', include('fatturazione.urls')),
-	(secure_url_regex, include('securestore.urls')),
+	#(secure_url_regex, include('securestore.urls')),
 )
 
 # add pluggable apps URL
