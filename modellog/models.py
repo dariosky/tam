@@ -1,7 +1,7 @@
-from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
+from django.contrib.staticfiles.storage import staticfiles_storage
 
 LOG_ACTION_TYPE = [
 					("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
