@@ -1451,7 +1451,7 @@ def newUser(request, template_name="utils/newUser.html"):
 
 def delUser(request, username, template_name="utils/delUser.html"):
 	user = request.user
-	if not user.has_perm('auth.del_user'):
+	if not user.has_perm('auth.delete_user'):
 			messages.error(request, "Non hai l'autorizzazione per cancellare gli utenti.")
 			return HttpResponseRedirect(reverse("tamUtil"))
 	userToDelete = User.objects.get(username=username)
