@@ -22,7 +22,7 @@ $(function () {
     var $status = $("#status");
     var $submit = $("#submit_btn");
 
-    socket = io.connect("http://localhost:8080/board"
+    var socket = io.connect("http://localhost:8080/board"
         //{ resource: 'backeca/socket.io' }
     );
 
@@ -103,7 +103,7 @@ $(function () {
     });
 
     /* Delete the message */
-    $('.del-mark').live('click', function () {
+    $('.del-mark').on('click', function () {
         var confirmation = confirm('Sicuro di voler cancellare il messaggio?');
         if (!confirmation) return;
         var message = $(this).parent('.message')[0];

@@ -23,8 +23,6 @@ function table_selector(global_check, table) {
 				return;
 			}
 		}
-		$(this).css("background")
-		//console.log("partial");
 	});
 	
 	$(global_check).change(function(){
@@ -39,18 +37,20 @@ function selectCheckboxToNext(from) {
 	 * se sono tutte selezionate le deseleziono altrimenti le seleziono
 	 */
 	var questaRiga = $(from).closest("tr")[0];
-	var nextRows = $(questaRiga).nextAll().andSelf(); // tutte le prossime righe
+	var nextRows = $(questaRiga).nextAll().addBack(); // tutte le prossime righe
 	
-	//console.log("Processo le prossime ", nextRows.length, " righe.")
+	var seleziono = !$(questaRiga).find("input[type=checkbox]").prop("checked");
+	//console.log(seleziono?"Seleziono":"Deseleziono" + " le prossime ", nextRows.length, " righe.");
+	var righe=0;
 	nextRows.each(function(){
-		//console.log("passo la linea", this);
 		if (this!=questaRiga && $(this).has(".clientSelect").length){
-			//console.log("Esco", this, "ha clienti");
 			return false;	// stop the loop
 		}
 		else {
-			//console.log("Seleziono la riga", this);
-			$(this).find("input[type=checkbox]").attr("checked", true);
+			righe += 1;
+			$(this).find("input[type=checkbox]").prop("checked", seleziono);
 		}
+
 	});
+	//console.log(righe + ' righe.')
 }

@@ -134,7 +134,7 @@
 	$( function() {
 		$("#clear").click( function(){ document.location="{% url "tamCorsaClear" %}"; });
 		var formChanged=false;
-		$("input").live('change', function(){
+		$("input").on('change', function(){
 			formChanged=true;
 		});
 		$("input:submit").live('click', function(){formChanged=false;})
@@ -142,10 +142,9 @@
 			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
 		}
 		window.onbeforeunload=askConfirm;
-		{% if da_speciale = "A" %}
+		{% if da_speciale == "A" %}
 			$("#id_abbuono_fisso").parent().append('<img src="{% static "flag/luogo-airport.png" %}" />');
-		{% endif%}
-		{% if da_speciale = "S" %}
+		{% elif da_speciale == "S" %}
 			$("#id_abbuono_fisso").parent().append('<img src="{% static "flag/luogo-train.png" %}" />');
 		{% endif%}
 	} );

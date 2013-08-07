@@ -75,7 +75,7 @@ Number.prototype.formatMoney = function(c, d, t){
 
 
 // creo le azioni in Ajax per la cancellazione
-$('.delrow').live("click",
+$('.delrow').on("click",
 	function(){
 		if (!confirm('Sicuro di voler cancellare la riga?')) return;
 		var row = $(this).closest('tr');
@@ -97,7 +97,7 @@ $('.delrow').live("click",
 	}
 );
 
-$('.delfat').live("click",
+$('.delfat').on("click",
 	function(){
 		if (!confirm('Sicuro di voler cancellare l\'intera fattura?')) return false;
 		$.post("",
