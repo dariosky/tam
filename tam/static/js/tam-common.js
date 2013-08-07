@@ -1,7 +1,7 @@
 /* funzioni JS comuni ovunque in tam */
 if (typeof $ != "undefined") {
 	$(document).ready(function () {
-		$('.messages').live("click", function () {
+		$('.messages').on("click", function () {
 			$(this).fadeOut('slow', function () {
 				$(this).remove()
 			});

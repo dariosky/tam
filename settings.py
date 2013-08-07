@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "5.9"
+TAM_VERSION = "5.91"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario"):
@@ -85,12 +85,16 @@ STATICFILES_FINDERS = (
 )
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
+jqueryURL = 'js/jquery.min.js'	# 1.7.2, port no newer one should need change autocomplete
+jqueryUIURL =    'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
+jqueryUICSSURL = 'js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css'
+
 PIPELINE_CSS = {
     'tam': {'source_filenames':['css/tam.css'], 'output_filename': 'css/tam.min.css'},
     'tam-stealth': {'source_filenames':['css/tam-stealth.css'], 'output_filename': 'css/tam-stealth.min.css'},
     'tamUI': {
 	    'source_filenames':(
-		                    'js/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.min.css',
+							jqueryUICSSURL,
 	                        'css/tam.css',
 	                       ),
         'output_filename': 'css/tamUI.min.css',
@@ -99,20 +103,22 @@ PIPELINE_CSS = {
     'codapresenze': {'source_filenames': ('css/codapresenze.css',), 'output_filename': 'css/codapresenze.min.css'},
 }
 
+
 PIPELINE_JS = {
 	'tam': {
-		'source_filenames': ['js/jquery.min.js', 'js/jquery.hotkeys.js', 'js/tam-common.js'],
+		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js', 'js/tam-common.js'],
 	    'output_filename': 'tam.min.js'
 	},
 	'tamUI': {
-		'source_filenames': ['js/jquery.min.js', 'js/jquery.hotkeys.js',
-			                 'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js', 'js/calendarPreferences.js',
+		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+							 jqueryUIURL, 'js/calendarPreferences.js',
 		                     'js/tam-common.js'],
 	    'output_filename': 'tamUI.min.js'
 	},
 	'tamCorse': {
-		'source_filenames': ['js/jquery.min.js', 'js/jquery.hotkeys.js',
-			                 'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js', 'js/calendarPreferences.js',
+		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+							 jqueryUIURL,
+							 'js/calendarPreferences.js',
 		                     'js/tam-common.js',
 		                     'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
 	    'output_filename': 'tamCorse.min.js'

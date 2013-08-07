@@ -1,0 +1,10 @@
+Custom selection:
+All UI Core
+
+Widget:
+	Accordion
+	Autocomplete
+	Datepicker
+	Menu
+	
+UI-lightness
