@@ -4,7 +4,7 @@
 
 {% block css %}
 {{ block.super }}
-	{% static 'fatturazione/fatture.css' %}
+	<link href="{% static 'fatturazione/fatture.css' %}" rel="stylesheet" type="text/css" />
 	{% if not readonly %}
 	<style type="text/css">
 		.editable, .editable * {

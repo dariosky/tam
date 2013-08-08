@@ -136,6 +136,7 @@ PIPELINE_JS = {
         'output_filename': 'js/codapresenze.min.js',
     },
 }
+PIPELINE_DISABLE_WRAPPER = True
 
 # List of callables that know how to import templates from various sources.
 if not DEBUG:
