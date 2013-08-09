@@ -238,7 +238,7 @@ def genera_fatture(request, fatturazione):
 
 					if esente_iva:
 						# alle esenti IVA metto l'imposta di bollo
-						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("1.81"), riga=riga)
+						riga_fattura = RigaFattura(descrizione="Imposta di bollo", qta=1, iva=0, prezzo=Decimal("2.00"), riga=riga)
 						fattura.righe.add(riga_fattura)
 						riga += 10
 
