@@ -1,6 +1,15 @@
 #coda {
     background:#fbeed5;
     padding: 30px 10px;
+	clear: both;
+}
+#user-choser {
+	float: right;
+}
+#user-choser select {
+	height: 3em;
+	margin: 20px;
+	min-width: 200px;
 }
 
 #coda>div, #codacomandi div {
@@ -20,7 +29,7 @@
 }
 
 #coda div.name {
-    font-size: larger;
+    font-size: 19pt;
 }
 
 #coda div.current {

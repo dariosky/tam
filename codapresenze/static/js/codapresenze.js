@@ -79,7 +79,10 @@ function ricreaCoda(coda) {
         var e = coda[i];
         //console.log(e);
         var e_obj = $("<div />");
-        e_obj.append($("<div />").html(e['utente']).addClass('name'));
+		var e_username = e['utente'];
+		var numerico = e_username.match(/\d+/);
+		if (numerico && numerico.length) e_username = numerico[0];
+        e_obj.append($("<div />").html(e_username).addClass('name'));
 
         var data = new Date(e['data'])
         var testo = "";

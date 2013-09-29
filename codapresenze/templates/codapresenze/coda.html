@@ -6,8 +6,8 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Coda Presenze</h1>
-    <div>
+    <h1 style="float:left">Coda Presenze</h1>
+    <div id="user-choser">
         {% if perms.codapresenze.editall %}
             <label for="conducente">Conducente:</label><select id='conducente'>
             {% for utente in utenti %}
