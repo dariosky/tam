@@ -1,7 +1,7 @@
 $(document).ready(function () {
     var auto_refresh_interval = 90;
     var count = auto_refresh_interval;   // update every TOT seconds
-    var countdown;
+    //var countdown;
     var counter_object = $("#counter");
 
     var doRequestCoda = function (data) {
@@ -14,9 +14,9 @@ $(document).ready(function () {
                 console.log("Success. Elementi:", coda.length);
                 ricreaCoda(coda);
             });
-    }
+    };
 
-    $("#codacomandi div").click(function () {
+    $("#codacomandi").find("div").click(function () {
         var data;
         if (this.id == "dequeue") {
             data = {dequeue: true};
@@ -26,7 +26,7 @@ $(document).ready(function () {
             if (count >= auto_refresh_interval-5){
                 // no a refresh troppo frequenti
                 console.log("Refresh troppo frequente");
-                return;
+                return false;
             }
         }
         else {
@@ -34,7 +34,7 @@ $(document).ready(function () {
         }
         count = auto_refresh_interval;  // will wait
         counter_object.hide();
-        var user_obj = $('#conducente option:selected');
+        var user_obj = $('#conducente').find('option:selected');
         if (user_obj) {
             data['user'] = user_obj.html();
         }
@@ -45,7 +45,8 @@ $(document).ready(function () {
 
     /* autorefresh */
 
-    countdown = setInterval(function () {
+	//countdown =
+    setInterval(function () {
         if (count <= 10) {
             counter_object.show();
             counter_object.html("Aggiornamento tra " + count + " secondi");
@@ -73,7 +74,7 @@ function ricreaCoda(coda) {
         result += ("00"+data.getHours()).slice(-2)+":";
         result += ("00"+data.getMinutes()).slice(-2);
         return result;
-    }
+    };
 
     for (var i = coda.length - 1; i >= 0; i--) {
         var e = coda[i];
@@ -84,7 +85,7 @@ function ricreaCoda(coda) {
 		if (numerico && numerico.length) e_username = numerico[0];
         e_obj.append($("<div />").html(e_username).addClass('name'));
 
-        var data = new Date(e['data'])
+        var data = new Date(e['data']);
         var testo = "";
         if (oggiString == data.toDateString()) {
             testo += "\ndalle " + timeFormat(data);
