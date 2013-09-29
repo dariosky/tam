@@ -13,6 +13,7 @@ from django.shortcuts import render
 from codapresenze.models import CodaPresenze
 from modellog.actions import logAction
 from tam.tamdates import tz_italy
+from tam.views.tamviews import get_userkeys
 
 
 def coda(request, template_name='codapresenze/coda.html'):
@@ -55,10 +56,10 @@ def coda(request, template_name='codapresenze/coda.html'):
 	coda = CodaPresenze.objects.all().values('id', 'utente__username', 'luogo', 'data_accodamento')
 	dthandler = lambda obj: obj.astimezone(tz_italy).isoformat() if isinstance(obj, datetime.datetime) else None
 	coda = [{"luogo": u["luogo"],
-	         "utente": u["utente__username"],
-	         "data": u['data_accodamento'],
-	         "id": u['id']
-	        } for u in coda]
+			 "utente": u["utente__username"],
+			 "data": u['data_accodamento'],
+			 "id": u['id']
+			} for u in coda]
 	codajson = json.dumps(coda, default=dthandler)
 
 	if request.is_ajax():
@@ -66,6 +67,9 @@ def coda(request, template_name='codapresenze/coda.html'):
 
 	piazze = getattr(settings, "CODA_PIAZZE", ['Abano', 'Montegrotto'])
 	utenti = User.objects.filter(prenotazioni__isnull=True)
+	if not request.user.is_superuser:
+		utenti = utenti.filter(is_superuser=False)	# solo i superuser vedono i superuser
+	utenti = sorted(utenti, key=get_userkeys)
 
 	return render(
 		request,
