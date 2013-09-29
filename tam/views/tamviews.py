@@ -1342,6 +1342,10 @@ def resetUserSession(selectedUser):
 		if ses.get_decoded().get('_auth_user_id') == selectedUser.id:
 			ses.delete()
 
+def get_userkeys(user):
+	""" Return the keys to order users """
+	return (hasattr(user, "prenotazioni"), user.username.lower())
+
 def permissions(request, username=None, template_name="utils/manageUsers.html"):
 	user = request.user
 	if not user.has_perm('auth.change_user'):
@@ -1350,6 +1354,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 
 	manage_prenotazioni = request.user.has_perm('prenotazioni.manage_permissions') and "prenotazioni" in settings.PLUGGABLE_APPS
 	users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
+	users = sorted(users, key=get_userkeys)
 
 	getUsername = request.GET.get("selectedUser", None)
 	if getUsername:
