@@ -9,7 +9,7 @@ def prenotaCorsa(prenotazione, dontsave=False):
 	" Crea il viaggio e lo associa alla corsa "
 
 	utentePrenotazioni = prenotazione.owner
-	profilo = ProfiloUtente.objects.get(user=utentePrenotazioni.user)
+	profilo, created = ProfiloUtente.objects.get_or_create(user=utentePrenotazioni.user)
 
 	if prenotazione.is_arrivo:
 		# arrivo dal luogo indicato a cliente
