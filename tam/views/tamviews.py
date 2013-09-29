@@ -426,7 +426,9 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		request.POST = {}
 
 	form = FormClass(request.POST or None, instance=viaggio)
-
+	if FormClass == ViaggioForm:
+		can_fast_create = not getattr(settings, "PREVENT_FAST_CREATE", False) or request.user.has_perm('tam.fastinsert_passenger')
+		form.fields["passeggero"].can_fast_create = can_fast_create
 
 	# *************** GET DEFAULTS ********************************
 	if id: # modifying
@@ -629,7 +631,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				logging.debug("Cambio i dati del privato in %s" % nuoviDati)
 				if nuoviDati != viaggio.passeggero.dati:
 					viaggio.passeggero.dati = nuoviDati
-					viaggio.passeggero.save();
+					viaggio.passeggero.save()
 					messages.success(request, "Modificati i dati del privato.")
 
 			return HttpResponseRedirect(reverse("tamCorse"))

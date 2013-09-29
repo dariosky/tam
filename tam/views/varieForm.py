@@ -1,6 +1,7 @@
 #coding: utf-8
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 from tam.models import * #@UnusedWildImport
 #from django.utils.encoding import force_unicode
@@ -12,6 +13,7 @@ from tam.widgets import MySplitDateTimeField, MySplitDateWidget
 class AutoCompleteForm(forms.ModelChoiceField):
 	def __init__(self, *args, **kwargs):
 		kwargs['widget'] = kwargs.pop('widget', AutoCompleteWidget)
+		self.can_fast_create = kwargs.pop('can_fast_create', True)
 		super(AutoCompleteForm, self).__init__(*args, **kwargs)
 
 	def clean(self, value):
@@ -19,10 +21,12 @@ class AutoCompleteForm(forms.ModelChoiceField):
 		if not value:
 			return None
 		try:
-			return self.queryset.filter(**{self.widget.fieldname: value}).get()    # find the client given fielname
+			# find the client given fielname, case insensitive
+			return self.queryset.filter(**{self.widget.fieldname + "__iexact": value}).get()
 		except self.queryset.model.DoesNotExist:
+			if self.can_fast_create is False:
+				raise ValidationError("Deve esistere")
 			newobj = self.queryset.model.objects.create(**{self.widget.fieldname: value})
-
 			return newobj # doesn't exist
 
 
@@ -31,7 +35,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
 	class Media:
 		js = [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.min.js')]
 		css = {
-			'all': [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.css')]
+		'all': [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.css')]
 		}
 
 	lookup_url = None
@@ -127,7 +131,7 @@ class ViaggioForm(forms.ModelForm):
 								  widget=AutoCompleteWidget(
 									  lookup_url=reverse('tamGetPasseggero'),
 									  Model=Passeggero,
-									  fieldname='nome'
+									  fieldname='nome',
 								  )
 	)
 	esclusivo = forms.TypedChoiceField(coerce=lambda str: str == "t",
@@ -135,12 +139,12 @@ class ViaggioForm(forms.ModelForm):
 									   widget=forms.RadioSelect
 	)
 
-
 	def clean(self):
 		data = self.cleaned_data
 		if not data.get("privato") and not data["cliente"]:
 			raise forms.ValidationError("Se il cliente non è un privato, va specificato.")
-		if data.get("privato"): data["cliente"] = None
+		if data.get("privato"):
+			data["cliente"] = None
 		return data
 
 	class Meta:
