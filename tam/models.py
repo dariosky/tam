@@ -934,6 +934,7 @@ class Passeggero(models.Model):
 	class Meta:
 		verbose_name_plural = _("Passeggeri")
 		ordering = ["nome"]
+		permissions = (('fastinsert_passenger', 'Inserimento passeggero veloce'),)
 	def __unicode__(self):
 		return self.nome
 	def delete_url(self):
