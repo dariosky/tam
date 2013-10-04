@@ -20,14 +20,16 @@ class AutoCompleteForm(forms.ModelChoiceField):
 	#		logging.debug("form clean %s" % value)
 		if not value:
 			return None
-		try:
-			# find the client given fielname, case insensitive
-			return self.queryset.filter(**{self.widget.fieldname + "__iexact": value}).get()
-		except self.queryset.model.DoesNotExist:
+		# find the client given fielname, case insensitive
+		results = self.queryset.filter(**{self.widget.fieldname + "__iexact": value})
+
+		if len(results) == 0:
 			if self.can_fast_create is False:
 				raise ValidationError("Deve esistere")
 			newobj = self.queryset.model.objects.create(**{self.widget.fieldname: value})
-			return newobj # doesn't exist
+			return newobj 	# doesn't exist
+		else:
+			return results[0]    # use the first result
 
 
 class AutoCompleteWidget(forms.widgets.Widget):
