@@ -1,3 +1,4 @@
+# coding=utf-8
 from django.conf.urls import url, patterns, include
 from django.conf import settings
 import os
@@ -12,7 +13,7 @@ urlpatterns = patterns('',
 	(r'^archive/', include('tamArchive.urls')),
 	#( r'', include( 'license.urls' ) ),
 	(r'^fatture/', include('fatturazione.urls')),
-	#(secure_url_regex, include('securestore.urls')),
+	(secure_url_regex, include('securestore.urls')),
 )
 
 # add pluggable apps URL
