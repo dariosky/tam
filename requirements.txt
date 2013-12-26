@@ -1,6 +1,5 @@
 django
 south
-distribute
 xlrd
 xlwt
 reportlab
