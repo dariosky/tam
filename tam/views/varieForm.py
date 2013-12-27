@@ -1,8 +1,10 @@
 #coding: utf-8
 
 from django import forms
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.urlresolvers import reverse
+from tam.models import Viaggio, Passeggero
 from django.utils.translation import ugettext as _
-from tam.models import * #@UnusedWildImport
 #from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 #from django.core.urlresolvers import reverse
@@ -23,7 +25,7 @@ class AutoCompleteForm(forms.ModelChoiceField):
 		except self.queryset.model.DoesNotExist:
 			newobj = self.queryset.model.objects.create(**{self.widget.fieldname: value})
 
-			return newobj # doesn't exist
+			return newobj  # doesn't exist
 
 
 class AutoCompleteWidget(forms.widgets.Widget):
@@ -31,7 +33,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
 	class Media:
 		js = [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.min.js')]
 		css = {
-			'all': [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.css')]
+		'all': [staticfiles_storage.url('js/jquery-autocomplete/jquery.autocomplete.css')]
 		}
 
 	lookup_url = None
@@ -130,17 +132,19 @@ class ViaggioForm(forms.ModelForm):
 									  fieldname='nome'
 								  )
 	)
-	esclusivo = forms.TypedChoiceField(coerce=lambda str: str == "t",
-									   choices=(('c', 'Collettivo'), ('t', 'Taxi')),
-									   widget=forms.RadioSelect
-	)
 
+	esclusivo = forms.TypedChoiceField(
+		coerce=lambda s: s == 'True',  # serve, perché il dato mi arriva qui come stringa
+		choices=((False, 'Collettivo'), (True, 'Taxi')),
+		widget=forms.RadioSelect
+	)
 
 	def clean(self):
 		data = self.cleaned_data
 		if not data.get("privato") and not data["cliente"]:
 			raise forms.ValidationError("Se il cliente non è un privato, va specificato.")
-		if data.get("privato"): data["cliente"] = None
+		if data.get("privato"):
+			data["cliente"] = None
 		return data
 
 	class Meta:
