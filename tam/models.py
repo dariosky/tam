@@ -1022,6 +1022,7 @@ class ProfiloUtente(models.Model):
 	def __unicode__(self):
 		return "%s" % self.user
 
+
 class Conguaglio(models.Model):
 	""" Memorizza tutti i conguagli effettuati tra i conducenti """
 	data = models.DateTimeField(auto_now=True)
