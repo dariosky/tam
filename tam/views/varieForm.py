@@ -2,8 +2,10 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.core.urlresolvers import reverse
+from tam.models import Viaggio, Passeggero
 from django.utils.translation import ugettext as _
-from tam.models import * #@UnusedWildImport
 #from django.utils.encoding import force_unicode
 from django.utils.safestring import mark_safe
 #from django.core.urlresolvers import reverse
@@ -136,9 +138,11 @@ class ViaggioForm(forms.ModelForm):
 									  fieldname='nome',
 								  )
 	)
-	esclusivo = forms.TypedChoiceField(coerce=lambda str: str == "t",
-									   choices=(('c', 'Collettivo'), ('t', 'Taxi')),
-									   widget=forms.RadioSelect
+
+	esclusivo = forms.TypedChoiceField(
+		coerce=lambda s: s == 'True',  # serve, perché il dato mi arriva qui come stringa
+		choices=((False, 'Collettivo'), (True, 'Taxi')),
+		widget=forms.RadioSelect
 	)
 
 	def clean(self):

@@ -1,4 +1,5 @@
 #coding: utf-8
+import copy
 from tam.models import get_classifiche, Conducente, Conguaglio, ProfiloUtente
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext	 # Context with steroid
@@ -70,7 +71,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 	conducente_byId = {}	# dizionario id->conducente
 	for conducente in conducenti: conducente_byId[conducente.id] = conducente
 
-	classifiche_definite = settings.CLASSIFICHE
+	classifiche_definite = copy.deepcopy(settings.CLASSIFICHE)
 
 	# prendo le classifiche definite e le mappo per ID
 	classifiche_definite_byId = {}
