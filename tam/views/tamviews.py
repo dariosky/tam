@@ -1,4 +1,6 @@
 #coding: utf-8
+import json
+import dateutil.parser
 from django.shortcuts import render_to_response, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect	#use the redirects
 #from django.contrib import auth	# I'll use authentication
@@ -9,7 +11,7 @@ from django.template.context import RequestContext	 # Context with steroid
 from tam.models import Luogo, get_classifiche, Cliente, \
 	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
-from modellog.actions import logAction
+# from modellog.actions import logAction
 from django.db import IntegrityError
 #from django.db import connection
 from django.core.paginator import Paginator
@@ -20,12 +22,11 @@ from django.db import models
 from django.contrib.auth.management import create_permissions
 from django.db.models import get_apps
 from django.db.models.aggregates import Count
-import json
 from django.core.urlresolvers import reverse
 import logging
 from django.db.models.query_utils import Q
 from django.db.models.deletion import ProtectedError
-from django.utils.safestring import mark_safe
+# from django.utils.safestring import mark_safe
 for app in get_apps():
 	create_permissions(app, None, 2)
 from django.db import connections
@@ -36,6 +37,43 @@ import pdfListino
 from tam import tamdates
 import datetime
 from tam.views.changelog import changeLog	#@UnusedImport
+
+
+class Step1Data():
+	""" This object serialize and deserialize the data from the step1 of a new run """
+	REFERENCE_FIELDS_NAMES = ("da", "a", "passeggero", "cliente") # gli initial dei riferimenti devono essere chiavi non oggetti
+
+	def __init__(self):
+		pass
+
+	@staticmethod
+	def serialize(cleaned_data):
+		""" Get the form cleaned_data of step1 and return an array with all json-serializable """
+		result = cleaned_data.copy()
+		for fieldname in Step1Data.REFERENCE_FIELDS_NAMES:
+			if result[fieldname]:
+				result[fieldname] = result[fieldname].pk
+		result['data']=result['data'].isoformat()
+		print "serialize to:", result
+		return result
+
+	@staticmethod
+	def deserialize(step1_data):
+		if step1_data is None:
+			return {}
+		result = step1_data.copy()
+		if "privato" in result:
+			del result["privato"]
+		result['da'] = Luogo.objects.get(id=result['da'])
+		result['a'] = Luogo.objects.get(id=result['a'])
+		result['cliente'] = Cliente.objects.get(id=result['cliente']) if result['cliente'] else None
+		result['passeggero'] = Passeggero.objects.get(id=result['passeggero']) if result['passeggero'] else None
+		result['data'] = dateutil.parser.parse(result['data'])
+		print result
+
+		return result
+
+
 
 class SmartPager(object):
 	def addToResults(self, start, count):
@@ -351,6 +389,7 @@ def corsaClear(request, next=None):
 			del request.session[field]	# sto ridefinendo il primo passo, lo tolgo dalla session
 	return HttpResponseRedirect(next)
 
+
 def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=False, redirectOk="/"):
 	user = request.user
 	profilo, created = ProfiloUtente.objects.get_or_create(user=user)
@@ -367,7 +406,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	if not profilo.luogo:
 		messages.warning(request, "Non hai ancora definito un luogo preferito.")
 	new = id is None
-	step1 = request.session.get("step1") or {}
+	step1 = Step1Data.deserialize(request.session.get("step1")) or {}
 	dontHilightFirst = id or request.POST or "data" in step1	# non evidenziare il primo input se in modifica o se ho un POST
 
 	if not id:				# popola la instance del viaggio
@@ -381,8 +420,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 			messages.error(request, "Il viaggio indicato non esiste.")
 			return HttpResponseRedirect(redirectOk)
 
-		destination1 = reverse("tamNuovaCorsaId", kwargs={"id":id})
-		destination2 = reverse("tamNuovaCorsa2Id", kwargs={"id":id})
+		destination1 = reverse("tamNuovaCorsaId", kwargs={"id": id})
+		destination2 = reverse("tamNuovaCorsa2Id", kwargs={"id": id})
 	if viaggio and viaggio.vecchioConfermato() and not user.has_perm('tam.change_oldviaggio'):
 		messages.error(request, "Non puoi cambiare i vecchi viaggi confermati.")
 		return HttpResponseRedirect("/")
@@ -426,7 +465,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		request.POST = {}
 
 	form = FormClass(request.POST or None, instance=viaggio)
-	if FormClass == ViaggioForm:
+	if step==1:
 		can_fast_create = not getattr(settings, "PREVENT_FAST_CREATE", False) or request.user.has_perm('tam.fastinsert_passenger')
 		form.fields["passeggero"].can_fast_create = can_fast_create
 
@@ -434,10 +473,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 	if id: # modifying
 		cliente = viaggio.cliente
 		form.initial["privato"] = (viaggio.cliente is None)
-		if viaggio.esclusivo:
-			form.initial["esclusivo"] = "t"
-		else:
-			form.initial["esclusivo"] = "c"
+		# if viaggio.esclusivo:
+		# 	form.initial["esclusivo"] = "t"
+		# else:
+		# 	form.initial["esclusivo"] = "c"
 
 		if step == 1:
 			form.initial["data"] = viaggio.data.astimezone(tamdates.tz_italy)
@@ -446,7 +485,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				messages.info(request, "Non puoi cambiare la prima pagina di dettagli finché la corsa è abbinata.")
 				return HttpResponseRedirect(destination2)
 				#form.fields['data'].widget.attrs['readonly'] = True
-		else:	# sto modificando una corsa esistente, step2.
+		else:   # sto modificando una corsa esistente, step2.
 			# Mi trovo il prezzo da listino per indicarlo
 			if cliente:
 				prezzolistino = None
@@ -458,7 +497,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					if prezzolistino:
 						prezzoDaListinoNotturno = viaggio.trattaInNotturna()
 						prezzoDaListinoDiurno = not prezzoDaListinoNotturno
-						if prezzoDaListinoDiurno:	# "Scelgo il prezzo normale"
+						if prezzoDaListinoDiurno:		# "Scelgo il prezzo normale"
 							prezzo_da_listino = prezzolistino.prezzo_diurno
 						else:		# "Scelgo il prezzo notturno"
 							prezzo_da_listino = prezzolistino.prezzo_notturno
@@ -467,29 +506,24 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		cliente = step1.get("cliente", None)
 #		form.initial["data"]=datetime.datetime.now()	# 5/10/2009 tolgo il default per la data
 		if step == 1:
+			form.initial['privato'] = cliente is None
 			if not step1:
 				form.initial["da"] = form.initial["a"] = profilo.luogo.pk	# se non bound la form comincia partendo e finendo nel luogo predefinito
 			else:
 				form.initial.update(step1)
-				if step1["esclusivo"]:
-					form.initial["esclusivo"] = "t"
-				else:
-					form.initial["esclusivo"] = "c"
-				referenceFields = ("da", "a", "passeggero", "cliente") # gli initial dei riferimenti devono essere chiavi non oggetti
-				for field in referenceFields:
+
+				for field in Step1Data.REFERENCE_FIELDS_NAMES:
 					try:
 						if form.initial[field]: form.initial[field] = form.initial[field].pk
 					except:
+						print "Initial should be the PK"
 						pass
 		elif step == 2:
 #			"Sono in creazione, provo a popolare step2 con i default del cliente %s" % cliente
-			fields = step1.copy()
-			del fields["privato"]
-			viaggioStep1 = Viaggio(**fields)
-			viaggioStep1.luogoDiRiferimento = profilo.luogo
-			viaggioStep1.updatePrecomp()
+			viaggio = Viaggio(**step1)
+			viaggio.luogoDiRiferimento = profilo.luogo
+			viaggio.updatePrecomp()
 			da, a = step1["da"], step1["a"]
-			viaggio = viaggioStep1	# in questo modo i dati dello step1 sono sempre in "viaggio"
 #			"Cerco il prezzo listino da %s a %s." % (da, a)
 
 			default = {}
@@ -502,10 +536,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				prezzolistino = None
 				if cliente.listino:
 					prezzolistino = cliente.listino.get_prezzo(da, a,
-										tipo_servizio=viaggioStep1.esclusivo and "T" or "C",
-										pax=viaggioStep1.numero_passeggeri)
+										tipo_servizio=viaggio.esclusivo and "T" or "C",
+										pax=viaggio.numero_passeggeri)
 
-				prezzoDaListinoNotturno = viaggioStep1.trattaInNotturna()
+				prezzoDaListinoNotturno = viaggio.trattaInNotturna()
 				prezzoDaListinoDiurno = not prezzoDaListinoNotturno
 
 				if prezzolistino:
@@ -525,7 +559,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 						default["commissione"] = prezzolistino.commissione
 						default["tipo_commissione"] = prezzolistino.tipo_commissione
 
-			default["costo_autostrada"] = viaggioStep1.costo_autostrada_default()
+			default["costo_autostrada"] = viaggio.costo_autostrada_default()
 
 			if da != profilo.luogo and da.speciale != "-":	# creando un viaggio di arrivo da una stazione/aeroporto
 				logging.debug("Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€")
@@ -585,7 +619,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 				viaggio = form.save()	#commit=True
 				viaggio.updatePrecomp()
 			else:
-				request.session["step1"] = form.cleaned_data
+				step1_data = Step1Data.serialize(form.cleaned_data)
+				request.session["step1"] = step1_data
 			return HttpResponseRedirect(destination2)
 
 		if step == 2:
@@ -618,7 +653,6 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 #						passeggero, created = Passeggero.objects.get_or_create( nome=fields["passeggero"] )
 #						fields["passeggero"]=passeggero
 
-				del fields["privato"]
 				nuovaCorsa = Viaggio(**fields)
 				nuovaCorsa.luogoDiRiferimento = profilo.luogo
 				nuovaCorsa.save()
@@ -652,11 +686,11 @@ def getList(request, model=Luogo.objects, field="nome", format="txt", fields=Non
 
 	if format == "txt":
 		results = "\n".join([record.__unicode__() for record in querySet])
-		return HttpResponse(results, mimetype="text/plain")
+		return HttpResponse(results, content_type="text/plain")
 	if format == "json" and fields:
 		records = querySet.values(*fields)
 		results = [ [record[key] for key in fields] for record in records]
-		return HttpResponse(json.dumps(results), mimetype="application/javascript")
+		return HttpResponse(json.dumps(results), content_type="application/json")
 
 
 def clienti(request, template_name="clienti_e_listini.html"):

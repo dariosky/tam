@@ -7,9 +7,9 @@
 
     <div id="accordion">
     	{% for classifica_definita in classifiche_definite %}
-    		{% if classifica_definita.type = "punti" %}
+    		{% if classifica_definita.type == "punti" %}
     			{% include "classifiche/classifica-punti.inc.html" %}
-    		{% elif classifica_definita.type = "supplementari" %}
+    		{% elif classifica_definita.type == "supplementari" %}
     			{% include "classifiche/classifica-supplementari.inc.html" %}
     		{% else %}
     			{% include "classifiche/classifica-prezzo.inc.html" %}
@@ -28,7 +28,7 @@
 {% if not confirmConguaglio %}
 <script type="text/javascript">
     $(document).ready( function() {
-		$("#accordion div").accordion({
+		$("#accordion").find('div').accordion({
 				header: "h2",
 				alwaysOpen: false,
 				active: false,
