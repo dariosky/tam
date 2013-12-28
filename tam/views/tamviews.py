@@ -1382,7 +1382,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 			return HttpResponseRedirect("/")
 
 	manage_prenotazioni = request.user.has_perm('prenotazioni.manage_permissions') and "prenotazioni" in settings.PLUGGABLE_APPS
-	users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
+	users = User.objects.exclude(is_superuser=True).exclude(id=user.id).order_by('username')
 
 	getUsername = request.GET.get("selectedUser", None)
 	if getUsername:

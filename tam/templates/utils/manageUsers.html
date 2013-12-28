@@ -7,8 +7,8 @@
 
 <form method="get" action=".">
 <p>
-	Seleziona l'utente da gestire.
-	<select name="selectedUser">
+	<label for="selectedUser">Seleziona l'utente da gestire.</label>
+	<select name="selectedUser" id="selectedUser">
 	{% for iterUser in users %}
 		<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %} value="{{ iterUser.username }}">
 			{{ iterUser.username }}{% if iterUser.prenotazioni %} - prenotazioni{% endif %}
@@ -75,7 +75,7 @@
 				highlight:true,
 				removeLabel:"rimuovi",
 				highlightAddedLabel:"Aggiunto: ",
-				highlightRemovedLabel:"Rimosso: ",
+				highlightRemovedLabel:"Rimosso: "
 			});
 		});
 	</script>
