@@ -62,7 +62,7 @@ def action(request, template_name="archive/action.html"):
 	end_date_string = request.POST.get("end_date")
 	try:
 		timetuple = time.strptime(end_date_string, '%d/%m/%Y')
-		end_date = datetime.date(timetuple.tm_year, timetuple.tm_mon, timetuple.tm_mday)
+		end_date = tamdates.tz_italy.localize(datetime.datetime(timetuple.tm_year, timetuple.tm_mon, timetuple.tm_mday))
 	except:
 		end_date = None
 	if (end_date is None):
