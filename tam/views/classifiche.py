@@ -113,7 +113,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 			totaleConguaglioAbbinate = 0
 			for key, nick, classifica in classifica_definita['dati']:
 				totaleConguaglioAbbinate += sum([punto['valore'] for punto in classifica["celle_abbinate"][:punti_assocMin]])
-			mediaAbbinate = round(totaleConguaglioAbbinate / len(classifica_definita['dati']), 0)
+			mediaAbbinate = round(totaleConguaglioAbbinate / len(classifica_definita['dati']), 2)
 			for key, nick, classifica  in classifica_definita['dati']:
 				classifica["debitoAbbinate"] = sum([punto['valore'] for punto in classifica["celle_abbinate"][:punti_assocMin]]) - Decimal(str(mediaAbbinate))
 				classifica["deveDare"] = (classifica["debitoAbbinate"] > 0)
