@@ -999,16 +999,13 @@ def privati(request, template_name="passeggeri.html"):
 
 def passeggero(request, template_name="passeggero.html", id=None, redirectOk="/privati/", delete=False, unique=(("nome",),),
 			excludedFields=None, fields_descriptions=None):
-	"""
-		@param extra_dict:	Addictional var to give to response
-	"""
 	if "next" in request.GET:
 		redirectOk = request.GET["next"]
 	nuovo = id is None
 	user = request.user
 	actionName = getActionName(delete=delete, nuovo=nuovo)
 
-	permissionName = "tam.%(action)s_%(module)s" % {"action":actionName, "module":Passeggero._meta.module_name}
+	permissionName = "tam.%(action)s_%(module)s" % {"action":actionName, "module":Passeggero._meta.model_name}
 	allowed = user.has_perm(permissionName)
 	if not allowed:
 		messages.error(request, "Operazione non concessa.")
@@ -1233,7 +1230,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 			if viaggio != primo:
 				viaggio.padre = primo
 			if contatore > 2:
-				if viaggio.abbuono_fisso <> 5:
+				if viaggio.abbuono_fisso != 5:
 					messages.info(request, "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 
