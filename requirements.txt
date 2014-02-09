@@ -5,3 +5,7 @@ xlwt
 reportlab
 pytz
 django-pipeline
+django-debug-toolbar
+
+psycopg2
+python-dateutil

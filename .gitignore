@@ -7,11 +7,9 @@
 Desktop.ini
 
 # Escludo le cartelle non funzionali
-/backup/
-/doc/
 /_gsdata_/
 
-# Escludo le cose relative a Netbeans
+# Escludo le cose relative agli IDE
 /.project
 /.pydevproject
 .settings/
@@ -25,6 +23,7 @@ free_hands_tests.py
 deploy/moin
 media/fatture/unused
 settings_local.py
+settings_*.py
 win_settings.bat
 
 /static
