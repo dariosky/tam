@@ -63,7 +63,7 @@ def coda(request, template_name='codapresenze/coda.html'):
 	codajson = json.dumps(coda, default=dthandler)
 
 	if request.is_ajax():
-		return HttpResponse(codajson, mimetype="application/json")
+		return HttpResponse(codajson, content_type="application/json")
 
 	piazze = getattr(settings, "CODA_PIAZZE", ['Abano', 'Montegrotto'])
 	utenti = User.objects.filter(prenotazioni__isnull=True)

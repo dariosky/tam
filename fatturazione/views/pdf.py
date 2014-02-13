@@ -210,7 +210,7 @@ def render_to_reportlab(context):
 	else:
 		fatture = context.get('fatture')
 
-	response = http.HttpResponse(mimetype='application/pdf')
+	response = http.HttpResponse(content_type='application/pdf')
 	NormalTemplates = ['Normale0', 'Normale1']
 
 	fatture_rimanenti = len(fatture)

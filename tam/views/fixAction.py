@@ -145,29 +145,54 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		messageLines.append("Aggiorno il tragitto precalcolato, senza toccare nient'altro.")
 		# passaggio da mediagenerator a django-pipeline... gli asset precalcolati li lascio senza timestamp
 		query_asset_sub = r"""
+		-- night
 							update tam_viaggio
-							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(night[\d]*)-[a-z0-9]*', '/static/img/\1', 'g')
-							where html_tragitto like '%mediaprod%' and html_tragitto like '%night%';
+							set html_tragitto = regexp_replace(html_tragitto, '/static/img/(night[\d]*)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/static/img%' and html_tragitto like '%night%';
 
 							update tam_viaggio
-							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(morning[\d]*)-[a-z0-9]*', '/static/img/\1', 'g')
-							where html_tragitto like '%mediaprod%' and html_tragitto like '%morning%';
+							set html_tragitto = regexp_replace(html_tragitto, '/media/(night[\d]*)\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/media/%' and html_tragitto like '%night%';
 
 							update tam_viaggio
-							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right)-[a-z0-9]*', '/static/img/\1', 'g')
-							where html_tragitto like '%mediaprod%' and html_tragitto like '%arrow_right%';
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(night[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/mediaprod/%' and html_tragitto like '%night%';
+		-- morning
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/static/img/(morning[\d]*)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/static/img%' and html_tragitto like '%morning%';
 
 							update tam_viaggio
-							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport)-[a-z0-9]*', '/static/\1', 'g')
-							where html_tragitto like '%mediaprod%' and html_tragitto like '%flag/luogo-airport%';
+							set html_tragitto = regexp_replace(html_tragitto, '/media/(morning[\d]*)\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/media/%' and html_tragitto like '%morning%';
 
 							update tam_viaggio
-							set html_tragitto = regexp_replace(html_tragitto, '/media/(flag/luogo-airport)', '/static/\1', 'g')
-							where html_tragitto like '%/media/%' and html_tragitto like '%flag/luogo-airport%';
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(morning[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/mediaprod/%' and html_tragitto like '%morning%';
+		--arrow
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/static/img/(arrow_right)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/static/img%' and html_tragitto like '%arrow_right%';
 
 							update tam_viaggio
-							set html_tragitto = regexp_replace(html_tragitto, '/media/(night|morning|arrow_right)\.png', '/static/img/\1.png', 'g')
-							where html_tragitto like '%/media/%';
+							set html_tragitto = regexp_replace(html_tragitto, '/media/(arrow_right[\d]*)\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/media/%' and html_tragitto like '%arrow_right%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right[\d]*)\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/mediaprod/%' and html_tragitto like '%arrow_right%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+							where html_tragitto like '%/mediaprod/%' and html_tragitto like '%arrow_right%';
+		--airport
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/static/(flag/luogo-airport)\.[a-z0-9]*\.png', '/static/\1.png', 'g')
+							where html_tragitto like '%/static/%' and html_tragitto like '%flag/luogo-airport%';
+
+							update tam_viaggio
+							set html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport[\d]*)-[a-z0-9]*\.png', '/static/\1.png', 'g')
+							where html_tragitto like '%/mediaprod/flag/%' and html_tragitto like '%luogo-airport%';
 
 						  """.replace("%", "%%")
 		from django.db import connection

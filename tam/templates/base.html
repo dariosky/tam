@@ -6,7 +6,6 @@
 	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>
 	<!--[if ie]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><![endif]-->
 	{% if not tam_stealth %}<link rel="icon" href="{% static "img/tam.ico" %}" type="image/ico"/>{% endif %}
-
 	{% if mediabundleCSS %}
 		{% for bundle in mediabundleCSS %}{% compressed_css bundle %}{% endfor %}
 	{% else %}
@@ -95,5 +94,6 @@
 	      });
 		</script>
 	{% endif %}
+{#<script type="application/javascript" src="http://code.jquery.com/jquery-migrate-1.2.1.js"></script>#}
 </body>
 </html>

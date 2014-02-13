@@ -41,7 +41,7 @@ def djangoManagerToTable(self, fields):
 		for field in fields.keys():
 			if "." in field:
 				related = record
-				for token in field.split('.'):    # iterate sub object with .
+				for token in field.split('.'):  # iterate sub object with .
 					if related:
 						related = related.__getattribute__(token)
 					else:
@@ -51,10 +51,10 @@ def djangoManagerToTable(self, fields):
 				related = record.__getattribute__(field)
 
 			if callable(related):
-				related = related()    # if it's a method call it
+				related = related()  # if it's a method call it
 			row.append(related)
 		table.append(row)
-	return (table,)    # only one result sheet with our table
+	return (table,)  # only one result sheet with our table
 
 
 def xlsResponse(request, querySet):
@@ -65,7 +65,7 @@ def xlsResponse(request, querySet):
 	maxViaggi = 3000
 	if numViaggi > maxViaggi:
 		messages.error(request, "Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
-		return HttpResponseRedirect("/")    # back home
+		return HttpResponseRedirect("/")  # back home
 
 	# from guppy import hpy
 	# h = hpy()
@@ -86,9 +86,9 @@ def xlsResponse(request, querySet):
 		#			response = HttpResponse(responseFile.read(), mimetype='application/excel')
 		#			responseFile.close()
 
-		doc.save(output)    # save the excel
+		doc.save(output)  # save the excel
 		output.seek(0)
-		response = HttpResponse(output.getvalue(), mimetype='application/excel')
+		response = HttpResponse(output.getvalue(), content_type='application/excel')
 
 		response['Content-Disposition'] = 'attachment; filename="%s"' % 'tamExport.xls'
 		logAction(action='X', description="Export in Excel di %d corse." % numViaggi, user=request.user, log_date=None)
@@ -97,4 +97,4 @@ def xlsResponse(request, querySet):
 	else:
 		messages.error(request, "Non ho alcun viaggio da mettere in Excel, cambia i filtri per selezionarne qualcuno.")
 		del generatore
-		return HttpResponseRedirect("/")    # back home
+		return HttpResponseRedirect("/")  # back home

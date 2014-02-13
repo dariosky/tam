@@ -83,7 +83,7 @@ def getbackup(request, backupdate):
 			backup_filename = backup["filename"]
 			backupPath = os.path.join(backupInfo["backupdir"], backup_filename)
 			responseFile = file(backupPath, 'rb')
-			response = HttpResponse(responseFile.read(), mimetype='application/octet-stream')  # 'application/gzip'
+			response = HttpResponse(responseFile.read(), content_type='application/octet-stream')  # 'application/gzip'
 			response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(backup_filename)
 			return response
 	else:
