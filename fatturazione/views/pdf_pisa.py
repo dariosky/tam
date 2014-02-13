@@ -15,7 +15,7 @@ def render_with_pisa(template_src, context_dict):
 	pdf = pisa.pisaDocument(StringIO.StringIO(html.encode("utf-8")), dest=result,
 						link_callback=fetch_resources)
 	if not pdf.err:
-		return http.HttpResponse(result.getvalue(), mimetype='application/pdf')
+		return http.HttpResponse(result.getvalue(), content_type='application/pdf')
 	return http.HttpResponse('We had some errors<pre>%s</pre>' % cgi.escape(html))
 
 def fetch_resources(uri, rel):

@@ -1,6 +1,6 @@
 #coding: utf-8
 from fatturazione.views.money_util import moneyfmt, NumberedCanvas
-from reportlab.lib.pagesizes import A4, portrait, landscape #@UnusedImport
+from reportlab.lib.pagesizes import A4, portrait #, landscape
 from django import http
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.lib.units import cm
@@ -166,7 +166,7 @@ def getTabellaListino(doc, righe_prezzo, tipo_servizio, luogoDiRiferimento):
 
 
 def export(listino, luogoDiRiferimento):
-	response = http.HttpResponse(mimetype='application/pdf')
+	response = http.HttpResponse(content_type='application/pdf')
 	width, height = portrait(A4)
 
 	pageTemplates = [

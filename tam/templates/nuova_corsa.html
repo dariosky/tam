@@ -58,8 +58,8 @@
 				{% if prezzoDaListinoDiurno %}<img src='{% static "img/morning.png" %}' />{%else%}<img src='{% static "img/night.png" %}' />{% endif %}
 				{{ prezzo_da_listino|floatformat:"2" }}€
 			{% endif %}
-			{% if fatturazione_forzata = 'S' %}<img src='{% static "flag/fat_on.png" %}' title='Fatturazione forzata da listino' />{% endif %}
-			{% if fatturazione_forzata = 'N' %}<img src='{% static "flag/fat_off.png" %}' title='Fatturazione disattivata da listino'/>{% endif %}
+			{% if fatturazione_forzata == 'S' %}<img src='{% static "flag/fat_on.png" %}' title='Fatturazione forzata da listino' />{% endif %}
+			{% if fatturazione_forzata == 'N' %}<img src='{% static "flag/fat_off.png" %}' title='Fatturazione disattivata da listino'/>{% endif %}
 			<table style='text-align:left; margin:auto;'>
 				{{ form }}
 				{% if viaggio.passeggero %}
@@ -137,7 +137,8 @@
 		$("input").on('change', function(){
 			formChanged=true;
 		});
-		$("input:submit").live('click', function(){formChanged=false;})
+		//$("input:submit").live('click', function(){formChanged=false;});
+		$(document).on("click", "input:submit", function(){formChanged=false;});
 		function askConfirm(){
 			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
 		}

@@ -355,7 +355,8 @@ class Viaggio(models.Model):
 
 	def get_html_tragitto(self):
 		""" Ritorna il tragitto da template togliendogli tutti gli spazi """
-		tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": self})
+		tragitto = render_to_string('corse/dettagli_viaggio.inc.html', {"viaggio": self,
+																		"STATIC_URL":settings.STATIC_URL})
 		tragitto = reallySpaceless(tragitto)
 		return tragitto
 
