@@ -8,7 +8,7 @@ host = gethostname().lower()
 TAM_VERSION = "5.96"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
-if host in ("dariosky", "acido", "dario"):
+if host in ("dariosky", "acido", "dario", "dico"):
 	DEBUG = True  # siamo in Test
 else:
 	DEBUG = False
@@ -26,14 +26,14 @@ if DEBUG:
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 
 ADMINS = (
-('Dario Varotto', 'dario.varotto@gmail.com'),
+	('Dario Varotto', 'dario.varotto@gmail.com'),
 )
 
 MANAGERS = ADMINS
 DATABASES = {}  # set them in settings_local
 
 DATABASE_ROUTERS = ['db_routers.TamArchiveRouter',
-					'modellog.db_routers.SeparateLogRouter']
+                    'modellog.db_routers.SeparateLogRouter']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -77,9 +77,8 @@ STATICFILES_DIRS = (  # Put strings here, like "/home/html/static" or "C:/www/dj
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-	'django.contrib.staticfiles.finders.FileSystemFinder',
-	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-	#'django.contrib.staticfiles.finders.DefaultStorageFinder',
+'django.contrib.staticfiles.finders.FileSystemFinder',
+'django.contrib.staticfiles.finders.AppDirectoriesFinder',  #'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 
@@ -88,50 +87,50 @@ jqueryUIURL = 'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
 jqueryUICSSURL = 'js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css'
 
 PIPELINE_CSS = {
-'tam': {'source_filenames': ['css/tam.css'], 'output_filename': 'css/tam.min.css'},
-'tam-stealth': {'source_filenames': ['css/tam-stealth.css'], 'output_filename': 'css/tam-stealth.min.css'},
-'tamUI': {
-'source_filenames': (
-jqueryUICSSURL,
-'css/tam.css',
-),
-'output_filename': 'css/tamUI.min.css',
-},
-'prenotazioni': {'source_filenames': ('css/prenotazioni.css',), 'output_filename': 'css/prenotazioni.min.css'},
-'codapresenze': {'source_filenames': ('css/codapresenze.css',), 'output_filename': 'css/codapresenze.min.css'},
+	'tam': {'source_filenames': ['css/tam.css'], 'output_filename': 'css/tam.min.css'},
+	'tam-stealth': {'source_filenames': ['css/tam-stealth.css'], 'output_filename': 'css/tam-stealth.min.css'},
+	'tamUI': {
+		'source_filenames': (
+			jqueryUICSSURL,
+			'css/tam.css',
+		),
+		'output_filename': 'css/tamUI.min.css',
+	},
+	'prenotazioni': {'source_filenames': ('css/prenotazioni.css',), 'output_filename': 'css/prenotazioni.min.css'},
+	'codapresenze': {'source_filenames': ('css/codapresenze.css',), 'output_filename': 'css/codapresenze.min.css'},
 }
 
 PIPELINE_JS = {
-	'tam': {
-		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js', 'js/tam-common.js'],
-		'output_filename': 'tam.min.js'
-	},
-	'tamUI': {
-		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-							 jqueryUIURL, 'js/calendarPreferences.js',
-							 'js/tam-common.js'],
-		'output_filename': 'tamUI.min.js'
-	},
-	'tamCorse': {
-		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-							 jqueryUIURL,
-							 'js/calendarPreferences.js',
-							 'js/tam-common.js',
-							 'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
-		'output_filename': 'tamCorse.min.js'
-	},
-	'jquery.editable': {
-		'source_filenames': ['js/jquery.editable-1.3.3.js'],
-		'output_filename': 'js/jquery.editable.min.js',
-	},
-	'fattura': {
-		'source_filenames': ['fatturazione/fattura.js'],
-		'output_filename': 'js/fattura.min.js',
-	},
-	'codapresenze': {
-		'source_filenames': ['js/codapresenze.js'],
-		'output_filename': 'js/codapresenze.min.js',
-	},
+'tam': {
+'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js', 'js/tam-common.js'],
+'output_filename': 'tam.min.js'
+},
+'tamUI': {
+'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                     jqueryUIURL, 'js/calendarPreferences.js',
+                     'js/tam-common.js'],
+'output_filename': 'tamUI.min.js'
+},
+'tamCorse': {
+'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                     jqueryUIURL,
+                     'js/calendarPreferences.js',
+                     'js/tam-common.js',
+                     'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
+'output_filename': 'tamCorse.min.js'
+},
+'jquery.editable': {
+'source_filenames': ['js/jquery.editable-1.3.3.js'],
+'output_filename': 'js/jquery.editable.min.js',
+},
+'fattura': {
+'source_filenames': ['fatturazione/fattura.js'],
+'output_filename': 'js/fattura.min.js',
+},
+'codapresenze': {
+'source_filenames': ['js/codapresenze.js'],
+'output_filename': 'js/codapresenze.min.js',
+},
 }
 PIPELINE_DISABLE_WRAPPER = True
 
@@ -139,8 +138,8 @@ PIPELINE_DISABLE_WRAPPER = True
 if not DEBUG:
 	TEMPLATE_LOADERS = (
 	('django.template.loaders.cached.Loader', (  # cache template loaders
-												 'django.template.loaders.filesystem.Loader',
-												 'django.template.loaders.app_directories.Loader',
+	                                             'django.template.loaders.filesystem.Loader',
+	                                             'django.template.loaders.app_directories.Loader',
 	)
 	),
 	)
@@ -149,18 +148,18 @@ if not DEBUG:
 PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify')
 
 MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'django.middleware.gzip.GZipMiddleware',
-						'django.middleware.common.CommonMiddleware',
-						'django.contrib.sessions.middleware.SessionMiddleware',
-						# 'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
-						'django.contrib.messages.middleware.MessageMiddleware',
-						'django.contrib.auth.middleware.AuthenticationMiddleware',
-						'tam.middleware.loginRequirement.RequireLoginMiddleware',
-						# 	'django.middleware.doc.XViewMiddleware',	# currently useless?
+                        'django.middleware.common.CommonMiddleware',
+                        'django.contrib.sessions.middleware.SessionMiddleware',
+                        # 'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
+                        'django.contrib.messages.middleware.MessageMiddleware',
+                        'django.contrib.auth.middleware.AuthenticationMiddleware',
+                        'tam.middleware.loginRequirement.RequireLoginMiddleware',
+                        # 	'django.middleware.doc.XViewMiddleware',	# currently useless?
 
-						'django.middleware.transaction.TransactionMiddleware',
+                        'django.middleware.transaction.TransactionMiddleware',
 
-						'tam.middleware.threadlocals.ThreadLocals',
-						# 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
+                        'tam.middleware.threadlocals.ThreadLocals',
+                        # 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -169,15 +168,15 @@ TEMPLATE_DIRS = (  # Put strings here, like "/home/html/django_templates"  # Alw
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
-	"django.contrib.auth.context_processors.auth",
-	"django.core.context_processors.debug",
-	"django.core.context_processors.i18n",
-	"django.core.context_processors.media",
-	'django.core.context_processors.request',
-	"django.contrib.messages.context_processors.messages",
-	'django.core.context_processors.static',
+"django.contrib.auth.context_processors.auth",
+"django.core.context_processors.debug",
+"django.core.context_processors.i18n",
+"django.core.context_processors.media",
+'django.core.context_processors.request',
+"django.contrib.messages.context_processors.messages",
+'django.core.context_processors.static',
 
-	"license.context_processors.license_details",
+"license.context_processors.license_details",
 )
 
 LICENSE_OWNER = ''  # to be shown on the footer
@@ -236,8 +235,8 @@ if use_debug_toolbar:
 		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
 		middleware_split_position = 0  #  put the toolbar middleware at the start
 		MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES[:middleware_split_position] + \
-							 ('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
-							 MIDDLEWARE_CLASSES
+		                     ('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
+		                     MIDDLEWARE_CLASSES
 	except:
 		pass
 	# 	MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)
@@ -259,11 +258,11 @@ TAM_VIAGGI_PAGINA = 100
 
 # ******************* CACHE
 CACHES = {
-	'default': {
-		'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-		'LOCATION': 'TaM',
-	}  # 	'default': {  # 		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-	# 		'LOCATION': '127.0.0.1:11211',  # 	}
+'default': {
+'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+'LOCATION': 'TaM',
+}  # 	'default': {  # 		'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+# 		'LOCATION': '127.0.0.1:11211',  # 	}
 }
 
 # Usiamo le sessioni su cookies per evitare di importunare il DB
@@ -271,8 +270,8 @@ CACHES = {
 # SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
-							"FattureConducente", "FattureConducenteNoIva",
-							"Ricevute"]
+                            "FattureConducente", "FattureConducenteNoIva",
+                            "Ricevute"]
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
 SECURE_URL = "/secure/"
