@@ -22,11 +22,14 @@ _generated_media_names.py
 free_hands_tests.py
 deploy/moin
 media/fatture/unused
-settings_local.py
+/*.hosts
+
 settings_*.py
+
 win_settings.bat
 
 /static
 /media/brand
 /media_secured/
 
+/logs
