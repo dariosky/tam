@@ -1,11 +1,22 @@
+# Django related
 django
 south
+django-debug-toolbar
+
+# static files
+django-pipeline
+
+# exports
 xlrd
 xlwt
 reportlab
-pytz
-django-pipeline
-django-debug-toolbar
 
-psycopg2
+# date things
+pytz
 python-dateutil
+
+# DB
+psycopg2
+
+# deployment
+fabric
