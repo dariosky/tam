@@ -242,20 +242,20 @@ def listaCorse(request, template_name="corse/lista.html"):
 		if request.GET.has_key('dstart'):
 			try:
 				data_inizio = tamdates.parseDateString(request.GET.get('dstart'))
-				request.session["dstart"] = data_inizio
+				request.session["dstart"] = data_inizio.strftime('%d/%m/%Y')
 			except:
 				pass
 		elif "dstart" in request.session:
-			data_inizio = request.session["dstart"]
+			data_inizio = tamdates.parseDateString(request.session["dstart"])
 
 		if request.GET.has_key('dend'):
 			try:
 				data_fine = tamdates.parseDateString(request.GET.get('dend'))
-				request.session["dend"] = data_fine
+				request.session["dend"] = data_fine.strftime('%d/%m/%Y')
 			except:
 				pass
 		elif "dend" in request.session:
-			data_fine = request.session["dend"]
+			data_fine = tamdates.parseDateString(request.session["dend"])
 
 	if data_inizio and data_fine and (data_fine <= data_inizio):
 		data_fine = data_inizio + datetime.timedelta(days=1)
