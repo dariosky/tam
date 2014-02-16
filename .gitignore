@@ -24,7 +24,9 @@ deploy/moin
 media/fatture/unused
 /*.hosts
 
+# instance secret files
 settings_*.py
+/*.ini
 
 win_settings.bat
 

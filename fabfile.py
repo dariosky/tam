@@ -17,6 +17,7 @@ Deploy will consist of:
 # Graceful restart gunicorn with a HUP signal
 # 	so instead of use supervisor, do a graceful restart with
 # kill -s HUP $(cat gunicorn.pid)
+import ConfigParser
 from StringIO import StringIO
 import glob
 import os
@@ -29,58 +30,42 @@ from fabric.decorators import serial
 from fabric.operations import local
 from fabric.utils import puts
 from contextlib import contextmanager as _contextmanager
-
-
-@task
-def hosts(filename):
-	"""
-	 	Set the hosts to ones in filename.hosts
-	"""
-	filepath = os.path.join(os.path.dirname(__file__), filename + ".hosts")
-	if not os.path.isfile(filepath):
-		raise Exception("Hosts file not found %s" % filepath)
-	host_list = [l.strip() for l in file(filepath, 'r').readlines() if not l.strip().startswith("#")]
-	env.hosts = host_list
-	return host_list
-
-
-if not env.hosts:
-	hosts('default')
+import sys
 
 env.localfolder = os.path.realpath(os.path.dirname(__file__))
 env.port = 22
-# env.user = 'dariosky'
+if not env.get('NAME'):
+	print "Please call fab specifying a host config file."
+	print "Example: fab -c host.ini"
+	sys.exit(1)
 
 if os.path.exists(os.path.expanduser("~/.ssh/config")):
 	env.use_ssh_config = True
 
-REPOSITORY_FOLDER = '~/projects/tam'  # the manage.py is here
-VENV_FOLDER = '~/.environments/tam'
-GIT_REPOSITORY = "git@bitbucket.org:dariosky/tam.git"
-REQUIREMENT_PATH = posixpath.join(REPOSITORY_FOLDER, 'requirements.txt')
-
-STATIC_FOLDER = posixpath.join(REPOSITORY_FOLDER, 'static')  # Static folder will be filled by django collectstatic
-MEDIA_FOLDER = posixpath.join(REPOSITORY_FOLDER, 'media')  # This is for UGC
-RUN_GUNICORN_COMMAND = posixpath.join(REPOSITORY_FOLDER, 'run_gunicorn')
-
-LOGDIR = posixpath.join(REPOSITORY_FOLDER, 'logs')
-GUNICORN_PID_FILE = posixpath.join(LOGDIR, 'gunicorn.pid')
-GUNICORN_LOGFILE = posixpath.join(LOGDIR, 'gunicorn.log')
-GUNICORN_WORKERS = 6
-GUNICORN_WORKERS_TIMEOUT = 360  # in seconds - keep high to handle large files upload
-GUNICORN_PORT = os.environ.get('GUNICORN_PORT', 80)
-USE_SUPERVISOR = False
-SUPERVISOR_JOBNAME = 'tam'  # This is needed only if USE_SUPERVISOR is True
 DO_REQUIREMENTS = False
+
+
+def perform_env_substitutions():
+	for key, value in env.items():
+		if isinstance(env[key], basestring):
+			old_value = env[key]
+			while True:  # do recursive substitution until the value doesn't change
+				value = old_value.format(**env)
+				if value == old_value:
+					break
+				old_value = value
+			env[key] = value
+
+perform_env_substitutions()
 
 
 def secrets_file_paths():
 	""" Return a list of secret files (to be sent) relative to REPOSITORY_FOLDER """
-	return ["settings_local.py"]
+	return [env.SECRETS_FILE]
 
 
 @_contextmanager
-def virtualenv(venv_path=VENV_FOLDER):
+def virtualenv(venv_path=env.VENV_FOLDER):
 	"""
 	Put fabric commands in a virtualenv
 	"""
@@ -89,17 +74,17 @@ def virtualenv(venv_path=VENV_FOLDER):
 
 
 def get_repository():
-	if run("test -d %s" % REPOSITORY_FOLDER, quiet=True).failed:
+	if run("test -d %s" % env.REPOSITORY_FOLDER, quiet=True).failed:
 		puts("Creating repository folder.")
-		run("mkdir -p %s" % REPOSITORY_FOLDER)
-	if not exists(posixpath.join(REPOSITORY_FOLDER, '.git')):
+		run("mkdir -p %s" % env.REPOSITORY_FOLDER)
+	if not exists(posixpath.join(env.REPOSITORY_FOLDER, '.git')):
 		puts("Cloning from repository.")
-		run("git clone %s %s" % (GIT_REPOSITORY, REPOSITORY_FOLDER))
+		run("git clone %s %s" % (env.GIT_REPOSITORY, env.REPOSITORY_FOLDER))
 
 
 def create_virtualenv():
-	if run("test -d %s" % VENV_FOLDER, quiet=True).failed:
-		run('virtualenv %s' % VENV_FOLDER)
+	if run("test -d %s" % env.VENV_FOLDER, quiet=True).failed:
+		run('virtualenv %s' % env.VENV_FOLDER)
 
 
 def update_distribute():
@@ -115,14 +100,14 @@ def initial_deploy():
 	get_repository()
 	create_virtualenv()
 	update_distribute()  # some package won't install if distriubte is the old one
-	run('mkdir -p %s' % LOGDIR)  # create the log dir if missing
+	run('mkdir -p %s' % env.LOGDIR)  # create the log dir if missing
 	create_run_command()
 
 
 @serial
 def update_database():
 	with virtualenv():
-		with cd(REPOSITORY_FOLDER):
+		with cd(env.REPOSITORY_FOLDER):
 			# update database, both standard apps and south migrated
 			run("python manage.py syncdb")
 			run("python manage.py migrate")
@@ -132,27 +117,27 @@ def update_database():
 def update_requirements():
 	""" Update all libraries in requirements file """
 	with virtualenv():
-		with cd(REPOSITORY_FOLDER):
-			run('pip install -U -r %s' % REQUIREMENT_PATH)  # update libraries
+		with cd(env.REPOSITORY_FOLDER):
+			run('pip install -U -r %s' % env.REQUIREMENT_PATH)  # update libraries
 
 
 def update_instance(do_update_requirements=True):
-	with cd(REPOSITORY_FOLDER):
+	with cd(env.REPOSITORY_FOLDER):
 		run("git pull")  # pull the changes
 	with virtualenv():
-		with cd(REPOSITORY_FOLDER):
+		with cd(env.REPOSITORY_FOLDER):
 			if do_update_requirements:
 				update_requirements()
 
 			run("python manage.py syncdb")
 
-			if run("test -d %s" % STATIC_FOLDER, quiet=True).failed:
+			if run("test -d %s" % env.STATIC_FOLDER, quiet=True).failed:
 				puts("Creating static subfolder for generated assets.")
-				run("mkdir -p %s" % STATIC_FOLDER)
+				run("mkdir -p %s" % env.STATIC_FOLDER)
 
-			if run("test -d %s" % MEDIA_FOLDER, quiet=True).failed:
+			if run("test -d %s" % env.MEDIA_FOLDER, quiet=True).failed:
 				puts("Creating media subfolder for user uploaded assets.")
-				run("mkdir -p %s" % MEDIA_FOLDER)
+				run("mkdir -p %s" % env.MEDIA_FOLDER)
 
 			run("python manage.py collectstatic --noinput")
 
@@ -161,30 +146,30 @@ def update_instance(do_update_requirements=True):
 
 def get_gunicorn_command(daemon=True):
 	options = [
-		'-w %d' % GUNICORN_WORKERS,  # --user=$USER --group=$GROUP
+		'-w %d' % env.GUNICORN_WORKERS,  # --user=$USER --group=$GROUP
 		'--log-level=debug',
-		'-b 127.0.0.1:%d' % GUNICORN_PORT,
-		'--pid %s' % GUNICORN_PID_FILE,
-		'--log-file=%(log)s' % {'log': GUNICORN_LOGFILE},
-		'-t %d' % GUNICORN_WORKERS_TIMEOUT,  # timeout, upload processes can take some time (default is 30 seconds)
+		'-b 127.0.0.1:%d' % env.GUNICORN_PORT,
+		'--pid %s' % env.GUNICORN_PID_FILE,
+		'--log-file %(log)s' % {'log': env.GUNICORN_LOGFILE},
+		'-t %d' % env.GUNICORN_WORKERS_TIMEOUT,  # timeout, upload processes can take some time (default is 30 seconds)
 	]
 	if daemon:
 		options.append('--daemon')
 	return "{env_path}/bin/gunicorn {options_string} {wsgi_app}".format(
-		env_path=VENV_FOLDER,
+		env_path=env.VENV_FOLDER,
 		options_string=" ".join(options),
 		wsgi_app="wsgi:application",
 	)
 
 
 def start():
-	if USE_SUPERVISOR:
+	if env.USE_SUPERVISOR:
 		# Supervisor should be set to use this fabfile too
 		# the command should be 'fab gunicorn_start_local'
-		run('supervisorctl start %s' % SUPERVISOR_JOBNAME)
+		run('supervisorctl start %s' % env.SUPERVISOR_JOBNAME)
 	else:  # directly start remote Gunicorn
 		with virtualenv():
-			with cd(REPOSITORY_FOLDER):
+			with cd(env.REPOSITORY_FOLDER):
 				gunicorn_command = get_gunicorn_command()
 				run(gunicorn_command)
 
@@ -192,11 +177,11 @@ def start():
 @task
 def stop():
 	""" Stop the remote gunicorn instance (eventually using supervisor) """
-	if USE_SUPERVISOR:
-		run('supervisorctl stop %s' % SUPERVISOR_JOBNAME)
+	if env.USE_SUPERVISOR:
+		run('supervisorctl stop %s' % env.SUPERVISOR_JOBNAME)
 	else:  # directly start remote Gunicorn
 		puts('Sending TERM signal to Gunicorn.')
-		gunicorn_pid = int(run('cat %s' % GUNICORN_PID_FILE, quiet=True))
+		gunicorn_pid = int(run('cat %s' % env.GUNICORN_PID_FILE, quiet=True))
 		run("kill %d" % gunicorn_pid)
 
 
@@ -204,7 +189,7 @@ def stop():
 def start_local():
 	""" Start locally gunicorn instance """
 	gunicorn_command = get_gunicorn_command(daemon=False)
-	if USE_SUPERVISOR:
+	if env.USE_SUPERVISOR:
 		#abort("You should not start_local if you would like to use Supervisor.")
 		process = None
 		try:
@@ -216,14 +201,14 @@ def start_local():
 
 				process.send_signal(signal.SIGTERM)
 	else:
-		with lcd(REPOSITORY_FOLDER):
+		with lcd(env.REPOSITORY_FOLDER):
 			local(gunicorn_command)
 
 
 @task
 def restart():
 	""" Start/Restart the remote gunicorn instance (eventually using supervisor) """
-	if run("test -e %s" % GUNICORN_PID_FILE, quiet=True).failed:
+	if run("test -e %s" % env.GUNICORN_PID_FILE, quiet=True).failed:
 		puts("Gunicorn doesn't seems to be running (PID file missing)...")
 
 		start()
@@ -233,7 +218,7 @@ def restart():
 	# 	abort('ERROR: Gunicorn seems down after the start command.')
 	else:
 		puts('Gracefully restarting Gunicorn.')
-		gunicorn_pid = int(run('cat %s' % GUNICORN_PID_FILE, quiet=True))
+		gunicorn_pid = int(run('cat %s' % env.GUNICORN_PID_FILE, quiet=True))
 		run("kill -s HUP %d" % gunicorn_pid)
 
 
@@ -249,8 +234,11 @@ def send_secrets(secret_files=None, ask=False):
 	puts("Uploading secrets.")
 	for filename in secret_files:
 		local_path = os.path.join(env.localfolder, filename)
-		remote_path = posixpath.join(REPOSITORY_FOLDER, filename)
+		remote_path = posixpath.join(env.REPOSITORY_FOLDER, filename)
 		put(local_path, remote_path)
+	if len(secret_files)==1:
+		with cd(env.REPOSITORY_FOLDER):
+			run('ln -s -f %s settings_local.py' % secret_files[0])
 
 
 def run_command_content():
@@ -263,18 +251,18 @@ def create_run_command():
 	""" Create the remote_run command to be executed """
 	puts("Creating run_server.")
 	with lcd(env.localfolder):
-		with cd(REPOSITORY_FOLDER):
+		with cd(env.REPOSITORY_FOLDER):
 			run_temp_file = StringIO(run_command_content())
 			run_temp_file.name = "run_server"  # to show it as fabric file representation
-			put(run_temp_file, posixpath.join(REPOSITORY_FOLDER, 'run_server'))
+			put(run_temp_file, posixpath.join(env.REPOSITORY_FOLDER, 'run_server'))
 			run('chmod +x run_server')
 
 
 @task
 def local_create_run_command():
 	puts("Creating run_server command to be run with supervisor.")
-	with lcd(REPOSITORY_FOLDER):
-		with file(posixpath.join(REPOSITORY_FOLDER, 'run_server'), 'w') as runner:
+	with lcd(env.REPOSITORY_FOLDER):
+		with file(posixpath.join(env.REPOSITORY_FOLDER, 'run_server'), 'w') as runner:
 			runner.write(run_command_content())
 
 
@@ -282,8 +270,8 @@ def local_create_run_command():
 def local_create_run_command():
 	gunicorn_command = get_gunicorn_command(daemon=False)
 	puts("Creating run_server command to be run with supervisor.")
-	with lcd(REPOSITORY_FOLDER):
-		with file(posixpath.join(REPOSITORY_FOLDER, 'run_server'), 'w') as runner:
+	with lcd(env.REPOSITORY_FOLDER):
+		with file(posixpath.join(env.REPOSITORY_FOLDER, 'run_server'), 'w') as runner:
 			runner.write('#!/bin/bash\n')
 			runner.write('exec %s' % gunicorn_command)
 
@@ -296,7 +284,7 @@ def deploy():
 	Pull from git, update virtualenv, create static and restart gunicorn
 	"""
 	is_this_initial = False
-	if run("test -d %s/.git" % REPOSITORY_FOLDER, quiet=True).failed:  # destination folder to be created
+	if run("test -d %s/.git" % env.REPOSITORY_FOLDER, quiet=True).failed:  # destination folder to be created
 		message = 'Repository folder doesn\'t exists on destination. Proceed with initial deploy?'
 		if not confirm(message):
 			abort("Aborting at user request.")
@@ -305,7 +293,7 @@ def deploy():
 			is_this_initial = True
 
 	for secret in secrets_file_paths():
-		if run("test -e %s" % posixpath.join(REPOSITORY_FOLDER, secret), quiet=True).failed:  # secrets missing
+		if run("test -e %s" % posixpath.join(env.REPOSITORY_FOLDER, secret), quiet=True).failed:  # secrets missing
 			message = 'Some secret doesn\'t exists on destination. Proceed with initial deploy?'
 			send_secrets(ask=True)
 
@@ -317,7 +305,7 @@ def deploy():
 @task
 def discard_remote_git():
 	"""Discard changes done on remote """
-	with cd(REPOSITORY_FOLDER):
+	with cd(env.REPOSITORY_FOLDER):
 		run('git reset --hard HEAD')
 
 
@@ -325,11 +313,11 @@ def discard_remote_git():
 def send_file(mask='*.*', subfolder='files', mask_prefix=None):
 	if mask_prefix:
 		mask = mask_prefix + mask
-	run('mkdir -p %s' % posixpath.join(REPOSITORY_FOLDER, subfolder))
+	run('mkdir -p %s' % posixpath.join(env.REPOSITORY_FOLDER, subfolder))
 	with lcd(env.localfolder):
 		puts("Uploading %s." % posixpath.join(subfolder, mask))
 		file_paths = glob.glob(os.path.join(env.localfolder, subfolder, mask))
 		for path in file_paths:
 			filename = os.path.basename(path)
-			remote_path = posixpath.join(REPOSITORY_FOLDER, subfolder, filename)
+			remote_path = posixpath.join(env.REPOSITORY_FOLDER, subfolder, filename)
 			put(path, remote_path)
