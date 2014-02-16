@@ -127,6 +127,7 @@ def changeLog(request, template_name='static/changelog.html'):
 	    ('5.9', '10/5/2013', 'Cambiata la gestione degli assets per alleggerirne il peso e farne il versioning.'),
 		('5.95', '29/9/2013', 'Ordinamento utenti, unicità case-insensitive dei passeggeri e sistemazioni varie.'),
 		('5.96', '27/12/2013', 'Aggiornamenti vari e ultima versione del framework.'),
+		('5.97', '16/2/2014', 'Deployment rivoluzionato.'),
 		#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
