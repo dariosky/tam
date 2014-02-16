@@ -46,15 +46,21 @@ DO_REQUIREMENTS = False
 
 
 def perform_env_substitutions():
+	""" Do recursive substitution until the value doesn't change
+	Change the type of some env variable that should not be string
+	"""
 	for key, value in env.items():
 		if isinstance(env[key], basestring):
 			old_value = env[key]
-			while True:  # do recursive substitution until the value doesn't change
+			while True:  #
 				value = old_value.format(**env)
 				if value == old_value:
 					break
 				old_value = value
 			env[key] = value
+	if env.USE_SUPERVISOR == 'False':
+		env.USE_SUPERVISOR = False
+
 
 perform_env_substitutions()
 
@@ -121,9 +127,11 @@ def update_requirements():
 			run('pip install -U -r %s' % env.REQUIREMENT_PATH)  # update libraries
 
 
-def update_instance(do_update_requirements=True):
+def update_instance(do_update_requirements=True, justPull=False):
 	with cd(env.REPOSITORY_FOLDER):
 		run("git pull")  # pull the changes
+	if justPull:
+		return
 	with virtualenv():
 		with cd(env.REPOSITORY_FOLDER):
 			if do_update_requirements:
@@ -146,12 +154,12 @@ def update_instance(do_update_requirements=True):
 
 def get_gunicorn_command(daemon=True):
 	options = [
-		'-w %d' % env.GUNICORN_WORKERS,  # --user=$USER --group=$GROUP
+		'-w %s' % env.GUNICORN_WORKERS,  # --user=$USER --group=$GROUP
 		'--log-level=debug',
-		'-b 127.0.0.1:%d' % env.GUNICORN_PORT,
+		'-b 127.0.0.1:%s' % env.GUNICORN_PORT,
 		'--pid %s' % env.GUNICORN_PID_FILE,
 		'--log-file %(log)s' % {'log': env.GUNICORN_LOGFILE},
-		'-t %d' % env.GUNICORN_WORKERS_TIMEOUT,  # timeout, upload processes can take some time (default is 30 seconds)
+		'-t %s' % env.GUNICORN_WORKERS_TIMEOUT,  # timeout, upload processes can take some time (default is 30 seconds)
 	]
 	if daemon:
 		options.append('--daemon')
@@ -162,7 +170,7 @@ def get_gunicorn_command(daemon=True):
 	)
 
 
-def start():
+def start(daemon=False):
 	if env.USE_SUPERVISOR:
 		# Supervisor should be set to use this fabfile too
 		# the command should be 'fab gunicorn_start_local'
@@ -170,7 +178,7 @@ def start():
 	else:  # directly start remote Gunicorn
 		with virtualenv():
 			with cd(env.REPOSITORY_FOLDER):
-				gunicorn_command = get_gunicorn_command()
+				gunicorn_command = get_gunicorn_command(daemon=True)
 				run(gunicorn_command)
 
 
@@ -210,7 +218,6 @@ def restart():
 	""" Start/Restart the remote gunicorn instance (eventually using supervisor) """
 	if run("test -e %s" % env.GUNICORN_PID_FILE, quiet=True).failed:
 		puts("Gunicorn doesn't seems to be running (PID file missing)...")
-
 		start()
 
 	# gunicorn_pid = int(run('cat %s' % GUNICORN_PID_FILE, quiet=True))
@@ -236,7 +243,7 @@ def send_secrets(secret_files=None, ask=False):
 		local_path = os.path.join(env.localfolder, filename)
 		remote_path = posixpath.join(env.REPOSITORY_FOLDER, filename)
 		put(local_path, remote_path)
-	if len(secret_files)==1:
+	if len(secret_files) == 1:
 		with cd(env.REPOSITORY_FOLDER):
 			run('ln -s -f %s settings_local.py' % secret_files[0])
 
@@ -277,7 +284,7 @@ def local_create_run_command():
 
 
 @task
-def deploy():
+def deploy(justPull=False):
 	"""
 	Update the remote instance.
 
@@ -297,7 +304,7 @@ def deploy():
 			message = 'Some secret doesn\'t exists on destination. Proceed with initial deploy?'
 			send_secrets(ask=True)
 
-	update_instance(do_update_requirements=is_this_initial or DO_REQUIREMENTS)
+	update_instance(do_update_requirements=is_this_initial or DO_REQUIREMENTS, justPull=justPull)
 
 	restart()
 
