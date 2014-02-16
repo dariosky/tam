@@ -29,6 +29,7 @@ settings_*.py
 /*.ini
 
 win_settings.bat
+run_server
 
 /static
 /media/brand
