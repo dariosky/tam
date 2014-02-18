@@ -86,7 +86,6 @@ def do_archiviazioneTask(user, end_date):
 def do_archiviazione(user, end_date):
 	if settings.DEBUG:
 		raise Exception("Per archiviare devi uscire dal DEBUG mode.")
-		return
 	from tam.models import Viaggio, Conducente
 	filtroViaggi = Q(data__lt=end_date, conducente__isnull=False, padre__isnull=True)
 	viaggiDaArchiviare = Viaggio.objects.select_related("da", "a", "cliente", "conducente", "passeggero").order_by().filter(filtroViaggi)
@@ -173,4 +172,4 @@ def do_archiviazione(user, end_date):
 	logging.debug("Archiviazione fino al %s completata." % end_date)
 
 if __name__ == '__main__':
-	do_archiviazione(User.objects.get(id=1), datetime.date(2011, 1, 1))
+	do_archiviazione(User.objects.get(id=1), datetime.date(2012, 1, 1))
