@@ -54,7 +54,7 @@ class Step1Data():
 			if result[fieldname]:
 				result[fieldname] = result[fieldname].pk
 		result['data']=result['data'].isoformat()
-		print "serialize to:", result
+		# print "serialize to:", result
 		return result
 
 	@staticmethod
@@ -69,8 +69,7 @@ class Step1Data():
 		result['cliente'] = Cliente.objects.get(id=result['cliente']) if result['cliente'] else None
 		result['passeggero'] = Passeggero.objects.get(id=result['passeggero']) if result['passeggero'] else None
 		result['data'] = dateutil.parser.parse(result['data'])
-		print result
-
+		# print result
 		return result
 
 
