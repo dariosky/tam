@@ -17,7 +17,6 @@ Deploy will consist of:
 # Graceful restart gunicorn with a HUP signal
 # 	so instead of use supervisor, do a graceful restart with
 # kill -s HUP $(cat gunicorn.pid)
-import ConfigParser
 from StringIO import StringIO
 import glob
 import os
@@ -275,7 +274,7 @@ start_server () {{
   fi
   #cd $PROJECTLOC
   echo "starting gunicorn on port $PORT"
-  $GUNICORN_CMD $GUNICORN_ARGS -b 127.0.0.1:$PORT --log-file $LOG_PATH --pid $PID_PATH {WSGI_APPLICATION}
+  exec $GUNICORN_CMD $GUNICORN_ARGS -b 127.0.0.1:$PORT --log-file $LOG_PATH --pid $PID_PATH {WSGI_APPLICATION}
 }}
 
 stop_server () {{
