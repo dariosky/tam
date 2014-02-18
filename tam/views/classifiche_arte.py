@@ -19,12 +19,11 @@ verranno aggiungi in visualizzazione:
 """
 
 CLASSIFICHE = [
-	{"nome": "Doppi Venezia",
-	 'type': 'punti',
-	 "mapping_field": "punti_abbinata",
-	 "viaggio_field": "punti_abbinata",
+	{"nome": "Venezia",
+	 "descrizione": ">=60km",
+	 "mapping_field": "prezzoVenezia",
+	 'viaggio_field': 'prezzoVenezia',
 	},
-
 	{"nome": "Supplementari mattutini",
 	 "mapping_field": "puntiDiurni",
 	 'type': 'supplementari',
@@ -37,10 +36,10 @@ CLASSIFICHE = [
 	 'image': "img/night.png",
 	 'viaggio_field': 'punti_notturni',
 	},
-	{"nome": "Venezia",
-	 "descrizione": ">=60km",
-	 "mapping_field": "prezzoVenezia",
-	 'viaggio_field': 'prezzoVenezia',
+	{"nome": "Doppi Venezia",
+	 'type': 'punti',
+	 "mapping_field": "punti_abbinata",
+	 "viaggio_field": "punti_abbinata",
 	},
 	{"nome": "Doppi Padova",
 	 "mapping_field": "prezzoDoppioPadova",
