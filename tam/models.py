@@ -822,12 +822,18 @@ class Viaggio(models.Model):
 					"punti_abbinata": conducente.classifica_iniziale_puntiDoppiVenezia
 					}
 				chiave = []
-				if self.punti_diurni: chiave.append(classid[conducente.id]["puntiDiurni"])
-				if self.punti_notturni: chiave.append(classid[conducente.id]["puntiNotturni"])
-				if self.punti_abbinata: chiave.append(classid[conducente.id]["punti_abbinata"])
-				if self.prezzoVenezia: chiave.append(classid[conducente.id]["prezzoVenezia"])
-				if self.prezzoDoppioPadova: chiave.append(classid[conducente.id]["prezzoDoppioPadova"])
-				if self.prezzoPadova: chiave.append(classid[conducente.id]["prezzoPadova"])
+				# da priorità alle classifiche così come nei settings
+				for desc_classifica in settings.CLASSIFICHE:
+					punti_viaggio = getattr(self, desc_classifica['viaggio_field'])
+					if punti_viaggio:
+						chiave.append(classid[conducente.id][desc_classifica['mapping_field']])
+				# if self.punti_diurni: chiave.append(classid[conducente.id]["puntiDiurni"])
+				# if self.punti_notturni: chiave.append(classid[conducente.id]["puntiNotturni"])
+				# if self.punti_abbinata: chiave.append(classid[conducente.id]["punti_abbinata"])
+				# if self.prezzoVenezia: chiave.append(classid[conducente.id]["prezzoVenezia"])
+				# if self.prezzoDoppioPadova: chiave.append(classid[conducente.id]["prezzoDoppioPadova"])
+				# if self.prezzoPadova: chiave.append(classid[conducente.id]["prezzoPadova"])
+
 				chiave.append(conducente.nick)    # nei parimeriti metto i nick in ordine
 
 				conducenti.append((chiave, conducente))

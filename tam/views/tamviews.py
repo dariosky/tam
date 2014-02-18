@@ -506,12 +506,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		cliente = step1.get("cliente", None)
 #		form.initial["data"]=datetime.datetime.now()	# 5/10/2009 tolgo il default per la data
 		if step == 1:
-			form.initial['privato'] = cliente is None
+			#form.initial['privato'] = cliente is None
+			#print "privato",form.initial['privato']
 			if not step1:
 				form.initial["da"] = form.initial["a"] = profilo.luogo.pk	# se non bound la form comincia partendo e finendo nel luogo predefinito
 			else:
 				form.initial.update(step1)
-
 				for field in Step1Data.REFERENCE_FIELDS_NAMES:
 					try:
 						if form.initial[field]: form.initial[field] = form.initial[field].pk
