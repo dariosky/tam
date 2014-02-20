@@ -97,6 +97,7 @@ urlpatterns += patterns('tam.views.login',
 )
 
 urlpatterns += patterns('',
+	#TODO: Create the rules dynamically based on real rules
 	url(r'^rules/$', render, {'template_name': 'static/rules.html'}, name="tam_rules"),
 )
 

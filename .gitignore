@@ -31,7 +31,8 @@ settings_*.py
 win_settings.bat
 run_server
 
-/static
+/static/*
+!/static/.htaccess
 /media/brand
 /media_secured/
 
