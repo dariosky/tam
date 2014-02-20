@@ -34,13 +34,13 @@ CLASSIFICHE = [
 ]
 
 NOMI_CAMPI_CONDUCENTE = {
-"classifica_iniziale_diurni": "Supplementari diurni",
-"classifica_iniziale_notturni": "Supplementari notturni",
-"classifica_iniziale_puntiDoppiVenezia": "Punti VE-TV",
-"classifica_iniziale_prezzoDoppiVenezia": "Valore punti VE-TV",
-"classifica_iniziale_doppiPadova": "Valore Doppi Padova",
-"classifica_iniziale_long": "Valore Lunghe",
-"classifica_iniziale_medium": "Valore Corte (Padova)",
+	"classifica_iniziale_diurni": "Supplementari diurni",
+	"classifica_iniziale_notturni": "Supplementari notturni",
+	"classifica_iniziale_puntiDoppiVenezia": "Punti VE-TV",
+	"classifica_iniziale_prezzoDoppiVenezia": "Valore punti VE-TV",
+	"classifica_iniziale_doppiPadova": "Valore Doppi Padova",
+	"classifica_iniziale_long": "Valore Lunghe",
+	"classifica_iniziale_medium": "Valore Corte (Padova)",
 }
 
 from decimal import Decimal
@@ -197,6 +197,9 @@ def get_value(viaggio, forzaSingolo=False):
 	if forzaSingolo:
 		pass
 	#			logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
+
+	if viaggio.cartaDiCredito:
+		importoViaggio *= 0.98  # tolgo il 2% al lordo per i pagamenti con carta di credito
 
 	if viaggio.commissione:  # tolgo la commissione dal lordo
 		if viaggio.tipo_commissione == "P":
