@@ -106,6 +106,7 @@ def initial_deploy():
 	create_virtualenv()
 	update_distribute()  # some package won't install if distriubte is the old one
 	run('mkdir -p %s' % env.LOGDIR)  # create the log dir if missing
+	run('chmod +x node_modules/.bin/yuglify')
 	create_run_command()
 
 
