@@ -71,9 +71,9 @@ def process_classifiche(viaggio, force_numDoppi=None):
 				viaggio.prezzoDoppioPadova = da["rimanenteInLunghe"]
 			else:
 				prezzoNetto = da["rimanenteInLunghe"]
-				if da["kmTotali"] >= 60:
+				if da["kmTotali"] >= getattr(settings, 'KM_PER_LUNGHE', 50):
 					viaggio.prezzoVenezia = prezzoNetto
-				elif 25 <= da["kmTotali"] < 60:
+				elif 25 <= da["kmTotali"] < getattr(settings, 'KM_PER_LUNGHE', 50):
 					viaggio.prezzoPadova = prezzoNetto
 	elif viaggio.padre_id is None:  # corse non abbinate, o abbinate che non fanno alcun punto
 		if viaggio.is_long():

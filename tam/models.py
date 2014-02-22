@@ -686,11 +686,11 @@ class Viaggio(models.Model):
 
 	def is_long(self):
 		""" Ritorna vero se la tratta, andando e tornando è lunga """
-		return self.km >= 50
+		return self.km >= getattr(settings, 'KM_PER_LUNGHE', 50)
 
 	def is_medium(self):
 		""" Ritorna vero se la tratta è media """
-		return 25 <= self.km < 50 or (self.km < 25 and self.prezzo > 16)
+		return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (self.km < 25 and self.prezzo > 16)
 
 	def _is_valid(self):
 		"""Controlla che il viaggio abbia tutte le tratte definite"""
