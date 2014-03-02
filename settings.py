@@ -33,7 +33,7 @@ MANAGERS = ADMINS
 DATABASES = {}  # set them in settings_local
 
 DATABASE_ROUTERS = ['db_routers.TamArchiveRouter',
-					'modellog.db_routers.SeparateLogRouter']
+                    'modellog.db_routers.SeparateLogRouter']
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -81,7 +81,7 @@ STATICFILES_FINDERS = (
 	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 	#'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+STATICFILES_STORAGE = 'tam.storage.PipelineCachedStorage'
 
 jqueryURL = 'js/jquery.min.js'  # 1.7.2, port no newer one should need change autocomplete
 jqueryUIURL = 'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
@@ -108,16 +108,16 @@ PIPELINE_JS = {
 	},
 	'tamUI': {
 		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-							 jqueryUIURL, 'js/calendarPreferences.js',
-							 'js/tam-common.js'],
+		                     jqueryUIURL, 'js/calendarPreferences.js',
+		                     'js/tam-common.js'],
 		'output_filename': 'tamUI.min.js'
 	},
 	'tamCorse': {
 		'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-							 jqueryUIURL,
-							 'js/calendarPreferences.js',
-							 'js/tam-common.js',
-							 'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
+		                     jqueryUIURL,
+		                     'js/calendarPreferences.js',
+		                     'js/tam-common.js',
+		                     'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
 		'output_filename': 'tamCorse.min.js'
 	},
 	'jquery.editable': {
@@ -139,8 +139,8 @@ PIPELINE_DISABLE_WRAPPER = True
 if not DEBUG:
 	TEMPLATE_LOADERS = (
 	('django.template.loaders.cached.Loader', (  # cache template loaders
-												 'django.template.loaders.filesystem.Loader',
-												 'django.template.loaders.app_directories.Loader',
+	                                             'django.template.loaders.filesystem.Loader',
+	                                             'django.template.loaders.app_directories.Loader',
 	)
 	),
 	)
@@ -149,18 +149,18 @@ if not DEBUG:
 PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify')
 
 MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'django.middleware.gzip.GZipMiddleware',
-						'django.middleware.common.CommonMiddleware',
-						'django.contrib.sessions.middleware.SessionMiddleware',
-						# 'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
-						'django.contrib.messages.middleware.MessageMiddleware',
-						'django.contrib.auth.middleware.AuthenticationMiddleware',
-						'tam.middleware.loginRequirement.RequireLoginMiddleware',
-						# 	'django.middleware.doc.XViewMiddleware',	# currently useless?
+                        'django.middleware.common.CommonMiddleware',
+                        'django.contrib.sessions.middleware.SessionMiddleware',
+                        # 'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
+                        'django.contrib.messages.middleware.MessageMiddleware',
+                        'django.contrib.auth.middleware.AuthenticationMiddleware',
+                        'tam.middleware.loginRequirement.RequireLoginMiddleware',
+                        # 	'django.middleware.doc.XViewMiddleware',	# currently useless?
 
-						'django.middleware.transaction.TransactionMiddleware',
+                        'django.middleware.transaction.TransactionMiddleware',
 
-						'tam.middleware.threadlocals.ThreadLocals',
-						# 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
+                        'tam.middleware.threadlocals.ThreadLocals',
+                        # 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -236,8 +236,8 @@ if use_debug_toolbar:
 		# middleware_split_position = MIDDLEWARE_CLASSES.index('django.middleware.gzip.GZipMiddleware') + 1
 		middleware_split_position = 0  #  put the toolbar middleware at the start
 		MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES[:middleware_split_position] + \
-							 ('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
-							 MIDDLEWARE_CLASSES
+		                     ('debug_toolbar.middleware.DebugToolbarMiddleware',) + \
+		                     MIDDLEWARE_CLASSES
 	except:
 		pass
 	# 	MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)
@@ -271,8 +271,8 @@ CACHES = {
 # SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
-							"FattureConducente", "FattureConducenteNoIva",
-							"Ricevute"]
+                            "FattureConducente", "FattureConducenteNoIva",
+                            "Ricevute"]
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
 SECURE_URL = "/secure/"
@@ -299,3 +299,4 @@ for app, desc in PLUGGABLE_APPS.items():
 # djcelery.setup_loader()
 
 WSGI_APPLICATION = 'wsgi.application'
+CSRF_FAILURE_VIEW = 'tam.middleware.loginRequirement.csrf_failure_view'

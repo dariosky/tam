@@ -22,6 +22,7 @@
 	{% endif %}
 
 	<form method="post" action=".">
+		{% csrf_token %}
 		<table style="margin:0 auto;">
 			<tr>
 				<td>
@@ -42,7 +43,6 @@
 				</td>
 			</tr>
 		</table>
-		{% csrf_token %}
 	</form>
 </div>
 {% endblock %}

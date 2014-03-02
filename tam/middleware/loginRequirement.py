@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 from django.contrib import messages
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from django.views.generic import TemplateView
 
 
 class RequireLoginMiddleware(object):
@@ -35,3 +38,7 @@ class RequireLoginMiddleware(object):
 				return HttpResponseRedirect(reverse('tamCorse'))
 			else:
 				return login_required(view_func)(request, *view_args, **view_kwargs)
+
+
+def csrf_failure_view(request, reason=''):
+	return render_to_response('403.html', {}, context_instance=RequestContext(request))
