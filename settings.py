@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "5.97"
+TAM_VERSION = "5.98"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico"):
@@ -164,6 +164,7 @@ MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'djan
 )
 
 ROOT_URLCONF = 'urls'
+CSRF_FAILURE_VIEW = 'tam.middleware.loginRequirement.csrf_failure_view'
 
 TEMPLATE_DIRS = (  # Put strings here, like "/home/html/django_templates"  # Always use forward slashes, even on Windows.  # Don't forget to use absolute paths, not relative paths.
 )
@@ -299,4 +300,3 @@ for app, desc in PLUGGABLE_APPS.items():
 # djcelery.setup_loader()
 
 WSGI_APPLICATION = 'wsgi.application'
-CSRF_FAILURE_VIEW = 'tam.middleware.loginRequirement.csrf_failure_view'

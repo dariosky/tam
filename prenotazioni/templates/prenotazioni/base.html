@@ -1,80 +1,91 @@
 {% load staticfiles %}{% load url from future %}{% load compressed %}<!DOCTYPE html>
 <html>
-	<head>
-		<title>{{ license_owner }} - Sistema di prenotazione online</title>
-		<meta name="description" content="TaM - Sistema di prenotazione online" />
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<link rel="shortcut icon" href="{{ STATIC_URL }}prenotazioni/ico/favicon.ico" type="image/x-icon" />
-		<link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-144-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="114x114" href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-114-precomposed.png">
-		<link rel="apple-touch-icon-precomposed" sizes="72x72"   href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-72-precomposed.png">
-		<link rel="apple-touch-icon-precomposed"                 href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-57-precomposed.png">
+<head>
+	<title>{{ license_owner }} - Sistema di prenotazione online</title>
+	<meta name="description" content="TaM - Sistema di prenotazione online"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<link rel="shortcut icon" href="{{ STATIC_URL }}prenotazioni/ico/favicon.ico" type="image/x-icon"/>
+	<link rel="apple-touch-icon-precomposed" sizes="144x144"
+		  href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-144-precomposed.png">
+	<link rel="apple-touch-icon-precomposed" sizes="114x114"
+		  href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-114-precomposed.png">
+	<link rel="apple-touch-icon-precomposed" sizes="72x72"
+		  href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-72-precomposed.png">
+	<link rel="apple-touch-icon-precomposed"
+		  href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-57-precomposed.png">
 
-		<link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet">
-		<link href="{% static 'bootstrap/css/bootstrap-responsive.css' %}" rel="stylesheet">
-		<link href="{% static 'js/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.css' %}" rel="stylesheet">
-		<link href="{% static 'chosen/chosen.css' %}" rel="stylesheet" />
+	<link href="{% static 'bootstrap/css/bootstrap.css' %}" rel="stylesheet">
+	<link href="{% static 'bootstrap/css/bootstrap-responsive.css' %}" rel="stylesheet">
+	{#		<link href="{% static 'js/jquery-ui-1.9.1.custom/css/ui-lightness/jquery-ui-1.9.1.custom.css' %}" rel="stylesheet">#}
+	<link href="{% static 'bootstrap-datepicker/css/datepicker.css' %}" rel="stylesheet">
+	<link href="{% static 'chosen/chosen.css' %}" rel="stylesheet"/>
 
-		{% compressed_css 'prenotazioni' %}
-		{% if tam_stealth %}{% compressed_css 'tam-stealth' %}{% endif %}
+	{% compressed_css 'prenotazioni' %}
+	{% if tam_stealth %}{% compressed_css 'tam-stealth' %}{% endif %}
 
-		<script src="{% static 'js/jquery.min.js' %}"></script>
+	<script src="{% static 'js/jquery.min.js' %}"></script>
 
-	</head>
-	<body>
-		<div id='header'>
-			{% block header %}
-			<img id='taxilogo' src="{{ MEDIA_URL }}{{ logo_consorzio }}" />
-			{% endblock header %}
-		</div>
+</head>
+<body>
+<div id='header'>
+	{% block header %}
+		<img id='taxilogo' src="{{ MEDIA_URL }}{{ logo_consorzio }}"/>
+	{% endblock header %}
+</div>
 
-		<div id='mainContent'>
-			<a href="/">
-			<h2><img src="{% static "img/tam_16.png" %}" class="loghetto" alt="" />Servizio prenotazioni</h2>
-			</a>
+<div id='mainContent'>
+	<a href="/">
+		<h2><img src="{% static "img/tam_16.png" %}" class="loghetto" alt=""/>Servizio prenotazioni</h2>
+	</a>
 
-			{% if messages %}
-			<div class="messages">
-				{% for message in messages %}
+	{% if messages %}
+		<div class="messages">
+			{% for message in messages %}
 				<div class="alert{% if message.tags %} {{ message.tags }}{% endif %}">
 					{{ message }}
 				</div>
-				{% endfor %}
-			</div>
-			{% endif %}
-
-			<div class='box'>
-				{% block content %}
-				{% endblock content %}
-			</div>
-
-			<div id='footer'>
-				{% block footer %}
-				Accesso effettuato con nome utente: {{ request.user }} - <a href='{% url 'logout' %}?next=/prenotazioni'>disconnettiti</a>
-				{% endblock footer %}
-			</div>
+			{% endfor %}
 		</div>
+	{% endif %}
 
-		<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
-		<script src="{% static 'chosen/chosen.jquery.min.js' %}" type="text/javascript"></script>
-		<script src="{% static 'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js' %}"></script>
-		<script src="{% static 'js/calendarPreferences.js' %}"></script>
-		<script>
-			$(function() {
-				$("#id_data_corsa_0").datepicker({
-					onSelect : function(dateText) {
-						$('#id_data_1').focus().select();
-					}
-				});
+	<div class='box'>
+		{% block content %}
+		{% endblock content %}
+	</div>
 
-				$("#id_data_corsa_1").bind('keyup', function(e) {
-					if ((this.value.length > 2) && (this.value.indexOf(":") == -1)) {
-						this.value = this.value.slice(0, 2) + ':' + this.value.slice(2);
-					}
-				});
+	<div id='footer'>
+		{% block footer %}
+			Accesso effettuato con nome utente: {{ request.user }} -
+			<a href='{% url 'logout' %}?next=/prenotazioni'>disconnettiti</a>
+		{% endblock footer %}
+	</div>
+</div>
 
-				$("#id_luogo").chosen();
-			});
-		</script>
-	</body>
+<script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+<script src="{% static 'chosen/chosen.jquery.min.js' %}" type="text/javascript"></script>
+{#		<script src="{% static 'js/jquery-ui-1.9.1.custom/js/jquery-ui-1.9.1.custom.min.js' %}"></script>#}
+{#		<script src="{% static 'js/calendarPreferences.js' %}"></script>#}
+<script src="{% static 'bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
+<script src="{% static 'bootstrap-datepicker/js/locales/bootstrap-datepicker.it.js' %}"></script>
+<script>
+	$(function () {
+		$("#id_data_corsa_0").datepicker({
+			todayBtn: "linked",
+			language: "it",
+			autoclose: true,
+			todayHighlight: true
+		}).on('changeDate', function () {
+			$('#id_data_corsa_1').focus().select();
+		});
+
+		$("#id_data_corsa_1").bind('keyup', function (e) {
+			if ((this.value.length > 2) && (this.value.indexOf(":") == -1)) {
+				this.value = this.value.slice(0, 2) + ':' + this.value.slice(2);
+			}
+		});
+
+		$("#id_luogo").chosen();
+	});
+</script>
+</body>
 </html>

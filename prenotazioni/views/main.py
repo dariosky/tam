@@ -167,7 +167,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 	form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
 	if prenotazione:
 		form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(
-			tamdates.tz_italy)    # inizialmente forzo la corsa
+			tamdates.tz_italy)  # inizialmente forzo la corsa
 
 	# deciso se mostrare o meno la scelta dei clienti:
 	clienti_attivi = utentePrenotazioni.clienti
@@ -196,7 +196,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 		if "delete" in request.POST:
 			inviaMailPrenotazione(prenotazione, "delete")
-			id_prenotazione = prenotazione.id    # salvo per il messaggio finale
+			id_prenotazione = prenotazione.id  # salvo per il messaggio finale
 			prenotazione.delete()
 			messages.success(request, "Prenotazione n°%d annullata." % id_prenotazione)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
@@ -316,7 +316,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	filtroCliente = request.GET.get('cliente', None)
 	cliente_selezionato = None
 	if filtroCliente is not None:
-		if filtroCliente <> "all":
+		if filtroCliente != "all":
 			try:
 				codice_cliente = int(filtroCliente)
 				cliente_selezionato = Cliente.objects.get(id=codice_cliente)
@@ -338,18 +338,21 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 		if filtroData == 'cur':  # mese corrente
 			data_inizio = adesso.replace(hour=0, minute=0, day=1)
 			data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0, minute=0, day=1)
-		if filtroData == 'prev':  # mese precedente
+		elif filtroData == 'prev':  # mese precedente
 			data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
 			data_inizio = (data_fine - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio del mese precedente
-		if filtroData == 'day':  # tutta oggi
+		elif filtroData == 'day':  # tutta oggi
 			data_inizio = adesso.replace(hour=0, minute=0)  # da mezzanotte...
 			data_fine = adesso.replace(hour=23, minute=59)  # fino a fine giornata
-		if filtroData == 'next':  # prossime corse
+		elif filtroData == 'next':  # prossime corse
 			# prendo il minore tra 2 ore fa e mezzanotte scorsa e per i prossimi 15 giorni
 			data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
 			data_DueOreFa = adesso - datetime.timedelta(hours=2)
 			data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
 			data_fine = adesso + datetime.timedelta(days=15)
+		elif filtroData == 'adv':  # filtro avanzato da data - a data
+			data_inizio = tamdates.parseDateString(request.GET.get('dstart')).replace(hour=0, minute=0)
+			data_fine = tamdates.parseDateString(request.GET.get('dend')).replace(hour=23, minute=59)  # fino a fine giornata
 
 	viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
 
@@ -389,7 +392,10 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 		"cliente_unico": cliente_unico,
 		"clienti_attivi": clienti_attivi,
 		"cliente_selezionato": cliente_selezionato,
+
 		"current_date_filter": filtroData,
+		"data_inizio": data_inizio.strftime('%d/%m/%Y'),
+		"data_fine": data_fine.strftime('%d/%m/%Y'),
 
 		"paginator": paginator,
 		"thisPage": thisPage,
