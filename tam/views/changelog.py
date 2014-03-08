@@ -128,6 +128,7 @@ def changeLog(request, template_name='static/changelog.html'):
 		('5.95', '29/9/2013', 'Ordinamento utenti, unicità case-insensitive dei passeggeri e sistemazioni varie.'),
 		('5.96', '27/12/2013', 'Aggiornamenti vari e ultima versione del framework.'),
 		('5.97', '16/2/2014', 'Deployment rivoluzionato.'),
+		('5.98', '8/3/2014', 'Filtro prenotazioni per data da-a e cambio stile date selectors nelle prenotazioni.'),
 		#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
