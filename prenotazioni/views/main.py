@@ -351,8 +351,15 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 			data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
 			data_fine = adesso + datetime.timedelta(days=15)
 		elif filtroData == 'adv':  # filtro avanzato da data - a data
-			data_inizio = tamdates.parseDateString(request.GET.get('dstart')).replace(hour=0, minute=0)
-			data_fine = tamdates.parseDateString(request.GET.get('dend')).replace(hour=23, minute=59)  # fino a fine giornata
+			try:
+				start_string = request.GET.get('dstart')
+				end_string = request.GET.get('dend')
+				data_inizio = tamdates.parseDateString(start_string).replace(hour=0, minute=0)
+				data_fine = tamdates.parseDateString(end_string).replace(hour=23, minute=59)  # fino a fine giornata
+			except AttributeError:
+				messages.warning(request,
+				                 "Errore nel processare l'intervallo di date %s-%s." % (start_string, end_string))
+				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
 
@@ -394,8 +401,8 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 		"cliente_selezionato": cliente_selezionato,
 
 		"current_date_filter": filtroData,
-		"data_inizio": data_inizio.strftime('%d/%m/%Y'),
-		"data_fine": data_fine.strftime('%d/%m/%Y'),
+		"data_inizio": data_inizio.strftime('%d/%m/%Y') if data_inizio else "",
+		"data_fine": data_fine.strftime('%d/%m/%Y') if data_fine else "",
 
 		"paginator": paginator,
 		"thisPage": thisPage,

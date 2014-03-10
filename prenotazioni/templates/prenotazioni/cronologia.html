@@ -22,7 +22,7 @@
 					{% endfor %}
 				</select>
 			{% endif %}
-			<select name='data'>
+			<select name='data' id="datemode">
 				<option value='all'>Tutte le date</option>
 				<option value='next'{% if current_date_filter == "next" %}  selected="selected"{% endif %}>Prossime
 					corse
@@ -39,7 +39,7 @@
 				</option>
 			</select>
 
-			<div class="input-daterange input-group hixdden" id="datepicker">
+			<div class="input-daterange input-group hidden" id="datepicker">
 				<label for="datepicker">Seleziona le date per il filtro:</label>
 				Da:
 				<input type="text" class="input-sm form-control" name="dstart" value="{{ data_inizio }}"/>
@@ -119,6 +119,16 @@
 					language: "it",
 					autoclose: true
 				});
+				$('#datemode').change(
+						function () {
+							var datemode = $(this).find(":selected").val();
+							if (datemode == 'adv')
+								$('#datepicker').removeClass('hidden');
+							else
+								$('#datepicker').addClass('hidden');
+						}
+				);
+				$('#datemode').change();
 			});
 		</script>
 	{% endif %}
