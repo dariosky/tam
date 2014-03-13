@@ -104,9 +104,10 @@ def process_classifiche(viaggio, force_numDoppi=None):
 			#
 			#		# i figli non prendono nulla
 
-	if viaggio.padre is None and valoreTotale > 27:
+	if viaggio.padre is None and valoreTotale > 0:
 		# padri e singoli possono avere i supplementi
-		# 27/1/2014 le corse al di sotto dei 27euro non generano supplementari
+		# 27/1/2014 le corse al di sotto dei 27euro non generano supplementari. 13/3/2014 Abbasso i 27 a 0 euro
+		# i 27 dovevano essere solo per il cliente fittizio
 		for fascia, points in viaggio.disturbi().items():
 			if fascia == "night":
 				viaggio.punti_notturni += points
