@@ -99,7 +99,7 @@
 					<a href="{% url "actionLog" %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
 				{% endifnotequal %}
                 {% with viaggio.delete_url as deleteUrl %}
-                    {% if deleteUrl %}
+                    {% if deleteUrl and perms.tam.delete_viaggio %}
 							<br/>
 							<a href="{{ deleteUrl }}">
 								<img src="{% static "img/delbtn.png" %}" alt="Cancella corsa" />

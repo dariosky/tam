@@ -426,6 +426,9 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		return HttpResponseRedirect("/")
 
 	if delete:
+		if not request.user.has_perm('tam.delete_viaggio'):
+			messages.error(request, "Non hai permessi per cancellare le corse.")
+			return HttpResponseRedirect(redirectOk)
 		if not id:
 			messages.error(request, "Indicare la corsa da cancellare.")
 			return HttpResponseRedirect(redirectOk)
@@ -435,7 +438,6 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 					if viaggio.is_abbinata:
 						messages.error(request, "Non puoi cancellare le corse abbinate, scollegale prima.")
 						return HttpResponseRedirect(redirectOk)
-
 					try:
 						viaggio.delete()
 						messages.success(request, "Cancellata la corsa %s." % viaggio)

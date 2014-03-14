@@ -1,4 +1,5 @@
 #coding: utf8
+from prenotazioni.models import Prenotazione
 from tam.models import Viaggio, Luogo
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -8,6 +9,7 @@ from django.template.context import RequestContext
 from tam.disturbi import trovaDisturbi, fasce_semilineari
 from django.contrib import messages
 
+
 def fixAction(request, template_name="utils/fixAction.html"):
 	if not request.user.is_superuser:
 		messages.error(request, "Devi avere i superpoteri per eseguire le azioni correttive.")
@@ -15,13 +17,14 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
 	messageLines = []
 	error = ""
-#	messageLines.append("Nessuna azione correttiva impostata. Meglio tenere tutto fermo di default.")
+	#	messageLines.append("Nessuna azione correttiva impostata. Meglio tenere tutto fermo di default.")
 	if request.POST.get('toV2'):
 		#===========================================================================
 		# Azione di aggiornamento alla 2.0
 		# Aggiungo lo speciale ai luoghi in base al nome
 		# Effettuo il vacuum del DB
 		from tamArchive.tasks import vacuum_db
+
 		messageLines.append('Imposto gli speciali sui luoghi con stazione/aer* nel nome.')
 		stazioni = Luogo.objects.filter(nome__icontains='stazione').exclude(speciale='S')
 		if len(stazioni):
@@ -39,6 +42,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 			messageLines.append(aeroporto.nome)
 
 		from django.contrib.auth.models import Group, Permission
+
 		gruppo_potenti = Group.objects.get(name='Potente')
 		permessiDaAggiungere = ('get_backup', 'can_backup', 'archive', 'flat')
 		for nomePermesso in permessiDaAggiungere:
@@ -47,19 +51,21 @@ def fixAction(request, template_name="utils/fixAction.html"):
 			messageLines.append('Do agli utenti potenti: %s' % nomePermesso)
 		messageLines.append('Vacuum DB.')
 		vacuum_db()
-		#===========================================================================
+	#===========================================================================
 
 	if "Aggiorno i prezzi di Padova e Venezia delle corse degli ultimi 2 mesi" == False:
 		corseCambiate = corse = 0
 
-		corseDaSistemare = Viaggio.objects.filter(data__gt=datetime.date.today() - datetime.timedelta(days=60), padre__isnull=True)
-	#	corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
+		corseDaSistemare = Viaggio.objects.filter(data__gt=datetime.date.today() - datetime.timedelta(days=60),
+		                                          padre__isnull=True)
+		#	corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
 		for corsa in corseDaSistemare:
 			oldDPadova = corsa.prezzoDoppioPadova
 			oldVenezia = corsa.prezzoVenezia
 			corsa.updatePrecomp(forceDontSave=True)
 			if oldDPadova <> corsa.prezzoDoppioPadova or oldVenezia <> corsa.prezzoVenezia:
-				messageLines.append("%s\n   DPD: %d->%d VE: %d->%d" % (corsa, oldDPadova, corsa.prezzoDoppioPadova, oldVenezia, corsa.prezzoVenezia))
+				messageLines.append("%s\n   DPD: %d->%d VE: %d->%d" % (
+				corsa, oldDPadova, corsa.prezzoDoppioPadova, oldVenezia, corsa.prezzoVenezia))
 				corseCambiate += 1
 			corse += 1
 		messageLines.append("Corse aggiornate %d/%d" % (corseCambiate, corse))
@@ -71,15 +77,15 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		def status():
 			corsa = Viaggio.objects.filter(pk=35562)[0]
 			messageLines.append("la prima del %s è conguagliata di %d km su %d punti. Andrebbe 360."
-					% (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
+			                    % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
 
 			corsa = Viaggio.objects.filter(pk=38740)[0]
 			messageLines.append("la seconda del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-					% (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
+			                    % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
 
 			corsa = Viaggio.objects.filter(pk=38887)[0]
 			messageLines.append("la terza del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-					% (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
+			                    % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
 
 		status()
 
@@ -87,30 +93,32 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		corsa = Viaggio.objects.filter(pk=35562)[0]
 		corsa.km_conguagliati = 360
 		corsa.save()
-		corsa.updatePrecomp() # salvo perché mi toglierà i punti
+		corsa.updatePrecomp()  # salvo perché mi toglierà i punti
 
 		corsa = Viaggio.objects.filter(pk=38740)[0]
 		corsa.km_conguagliati = 0
 		corsa.save()
-		corsa.updatePrecomp() # salvo perché mi toglierà i punti
+		corsa.updatePrecomp()  # salvo perché mi toglierà i punti
 
 		corsa = Viaggio.objects.filter(pk=38887)[0]
 		corsa.km_conguagliati = 0
 		corsa.save()
-		corsa.updatePrecomp() # salvo perché mi toglierà i punti
+		corsa.updatePrecomp()  # salvo perché mi toglierà i punti
 
 		status()
 
 	if request.POST.get('fixDisturbi'):
-		""" Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi """
+		# Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi
 		print "Refixo"
-		viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'), date_start__gt=datetime.datetime(2012, 3, 1), padre=None)
+		viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'), date_start__gt=datetime.datetime(2012, 3, 1),
+		                                padre=None)
 		sistemati = 0
 		for viaggio in viaggi:
 			ultimaCorsa = viaggio.lastfratello()
 			if ultimaCorsa.da.speciale == 'A':
 
-				disturbiGiusti = trovaDisturbi(viaggio.date_start, viaggio.date_end(recurse=True), metodo=fasce_semilineari)
+				disturbiGiusti = trovaDisturbi(viaggio.date_start, viaggio.date_end(recurse=True),
+				                               metodo=fasce_semilineari)
 				notturniGiusti = disturbiGiusti.get('night', 0)
 				diurniGiusti = disturbiGiusti.get('morning', 0)
 				if diurniGiusti <> viaggio.punti_diurni or notturniGiusti <> viaggio.punti_notturni:
@@ -118,7 +126,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 					messageLines.append(ultimaCorsa)
 					messageLines.append("prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni))
 					messageLines.append("dopo %s/%s" % (diurniGiusti, notturniGiusti))
-					messageLines.append(" ");
+					messageLines.append(" ")
 					viaggio.punti_diurni = diurniGiusti
 					viaggio.punti_notturni = notturniGiusti
 					viaggio.save()
@@ -127,18 +135,21 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		messageLines.append("Errati (e corretti) %d/%d" % (sistemati, len(viaggi)))
 	if request.POST.get("spostaILog"):
 		from tam.tasks import moveLogs
+
 		moveLogs()
 		messages.info(request, "Spostamento dei log iniziato.")
 
 	if request.POST.get("permessiStandard"):
 		import tam.views.actions.set_default_permissions as setperm
+
 		setperm.delete_all_permissions()
 		setperm.create_missing_permissions()
 		setperm.create_missing_groups()
 		setperm.setDefaultPermissions()
 
 	if request.POST.get("deleteAllCorse"):
-		messageLines.append("CANCELLO TUTTE LE CORSE")
+		messageLines.append("CANCELLO TUTTE LE PRENOTAZIONI e le CORSE")
+		Prenotazione.objects.all().delete()
 		Viaggio.objects.all().delete()
 
 	if request.POST.get("renewTragitto"):
@@ -196,9 +207,10 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
 						  """.replace("%", "%%")
 		from django.db import connection
+
 		cursor = connection.cursor()
 		cursor.execute(query_asset_sub)
 		connection.commit()
 
-	return render_to_response(template_name, {"messageLines":messageLines, "error":error},
-							context_instance=RequestContext(request))
+	return render_to_response(template_name, {"messageLines": messageLines, "error": error},
+	                          context_instance=RequestContext(request))
