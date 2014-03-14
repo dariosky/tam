@@ -106,8 +106,12 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 
 	for classifica_definita in classifiche_definite:	# ordino i dati
 		classifica_definita['dati'].sort()
-		classifica_definita['min'] = classifica_definita["dati"][0][0]	# prendo la chiave del primo valore
-		classifica_definita['max'] = classifica_definita["dati"][-1][0]	# prendo la chiave del'ultimo valore
+		if classifica_definita['dati']:
+			classifica_definita['min'] = classifica_definita["dati"][0][0]	# prendo la chiave del primo valore
+			classifica_definita['max'] = classifica_definita["dati"][-1][0]	# prendo la chiave del'ultimo valore
+		else:
+			classifica_definita['min'] = 0
+			classifica_definita['max'] = 1
 		if classifica_definita.get("type") == "punti" and classifica_definita['min']: # abbiamo un minimo da conguagliare
 			punti_assocMin = classifica_definita['min'] # punti comuni a tutti gli attivi da conguagliare
 			totaleConguaglioAbbinate = 0
