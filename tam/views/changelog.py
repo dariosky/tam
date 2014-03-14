@@ -118,22 +118,26 @@ def changeLog(request, template_name='static/changelog.html'):
 		('4.8', '24/2/2013', 'Logo personalizzato nella pagina di login, più filtri sulla visualizzazione.'),
 		('4.9', '24/2/2013', 'Seleziona rapida dei 2 mesi precedenti nella visualizzazione fatture.'),
 		('5.0', '6/3/2013', 'Supporto a timezone differenti sul server. Fix e miglioramenti vari.'),
-		('5.1', '29/3/2013', 'Memorizza quando nelle prenotazioni è stato inviato un allegato.' if prenotazioni else ""),
+		(
+		'5.1', '29/3/2013', 'Memorizza quando nelle prenotazioni è stato inviato un allegato.' if prenotazioni else ""),
 		('5.2', '9/5/2013', 'Possibilità di cancellare un cliente, dopo aver cancellato le sue corse.'),
-	    ('5.3', '10/5/2013', 'Forzo la selezione di tutte le corse quando clicco su un\'abbinata.'),
-		('5.5', '1/4/2013', mark_safe('<b>Bacheca notizie in realtime.</b>') ) if 'board' in settings.PLUGGABLE_APPS else "",
+		('5.3', '10/5/2013', 'Forzo la selezione di tutte le corse quando clicco su un\'abbinata.'),
+		('5.5', '1/4/2013',
+		 mark_safe('<b>Bacheca notizie in realtime.</b>') ) if 'board' in settings.PLUGGABLE_APPS else "",
 		('5.6', '18/6/2013', mark_safe('<b>Coda presenze.</b>')) if 'codapresenze' in settings.PLUGGABLE_APPS else "",
-	    ('5.7', '24/6/2013', mark_safe('Gli utenti potenti ora possono gestire la coda di tutti.')) if 'codapresenze' in settings.PLUGGABLE_APPS else "",
-	    ('5.9', '10/5/2013', 'Cambiata la gestione degli assets per alleggerirne il peso e farne il versioning.'),
+		('5.7', '24/6/2013', mark_safe(
+			'Gli utenti potenti ora possono gestire la coda di tutti.')) if 'codapresenze' in settings.PLUGGABLE_APPS else "",
+		('5.9', '10/5/2013', 'Cambiata la gestione degli assets per alleggerirne il peso e farne il versioning.'),
 		('5.95', '29/9/2013', 'Ordinamento utenti, unicità case-insensitive dei passeggeri e sistemazioni varie.'),
 		('5.96', '27/12/2013', 'Aggiornamenti vari e ultima versione del framework.'),
 		('5.97', '16/2/2014', 'Deployment rivoluzionato.'),
 		('5.98', '8/3/2014', 'Filtro prenotazioni per data da-a e cambio stile date selectors nelle prenotazioni.'),
-		('5.99', '14/3/2014', 'È possibile inibire la cancellazione delle corse.'),
+		('5.99', '14/3/2014', 'È possibile inibire la cancellazione delle corse. '
+		                      'Cambio sui costi della sosta nei collettivi in partenza.'),
 		#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:
-		if not version: continue    # version può essere vuoto... salto la riga
+		if not version: continue  # version può essere vuoto... salto la riga
 		if version[0] and version[0] <= current_version:
 			changes.append(version)
 	return render_to_response(template_name, {'changes': changes}, context_instance=RequestContext(request))

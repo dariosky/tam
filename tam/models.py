@@ -488,7 +488,8 @@ class Viaggio(models.Model):
 			da = self.a
 			a = self.luogoDiRiferimento
 		else:
-			if self._is_abbinata() == "P": # sono un collettivo partenza: la tratta=None quindi vado dal mio iniziale all'iniziale prossimo
+			if self._is_abbinata() == "P":
+			# sono un collettivo partenza: la tratta=None quindi vado dal mio iniziale all'iniziale prossimo
 				da = self.da
 				a = nextbro.da
 			else:
@@ -529,7 +530,7 @@ class Viaggio(models.Model):
 			return self.data
 
 	def date_end(self, recurse=False):
-		""" Ritorno il tempo finale di tutta la corsa (compresi eventuali figli se recurseFigli) """
+		""" Ritorno il tempo finale di tutta la corsa (compresi eventuali figli se recurse) """
 		#		logging.debug("Data finale di %s. Recurse:%s"%(self.id, recurse))
 		if not recurse or not self.id:    # se devo ancora salvare non cerco figli
 			ultimaCorsa = self    # trovo il tempo finale solo di me stesso
@@ -541,8 +542,10 @@ class Viaggio(models.Model):
 		end_time = ultimaCorsa.data
 		#		logging.debug("Partiamo da %s"%end_time)
 
-		if ultimaCorsa.da.speciale == 'A':
-			end_time += datetime.timedelta(minutes=30)    # quando parto da un aeroporto aspetto 30 minuti
+		# quando parto da un aeroporto la corsa dura 30 minuti di più
+		# non quando sono in sosta, arrivato in un aereoporto, in modo che i 30 minuti in più siano alla ripartenza
+		if ultimaCorsa.da.speciale == 'A' and tratta:
+			end_time += datetime.timedelta(minutes=30)
 
 		if tratta and tratta.is_valid():     # add the runtime of this tratta
 		#			logging.debug("Aggiungo %s per la tratta %s" %(tratta.minuti, tratta))
@@ -1164,4 +1167,4 @@ process_value = settings.GET_VALUE_FUNCTION
 PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
 
 # load models required for the tasks
-from tam.tasks import TaskBackup, TaskMovelog, TaskArchive	#@UnusedImport
+from tam.tasks import TaskBackup, TaskMovelog, TaskArchive      # @UnusedImport
