@@ -50,11 +50,13 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
 	if extra_context:
 		context.update(extra_context)
 
+	from_email=getattr(settings, 'PRENOTAZIONI_FROM_EMAIL', None)
 	if settings.DEBUG:
-		print "Sono in test. non invio la mail."
+		print "Sono in test. non invio la mail da {from_email}".format(from_email=from_email)
 	else:
 		notifyByMail(
 			to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
+			from_email=from_email,
 			subject=subject,
 			context=context,
 			attachments=attachments,
