@@ -15,10 +15,13 @@ ADMIN_MAIL = ",".join(["%s <%s>" % (name, email) for (name, email) in settings.A
 def notifyByMail(to=None, subject="",
                  context=None, contextText=None, messageTxtTemplateName=None,
                  messageHtmlTemplateName=None, bcc=(ADMIN_MAIL,),
-                 reply_to=None, attachments=None, **kwargs):
+                 reply_to=None, attachments=None,
+                 from_email=None,
+                 **kwargs):
 	""" Warn with a mail when some event occour """
 	if not context: context = {}
 	if not attachments: attachments = []
+	from_email = from_email or settings.DEFAULT_FROM_EMAIL
 
 	signatureTXT = settings.DATI_CONSORZIO
 
@@ -46,9 +49,9 @@ def notifyByMail(to=None, subject="",
 	if messageHtmlTemplateName:
 		htmlTemplate = get_template(messageHtmlTemplateName)
 		htmlMessage = htmlTemplate.render(context_html)
-	else:    # default html message
+	else:  # default html message
 		htmlTemplate = get_template("prenotazioni_email/htmlMailTemplate.html")
-		htmlMessage = htmlTemplate.render(Context({"message": messageText}))    # generic html message
+		htmlMessage = htmlTemplate.render(Context({"message": messageText}))  # generic html message
 
 	if signatureTXT:
 		messageText += u"\n-- \n" + signatureTXT
@@ -58,6 +61,7 @@ def notifyByMail(to=None, subject="",
 		subject=subject,
 		to=to,
 		bcc=bcc,
+		from_email=from_email,
 	)
 	if reply_to:
 		emailMessage.extra_headers['Reply-To'] = reply_to
