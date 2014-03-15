@@ -23,6 +23,7 @@ CLASSIFICHE = [
 	 "descrizione": ">=60km",
 	 "mapping_field": "prezzoVenezia",
 	 'viaggio_field': 'prezzoVenezia',
+	 'ignore_if_field': 'punti_abbinata',   # ignoro questa classifica se ho dei punti abbinata
 	},
 	{"nome": "Supplementari mattutini",
 	 "mapping_field": "puntiDiurni",
