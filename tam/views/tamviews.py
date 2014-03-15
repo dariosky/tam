@@ -355,7 +355,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 	conducentiPerCapienza = {}
 
 	for viaggio in viaggi:
-		if not viaggio.conducente_confermato:	# se il viaggio non è confermato ottengo le classifiche (solo una volta)
+		if not viaggio.conducente_confermato and not viaggio.annullato:
+		# se il viaggio non è confermato ne annullato ottengo le classifiche (solo una volta)
 			if classifiche is None:
 				classifiche = get_classifiche()
 #				for classi in classifiche[:2]:
