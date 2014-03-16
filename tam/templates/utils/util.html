@@ -47,6 +47,10 @@
 	<div class="btnbox"><a href="{% url "codapresenze-home" %}"><img src="{%  static "img/qtaxi.png" %}" alt="" />Coda presenze</a></div>
 {% endif %}
 
+{% if perms.calendariopresenze.view and 'calendariopresenze' in PLUGGABLE_APPS%}
+	<div class="btnbox"><a href="{% url "calendariopresenze-manage" %}"><img src="{%  static "img/calendar.gif" %}" alt="" />Calendario presenze</a></div>
+{% endif %}
+
 <br style="clear:both" />
 {% if error %}
 	<p>

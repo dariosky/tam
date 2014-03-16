@@ -12,6 +12,7 @@ from django.utils.safestring import mark_safe
 from django.conf import settings
 from django.contrib.staticfiles.storage import staticfiles_storage
 
+
 def conguaglia(classifica_definita):
 	kmPuntoAbbinate = settings.KM_PUNTO_ABBINATE
 	# todo: la classifica dovrebbe definire i due campi del conducente da cui prendere i valoro iniziali

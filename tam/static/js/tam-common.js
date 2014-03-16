@@ -10,7 +10,7 @@ if (typeof $ != "undefined") {
 
 		$(document).bind('keydown', 'esc', function () {
 			if (!confirm("Sicuro di volerti disconnettere?")) return false;
-			var overlay = $("<div style='position:fixed; left:50%; top:50%; width:300px; height:200px; margin-top:-200px; margin-left:-150px; font-size:2em; font-family:Times; text-align:center; z-index:1000;'>" + "Disconnessione in corso" + "</div>");
+			var overlay = $("<div id='overlay'>" + "Disconnessione in corso" + "</div>");
 			$('.content').animate({
 				opacity: 0.25
 			});
@@ -44,7 +44,7 @@ window.scrollableGoto = function scrollableGoto(scroller) {
 	var scrollParent = scroller.parent();
 	//var deltaH = scroller.offset().top - scrollParent.scrollTop();
 	//console.log("deltaH:"+deltaH);
-	deltaH = 0;
+	var deltaH = 0;
 	//console.log("Scroll da "+scroller_min+" a "+scroller_max);
 	$(window).scroll(function () {
 		if (!scroller.is(":visible")) return;
@@ -57,4 +57,8 @@ window.scrollableGoto = function scrollableGoto(scroller) {
 		//console.log("set to "+newTop+" ["+scroller_min+","+scroller_max+"]");
 		scroller.stop().animate({"top": newTop + "px"}, "fast");
 	});
-}
+};
+
+if ($.datepicker) {
+	$(".datepicker").datepicker();
+};
