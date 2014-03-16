@@ -1133,7 +1133,7 @@ def get_classifiche():
 		from tam_conducente c
 			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
 		where c.attivo --and c.nick='2'
-			and not v.annullato
+			and not coalesce(v.annullato, false)
 		group by c.id, c.nick
 		order by conducente_nick
 	"""

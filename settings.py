@@ -208,6 +208,7 @@ INSTALLED_APPS = [
 	'modellog',  # 	'license',
 
 	'djangotasks',  # let's use djangotasks instead of celery
+
 ]
 
 LOGIN_URL = "/login/"
