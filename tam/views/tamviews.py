@@ -138,6 +138,9 @@ def listaCorse(request, template_name="corse/lista.html"):
 			if viaggio.confirmed():
 				messages.error(request, "Il viaggio è già stato confermato.")
 				return HttpResponseRedirect(reverse("tamCorse"))
+			if viaggio.padre:
+				messages.error(request, "Non puoi cambiare il conducente a un viaggio figlio.")
+				return HttpResponseRedirect(reverse("tamCorse"))
 			conducente = Conducente.objects.get(pk=request.POST["conducente"])
 			viaggio.conducente = conducente
 			viaggio.conducente_confermato = True
@@ -355,7 +358,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 	conducentiPerCapienza = {}
 
 	for viaggio in viaggi:
-		if not viaggio.conducente_confermato and not viaggio.annullato:
+		if not viaggio.conducente_confermato and not viaggio.annullato and not viaggio.padre_id:
 		# se il viaggio non è confermato ne annullato ottengo le classifiche (solo una volta)
 			if classifiche is None:
 				classifiche = get_classifiche()

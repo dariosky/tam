@@ -134,6 +134,7 @@ def changeLog(request, template_name='static/changelog.html'):
 		('5.98', '8/3/2014', 'Filtro prenotazioni per data da-a e cambio stile date selectors nelle prenotazioni.'),
 		('5.99', '14/3/2014', 'È possibile inibire la cancellazione delle corse. '
 		                      'Cambio sui costi della sosta nei collettivi in partenza.'),
+		('5.991', '4/4/2014', 'Ottimizzazioni sul calcolo delle classifiche e sulle select dinamiche.'),
 		#  ('', '', mark_safe('''''')),
 	]
 	for version in known_changes[::-1]:

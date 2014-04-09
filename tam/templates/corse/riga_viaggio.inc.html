@@ -43,8 +43,9 @@
 	</td>
 
 	<td>
-	{% if viaggio.padre_id and not distinct %}
+	{% if viaggio.padre_id %}
 		<img src="{% static "img/arrow_join.png" %}" alt='' />
+		{% if distinct and viaggio.conducente %}<br>{{ viaggio.conducente }}{% endif %}
 	{% else %}
 		{% if viaggio.annullato %}
 			{% if viaggio.conducente %}{{ viaggio.conducente }}{% endif %}
@@ -60,7 +61,7 @@
 						{% if classificaViaggio %}
 							<form action="" method="post">
 								<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
-								<select name="conducente" style='display:block'>
+								<select name="conducente">
 									{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
 								</select>
 								<input type="checkbox" name="confirmed" class="cbConducente" />
