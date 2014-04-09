@@ -1,9 +1,15 @@
 # coding: utf-8
 from django.db import models
 from django.utils.translation import ugettext as _
-from django.core.urlresolvers import reverse  #to resolve named urls
+from django.core.urlresolvers import reverse  # to resolve named urls
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
+
+try:
+	from calendariopresenze.models import Calendar
+except ImportError:
+	Calendar = None
+
 import tam.tamdates as tamdates
 import datetime
 from decimal import Decimal
@@ -498,7 +504,6 @@ class Viaggio(models.Model):
 		if da != a:
 			return get_tratta(da, a)
 
-
 	def sostaFinale(self):
 		nextbro = self.nextfratello()
 		if nextbro:
@@ -577,7 +582,6 @@ class Viaggio(models.Model):
 		#		if start.hour> and end.hour>22: return result
 		return result
 
-
 	def disturbi(self, date_start=None, date_end=None):
 		""" Restituisce un dizionario di "codiceFascia":punti con le fasce e i punti disturbo relativi.
 			Ho due fasce mattutine 4-6, 6-7:45 di due e un punto
@@ -632,7 +636,6 @@ class Viaggio(models.Model):
 	# 					fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "night"))
 	# 	dayMarker = dayMarker + datetime.timedelta(days=1)	# passa il giorno
 	# return result
-
 
 	def get_kmrow(self):
 		""" Restituisce il N° di KM totali di corsa con andata, corsa e ritorno """
@@ -776,6 +779,7 @@ class Viaggio(models.Model):
 	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
 		conducenti = []
 		inattivi = []
+		# print "getclassifica", self
 
 		if classifiche is None:
 			classifiche = get_classifiche()
@@ -807,23 +811,42 @@ class Viaggio(models.Model):
 		#			cache_conducentiPerPersona[self.numero_passeggeri] = conducentiConCapienza
 		#		# ************************************************************************************
 
+		if 'calendariopresenz' in settings.INSTALLED_APPS:
+			calendarizzati = Calendar.objects.filter(
+				date_start__lt=self.date_end,  # I use the date-interval cross detection
+				date_end__gt=self.date_start,
+			)
+			c_byid = {}
+			for calendario in calendarizzati:
+				cid = calendario.conducente.id
+				c_byid[cid] = c_byid.get(cid, []) + [calendario.type]
+			viaggi_contemporanei = Viaggio.objects.filter(
+				date_start__lt=self.date_end,  # I use the date-interval cross detection
+				date_end__gt=self.date_start,
+				conducente_confermato=True,
+			)
+			for viaggio in viaggi_contemporanei:
+				cid = viaggio.conducente.id
+				c_byid[cid] = c_byid.get(cid, []) + ['in viaggio']
+			print c_byid
+
 		for conducente in conducentiConCapienza:  # listo i conducenti attivi che parteciperanno
-			if conducente.attivo == False:
+			if conducente.attivo is False:
 				inattivi.append(conducente)
 			else:
-				if not classid.has_key(conducente.id):
-					# il conducente è nuovo, senza viaggi. Classifica alternativa con solo gli iniziali
-					classid[conducente.id] = {
-					"id": conducente.id,
-					"conducente_nick": conducente.nick,
-					"max_persone": conducente.max_persone,
-					"puntiDiurni": conducente.classifica_iniziale_diurni,
-					"puntiNotturni": conducente.classifica_iniziale_notturni,
-					"prezzoVenezia": conducente.classifica_iniziale_long,
-					"prezzoPadova": conducente.classifica_iniziale_medium,
-					"prezzoDoppioPadova": conducente.classifica_iniziale_doppiPadova,
-					"punti_abbinata": conducente.classifica_iniziale_puntiDoppiVenezia
-					}
+				# if not classid.has_key(conducente.id):
+				# 	# il conducente è nuovo, senza viaggi. Classifica alternativa con solo gli iniziali
+				# 	classid[conducente.id] = {
+				# 	"id": conducente.id,
+				# 	"conducente_nick": conducente.nick,
+				# 	"max_persone": conducente.max_persone,
+				# 	"puntiDiurni": conducente.classifica_iniziale_diurni,
+				# 	"puntiNotturni": conducente.classifica_iniziale_notturni,
+				# 	"prezzoVenezia": conducente.classifica_iniziale_long,
+				# 	"prezzoPadova": conducente.classifica_iniziale_medium,
+				# 	"prezzoDoppioPadova": conducente.classifica_iniziale_doppiPadova,
+				# 	"punti_abbinata": conducente.classifica_iniziale_puntiDoppiVenezia
+				# 	}
 				chiave = []
 				# da priorità alle classifiche così come nei settings
 

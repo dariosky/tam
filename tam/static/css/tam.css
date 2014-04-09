@@ -537,6 +537,12 @@ h2.fatturaTipo5 {
 .cellaPrezzo a {
 	font-weight: bold; /*nella cella prezzo, i link (il netto) sono in grossetto */
 }
+#listaCorse select {
+	text-align: center;
+	padding: 5px 10px;
+	width: 100%;
+	display: block;
+}
 
 .actionButton {
 	cursor: pointer;

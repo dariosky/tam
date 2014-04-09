@@ -101,11 +101,10 @@ $(function () {
 		}
 	});
 	function populateSelect(select, address) {
-		$(select).bind('click keydown focus', function () {
+		$(select).one('mouseover keydown focus', function () {
 			var select = $(this);
-			if (select.data('done')) return;
-
-			select.data('done', true);	// mark the select as populated
+			//if (select.data('done')) return;
+			//select.data('done', true);	// mark the select as populated
 
 			$.getJSON(address, function (result) {
 				var html = "";
