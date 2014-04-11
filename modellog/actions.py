@@ -1,15 +1,21 @@
+# coding=utf-8
+from django.conf import settings
 from django.db.models import signals
 from tam.middleware import threadlocals
 from django.contrib.contenttypes.models import ContentType
 from modellog.models import ActionLog
 from django.utils import timezone
 
-def logAction(action, instance=None, description='', user=None, log_date=None):
+def logAction(action, instance=None, description=u'', user=None, log_date=None):
 	if instance:
 		content_type = ContentType.objects.get_for_model(instance)
+	else:
+		content_type=None
 
 	if user is None:
 		user = threadlocals.get_current_user()
+	if user.is_superuser and settings.DEBUG:
+		return
 	if log_date is None: log_date = timezone.now()
 
 	modification = ActionLog (

@@ -43,7 +43,7 @@
 	{# *** TRATTA FINALE *** #}
     {% if tratta_end %}
 		{% if tratta_end.is_valid %}
-		    {% if nextfratello %}arrivo alle {{ viaggio.date_end|date:"H:i" }}{% endif %}
+		    {% if nextfratello %}arrivo alle {{ viaggio.get_date_end|date:"H:i" }}{% endif %}
 		{% else %}
 			<a href="{% url "tamTrattaId" tratta_end.id %}" class="errorlist">tratta {{tratta_end.da}}-{{tratta_end.a}} scononosciuta</a>
 		{% endif %}
@@ -52,7 +52,7 @@
     {% with viaggio.sostaFinaleMinuti as minutifermo  %}{% ifnotequal minutifermo 0 %}sosta di {{ minutifermo }} m.{% endifnotequal %}{% endwith %}
 	<img src="{{ STATIC_URL }}img/arrow_right.png" alt="..." />
 {% else %}
-	ritorno alle {{ viaggio.date_end|date:"H:i" }}
+	ritorno alle {{ viaggio.get_date_end|date:"H:i" }}
 {% endif %}
 </div>
 

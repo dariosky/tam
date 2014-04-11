@@ -62,7 +62,11 @@
 							<form action="" method="post">
 								<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
 								<select name="conducente">
-									{% for conducente in classificaViaggio %}<option value="{{ conducente.id }}">{% if not conducente.attivo %}*inattivo*{% endif %}{% if conducente.assente %}*assente*{% endif %}{{ conducente }}</option>{% endfor %}
+									{% for conducente, cname, cavailable, ctags in classificaViaggio %}
+										<option value="{{ conducente.id }}"{% if ctags %} class='{{ ctags }}'{% endif %}>
+											{{ conducente }} {{ cname }}
+										</option>
+									{% endfor %}
 								</select>
 								<input type="checkbox" name="confirmed" class="cbConducente" />
 								{# <input type="submit" name="confirm" class='conducenteOkBtn' value="ok" /> #}

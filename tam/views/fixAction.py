@@ -117,7 +117,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 			ultimaCorsa = viaggio.lastfratello()
 			if ultimaCorsa.da.speciale == 'A':
 
-				disturbiGiusti = trovaDisturbi(viaggio.date_start, viaggio.date_end(recurse=True),
+				disturbiGiusti = trovaDisturbi(viaggio.date_start, viaggio.get_date_end(recurse=True),
 				                               metodo=fasce_semilineari)
 				notturniGiusti = disturbiGiusti.get('night', 0)
 				diurniGiusti = disturbiGiusti.get('morning', 0)
@@ -211,6 +211,15 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		cursor = connection.cursor()
 		cursor.execute(query_asset_sub)
 		connection.commit()
+
+	if request.POST.get("setEndDates"):
+		# add end dates to latest viaggio (I suppose we don't need it the old ones)
+		viaggi = Viaggio.objects.filter(date_end=None, padre_id=None,
+		                                data__gt=datetime.date.today()-datetime.timedelta(days=15))
+		messageLines.append("Imposto la data di fine a %d corse." % len(viaggi))
+		for viaggio in viaggi:
+			viaggio.date_end = viaggio.get_date_end(recurse=True)
+			viaggio.save(updateViaggi=False)
 
 	return render_to_response(template_name, {"messageLines": messageLines, "error": error},
 	                          context_instance=RequestContext(request))

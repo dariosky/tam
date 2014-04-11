@@ -13,9 +13,10 @@ from tam import tamdates
 
 TIPI_PAGAMENTO = (
 	('D', 'Diretto'),
-	('H', 'Hotel'), # diventa "conto finemese"
+	('H', 'Hotel'),  # diventa "conto finemese"
 	('F', 'Fattura'),  # fattura richiesta
 )
+
 
 # Create your models here.
 class UtentePrenotazioni(models.Model):

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Calendario presenze &raquo; {{ block.super }}{% endblock %}
+{% block content %}
+	<h1>Calendario presenze</h1>
+	<form method="get" action="">
+		<label for="day">Scegli il giorno</label>
+		<input id="day" name="day" type="text" class="datepicker"
+			   value='{{ day|date:"d/m/Y" }}'/>
+		<input type="submit" value="vedi calendario"/>
+	</form>
+	{% for calType, calDesc in calendars.items %}
+		<h2>{{ calDesc.name }}</h2>
+		{% if calDesc.elements %}
+			<table class="tablesorter">
+				<thead class="cal_office">
+				<tr>
+					<th>Conducente</th>
+					<th>dalle</th>
+					<th>alle</th>
+					<th>durata</th>
+				</tr>
+				</thead>
+				<tbody>
+				{% for element in calDesc.elements %}
+					<tr>
+						<td>{{ element.conducente }}</td>
+						<td>
+							{% with d=element.date_start %}
+								{% if d < day %}
+									{{ d|date:"d/M/Y H:i" }}
+								{% else %}
+									{{ d|date:"H:i" }}
+								{% endif %}
+							{% endwith %}
+						</td>
+						<td>
+							{% with d=element.date_end %}
+								{% if d > nextday %}
+									{{ d|date:"d/M/Y H:i" }}
+								{% else %}
+									{{ d|date:"H:i" }}
+								{% endif %}
+							{% endwith %}
+						</td>
+						<td>{{ element.pretty_duration }}</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		{% endif %}
+	{% endfor %}
+{% endblock %}
+
+{% block bottom %}
+	<script>
+		$('#day').change(function (e) {
+			e.target.form.submit();
+		})
+	</script>
+{% endblock bottom %}

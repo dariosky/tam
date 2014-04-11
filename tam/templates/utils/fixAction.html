@@ -19,9 +19,18 @@
 
     <input type='submit' name='renewTragitto' value='Ricalcolo HTML del tragitto' />
 
-	<input type='submit' name='deleteAllCorse' value='CANCELLA TUTTE LE CORSE!!!' />
-</form>
+	<input type='submit' name='setEndDates' value='Imposta la data di fine corsa per (versione 6.0)' />
 
+	<input type='submit' class='askConfirm' name='deleteAllCorse' value='CANCELLA TUTTE LE CORSE!!!' />
+</form>
+<script>
+	var shouldConfirm = document.getElementsByClassName('askConfirm');
+	for (var i=0; i<shouldConfirm.length; i++) {
+		shouldConfirm[i].onclick = function(e) {
+			return confirm("Sicuro di volerlo fare? È l'ultimo avviso ...");
+		}
+	}
+</script>
 
 {% if error %}
 	<p>

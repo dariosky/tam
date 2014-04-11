@@ -537,11 +537,26 @@ h2.fatturaTipo5 {
 .cellaPrezzo a {
 	font-weight: bold; /*nella cella prezzo, i link (il netto) sono in grossetto */
 }
+
 #listaCorse select {
 	text-align: center;
 	padding: 5px 10px;
 	width: 100%;
 	display: block;
+}
+
+.cal_office {
+	background-color: #6278ff;
+}
+
+#listaCorse select option.cal_inactive {
+	background-color: #e5edff;
+	color: #adb4c2;
+}
+
+#listaCorse select option.cal_travel {
+	background-color: #f4f010;
+	color: black;
 }
 
 .actionButton {
@@ -630,5 +645,6 @@ i.vson {
 	font-family: Times, Georgia, Serif;
 	text-align: center;
 	z-index: 1000;
-'
 }
+
+
