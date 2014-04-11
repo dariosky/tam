@@ -230,4 +230,4 @@ if __name__ == '__main__':
 	print "vecchio metodo: ", corsa.disturbi()
 
 	print "\nnuovo metodo*****************"
-	trovaDisturbi(corsa.date_start, corsa.date_end(recurse=True), metodo=fasce_semilineari)
+	trovaDisturbi(corsa.date_start, corsa.get_date_end(recurse=True), metodo=fasce_semilineari)

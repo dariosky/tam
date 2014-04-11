@@ -1,26 +1,28 @@
 # coding: utf-8
 from django.db import models
+from django.db import connections
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse  # to resolve named urls
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
-
-try:
-	from calendariopresenze.models import Calendar
-except ImportError:
-	Calendar = None
-
 import tam.tamdates as tamdates
 import datetime
 from decimal import Decimal
 import logging
+import itertools
 from django.core.cache import cache
-from django.db import connections
 from django.conf import settings
 import re
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 from django.db.models.deletion import SET_NULL, PROTECT
 from django.contrib.staticfiles.storage import staticfiles_storage
+
+Calendar = None
+if 'calendariopresenze' in settings.INSTALLED_APPS:
+	try:
+		from calendariopresenze.models import Calendar
+	except ImportError:
+		pass
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))  # se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
@@ -39,6 +41,42 @@ TIPISERVIZIO = [("T", "Taxi"), ("C", "Collettivo")]
 #	cache_key = 'template.cache.%s.%s' % (fragment_name, args.hexdigest())
 #	cache.delete(cache_key)
 # ******************
+
+def get_classifiche():
+	"""	Restituisco le classifiche globali (per le corse confermate)
+		Restituisce una lista di dizionari, ognuna con i valori del conducente.
+		Utilizzo una query fuori dall'ORM di Django per migliorare le prestazioni.
+	"""
+	#	logging.debug("Ottengo le classifiche globali.")
+	cursor = connections['default'].cursor()
+	query = """
+		select
+			c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
+			coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
+			coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
+			coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
+			coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
+			coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
+			coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
+		from tam_conducente c
+			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
+		where c.attivo --and c.nick='2'
+			and not coalesce(v.annullato, false)
+		group by c.id, c.nick
+		order by conducente_nick
+	"""
+	cursor.execute(query, ())
+	results = cursor.fetchall()
+
+	classifiche = []
+	fieldNames = [field[0] for field in cursor.description]
+	for classifica in results:
+		classDict = {}
+		for name, value in zip(fieldNames, classifica):
+			classDict[name] = value
+		classifiche.append(classDict)
+	return classifiche
+
 
 def reallySpaceless(s):
 	""" Given a string, removes all double spaces and tab """
@@ -248,7 +286,10 @@ class Viaggio(models.Model):
 	prezzoDoppioPadova = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 	date_start = models.DateTimeField(editable=False,
-	                                  default=tamdates.date_enforce(datetime.datetime(2009, 01, 01, 0, 0, 0)))
+	                                  default=tamdates.date_enforce(datetime.datetime(2009, 1, 1, 0, 0, 0)),
+	                                  db_index=True)
+	# la data finale, di tutto il gruppo di corse, per trovare intersezioni
+	date_end = models.DateTimeField(editable=False, null=True, db_index=True)
 	annullato = models.BooleanField('Corsa annullata', default=False, editable=True)
 
 	# per non dover fare query quando visualizzo il viaggio, mi imposto che deriva da una prenotazione
@@ -317,6 +358,7 @@ class Viaggio(models.Model):
 			"arrivo",
 			"is_valid",
 			"date_start",
+			"date_end",
 		]
 
 		oldValues = {}
@@ -327,6 +369,7 @@ class Viaggio(models.Model):
 		self.tratta_start = self._tratta_start()
 		self.tratta_end = self._tratta_end()
 		self.date_start = self._date_start()  # richiede tratta_start
+		self.date_end = self.get_date_end(recurse=True)  # date_end finale
 
 		self.arrivo = self.is_arrivo()
 
@@ -358,6 +401,100 @@ class Viaggio(models.Model):
 		if self.id:  # itero sui figli
 			for figlio in self.viaggio_set.all():
 				figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave)
+
+	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
+		# le tre liste con (conducente, stato) (conducenti sono ordinate per chiave generata dalla corsa)
+		conducenti = []
+		occupati = []
+		fondo_classifica = []
+		# print "getclassifica", self
+
+		if classifiche is None:
+			classifiche = get_classifiche()
+		classid = {}
+		for classifica in classifiche:  # metto le classifiche in un dizionario
+			#id = classifica["conducente_id"]
+			classid[classifica["conducente_id"]] = classifica
+
+		# cache conducenti per capienza ******************************************************
+		if self.numero_passeggeri in conducentiPerCapienza:
+			conducentiConCapienza = conducentiPerCapienza[self.numero_passeggeri]
+		#print "Uso la cache per conducenti con capienza %d" % self.numero_passeggeri
+		else:
+			# Metto in cache la lista dei clienti che possono portare almeno X persone
+			conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
+			#print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
+			conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
+		# ************************************************************************************
+
+		c_byid = {}  # {conducente.id: [list of caltoken (name, available, tags)]}
+		if 'calendariopresenze' in settings.INSTALLED_APPS:
+			if self.date_end is None:
+				print "date_end non dovrebbe essere mai null per il calcolo delle classifiche"
+			else:
+				calendarizzati = Calendar.objects.filter(
+					date_start__lt=self.date_end,  # I use the date-interval cross detection
+					date_end__gt=self.date_start,
+					# available=False,  # I'll consider calendar event even if the conducente is available
+				)
+				# creo un array che associa all'id del conducente, quello che sta facendo eventualmente durante questa corsa
+
+				for calendario in calendarizzati:
+					cid = calendario.conducente.id
+					c_byid[cid] = c_byid.get(cid, []) + [(calendario.name, calendario.available, calendario.tags)]
+				viaggi_contemporanei = Viaggio.objects.filter(
+					padre_id=None,  # I figli non hanno date_end
+					date_start__lt=self.date_end,  # I use the date-interval cross detection
+					date_end__gt=self.date_start,
+					conducente_confermato=True,
+				)
+				for viaggio in viaggi_contemporanei:
+					cid = viaggio.conducente.id
+					c_byid[cid] = c_byid.get(cid, []) + [('in viaggio', False, "cal_travel")]  # name, available, tags
+
+		for conducente in conducentiConCapienza:  # listo i conducenti attivi che parteciperanno
+			if conducente.attivo is False:
+				fondo_classifica.append((conducente, '*inattivo*', False, 'cal_inactive'))
+				continue
+			if conducente.id in c_byid:
+				cal = c_byid[conducente.id]
+				available = all([c[1] for c in cal])  # disponibile solo se tutti gli appuntamenti sono disponibili
+				if not available:
+					occupati.append((conducente,
+					                 ", ".join(c[0] for c in cal),  # names
+					                 available,
+					                 " ".join(c[2] for c in cal))  # tags
+					)
+					continue
+				# se ho appuntamenti ma sono disponibile continuo (e inserisco in classifica conducenti)
+			else:
+				# un conducente disponibile non ha impegni
+				available = True
+				cal = []
+			# if conducente.assente
+
+			chiave = []
+
+			keys = []  # da priorità alle classifiche così come nei settings
+			for desc_classifica in settings.CLASSIFICHE:
+				punti_viaggio = getattr(self, desc_classifica['viaggio_field'])
+				if punti_viaggio:
+					ignore_if_field = desc_classifica.get('ignore_if_field', None)
+					if ignore_if_field is not None and getattr(self, ignore_if_field):
+						# print "ho punti in %s, salto %s" % (ignore_if_field, desc_classifica['mapping_field'])
+						continue
+					chiave.append(classid[conducente.id][desc_classifica['mapping_field']])
+					keys.append(desc_classifica['mapping_field'])
+
+			chiave.append(conducente.nick)  # nei pari-meriti metto i nick in ordine
+
+			conducenti.append((chiave, conducente,
+			                   ", ".join(c[0] for c in cal),  # names
+			                   available,
+			                   " ".join(c[2] for c in cal))  # tags
+			)
+		conducenti.sort()
+		return itertools.chain([c[1:] for c in conducenti], occupati, fondo_classifica)
 
 	def get_html_tragitto(self):
 		""" Ritorna il tragitto da template togliendogli tutti gli spazi """
@@ -507,7 +644,7 @@ class Viaggio(models.Model):
 	def sostaFinale(self):
 		nextbro = self.nextfratello()
 		if nextbro:
-			this_end = self.date_end()
+			this_end = self.get_date_end()
 			if nextbro.data <= this_end:
 				return None
 			else:
@@ -519,7 +656,6 @@ class Viaggio(models.Model):
 			return int(sosta.seconds / 60)
 		else:
 			return 0
-
 
 	def _date_start(self):
 		""" Return the time to start to be there in time, looking Tratte
@@ -534,7 +670,7 @@ class Viaggio(models.Model):
 		else:
 			return self.data
 
-	def date_end(self, recurse=False):
+	def get_date_end(self, recurse=False):
 		""" Ritorno il tempo finale di tutta la corsa (compresi eventuali figli se recurse) """
 		#		logging.debug("Data finale di %s. Recurse:%s"%(self.id, recurse))
 		if not recurse or not self.id:  # se devo ancora salvare non cerco figli
@@ -595,47 +731,7 @@ class Viaggio(models.Model):
 			metodo = fasce_uno_due
 		else:
 			metodo = getattr(settings, "METODO_FASCE", fasce_semilineari)
-		return trovaDisturbi(self.date_start, self.date_end(recurse=True), metodo=metodo)
-
-	# def aggiungi_fascia(h_start, min_start, h_end, m_end, points, fasciaKey):
-	# 	""" Aggiungo a result il codice della fascia con la data prefissata e i punti indicati se
-	# 		la corsa tra date_start e date_end tocca nel giorno indicato da dayMarker tra le ore h_start:m_start e h_end:m_end
-	# 		Controllo se date_start cade nella fascia per contarlo
-	# 		o se date_end è nella fascia
-	# 		o se date_start è prima della fascia e date_end è dopo
-	# 	"""
-	# 	fascia_start = dayMarker.replace(hour=h_start, minute=min_start)
-	# 	fascia_end = dayMarker.replace(hour=h_end, minute=m_end)
-	# 	if fascia_start <= date_start < fascia_end or \
-	# 	fascia_start < date_end <= fascia_end or \
-	# 	(date_start < fascia_start and date_end > fascia_end):
-	# 		#print "mi disturba [%d] la fascia %s" % (points, fasciaKey)
-	# 		result[fasciaKey] = max(result.get(fasciaKey), points)
-	#
-	# if date_start is None: date_start = self.date_start
-	# if date_end is None: date_end = self.date_end(recurse=True)
-	# #print "Disturbo dalle %s alle %s" % (date_start, date_end)
-	# dayMarker = date_start.replace()   # creo una copia
-	# #daymaker mi serve per scorrere tra i giorni, partendo da quello di date_start al giorno di arrivo
-	# result = {}
-	# while dayMarker.date() <= date_end.date():
-	# 	# fino alle 4:00 sono 2 punti notturni, ma assegnati con chiave al giorno precedente
-	# 	aggiungi_fascia(0, 0, 4, 1, points=2,
-	# 					fasciaKey=((dayMarker - datetime.timedelta(days=1)).strftime("%d/%m/%Y"), "night"))
-	# 	aggiungi_fascia(4, 1, 6, 1, points=2,
-	# 					fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "morning")) # alle 6:00 sono 2 punto diurno
-	# 	aggiungi_fascia(6, 1, 7, 46, points=1,
-	# 					fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "morning"))	# 7:45 comprese l'ultimo disturbo
-	# 	if dayMarker.isoweekday() in (6, 7):	   # saturday and sunday, normal worktime is less
-	# 		aggiungi_fascia(20, 0, 22, 31, points=1,
-	# 						fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "night"))
-	# 	else:
-	# 		aggiungi_fascia(20, 30, 22, 31, points=1,
-	# 						fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "night"))
-	# 	aggiungi_fascia(22, 31, 23, 59, points=2,
-	# 					fasciaKey=(dayMarker.strftime("%d/%m/%Y"), "night"))
-	# 	dayMarker = dayMarker + datetime.timedelta(days=1)	# passa il giorno
-	# return result
+		return trovaDisturbi(self.date_start, self.get_date_end(recurse=True), metodo=metodo)
 
 	def get_kmrow(self):
 		""" Restituisce il N° di KM totali di corsa con andata, corsa e ritorno """
@@ -775,105 +871,6 @@ class Viaggio(models.Model):
 		return (not self.conducente_confermato
 		        and (self.date_start - datetime.timedelta(hours=2) < tamdates.ita_now())
 		)
-
-	def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
-		conducenti = []
-		inattivi = []
-		# print "getclassifica", self
-
-		if classifiche is None:
-			classifiche = get_classifiche()
-		classid = {}
-		for classifica in classifiche:  # metto le classifiche in un dizionario
-			#id = classifica["conducente_id"]
-			classid[classifica["conducente_id"]] = classifica
-
-		# cache conducenti per capienza ******************************************************
-		if self.numero_passeggeri in conducentiPerCapienza:
-			conducentiConCapienza = conducentiPerCapienza[self.numero_passeggeri]
-		#print "Uso la cache per conducenti con capienza %d" % self.numero_passeggeri
-		else:
-			# Metto in cache la lista dei clienti che possono portare almeno X persone
-			conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
-			#print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
-			conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
-		# ************************************************************************************
-
-		#		# cache conducenti per capienza GLOBAL STYLE******************************************
-		#		global cache_conducentiPerPersona
-		#		if self.numero_passeggeri in cache_conducentiPerPersona:
-		#			conducentiConCapienza = cache_conducentiPerPersona[self.numero_passeggeri]
-		#			#print "Uso la cache per conducenti con capienza %d" % self.numero_passeggeri
-		#		else:
-		#			# Metto in cache la lista dei clienti che possono portare almeno X persone
-		#			conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
-		#			print "Imposto la cache conducenti con capienza %d" % self.numero_passeggeri
-		#			cache_conducentiPerPersona[self.numero_passeggeri] = conducentiConCapienza
-		#		# ************************************************************************************
-
-		if 'calendariopresenz' in settings.INSTALLED_APPS:
-			calendarizzati = Calendar.objects.filter(
-				date_start__lt=self.date_end,  # I use the date-interval cross detection
-				date_end__gt=self.date_start,
-			)
-			c_byid = {}
-			for calendario in calendarizzati:
-				cid = calendario.conducente.id
-				c_byid[cid] = c_byid.get(cid, []) + [calendario.type]
-			viaggi_contemporanei = Viaggio.objects.filter(
-				date_start__lt=self.date_end,  # I use the date-interval cross detection
-				date_end__gt=self.date_start,
-				conducente_confermato=True,
-			)
-			for viaggio in viaggi_contemporanei:
-				cid = viaggio.conducente.id
-				c_byid[cid] = c_byid.get(cid, []) + ['in viaggio']
-			print c_byid
-
-		for conducente in conducentiConCapienza:  # listo i conducenti attivi che parteciperanno
-			if conducente.attivo is False:
-				inattivi.append(conducente)
-			else:
-				# if not classid.has_key(conducente.id):
-				# 	# il conducente è nuovo, senza viaggi. Classifica alternativa con solo gli iniziali
-				# 	classid[conducente.id] = {
-				# 	"id": conducente.id,
-				# 	"conducente_nick": conducente.nick,
-				# 	"max_persone": conducente.max_persone,
-				# 	"puntiDiurni": conducente.classifica_iniziale_diurni,
-				# 	"puntiNotturni": conducente.classifica_iniziale_notturni,
-				# 	"prezzoVenezia": conducente.classifica_iniziale_long,
-				# 	"prezzoPadova": conducente.classifica_iniziale_medium,
-				# 	"prezzoDoppioPadova": conducente.classifica_iniziale_doppiPadova,
-				# 	"punti_abbinata": conducente.classifica_iniziale_puntiDoppiVenezia
-				# 	}
-				chiave = []
-				# da priorità alle classifiche così come nei settings
-
-				keys = []
-				for desc_classifica in settings.CLASSIFICHE:
-					punti_viaggio = getattr(self, desc_classifica['viaggio_field'])
-					if punti_viaggio:
-						ignore_if_field = desc_classifica.get('ignore_if_field', None)
-						if ignore_if_field is not None and getattr(self, ignore_if_field):
-							# print "ho punti in %s, salto %s" % (ignore_if_field, desc_classifica['mapping_field'])
-							continue
-						chiave.append(classid[conducente.id][desc_classifica['mapping_field']])
-						keys.append(desc_classifica['mapping_field'])
-
-				# print self, chiave
-				# if self.punti_diurni: chiave.append(classid[conducente.id]["puntiDiurni"])
-				# if self.punti_notturni: chiave.append(classid[conducente.id]["puntiNotturni"])
-				# if self.punti_abbinata: chiave.append(classid[conducente.id]["punti_abbinata"])
-				# if self.prezzoVenezia: chiave.append(classid[conducente.id]["prezzoVenezia"])
-				# if self.prezzoDoppioPadova: chiave.append(classid[conducente.id]["prezzoDoppioPadova"])
-				# if self.prezzoPadova: chiave.append(classid[conducente.id]["prezzoPadova"])
-
-				chiave.append(conducente.nick)  # nei parimeriti metto i nick in ordine
-
-				conducenti.append((chiave, conducente))
-		conducenti.sort()
-		return [c[1] for c in conducenti] + inattivi
 
 	def punti_notturni_interi_list(self):
 		return range(int(self.punti_notturni))
@@ -1136,41 +1133,6 @@ class Conguaglio(models.Model):
 	def __unicode__(self):
 		return "%s, %s: %s" % (self.data, self.conducente, self.dare)
 
-
-def get_classifiche():
-	"""	Restituisco le classifiche globali (per le corse confermate)
-		Restituisce una lista di dizionari, ognuna con i valori del conducente.
-		Utilizzo una query fuori dall'ORM di Django per migliorare le prestazioni.
-	"""
-	#	logging.debug("Ottengo le classifiche globali.")
-	cursor = connections['default'].cursor()
-	query = """
-		select
-			c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
-			coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
-			coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
-			coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
-			coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
-			coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
-			coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
-		from tam_conducente c
-			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
-		where c.attivo --and c.nick='2'
-			and not coalesce(v.annullato, false)
-		group by c.id, c.nick
-		order by conducente_nick
-	"""
-	cursor.execute(query, ())
-	results = cursor.fetchall()
-
-	classifiche = []
-	fieldNames = [field[0] for field in cursor.description]
-	for classifica in results:
-		classDict = {}
-		for name, value in zip(fieldNames, classifica):
-			classDict[name] = value
-		classifiche.append(classDict)
-	return classifiche
 
 # Comincia a loggare i cambiamenti a questi Modelli
 from modellog.actions import startLog, stopLog
