@@ -29,6 +29,9 @@ class Calendar(models.Model):
 	type = models.IntegerField(choices=[(key, c['name']) for key, c in settings.CALENDAR_DESC.items()])
 	available = models.BooleanField(default=False)  # When this is True the conducente is still available
 
+	class Meta:
+		ordering = ['date_start', 'conducente']
+
 	def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 		delta = (self.date_end - self.date_start)
 		self.minutes = (delta.days * 60 * 24) + delta.seconds / 60

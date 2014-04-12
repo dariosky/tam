@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "5.991"
+TAM_VERSION = "6.0b"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico"):
@@ -281,7 +281,7 @@ SECURE_URL = "/secure/"
 
 PLUGGABLE_APPS = {}
 
-settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
+settings_file = os.environ.get('TAM_SETTINGS', 'settings_arte')
 try:
 	# Dynamically import settings from the indicated sys envoronment var
 	# from settings_local import *

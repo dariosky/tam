@@ -3,59 +3,69 @@
 {% block title %}Strumenti &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Strumenti per TaM.</h1>
 
-{% if perms.tam.get_backup or perms.tam.can_backup %}
+	{% if perms.auth.add_user %}
+		<div class="btnbox">
+			<a href="{% url "tamManage" %}"><img src="{% static 'buuf/Man-Brown-icon.png' %}" alt=""/>Gestione
+				utenti</a>
+		</div>
+	{% endif %}
+
+	{% if perms.auth.is_superuser %}
+		<div class="btnbox super">
+			<a href="{% url "tamResetSessions" %}"><img src="{% static 'buuf/Hatchet-icon.png' %}" alt=""/>Reset
+				sessioni utente</a>
+		</div>
+		<div class="btnbox super"><a href="{% url "fix_action" %}"><img src="{% static 'buuf/Dildo-icon.png' %}"
+																		alt=""/>Azioni correttive</a></div>
+	{% endif %}
+
+	{% if perms.tamArchive.archive or perms.tamArchive.flat %}
+		<div class="btnbox"><a href="{% url "tamArchiveUtil" %}"><img src="{% static 'buuf/File-Manager-icon.png' %}"
+																	  alt=""/>Archiviazione</a></div>
+	{% endif %}
+
+	{% if perms.fatturazione.generate %}
+		<div class="btnbox"><a href="{% url "tamGenerazioneFatture" %}"><img
+				src="{% static 'buuf/Calculator-icon.png' %}" alt=""/>Generazione fatture</a></div>
+	{% endif %}
+
+	{% if perms.fatturazione.view %}
+		<div class="btnbox"><a href="{% url "tamVisualizzazioneFatture" %}"><img
+				src="{% static 'fatturazione/invoice-icon.png' %}" alt=""/>Visualizzazione Fatture</a></div>
+	{% endif %}
+
+	{% if perms.board.view and 'board' in PLUGGABLE_APPS %}
+		<div class="btnbox"><a href="{% url "board-home" %}"><img src="{% static "img/bacheca.png" %}" alt=""/>Bacheca
+			messaggi</a></div>
+	{% endif %}
+
+	{% if perms.codapresenze.view and 'codapresenze' in PLUGGABLE_APPS %}
+		<div class="btnbox"><a href="{% url "codapresenze-home" %}"><img src="{% static "img/qtaxi.png" %}" alt=""/>Coda
+			presenze</a></div>
+	{% endif %}
+
+	{% if perms.calendariopresenze.view and 'calendariopresenze' in PLUGGABLE_APPS %}
+		<div class="btnbox"><a href="{% url "calendariopresenze-manage" %}"><img src="{% static "img/calendar.gif" %}"
+																				 alt=""/>Calendario presenze</a></div>
+	{% endif %}
+
+	{% if perms.tam.get_backup or perms.tam.can_backup %}
+		<div class="btnbox">
+			<a href="{% url "tamBackup" %}"><img src="{% static 'buuf/backup.png' %}" alt=""/>Backup</a>
+		</div>
+	{% endif %}
+
 	<div class="btnbox">
-		<a href="{% url "tamBackup" %}"><img src="{% static 'buuf/backup.png' %}" alt=""/>Backup</a>
+		<a href="{% url "actionLog" %}"><img src="{% static 'buuf/log.png' %}" alt=""/>Log delle modifiche</a>
 	</div>
-{% endif %}
 
-<div class="btnbox">
-	<a href="{% url "actionLog" %}"><img src="{% static 'buuf/log.png' %}" alt="" />Log degli accessi</a>
-</div>
 
-{% if perms.auth.add_user %}
-	<div class="btnbox">
-		<a href="{% url "tamManage" %}"><img src="{% static 'buuf/Man-Brown-icon.png' %}" alt="" />Gestione utenti</a>
-	</div>
-{% endif %}
-
-{% if perms.auth.is_superuser %}
-	<div class="btnbox super">
-		<a href="{%url "tamResetSessions" %}"><img src="{% static 'buuf/Hatchet-icon.png' %}" alt="" />Reset sessioni utente</a>
-	</div>
-	<div class="btnbox super"><a href="{% url "fix_action" %}"><img src="{% static 'buuf/Dildo-icon.png' %}" alt="" />Azione correttiva</a></div>
-{% endif %}
-
-{% if perms.tamArchive.archive or perms.tamArchive.flat %}
-	<div class="btnbox"><a href="{% url "tamArchiveUtil" %}"><img src="{% static 'buuf/File-Manager-icon.png' %}" alt="" />Archiviazione</a></div>
-{% endif %}
-
-{% if perms.fatturazione.generate %}	<div class="btnbox"><a href="{% url "tamGenerazioneFatture" %}"><img src="{% static 'buuf/Calculator-icon.png' %}" alt="" />Generazione fatture</a></div>
-{% endif %}
-
-{% if perms.fatturazione.view %}
-	<div class="btnbox"><a href="{% url "tamVisualizzazioneFatture" %}"><img src="{% static 'fatturazione/invoice-icon.png' %}" alt="" />Visualizzazione Fatture</a></div>
-{% endif %}
-
-{% if perms.board.view and 'board' in PLUGGABLE_APPS%}
-	<div class="btnbox"><a href="{% url "board-home" %}"><img src="{%  static "img/bacheca.png" %}" alt="" />Bacheca messaggi</a></div>
-{% endif %}
-
-{% if perms.codapresenze.view and 'codapresenze' in PLUGGABLE_APPS%}
-	<div class="btnbox"><a href="{% url "codapresenze-home" %}"><img src="{%  static "img/qtaxi.png" %}" alt="" />Coda presenze</a></div>
-{% endif %}
-
-{% if perms.calendariopresenze.view and 'calendariopresenze' in PLUGGABLE_APPS%}
-	<div class="btnbox"><a href="{% url "calendariopresenze-manage" %}"><img src="{%  static "img/calendar.gif" %}" alt="" />Calendario presenze</a></div>
-{% endif %}
-
-<br style="clear:both" />
-{% if error %}
-	<p>
-  	{{ error }}
-	</p>
-{% endif %}
+	<br style="clear:both"/>
+	{% if error %}
+		<p>
+			{{ error }}
+		</p>
+	{% endif %}
 
 {% endblock %}
