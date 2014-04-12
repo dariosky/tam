@@ -67,6 +67,7 @@
 {#		<script src="{% static 'js/calendarPreferences.js' %}"></script>#}
 <script src="{% static 'bootstrap-datepicker/js/bootstrap-datepicker.js' %}"></script>
 <script src="{% static 'bootstrap-datepicker/js/locales/bootstrap-datepicker.it.js' %}"></script>
+<script src="{% static 'js/timeWidgets.js' %}"></script>
 <script>
 	$(function () {
 		$("#id_data_corsa_0").datepicker({
@@ -76,12 +77,6 @@
 			todayHighlight: true
 		}).on('changeDate', function () {
 			$('#id_data_corsa_1').focus().select();
-		});
-
-		$("#id_data_corsa_1").bind('keyup', function (e) {
-			if ((this.value.length > 2) && (this.value.indexOf(":") == -1)) {
-				this.value = this.value.slice(0, 2) + ':' + this.value.slice(2);
-			}
 		});
 
 		$("#id_luogo").chosen();

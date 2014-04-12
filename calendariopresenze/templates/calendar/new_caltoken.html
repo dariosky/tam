@@ -1,0 +1,54 @@
+<div class="calendar_new">
+	<form action="" method="post">
+		<input name="day_string" type="hidden" value="{{ selected_day }}">
+		{{ form.non_field_errors }}
+		<table>
+			<tr>
+				<td>
+
+					<label for="conducente">Conducente</label>
+				</td>
+				<td>
+					<select id="conducente" name="conducente">
+						{% for conducente in conducenti %}
+							<option value="{{ conducente.id }}">{{ conducente.nome }}</option>
+						{% endfor %}
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td><label for="type">Tipo</label></td>
+				<td><select name="type" id="type">
+					{% for caltype, caldesc in calendars.items %}
+						<option value="{{ caltype }}">{{ caldesc.name }}</option>
+					{% endfor %}
+				</select></td>
+			</tr>
+			<tr>
+				<td><label for="from">dalle</label></td>
+				<td>
+					<input id="from" name="time_from" type="text" placeholder="oo:mm" class="time-widget">
+					{{ form.time_from.errors }}
+				</td>
+			</tr>
+
+			<tr>
+				<td><label for="to">alle</label></td>
+				<td>
+					<input id="to" name="time_to" type="text" placeholder="oo:mm" class="time-widget">
+					{{ form.time_to.errors }}
+				</td>
+			</tr>
+
+
+			<tr>
+				<td colspan="2">
+					<input type="submit" value="Aggiungi">
+				</td>
+			</tr>
+		</table>
+	</form>
+	<script>
+
+	</script>
+</div>

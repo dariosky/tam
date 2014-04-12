@@ -114,7 +114,7 @@ class AutoCompleteUIWidget(forms.widgets.Widget):
 
 class ViaggioForm(forms.ModelForm):
 	class Media:
-		js = [staticfiles_storage.url('js/nuovaCorsaPag1.js')]
+		js = [staticfiles_storage.url('js/nuovaCorsaPag1.js'), staticfiles_storage.url('js/timeWidgets.js')]
 
 	data = MySplitDateTimeField(label="Data e ora", date_input_formats=[_('%d/%m/%Y')], time_input_formats=[_('%H:%M')],
 								widget=MySplitDateWidget())

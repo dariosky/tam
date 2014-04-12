@@ -63,10 +63,8 @@ a:hover {
 
 .navBar {
 	text-align: left;
-	background: white url(../img/header_fade.png);
 	width: auto;
-	background-repeat: repeat-x;
-	background-position: top;
+	background: white url(../img/header_fade.png) repeat-x top;
 	/*max-width: 100%;*/
 	min-width: 600px;
 	left: 38px;
@@ -545,8 +543,44 @@ h2.fatturaTipo5 {
 	display: block;
 }
 
-.cal_office {
-	background-color: #6278ff;
+/************** CALENDARIO **************/
+#calendar_man {
+	margin: 0;
+}
+#calendar_man table td, #calendar_man table th {
+	width: 15em;
+}
+#calendar_man table tr td:first-child, #calendar_man table tr th:first-child {
+	width: auto;
+	min-width: 20em;
+}
+#calendar_man .del {
+	float: right
+}
+.calendar_new {
+	border: 1px ridge gray;
+	margin: 20px 0;
+	padding: 10px;
+	background-color: #eee;
+	display: inline-block;
+}
+
+.calendar_new input, .calendar_new select, .calendar_new option {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.cal_office, .cal_office th {
+	background-color: #8fa4ff;
+}
+
+.cal_riposo, .cal_riposo th {
+	background-color: #94f47e;
+}
+.cal_ferie, .cal_ferie th {
+	background-color: #f2f481;
 }
 
 #listaCorse select option.cal_inactive {
@@ -559,6 +593,7 @@ h2.fatturaTipo5 {
 	color: black;
 }
 
+/* ************************ */
 .actionButton {
 	cursor: pointer;
 }
@@ -590,9 +625,9 @@ h2.fatturaTipo5 {
 }
 
 .warning td {
-	background-image: url(../img/v-grad-red.png) !important;
-	background-position: bottom !important;
-	background-repeat: repeat-x !important;
+	background-image: url(../img/v-grad-red.png);
+	background-repeat: repeat-x;
+	background-position: bottom;
 }
 
 .prenotazione {
@@ -646,5 +681,3 @@ i.vson {
 	text-align: center;
 	z-index: 1000;
 }
-
-

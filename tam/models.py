@@ -22,7 +22,7 @@ if 'calendariopresenze' in settings.INSTALLED_APPS:
 	try:
 		from calendariopresenze.models import Calendar
 	except ImportError:
-		pass
+		Calendar = None
 
 TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"), ("D", "Ditta"))  # se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
