@@ -17,6 +17,7 @@ verranno aggiungi in visualizzazione:
 			 'min', 'max': con i valori chiave massimi e minimi
 
 """
+import pytz
 
 CLASSIFICHE = [
 	{"nome": "Venezia",
@@ -232,5 +233,23 @@ def get_value(viaggio, forzaSingolo=False):
 GET_VALUE_FUNCTION = get_value
 PROCESS_CLASSIFICHE_FUNCTION = process_classifiche
 KM_PUNTO_ABBINATE = kmPuntoAbbinate
+
+tz_italy = pytz.timezone('Europe/Rome')
+def gettoneDoppioSeFeriale(calendar):
+	"""
+		Restituisce il valore a gettoni, doppio se il calendario è in un giorno festivo o prefestivo
+	"""
+	reference_date = calendar.date_start.astimezone(tz_italy)
+	if reference_date.weekday in (5, 6):
+		return 2
+	return 1
+
+
+def mattinoOpomeriggio(calendar):
+	reference_date = calendar.date_start.astimezone(tz_italy)
+	if reference_date.hour <= 12:
+		return u"mattino"
+	else:
+		return u"pomeriggio"
 
 from django.conf import settings

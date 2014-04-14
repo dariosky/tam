@@ -8,51 +8,30 @@
 			   value='{{ day|date:"d/m/Y" }}'/>
 		<input id='changeday_submit' type="submit" value="vedi calendario"/>
 	</form>
-	{% include "calendar/new_caltoken.html" %}
+	{% if perms.calendariopresenze.add_calendar %}
+		{% include "calendar/new_caltoken.html" %}
+	{% endif %}
 	<div id="calendar_man">
 		{% for calType, calDesc in calendars.items %}
 			{#			<h2>{{ calDesc.name }}</h2>#}
-			{% if calDesc.elements or True %}
-				<table id='{{ calType }}' class="calendar tablesorter {{ calDesc.tags }}">
-					<thead>
-					<tr>
-						<th>Conducente in {{ calDesc.name }}</th>
+			<table id='caltype_{{ calType }}' class="calendar tablesorter {{ calDesc.tags }}">
+				<thead>
+				<tr>
+					<th>Conducente in {{ calDesc.name }}</th>
+					{% if calDesc.show_timerange %}
 						<th>orario</th>
 						<th>durata</th>
-					</tr>
-					</thead>
-					<tbody>
-					{% for element in calDesc.elements %}
-						<tr>
-							<td>{{ element.conducente.nome }}</td>
-							<td>
-								{% with d=element.date_start %}
-									{% if d < day %}
-										{{ d|date:"d/M/Y H:i" }}
-									{% else %}
-										{{ d|date:"H:i" }}
-									{% endif %}
-								{% endwith %}
-							-
-								{% with d=element.date_end %}
-									{% if d > nextday %}
-										{{ d|date:"d/M/Y H:i" }}
-									{% else %}
-										{{ d|date:"H:i" }}
-									{% endif %}
-								{% endwith %}
-							</td>
-							<td>
-								{{ element.pretty_duration }}
-								<span class="del"><a data-id="{{ element.id }}" href="#">elimina</a></span>
-							</td>
-						</tr>
-					{% endfor %}
-					</tbody>
-				</table>
-			{% else %}
-				Nessun evento in calendario.
-			{% endif %}
+					{% else %}
+						<th>Classifica</th>
+					{% endif %}
+				</tr>
+				</thead>
+				<tbody>
+				{% for element in calDesc.elements %}
+					{% include "calendar/cal_row.html" %}
+				{% endfor %}
+				</tbody>
+			</table>
 		{% endfor %}
 	</div>
 {% endblock %}

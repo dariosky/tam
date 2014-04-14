@@ -1,0 +1,35 @@
+<tr>
+	<td>{{ element.conducente.nome }}</td>
+	{% if calDesc.show_timerange %}
+		<td>
+			{% with d=element.date_start %}
+				{% if d < day %}
+					{{ d|date:"d/M/Y H:i" }}
+				{% else %}
+					{{ d|date:"H:i" }}
+				{% endif %}
+			{% endwith %}
+			-
+			{% with d=element.date_end %}
+				{% if d > nextday %}
+					{{ d|date:"d/M/Y H:i" }}
+				{% else %}
+					{{ d|date:"H:i" }}
+				{% endif %}
+			{% endwith %}
+		</td>
+		<td>
+			{{ element.pretty_duration }}
+			{% if perms.calendariopresenze.delete_calendar %}
+				<span class="del"><a data-id="{{ element.id }}" href="#">elimina</a></span>
+			{% endif %}
+		</td>
+	{% else %}
+		<td>
+			{{ element.display }}
+			{% if perms.calendariopresenze.delete_calendar %}
+				<span class="del"><a data-id="{{ element.id }}" href="#">elimina</a></span>
+			{% endif %}
+		</td>
+	{% endif %}
+</tr>

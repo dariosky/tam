@@ -1,52 +1,64 @@
 <div class="calendar_new">
-	<form action="" method="post">
-		<input name="day_string" type="hidden" value="{{ selected_day }}">
-		{{ form.non_field_errors }}
-		<table>
-			<tr>
-				<td>
-
-					<label for="conducente">Conducente</label>
-				</td>
-				<td>
-					<select id="conducente" name="conducente">
-						{% for conducente in conducenti %}
-							<option value="{{ conducente.id }}">{{ conducente.nome }}</option>
-						{% endfor %}
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td><label for="type">Tipo</label></td>
-				<td><select name="type" id="type">
-					{% for caltype, caldesc in calendars.items %}
-						<option value="{{ caltype }}">{{ caldesc.name }}</option>
+	{{ form.non_field_errors }}
+	<table>
+		<tr>
+			<td>
+				<label for="conducente">Conducente</label>
+			</td>
+			<td colspan="4">
+				<select id="conducente" name="conducente">
+					{% for conducente in conducenti %}
+						<option value="{{ conducente.id }}">{{ conducente.nome }}</option>
 					{% endfor %}
-				</select></td>
-			</tr>
+				</select>
+			</td>
+		</tr>
+		{% for type, caldesc in calendars.items %}
 			<tr>
-				<td><label for="from">dalle</label></td>
-				<td>
-					<input id="from" name="time_from" type="text" placeholder="oo:mm" class="time-widget">
-					{{ form.time_from.errors }}
-				</td>
+				{% if caldesc.display_as %}
+					<td colspan="5">
+						<input type="hidden" name="action" value="new">
+						{% for viewmode in caldesc.display_as %}
+							{% if  viewmode.mode == 'button' %}
+								<form method="post" action="">
+									<input name="day_string" type="hidden" value="{{ selected_day }}">
+									<input type="hidden" name="type" value="{{ type }}">
+									<input type="hidden" name="subname" value="{{ viewmode.name }}">
+									<button type="submit" class="{{ caldesc.tags }}">
+										Aggiungi {{ viewmode.name }}</button>
+								</form>
+							{% endif %}
+						{% endfor %} {# end viewmode #}
+					</td>
+				{% else %}
+					{#	Time based cal #}
+					<td>dalle</td>
+					<td>
+						<input name="time_from" type="text" placeholder="oo:mm" class="time-widget">
+						{{ form.time_from.errors }}
+					</td>
+
+					<td>alle</td>
+					<td>
+						<input name="time_to" type="text" placeholder="oo:mm" class="time-widget">
+						{{ form.time_to.errors }}
+					</td>
+					<td>
+						<form method="post" action="">
+							<input name="day_string" type="hidden" value="{{ selected_day }}">
+							<input type="hidden" name="action" value="new">
+							<input type="hidden" name="type" value="{{ type }}">
+							<button class="{{ caldesc.tags }}" type="submit">
+								Aggiungi {{ caldesc.name }}
+							</button>
+						</form>
+					</td>
+				{% endif %}
 			</tr>
 
-			<tr>
-				<td><label for="to">alle</label></td>
-				<td>
-					<input id="to" name="time_to" type="text" placeholder="oo:mm" class="time-widget">
-					{{ form.time_to.errors }}
-				</td>
-			</tr>
+		{% endfor %}
 
-
-			<tr>
-				<td colspan="2">
-					<input type="submit" value="Aggiungi">
-				</td>
-			</tr>
-		</table>
+	</table>
 	</form>
 	<script>
 
