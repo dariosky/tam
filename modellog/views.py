@@ -30,7 +30,7 @@ def logAndCleanExpiredSessions():
 	for s in Session.objects.filter(expire_date__lt=timezone.now()):
 		data = s.get_decoded()
 		try:
-			if data.has_key('_auth_user_id'):
+			if '_auth_user_id' in data:
 				user = User.objects.get(id=data['_auth_user_id'])
 				logAction('O', user=user, description='Sessione scaduta', log_date=s.expire_date)
 		except:
