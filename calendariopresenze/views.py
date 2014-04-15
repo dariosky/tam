@@ -6,7 +6,7 @@ from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.template import Context
+from django.template import Context, RequestContext
 from django.template.loader import get_template
 from django.views.generic.base import TemplateView
 from calendariopresenze.models import Calendar
@@ -143,7 +143,7 @@ class CalendarManage(TemplateView):
 			)
 			if request.is_ajax():
 				row_template = get_template('calendar/cal_row.html')
-				context = Context(dict(
+				context = RequestContext(request, dict(
 					element=calendar,
 					calDesc=settings.CALENDAR_DESC[calendar.type]
 				))
