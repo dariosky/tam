@@ -8,8 +8,9 @@
 			   value='{{ day|date:"d/m/Y" }}'/>
 		<input id='changeday_submit' type="submit" value="vedi calendario"/>
 	</form>
+	<p><a href="{% url 'calendariopresenze-rank' %}">vedi classifiche</a></p>
 	{% if perms.calendariopresenze.add_calendar %}
-		{% include "calendar/new_caltoken.html" %}
+		{% include "calendar/cal_new.html" %}
 	{% endif %}
 	<div id="calendar_man">
 		{% for calType, calDesc in calendars.items %}

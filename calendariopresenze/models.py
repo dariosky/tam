@@ -23,7 +23,7 @@ def pretty_duration(minutes):
 
 
 class Calendar(models.Model):
-	conducente = models.ForeignKey('tam.Conducente', on_delete=CASCADE)
+	conducente = models.ForeignKey('tam.Conducente', on_delete=CASCADE, related_name='presenze')
 	date_start = models.DateTimeField(db_index=True)
 	date_end = models.DateTimeField(db_index=True)
 	minutes = models.IntegerField(editable=False)
