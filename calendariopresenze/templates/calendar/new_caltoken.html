@@ -1,5 +1,4 @@
 <div class="calendar_new">
-	{{ form.non_field_errors }}
 	<table>
 		<tr>
 			<td>
@@ -14,8 +13,8 @@
 			</td>
 		</tr>
 		{% for type, caldesc in calendars.items %}
-			<tr>
-				{% if caldesc.display_as %}
+			{% if caldesc.display_as %}
+				<tr>
 					<td colspan="5">
 						<input type="hidden" name="action" value="new">
 						{% for viewmode in caldesc.display_as %}
@@ -27,40 +26,37 @@
 									<button type="submit" class="{{ caldesc.tags }}">
 										Aggiungi {{ viewmode.name }}</button>
 								</form>
+							{% elif viewmode.mode == "timedelta" %}
+								<div>
+									<form method="post" action="">
+										{#	Time based cal #}
+										dalle
+									<span>
+										<input name="time_from" type="text" placeholder="oo:mm" class="time-widget">
+										{{ form.time_from.errors }}
+									</span>
+										alle
+									<span>
+										<input name="time_to" type="text" placeholder="oo:mm" class="time-widget">
+										{{ form.time_to.errors }}
+									</span>
+
+										<input name="day_string" type="hidden" value="{{ selected_day }}">
+										<input type="hidden" name="action" value="new">
+										<input type="hidden" name="type" value="{{ type }}">
+										<button class="{{ caldesc.tags }}" type="submit">
+											Aggiungi {{ caldesc.name }}
+										</button>
+									</form>
+								</div>
 							{% endif %}
 						{% endfor %} {# end viewmode #}
 					</td>
-				{% else %}
-					{#	Time based cal #}
-					<td>dalle</td>
-					<td>
-						<input name="time_from" type="text" placeholder="oo:mm" class="time-widget">
-						{{ form.time_from.errors }}
-					</td>
+				</tr>
+			{% endif %}
 
-					<td>alle</td>
-					<td>
-						<input name="time_to" type="text" placeholder="oo:mm" class="time-widget">
-						{{ form.time_to.errors }}
-					</td>
-					<td>
-						<form method="post" action="">
-							<input name="day_string" type="hidden" value="{{ selected_day }}">
-							<input type="hidden" name="action" value="new">
-							<input type="hidden" name="type" value="{{ type }}">
-							<button class="{{ caldesc.tags }}" type="submit">
-								Aggiungi {{ caldesc.name }}
-							</button>
-						</form>
-					</td>
-				{% endif %}
-			</tr>
 
 		{% endfor %}
 
 	</table>
-	</form>
-	<script>
-
-	</script>
 </div>

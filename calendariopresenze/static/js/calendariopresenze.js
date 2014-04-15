@@ -29,7 +29,7 @@ $('.calendar_new').on('click', 'button', function (e) {
 	var button = e.target,
 		$form = $(button.form),
 		conducente_id = $("#conducente").val(),
-		row = $(button).closest('tr'),
+		row = $(button).closest('tr, div, form'),// get the container, we'll check it's children for additional content
 		text_fields = $(row).find("input[type=text]"),
 		valid = true;
 	$.each(text_fields, function () {
