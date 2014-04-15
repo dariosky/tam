@@ -575,7 +575,6 @@ h2.fatturaTipo5 {
 }
 
 .calendar_new input, .calendar_new select, .calendar_new option {
-	width: 100%;
 	margin: 0;
 	padding: 0;
 	border: 0;
