@@ -5,11 +5,12 @@ from django.conf import settings
 from django import forms
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db.models import Sum
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.template import Context, RequestContext
 from django.template.loader import get_template
 from django.views.generic.base import TemplateView
-from calendariopresenze.models import Calendar
+from calendariopresenze.models import Calendar, pretty_duration
 from modellog.actions import logAction
 from tam import tamdates
 from tam.models import Conducente
@@ -152,6 +153,35 @@ class CalendarManage(TemplateView):
 				return HttpResponseRedirect(
 					reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
 				)
+
+
+class CalendarRank(TemplateView):
+	template_name = "calendar/cal_rank.html"
+
+	def dispatch(self, request, year=None, *args, **kwargs):
+		if year is None:
+			return HttpResponseRedirect(reverse('calendariopresenze-rank', kwargs={'year': datetime.date.today().year}))
+		return super(CalendarRank, self).dispatch(request, *args, **kwargs)
+
+	def get_context_data(self, **kwargs):
+		context = super(CalendarRank, self).get_context_data(**kwargs)
+		year = int(self.kwargs['year'])
+		calendars = copy.copy(settings.CALENDAR_DESC)
+		for key, caldesc in calendars.items():
+			ranks = []
+			for conducente in Conducente.objects.filter(attivo=True,
+			                                            presenze__date_start__year=year,
+			                                            presenze__type=key) \
+					.annotate(tot=Sum('presenze__value')) \
+					.order_by('-tot'):
+				if 'display' in caldesc:
+					value = conducente.tot
+				else:
+					value = pretty_duration(conducente.tot)
+				ranks.append({'name': conducente.nome, 'value': value})
+			caldesc['rank'] = ranks
+		context['calendars'] = calendars
+		return context
 
 
 if __name__ == '__main__':
