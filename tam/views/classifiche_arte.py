@@ -24,7 +24,7 @@ CLASSIFICHE = [
 	 "descrizione": ">=60km",
 	 "mapping_field": "prezzoVenezia",
 	 'viaggio_field': 'prezzoVenezia',
-	 'ignore_if_field': 'punti_abbinata',   # ignoro questa classifica se ho dei punti abbinata
+	 'ignore_if_field': 'punti_abbinata',  # ignoro questa classifica se ho dei punti abbinata
 	},
 	{"nome": "Supplementari mattutini",
 	 "mapping_field": "puntiDiurni",
@@ -235,21 +235,50 @@ PROCESS_CLASSIFICHE_FUNCTION = process_classifiche
 KM_PUNTO_ABBINATE = kmPuntoAbbinate
 
 tz_italy = pytz.timezone('Europe/Rome')
+
+
 def gettoneDoppioSeFeriale(calendar):
 	"""
 		Restituisce il valore a gettoni, doppio se il calendario è in un giorno festivo o prefestivo
 	"""
 	reference_date = calendar.date_start.astimezone(tz_italy)
-	if reference_date.weekday in (5, 6):
+	if reference_date.weekday() in (5, 6):
 		return 2
+	md = reference_date.timetuple()[1:3]
+	if md in (
+	(1, 1),  # Capodanno
+	(1, 6),  # Epifania
+	(4, 25),  # 25 aprile
+	(5, 1),  # primo maggio, festa del lavoro
+	(6, 2),  # 2 giugno, festa della repubblica
+	(8, 15),  # ferragosto
+	(11, 1),  # ognissanti
+	(12, 8),  # immacolata
+	(12, 25),  # Natale
+	(12, 26),  # S.Stefano
+	):
+		return 2
+
 	return 1
 
 
-def mattinoOpomeriggio(calendar):
+def cal_display_mattino_pomeriggio(calendar):
 	reference_date = calendar.date_start.astimezone(tz_italy)
+	result = u""
 	if reference_date.hour <= 12:
-		return u"mattino"
+		result += u"mattino"
 	else:
-		return u"pomeriggio"
+		result += u"pomeriggio"
+	if calendar.value > 1:
+		result += u" x%d" % calendar.value
+	return result
+
+
+def cal_display_all_day(calendar):
+	result = u"Tutto il giorno"
+	if calendar.value > 1:
+		result += u" x%d" % calendar.value
+	return result
+
 
 from django.conf import settings
