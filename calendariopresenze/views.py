@@ -63,7 +63,6 @@ class CalendarManage(TemplateView):
 		return context
 
 	def post(self, request, *args, **kwargs):
-		print "POST", request.POST
 		context = self.get_context_data()
 		form = context['form']
 		action = request.POST.get('action', 'new')
@@ -168,6 +167,9 @@ class CalendarRank(TemplateView):
 		year = int(self.kwargs['year'])
 		calendars = copy.copy(settings.CALENDAR_DESC)
 		for key, caldesc in calendars.items():
+			if "hide_rank" in caldesc:
+				del calendars[key]
+				continue
 			ranks = []
 			for conducente in Conducente.objects.filter(attivo=True,
 			                                            presenze__date_start__year=year,
