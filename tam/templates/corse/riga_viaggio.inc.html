@@ -20,11 +20,11 @@
 		{% include "corse/cella_ora_e_percorso.inc.html" %}
 	</td>
 
+	{% include "corse/cella_partenza_arrivo.inc.html" %}
+
 	<td{% if viaggio.is_prenotazione %} class='prenotazione'{% endif %}>
 		{% include "corse/cella_cliente.inc.html" %}
 	</td>
-
-	{% include "corse/cella_partenza_arrivo.inc.html" %}
 
 	<td class='note'>{% include "corse/cella_note.inc.html" %}</td>
 
