@@ -1,5 +1,6 @@
 #coding: utf8
 from prenotazioni.models import Prenotazione
+from tam import tamdates
 from tam.models import Viaggio, Luogo
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
@@ -215,7 +216,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 	if request.POST.get("setEndDates"):
 		# add end dates to latest viaggio (I suppose we don't need it the old ones)
 		viaggi = Viaggio.objects.filter(date_end=None, padre_id=None,
-		                                data__gt=datetime.date.today()-datetime.timedelta(days=15))
+		                                data__gt=tamdates.ita_today() - datetime.timedelta(days=15))
 		messageLines.append("Imposto la data di fine a %d corse." % len(viaggi))
 		for viaggio in viaggi:
 			viaggio.date_end = viaggio.get_date_end(recurse=True)
