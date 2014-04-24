@@ -165,6 +165,7 @@ class CalendarRank(TemplateView):
 	def get_context_data(self, **kwargs):
 		context = super(CalendarRank, self).get_context_data(**kwargs)
 		year = int(self.kwargs['year'])
+		context['year'] = year
 		calendars = copy.copy(settings.CALENDAR_DESC)
 		for key, caldesc in calendars.items():
 			if "hide_rank" in caldesc:
@@ -182,8 +183,27 @@ class CalendarRank(TemplateView):
 						value = caldesc['rank_display'](value)
 				else:
 					value = pretty_duration(conducente.tot)
-				ranks.append({'name': conducente.nome, 'value': value})
+				ranks.append({'name': conducente.nome, 'conducente_id': conducente.id, 'value': value})
 			caldesc['rank'] = ranks
+		context['calendars'] = calendars
+		return context
+
+
+class CalendarByConducente(TemplateView):
+	template_name = "calendar/cal_view.html"
+
+	def get_context_data(self, year, conducente_id, caltype, **kwargs):
+		year = int(year)
+		caltype = int(caltype)
+		context = super(CalendarByConducente, self).get_context_data(**kwargs)
+		conducente = Conducente.objects.get(id=conducente_id)
+		caldesc = settings.CALENDAR_DESC[caltype]
+		context['conducente'] = conducente
+		context['caldesc'] = caldesc
+		calendars = Calendar.objects.filter(conducente=conducente,
+		                                    date_start__year=year,
+		                                    type=caltype,
+		)
 		context['calendars'] = calendars
 		return context
 

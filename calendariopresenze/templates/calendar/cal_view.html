@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% load static %}
+{% block title %}Dettagli {{ caldesc.name }} {{ conducente }} &raquo; {{ block.super }}{% endblock %}
+{% block content %}
+	<h1>Dettagli calendario</h1>
+	<h2>{{ conducente.nome }} - {{ caldesc.name }}</h2>
+	<h2>{{ year }}</h2>
+	{% for calendar in calendars %}
+		{% ifchanged calendar.date_start.month %}
+			<h2>{{ calendar.date_start|date:"F" }}</h2>
+		{% endifchanged %}
+		<div class="left-padded">
+			<a href="{% url 'calendariopresenze-manage' %}?day={{ calendar.date_start|date:"d/m/Y"|urlencode }}">
+				{{ calendar.date_start|date:"l j" }}
+			</a>
+			{{ calendar.display }}
+		</div>
+	{% endfor %}
+
+{% endblock %}
