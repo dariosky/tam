@@ -20,14 +20,14 @@
 		</td>
 		<td>
 			{{ element.pretty_duration }}
-			{% if perms.calendariopresenze.delete_calendar %}
+			{% if can_edit and perms.calendariopresenze.delete_calendar %}
 				<span class="del"><a data-id="{{ element.id }}" href="#">elimina</a></span>
 			{% endif %}
 		</td>
 	{% else %}
 		<td>
 			{{ element.display }}
-			{% if perms.calendariopresenze.delete_calendar %}
+			{% if can_edit and perms.calendariopresenze.delete_calendar %}
 				<span class="del"><a data-id="{{ element.id }}" href="#">elimina</a></span>
 			{% endif %}
 		</td>

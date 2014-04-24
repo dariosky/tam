@@ -60,12 +60,21 @@ class CalendarManage(TemplateView):
 		})
 		context['form'] = CalendarForm(self.request.POST if self.request.method == 'POST' else None)
 		context['dontHilightFirst'] = True
+		is_old_day = day < ita_today()
+		context['can_edit'] = not is_old_day or self.request.user.has_perm('calendariopresenze.change_oldcalendar')
 		return context
 
 	def post(self, request, *args, **kwargs):
 		context = self.get_context_data()
 		form = context['form']
 		action = request.POST.get('action', 'new')
+		if not context['can_edit']:
+			if request.is_ajax():
+				return HttpResponse("Non hai permessi per modificare vecchie presenze.", status=401)
+			else:
+				messages.error(request, "Non hai permessi per modificare vecchie presenze.")
+				return HttpResponseRedirect(reverse('calendariopresenze-manage'))
+
 		if action == 'delete':
 			if not request.user.has_perm('calendariopresenze.delete_calendar'):
 				if request.is_ajax():
