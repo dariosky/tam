@@ -9,7 +9,7 @@
 		<input id='changeday_submit' type="submit" value="vedi calendario"/>
 	</form>
 	<p><a href="{% url 'calendariopresenze-rank' %}">vedi classifiche</a></p>
-	{% if perms.calendariopresenze.add_calendar %}
+	{% if can_edit and perms.calendariopresenze.add_calendar %}
 		{% include "calendar/cal_new.html" %}
 	{% endif %}
 	<div id="calendar_man">

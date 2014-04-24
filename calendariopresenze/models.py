@@ -33,6 +33,7 @@ class Calendar(models.Model):
 
 	class Meta:
 		ordering = ['date_start', 'conducente']
+		permissions = (('change_oldcalendar', 'Imposta vecchio calendario'),)
 
 	def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 		delta = (self.date_end - self.date_start)
