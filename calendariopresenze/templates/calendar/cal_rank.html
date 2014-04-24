@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% load static %}
 {% block title %}Classifica presenze &raquo; {{ block.super }}{% endblock %}
 {% block content %}
-	<h1>Classifiche presenze</h1>
+	<h1>Classifica presenze</h1>
 	{% for key, caldesc in calendars.items %}
 		<h2>{{ caldesc.name }}</h2>
 		<table class="calendar tablesorter {{ caldesc.tags }}">
@@ -15,7 +15,9 @@
 			{% for c in caldesc.rank %}
 				<tr>
 					<td>{{ c.name }}</td>
-					<td>{{ c.value|default:0 }}</td>
+					<td>
+						<a href="{% url 'calendariopresenze-view' year c.conducente_id key %}">{{ c.value|default:0 }}</a>
+					</td>
 				</tr>
 			{% endfor %}
 			</tbody>
