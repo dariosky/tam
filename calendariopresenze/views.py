@@ -178,6 +178,8 @@ class CalendarRank(TemplateView):
 					.order_by('-tot'):
 				if 'display' in caldesc:
 					value = conducente.tot
+					if 'rank_display' in caldesc:
+						value = caldesc['rank_display'](value)
 				else:
 					value = pretty_duration(conducente.tot)
 				ranks.append({'name': conducente.nome, 'value': value})

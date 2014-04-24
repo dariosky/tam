@@ -17,6 +17,7 @@ verranno aggiungi in visualizzazione:
 			 'min', 'max': con i valori chiave massimi e minimi
 
 """
+from django.utils.safestring import mark_safe
 import pytz
 
 CLASSIFICHE = [
@@ -279,6 +280,22 @@ def cal_display_all_day(calendar):
 	if calendar.value > 1:
 		result += u" x%d" % calendar.value
 	return result
+
+
+def cal_display_dimezzato(rank_total):
+	""" Visualizza il totale in giorni di una classifica a gettoni, dove ogni gettone è mezza giornata """
+	result_int = 0
+	if rank_total % 2 == 0:
+		result_int = rank_total / 2
+		fract = ""
+	else:
+		result_int = int(rank_total / 2)
+		fract = " &frac12;"
+
+	suffix = 'giorno' if result_int <= 1 else 'giorni'
+	if result_int == 0:
+		result_int = ""
+	return mark_safe(u"{giorni}{fract} {suffix}".format(giorni=result_int, fract=fract, suffix=suffix))
 
 
 from django.conf import settings
