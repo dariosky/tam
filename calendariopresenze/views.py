@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.db.models import Sum
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.template import Context, RequestContext
+from django.template import RequestContext
 from django.template.loader import get_template
 from django.views.generic.base import TemplateView
 from calendariopresenze.models import Calendar, pretty_duration
@@ -152,11 +152,13 @@ class CalendarManage(TemplateView):
 			)
 			if request.is_ajax():
 				row_template = get_template('calendar/cal_row.html')
-				context = RequestContext(request, dict(
+
+				# I use the context view, adding the things to rendere the row
+				context.update(dict(
 					element=calendar,
 					calDesc=settings.CALENDAR_DESC[calendar.type]
 				))
-				return HttpResponse(row_template.render(context), status=201)
+				return HttpResponse(row_template.render(RequestContext(request, context)), status=201)
 			else:
 				return HttpResponseRedirect(
 					reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
