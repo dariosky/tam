@@ -71,19 +71,19 @@ class FormPrenotazioni(forms.ModelForm):
 		"pulizia numero di pax"
 		value = self.cleaned_data['pax']
 		if value > 50:
-			raise forms.ValidationError("Sicuro del numero di persone?")
+			raise forms.ValidationError(_("Sicuro del numero di persone?"))
 		return value
 
 	def clean_is_arrivo(self):
 		value = self.cleaned_data['is_arrivo']
 		if not value in (True, False):
-			raise forms.ValidationError("Devi specificare se la corsa è un arrivo o una partenza.")
+			raise forms.ValidationError(_("Devi specificare se la corsa è un arrivo o una partenza."))
 		return value
 
 	def clean_is_collettivo(self):
 		value = self.cleaned_data['is_collettivo']
 		if not value in (True, False):
-			raise forms.ValidationError("Questo campo è obbligatorio.")
+			raise forms.ValidationError(_("Questo campo è obbligatorio."))
 		return value
 
 
@@ -94,16 +94,16 @@ class FormPrenotazioni(forms.ModelForm):
 
 		oraMinima = ora + datetime.timedelta(hours=preavviso_ore)  # bisogna prenotare 48 ore prima
 		if 'data_corsa' in cleaned_data and cleaned_data['data_corsa'] < oraMinima:
-			raise forms.ValidationError("Devi prenotare almeno %d ore prima. " % preavviso_ore)
+			raise forms.ValidationError(_("Devi prenotare almeno %d ore prima. ") % preavviso_ore)
 
 		return cleaned_data
 
 	def __init__(self, *args, **kwargs):
 		super(FormPrenotazioni, self).__init__(*args, **kwargs)
 		self.fields['attachment'] = forms.FileField(
-			label="Allegato",
+			label=_("Allegato"),
 			required=False,
-			help_text="Allega un file alla richiesta (facoltativo)."
+			help_text=_("Allega un file alla richiesta (facoltativo).")
 		)
 
 		for field_name in self.fields:
@@ -146,20 +146,20 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		except Prenotazione.DoesNotExist:
 			messages.error(
 				request,
-				"La prenotazione non esiste."
+				_("La prenotazione non esiste.")
 			)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 		if prenotazione.owner <> utentePrenotazioni:
 			messages.error(
 				request,
-				"La prenotazione non è stata fatta da te, non puoi accedervi."
+				_("La prenotazione non è stata fatta da te, non puoi accedervi.")
 			)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 		editable = prenotazione.is_editable()
 		if not editable:
 			messages.warning(
 				request,
-				"La prenotazione non è più modificabile."
+				_("La prenotazione non è più modificabile.")
 			)
 		# return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 	else:
@@ -176,7 +176,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 	if clienti_attivi.count() == 0:
 		messages.error(
 			request,
-			"Non hai alcun cliente abilitato."
+			_("Non hai alcun cliente abilitato.")
 		)
 		return HttpResponseRedirect(reverse('login'))
 
@@ -200,7 +200,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 			inviaMailPrenotazione(prenotazione, "delete")
 			id_prenotazione = prenotazione.id  # salvo per il messaggio finale
 			prenotazione.delete()
-			messages.success(request, "Prenotazione n°%d annullata." % id_prenotazione)
+			messages.success(request, _("Prenotazione n°%d annullata.") % id_prenotazione)
 			return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	if form.is_valid() and editable:
@@ -243,7 +243,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 			)
 			messages.success(
 				request,
-				"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma." % prenotazione.id
+				_("Prenotazione n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
 			)
 			return HttpResponseRedirect(reverse('tamPrenotazioni'))
 		else:  # salvo la modifica
@@ -286,7 +286,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				if request_attachment and not prenotazione.had_attachment:
 					prenotazione.had_attachment = True  # aggiunto l'allegato
 				prenotazione.save()
-				messages.success(request, "Modifica eseguita.")
+				messages.success(request, _("Modifica eseguita."))
 			return HttpResponseRedirect(
 				reverse('tamPrenotazioni-edit',
 				        kwargs={"id_prenotazione": prenotazione.id}
@@ -323,12 +323,12 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 				codice_cliente = int(filtroCliente)
 				cliente_selezionato = Cliente.objects.get(id=codice_cliente)
 				if cliente_selezionato not in clienti_attivi:
-					messages.error(request, 'Non sei abilitato a vedere questo cliente.')
+					messages.error(request, _('Non sei abilitato a vedere questo cliente.'))
 					return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 			except ValueError:
 				filtroCliente = None
 			except Cliente.DoesNotExist:
-				messages.error(request, 'Il cliente non esiste.')
+				messages.error(request, _('Il cliente non esiste.'))
 				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	adesso = tamdates.ita_now().replace(second=0, microsecond=0)
@@ -360,7 +360,9 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 				data_fine = tamdates.parseDateString(end_string).replace(hour=23, minute=59)  # fino a fine giornata
 			except AttributeError:
 				messages.warning(request,
-				                 "Errore nel processare l'intervallo di date %s-%s." % (start_string, end_string))
+				                 _("Errore nel processare l'intervallo di date {start}-{end}.").format(
+				                 start=start_string, end=end_string)
+				)
 				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
 	viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
@@ -387,7 +389,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 		thisPage = paginator.page(page)
 		viaggi = thisPage.object_list
 	except:
-		messages.warning(request, "La pagina %d è vuota." % page)
+		messages.warning(request, _("La pagina %d è vuota.") % page)
 		thisPage = None
 		viaggi = []
 	# ----------------------

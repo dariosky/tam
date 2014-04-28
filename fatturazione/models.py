@@ -1,4 +1,4 @@
-#coding: utf8
+#coding: utf-8
 from django.db import models
 from tam.models import Viaggio, Conducente, Cliente, Passeggero
 from decimal import Decimal, ROUND_HALF_UP

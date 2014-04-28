@@ -151,6 +151,7 @@ PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify'
 MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'django.middleware.gzip.GZipMiddleware',
                         'django.middleware.common.CommonMiddleware',
                         'django.contrib.sessions.middleware.SessionMiddleware',
+                        'django.middleware.locale.LocaleMiddleware',
                         # 'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
                         'django.contrib.messages.middleware.MessageMiddleware',
                         'django.contrib.auth.middleware.AuthenticationMiddleware',

@@ -1,20 +1,20 @@
 # coding: utf-8
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.translation import ugettext_lazy as _
 from tam.models import Cliente, Luogo, Viaggio
 import datetime
 from prenotazioni.util import preavviso_ore, prenotaCorsa
 from tam import tamdates
-
 # Regole da rispettare:
 # 	non mostro i prezzi
 # 	creo/modifico solo se ad almeno TOT ore dalla data prenotazione
 # 	non posso modificare se il viaggio è già confermato
 
 TIPI_PAGAMENTO = (
-	('D', 'Diretto'),
-	('H', 'Hotel'),  # diventa "conto finemese"
-	('F', 'Fattura'),  # fattura richiesta
+	('D', _('Diretto')),
+	('H', _('Hotel')),  # diventa "conto finemese"
+	('F', _('Fattura')),  # fattura richiesta
 )
 
 
@@ -45,29 +45,31 @@ class Prenotazione(models.Model):
 	cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
-	data_corsa = models.DateTimeField("Data e ora",
-	                                  help_text="Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora al luogo specificato.")
+	data_corsa = models.DateTimeField(_("Data e ora"),
+	                                  help_text=_(
+		                                  "Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora al luogo specificato.")
+	)
 
 	pax = models.IntegerField(default=1)
 	is_collettivo = models.BooleanField(
-		"Individuale o collettivo?",
-		choices=((False, 'Individuale'), (True, 'Collettivo')),
+		_("Individuale o collettivo?"),
+		choices=((False, _('Individuale')), (True, _('Collettivo'))),
 		default=None
 	)
 
-	is_arrivo = models.BooleanField("Arrivo o partenza?",
-	                                choices=((True, 'Arrivo da...'), (False, 'Partenza per...')),
+	is_arrivo = models.BooleanField(_("Arrivo o partenza?"),
+	                                choices=((True, _('Arrivo da...')), (False, _('Partenza per...'))),
 	                                default=None
 	)
-	luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
+	luogo = models.ForeignKey(Luogo, verbose_name=_('Luogo'), on_delete=models.PROTECT)
 
-	pagamento = models.CharField(max_length=1,
+	pagamento = models.CharField(_("Pagamento"), max_length=1,
 	                             choices=TIPI_PAGAMENTO,
 	                             default="D")
 
-	note_camera = models.CharField("Numero di camera", max_length=20, blank=True)
-	note_cliente = models.CharField("Nome del cliente", max_length=40, blank=True)
-	note = models.TextField(blank=True)
+	note_camera = models.CharField(_("Numero di camera"), max_length=20, blank=True)
+	note_cliente = models.CharField(_("Nome del cliente"), max_length=40, blank=True)
+	note = models.TextField(_("Note"), blank=True)
 
 	viaggio = models.OneToOneField(Viaggio,
 	                               null=True,

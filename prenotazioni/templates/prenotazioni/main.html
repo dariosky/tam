@@ -1,10 +1,11 @@
-{% extends 'prenotazioni/base.html' %}{% load url from future %}{% load tz %}
+{% extends 'prenotazioni/base.html' %}
+{% load i18n %}{% load url from future %}{% load tz %}
 {% block content %}
 	{% if prenotazione %}
-		<h3>Prenotazione {{ prenotazione.id }}</h3>
+		<h3>{% trans "Prenotazione" %} {{ prenotazione.id }}</h3>
 	{% endif %}
 	
-	{{ utentePrenotazioni.nome_operatore }} per
+	{{ utentePrenotazioni.nome_operatore }} {% trans "per" %}
 	{% if cliente_unico %}{{ cliente_unico }}{% endif %}
 	<form action='' method="post" enctype="multipart/form-data" id='preForm'>
 		{{ form.as_p }}
@@ -13,13 +14,13 @@
 			<input type='submit'
 				   name='prenota'
 				   class='btn'
-				   value='{% if prenotazione %}Modifica{%else%}Invia{%endif%} prenotazione'
+				   value='{% if prenotazione %}{% trans "Modifica" %}{%else%}{% trans "Invia" %}{%endif%}{% trans " prenotazione" %}'
 			/>
 			{% if prenotazione %}
 				<input type='submit'
 				   name='delete'
 				   class='btn'
-				   value='Cancella prenotazione'
+				   value='{% trans "Cancella prenotazione" %}'
 			/>
 			{% endif %}
 		{% else %}
@@ -32,7 +33,7 @@
 	<a href='{% url 'tamCronoPrenotazioni' %}'>
 
 	<div style='text-align:center'>
-		vai alla cronologia delle prenotazioni effettuate
+		{% blocktrans %}vai alla cronologia delle prenotazioni effettuate{% endblocktrans %}
 	</div>
 	</a>
 {% endblock content %}

@@ -1,4 +1,4 @@
-#coding:utf8
+#coding:utf-8
 from modellog.actions import logAction
 import xlsUtil
 import xlwt
