@@ -1,4 +1,5 @@
-{% extends 'prenotazioni/base.html' %}{% load staticfiles %}{% load url from future %}
+{% extends 'prenotazioni/base.html' %}
+{% load i18n %}{% load staticfiles %}{% load url from future %}
 {% block content %}
 	{% if thisPage.has_other_pages %}
 		<div class="countblock noprint">
@@ -8,10 +9,10 @@
 	<div id='filtri' class='noprint'>
 		<form action='' method="get" name='filter'>
 			{% if cliente_unico %}
-				per {{ cliente_unico }}
+				{% trans "per" %} {{ cliente_unico }}
 			{% else %}
 				<select name=cliente>
-					<option value='all'>Tutti i clienti</option>
+					<option value='all'>{% blocktrans %}Tutti i clienti{% endblocktrans %}</option>
 					{% for cliente in clienti_attivi %}
 						{% if cliente == cliente_selezionato %}
 							<option value="{{ cliente.id }}" selected="selected"><b>{{ cliente.nome }}</b></option>
@@ -24,30 +25,33 @@
 			{% endif %}
 			<select name='data' id="datemode">
 				<option value='all'>Tutte le date</option>
-				<option value='next'{% if current_date_filter == "next" %}  selected="selected"{% endif %}>Prossime
-					corse
+				<option value='next'{% if current_date_filter == "next" %}  selected="selected"{% endif %}>
+					{% blocktrans %}Prossime corse{% endblocktrans %}
 				</option>
-				<option value='day'{% if current_date_filter == "day" %}  selected="selected"{% endif %}>Odierne
+				<option value='day'{% if current_date_filter == "day" %}  selected="selected"{% endif %}>
+					{% trans "Odierne" %}
 				</option>
-				<option value='cur'{% if current_date_filter == "cur" %}  selected="selected"{% endif %}>Mese corrente
+				<option value='cur'{% if current_date_filter == "cur" %}  selected="selected"{% endif %}>
+					{% blocktrans %}Mese corrente{% endblocktrans %}
 				</option>
-				<option value='prev'{% if current_date_filter == "prev" %}  selected="selected"{% endif %}>Mese
-					precedente
+				<option value='prev'{% if current_date_filter == "prev" %}  selected="selected"{% endif %}>
+					{% blocktrans %}Mese precedente{% endblocktrans %}
 				</option>
 				<option value='adv'{% if current_date_filter == "adv" %}  selected="selected"{% endif %}>
-					Da data - a data
+					{% blocktrans %}Da data - a data{% endblocktrans %}
 				</option>
 			</select>
 
 			<div class="input-daterange input-group hidden" id="datepicker">
-				<label for="datepicker">Seleziona le date per il filtro:</label>
-				Da:
+				<label for="datepicker">{% blocktrans %}Seleziona le date per il filtro:{% endblocktrans %}</label>
+				{% trans "Da:" %}
 				<input type="text" class="input-sm form-control" name="dstart" value="{{ data_inizio }}"/>
-				a:
+				{% trans "a:" %}
 				<input type="text" class="input-sm form-control" name="dend" value="{{ data_fine }}"/>
 			</div>
 
-			<a class="btn btn-mini" href="javascript:document.filter.submit()"><i class="icon-refresh"></i> Aggiorna</a>
+			<a class="btn btn-mini" href="javascript:document.filter.submit()"><i class="icon-refresh"></i> {% trans "Aggiorna" %}
+			</a>
 		</form>
 	</div>
 
@@ -56,9 +60,10 @@
 		<table class='prenotazioni'>
 			<tr>
 				{% if not cliente_unico %}
-					<th>Cliente</th>{% endif %}
-				<th>Corsa</th>
-				<th>orario</th>
+					<th>{% trans "Cliente" %}</th>
+				{% endif %}
+				<th>{% trans "Corsa" %}</th>
+				<th>{% trans "orario" %}</th>
 			</tr>
 			{% for viaggio in viaggi %}
 				<tr>
@@ -77,8 +82,8 @@
 					{% if viaggio.is_prenotazione %}
 						{% with prenotazione=viaggio.prenotazione %}
 							<td class='note'>
-								{% if prenotazione.note_camera %}Camera: {{ prenotazione.note_camera }}<br/>{% endif %}
-								{% if prenotazione.note_cliente %}Cliente:
+								{% if prenotazione.note_camera %}{% trans "Camera:" %} {{ prenotazione.note_camera }}<br/>{% endif %}
+								{% if prenotazione.note_cliente %}{% trans "Cliente:" %}
 									{{ prenotazione.note_cliente }}<br/>{% endif %}
 								{% if prenotazione.note %}{{ prenotazione.note }}{% endif %}
 							</td>
@@ -86,14 +91,14 @@
 								<td>
 									<a href='{% url 'tamPrenotazioni-edit' prenotazione.id %}'>
 										{% if prenotazione.is_editable %}
-											modifica
+											{% trans "modifica" %}
 										{% else %}
-											visualizza
+											{% trans "visualizza" %}
 										{% endif %}
 									</a>
 									{% if prenotazione.had_attachment %}
 										<div><img src="{% static "img/attachment.gif" %}"
-												  title="Un allegato è già stato inviato"/></div>
+												  title="{% trans "Un allegato è già stato inviato" %}"/></div>
 									{% endif %}
 								</td>
 							{% endif %}
@@ -101,7 +106,7 @@
 						{% endwith %}
 					{% endif %}
 					{% if viaggio.annullato %}
-						<td>Anullato</td>
+						<td>{% trans "Annullato" %}</td>
 					{% endif %}
 				</tr>
 			{% endfor %}

@@ -1,9 +1,10 @@
+{% load i18n %}
 {% load staticfiles %}
 {% if viaggio.arrivo %}
 	<td class="arrivo">
 		{% if viaggio.is_long %}<strong>{% endif %}
 		{% if viaggio.a.id == viaggio.luogoDiRiferimento_id %}
-			ARRIVO<br>{{ viaggio.da }}
+			{% trans "ARRIVO" %}<br>{{ viaggio.da }}
 		{% else %}
 			{{ viaggio.da }}<br><img src="{% static "img/fout.png" %}" alt="Arrivo" />{{ viaggio.a }}
 		{% endif %}
@@ -13,7 +14,7 @@
 	<td class="partenza">
 		{% if viaggio.is_long %}<strong>{% endif %}
 		{% if viaggio.da.id == viaggio.luogoDiRiferimento_id %}
-			PARTENZA<br>{{ viaggio.a }}
+			{% trans "PARTENZA" %}<br>{{ viaggio.a }}
 		{% else %}
 			{{ viaggio.da }}<br><img src="{% static "img/fin.png" %}" alt="Partenza" />{{ viaggio.a }}
 		{% endif %}
