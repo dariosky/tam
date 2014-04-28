@@ -1,0 +1,214 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TaM - prenotazioni\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-04-28 10:47+0200\n"
+"PO-Revision-Date: 2014-04-28 10:48+0100\n"
+"Last-Translator: Dario Varotto <dario.varotto@gmail.com>\n"
+"Language-Team: English <dariosky@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en\n"
+"X-Generator: Poedit 1.6.3\n"
+
+#: .\models.py:15
+msgid "Diretto"
+msgstr "Direct"
+
+#: .\models.py:16
+msgid "Hotel"
+msgstr "Hotel"
+
+#: .\models.py:17
+msgid "Fattura"
+msgstr "Invoice"
+
+#: .\models.py:48
+msgid "Data e ora"
+msgstr "Date and time"
+
+#: .\models.py:50
+msgid ""
+"Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora "
+"al luogo specificato."
+msgstr ""
+"In the departures it is the time of the hotel pickup. On the arrival it is "
+"the time at the specified place."
+
+#: .\models.py:55
+msgid "Individuale o collettivo?"
+msgstr "Individual or collective?"
+
+#: .\models.py:56
+msgid "Individuale"
+msgstr "Individual"
+
+#: .\models.py:56
+msgid "Collettivo"
+msgstr "Collective"
+
+#: .\models.py:60
+msgid "Arrivo o partenza?"
+msgstr "Arrival or departure"
+
+#: .\models.py:61
+msgid "Arrivo da..."
+msgstr "Arrival from..."
+
+#: .\models.py:61
+msgid "Partenza per..."
+msgstr "Departure to..."
+
+#: .\models.py:64
+msgid "Luogo"
+msgstr "Where"
+
+#: .\models.py:66
+msgid "Pagamento"
+msgstr "Payment mode"
+
+#: .\models.py:70
+msgid "Numero di camera"
+msgstr "Room number"
+
+#: .\models.py:71
+msgid "Nome del cliente"
+msgstr "Client name"
+
+#: .\models.py:72
+msgid "Note"
+msgstr "Notes"
+
+#: .\templates\prenotazioni\base.html:5
+msgid "Sistema di prenotazione online"
+msgstr "Online booking"
+
+#: .\templates\prenotazioni\base.html:6
+msgid "TaM - Sistema di prenotazione online"
+msgstr "TaM - Online booking"
+
+#: .\templates\prenotazioni\base.html:40
+msgid "Servizio prenotazioni"
+msgstr "Booking service"
+
+#: .\templates\prenotazioni\base.html:61
+msgid "Accesso effettuato con nome utente:"
+msgstr "Logged as:"
+
+#: .\templates\prenotazioni\base.html:62
+msgid "disconnettiti"
+msgstr "logout"
+
+#: .\templates\prenotazioni\main.html:5
+msgid "Prenotazione"
+msgstr "Booking"
+
+#: .\templates\prenotazioni\main.html:8
+msgid "per"
+msgstr "for"
+
+#: .\templates\prenotazioni\main.html:17
+msgid "Modifica"
+msgstr "Change"
+
+#: .\templates\prenotazioni\main.html:17
+msgid "Invia"
+msgstr "Send"
+
+#: .\templates\prenotazioni\main.html:17
+msgid " prenotazione"
+msgstr " booking"
+
+#: .\templates\prenotazioni\main.html:23
+msgid "Cancella prenotazione"
+msgstr "cancel booking"
+
+#: .\templates\prenotazioni\main.html:36
+msgid "vai alla cronologia delle prenotazioni effettuate"
+msgstr "go to the booking history"
+
+#: .\views\main.py:74
+msgid "Sicuro del numero di persone?"
+msgstr "Are you sure about the number of people?"
+
+#: .\views\main.py:80
+msgid "Devi specificare se la corsa è un arrivo o una partenza."
+msgstr "You should specify if the run is an arrival or a departure."
+
+#: .\views\main.py:86
+msgid "Questo campo è obbligatorio."
+msgstr "This field is required."
+
+#: .\views\main.py:97
+#, python-format
+msgid "Devi prenotare almeno %d ore prima. "
+msgstr "You have to book at least %d hours before the time of the run."
+
+#: .\views\main.py:104
+msgid "Allegato"
+msgstr "Attachment"
+
+#: .\views\main.py:106
+msgid "Allega un file alla richiesta (facoltativo)."
+msgstr "Attach a file (not required)"
+
+#: .\views\main.py:119
+msgid "%d/%m/%Y"
+msgstr "%d/%m/%Y"
+
+#: .\views\main.py:120
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: .\views\main.py:149
+msgid "La prenotazione non esiste."
+msgstr "The booking does not exists."
+
+#: .\views\main.py:155
+msgid "La prenotazione non è stata fatta da te, non puoi accedervi."
+msgstr "This booking has not be made by you, you cannot access it."
+
+#: .\views\main.py:162
+msgid "La prenotazione non è più modificabile."
+msgstr "The booking is not editable anymore."
+
+#: .\views\main.py:179
+msgid "Non hai alcun cliente abilitato."
+msgstr "You don't have any client enabled."
+
+#: .\views\main.py:203
+#, python-format
+msgid "Prenotazione n°%d annullata."
+msgstr "Booking n°%d cancelled."
+
+#: .\views\main.py:246
+#, python-format
+msgid "Prenotazione n° %d effettuata, a breve riceverai una mail di conferma."
+msgstr "Booking n° %d sent, sooner you will receive a confirmation mail."
+
+#: .\views\main.py:289
+msgid "Modifica eseguita."
+msgstr "Changes applied."
+
+#: .\views\main.py:326
+msgid "Non sei abilitato a vedere questo cliente."
+msgstr "You are not allowed to see this client."
+
+#: .\views\main.py:331
+msgid "Il cliente non esiste."
+msgstr "Client does not exist."
+
+#: .\views\main.py:363
+msgid "Errore nel processare l'intervallo di date {start}-{end}."
+msgstr "Error processing date range {start}-{end}."
+
+#: .\views\main.py:392
+#, python-format
+msgid "La pagina %d è vuota."
+msgstr "Page %d is empty."

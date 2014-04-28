@@ -1,4 +1,4 @@
-#coding: utf8
+#coding: utf-8
 from prenotazioni.models import Prenotazione
 from tam import tamdates
 from tam.models import Viaggio, Luogo

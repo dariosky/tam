@@ -1,8 +1,9 @@
+{% load i18n %}
 {% load staticfiles %}{% load url from future %}{% load compressed %}<!DOCTYPE html>
 <html>
 <head>
-	<title>{{ license_owner }} - Sistema di prenotazione online</title>
-	<meta name="description" content="TaM - Sistema di prenotazione online"/>
+	<title>{{ license_owner }} - {% blocktrans %}Sistema di prenotazione online{% endblocktrans %}</title>
+	<meta name="description" content="{% trans "TaM - Sistema di prenotazione online" %}"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<link rel="shortcut icon" href="{{ STATIC_URL }}prenotazioni/ico/favicon.ico" type="image/x-icon"/>
 	<link rel="apple-touch-icon-precomposed" sizes="144x144"
@@ -35,7 +36,9 @@
 
 <div id='mainContent'>
 	<a href="/">
-		<h2><img src="{% static "img/tam_16.png" %}" class="loghetto" alt=""/>Servizio prenotazioni</h2>
+		<h2><img src="{% static "img/tam_16.png" %}" class="loghetto" alt=""/>
+			{% blocktrans %}Servizio prenotazioni{% endblocktrans %}
+		</h2>
 	</a>
 
 	{% if messages %}
@@ -55,8 +58,8 @@
 
 	<div id='footer'>
 		{% block footer %}
-			Accesso effettuato con nome utente: {{ request.user }} -
-			<a href='{% url 'logout' %}?next=/prenotazioni'>disconnettiti</a>
+			{% blocktrans %}Accesso effettuato con nome utente:{% endblocktrans %} {{ request.user }} -
+			<a href='{% url 'logout' %}?next=/prenotazioni'>{% trans "disconnettiti" %}</a>
 		{% endblock footer %}
 	</div>
 </div>
