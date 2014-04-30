@@ -37,16 +37,20 @@ class Calendar(models.Model):
 
 	class Meta:
 		ordering = ['date_start', 'conducente']
-		permissions = (('change_oldcalendar', 'Imposta vecchio calendario'),)
+		permissions = (
+		('change_oldcalendar', 'Imposta vecchio calendario'),
+		('toggle_calendarvalue', 'Cambia valore di un calendario'),  # toggle the value between 1 and 2
+		)
 
 	def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 		delta = (self.date_end - self.date_start)
 		self.minutes = (delta.days * 60 * 24) + delta.seconds / 60
 		caldesc = settings.CALENDAR_DESC[self.type]
-		if 'get_value' in caldesc:
-			self.value = caldesc['get_value'](self)
-		else:
-			self.value = self.minutes  # time based calendar
+		if self.id is None: # set value on creation
+			if 'get_value' in caldesc:
+				self.value = caldesc['get_value'](self)
+			else:
+				self.value = self.minutes  # time based calendar
 		super(Calendar, self).save(force_insert, force_update, using, update_fields)
 
 	def display(self):
