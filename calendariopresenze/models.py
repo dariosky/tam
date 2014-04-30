@@ -62,9 +62,11 @@ class Calendar(models.Model):
 
 	def __unicode__(self):
 		caldesc = settings.CALENDAR_DESC[self.type]
-		result = u"{conducente}. {date_start} ".format(conducente=self.conducente,
-		                                               date_start=(self.date_start.astimezone(tz_italy)).strftime(
-			                                               "%d/%m/%Y %H:%M"))
+		result = u"{conducente}. {cal_name} {date_start} ".format(
+			conducente=self.conducente,
+			cal_name=caldesc['name'],
+			date_start=(self.date_start.astimezone(tz_italy)).strftime("%d/%m/%Y %H:%M")
+		)
 		if "display_as" in caldesc:
 			result += self.display()
 		else:
