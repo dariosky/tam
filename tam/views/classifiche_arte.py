@@ -278,7 +278,7 @@ def cal_display_mattino_pomeriggio(calendar):
 def cal_display_allday2_halfday1(calendar):
 	reference_date = calendar.date_start.astimezone(tz_italy)
 	result = u""
-	if calendar.value == 1:
+	if calendar.minutes < 60 * 24:
 		if reference_date.hour <= 12:
 			result += u"mattino"
 		else:
