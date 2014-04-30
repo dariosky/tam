@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM - prenotazioni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-28 10:47+0200\n"
-"PO-Revision-Date: 2014-04-28 10:48+0100\n"
+"POT-Creation-Date: 2014-04-28 11:00+0200\n"
+"PO-Revision-Date: 2014-04-28 11:00+0100\n"
 "Last-Translator: Dario Varotto <dario.varotto@gmail.com>\n"
 "Language-Team: English <dariosky@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -105,13 +105,90 @@ msgstr "Logged as:"
 msgid "disconnettiti"
 msgstr "logout"
 
-#: .\templates\prenotazioni\main.html:5
-msgid "Prenotazione"
-msgstr "Booking"
-
+#: .\templates\prenotazioni\cronologia.html:12
 #: .\templates\prenotazioni\main.html:8
 msgid "per"
 msgstr "for"
+
+#: .\templates\prenotazioni\cronologia.html:15
+msgid "Tutti i clienti"
+msgstr "All clients"
+
+#: .\templates\prenotazioni\cronologia.html:29
+msgid "Prossime corse"
+msgstr "Next runs"
+
+#: .\templates\prenotazioni\cronologia.html:32
+msgid "Odierne"
+msgstr "Today"
+
+#: .\templates\prenotazioni\cronologia.html:35
+msgid "Mese corrente"
+msgstr "This month"
+
+#: .\templates\prenotazioni\cronologia.html:38
+msgid "Mese precedente"
+msgstr "Last moth"
+
+#: .\templates\prenotazioni\cronologia.html:41
+msgid "Da data - a data"
+msgstr "From date - to date"
+
+#: .\templates\prenotazioni\cronologia.html:46
+msgid "Seleziona le date per il filtro:"
+msgstr "Select dates to filter:"
+
+#: .\templates\prenotazioni\cronologia.html:47
+msgid "Da:"
+msgstr "From"
+
+#: .\templates\prenotazioni\cronologia.html:49
+msgid "a:"
+msgstr "to:"
+
+#: .\templates\prenotazioni\cronologia.html:53
+msgid "Aggiorna"
+msgstr "Refresh"
+
+#: .\templates\prenotazioni\cronologia.html:63
+msgid "Cliente"
+msgstr "Client"
+
+#: .\templates\prenotazioni\cronologia.html:65
+msgid "Corsa"
+msgstr "Run"
+
+#: .\templates\prenotazioni\cronologia.html:66
+msgid "orario"
+msgstr "date-time"
+
+#: .\templates\prenotazioni\cronologia.html:85
+msgid "Camera:"
+msgstr "Room:"
+
+#: .\templates\prenotazioni\cronologia.html:86
+msgid "Cliente:"
+msgstr "Client:"
+
+#: .\templates\prenotazioni\cronologia.html:94
+msgid "modifica"
+msgstr "change"
+
+#: .\templates\prenotazioni\cronologia.html:96
+msgid "visualizza"
+msgstr "view"
+
+#: .\templates\prenotazioni\cronologia.html:101
+msgid "Un allegato è già stato inviato"
+msgstr "An attachment has been already sent"
+
+#: .\templates\prenotazioni\cronologia.html:109
+msgid "Annullato"
+msgstr "Cancelled"
+
+#: .\templates\prenotazioni\main.html:5
+msgid "Prenotazione"
+msgstr "Booking"
 
 #: .\templates\prenotazioni\main.html:17
 msgid "Modifica"
