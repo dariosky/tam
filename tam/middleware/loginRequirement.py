@@ -1,11 +1,11 @@
+# coding=utf-8
 """ Each request needs an authenticathed user """
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.contrib import messages
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.views.generic import TemplateView
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class RequireLoginMiddleware(object):
@@ -26,7 +26,7 @@ class RequireLoginMiddleware(object):
 			prenotazioni_view = getattr(view_func, 'prenotazioni', False)
 			try:
 				prenotazioni_user = request.user.prenotazioni
-			except:
+			except ObjectDoesNotExist:
 				prenotazioni_user = False
 
 			if prenotazioni_user and not prenotazioni_view:
@@ -37,7 +37,12 @@ class RequireLoginMiddleware(object):
 				#messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
 				return HttpResponseRedirect(reverse('tamCorse'))
 			else:
-				return login_required(view_func)(request, *view_args, **view_kwargs)
+				if request.user.is_authenticated():
+					# everything is OK proceed with other middlewares
+					return None
+				else:
+					# we are not logged in so let login_required redirect us
+					return login_required(view_func)(request, *view_args, **view_kwargs)
 
 
 def csrf_failure_view(request, reason=''):

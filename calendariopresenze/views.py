@@ -37,7 +37,6 @@ class AjaxableResponseMixin(TemplateView):
 		redirect_url = context.get('redirect_url')
 		message = context.get('message')
 		status = context.get('status')
-		print message, status, redirect_url
 		if self.request.is_ajax() and message and status:
 			return HttpResponse(message, status=status)
 		if redirect_url:
