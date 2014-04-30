@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models.deletion import CASCADE
 # from tam.models import Conducente
 from tam.tamdates import tz_italy
+from django.utils.translation import ungettext
 
 
 def pretty_duration(minutes):
@@ -11,14 +12,17 @@ def pretty_duration(minutes):
 	results = []
 	a_day = 24 * 60
 	if remainder >= a_day:
-		results.append("%d giorni" % (remainder / a_day))
+		days = remainder / a_day
+		results.append(ungettext("%d giorno", "%d giorni", days) % days)
 		remainder %= a_day
 	an_hour = 60
 	if remainder > an_hour:
-		results.append("%d ore" % (remainder / an_hour))
+		hours = remainder / an_hour
+		results.append(ungettext("%d ora", "%d ore", hours) % hours)
 		remainder %= an_hour
 	if remainder:
-		results.append("%d minuti" % remainder)
+		minutes = remainder
+		results.append(ungettext("%d minuto", "%d minuti", minutes) % minutes)
 	return " ".join(results)
 
 
@@ -59,7 +63,8 @@ class Calendar(models.Model):
 	def __unicode__(self):
 		caldesc = settings.CALENDAR_DESC[self.type]
 		result = u"{conducente}. {date_start} ".format(conducente=self.conducente,
-		                                               date_start=(self.date_start.astimezone(tz_italy)).strftime("%d/%m/%Y %H:%M"))
+		                                               date_start=(self.date_start.astimezone(tz_italy)).strftime(
+			                                               "%d/%m/%Y %H:%M"))
 		if "display_as" in caldesc:
 			result += self.display()
 		else:
