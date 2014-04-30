@@ -1,21 +1,25 @@
+# coding=utf-8
 from django.db import connections
 from django.conf import settings
 from django.core.exceptions import MiddlewareNotUsed
 
+
 class SQLLogMiddleware:
 	def __init__(self):
-		if True or not settings.DEBUG:
+		if not settings.DEBUG:
 			raise MiddlewareNotUsed()
-		
-	def process_response (self, request, response):
+
+	def process_response(self, request, response):
 		if connections['default'].queries:
-#			time = 0.0
-			try:
-				qfile=file("querylog.sql", "w")
-				for q in connections['default'].queries:
-					qfile.write("%s\n"%q['sql'])
-	#				time += float(q['time'])
-				qfile.close()
-			except:
-				pass
+			#			time = 0.0
+			qfile = file("querylog.sql", "w")
+			rows = []
+			for q in connections['default'].queries:
+				sql = q['sql']
+				time = q['time']
+				rows.append((time, sql))
+
+			rows.sort(reverse=True)
+			qfile.write("\n".join(["/*{:>10}*/ {}".format(*row) for row in rows]))
+			qfile.close()
 		return response
