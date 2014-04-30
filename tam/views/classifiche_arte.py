@@ -275,11 +275,25 @@ def cal_display_mattino_pomeriggio(calendar):
 	return result
 
 
-def cal_display_all_day(calendar):
-	result = u"Tutto il giorno"
-	if calendar.value > 1:
-		result += u" x%d" % calendar.value
+def cal_display_allday2_halfday1(calendar):
+	reference_date = calendar.date_start.astimezone(tz_italy)
+	result = u""
+	if calendar.value == 1:
+		if reference_date.hour <= 12:
+			result += u"mattino"
+		else:
+			result += u"pomeriggio"
+	else:
+		result += u"tutto il giorno"
 	return result
+
+
+def value_allday2_halday1(calendar):  # gettone di valore sempre unitario
+	if calendar.minutes > 60 * 14:
+		value = 2
+	else:
+		value = 1
+	return value
 
 
 def cal_display_dimezzato(rank_total):
