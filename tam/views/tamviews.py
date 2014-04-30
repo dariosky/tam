@@ -311,8 +311,9 @@ def listaCorse(request, template_name="corse/lista.html"):
 		viaggi = viaggi.filter(passeggero__nome=filterPrivato)
 
 	if data_inizio:
-		viaggi = viaggi.filter(data__gt=data_inizio)
-	if data_fine: viaggi = viaggi.filter(data__lt=data_fine)  # prossimi 15 giorni
+		viaggi = viaggi.filter(data__gte=data_inizio)
+	if data_fine:
+		viaggi = viaggi.filter(data__lt=data_fine)  # prossimi 15 giorni
 
 	if filterType == u"Partenze":
 		viaggi = viaggi.filter(arrivo=False)

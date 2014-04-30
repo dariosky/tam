@@ -161,7 +161,6 @@ MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'djan
                         'django.middleware.transaction.TransactionMiddleware',
 
                         'tam.middleware.threadlocals.ThreadLocals',
-                        # 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -215,11 +214,6 @@ INSTALLED_APPS = [
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 
-# EMAIL_USE_TLS = True
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_HOST_USER = 'xxx@xxx.com'
-# EMAIL_HOST_PASSWORD = 'xxx'
-# EMAIL_PORT = 587
 EMAIL_SUBJECT_PREFIX = "[TaM]"
 
 if DEBUG:
@@ -248,17 +242,11 @@ if use_debug_toolbar:
 	INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
 
 if DEBUG:
-	MIDDLEWARE_CLASSES+=('tam.middleware.profiler.ProfileMiddleware',)
+	MIDDLEWARE_CLASSES+=(
+	'tam.middleware.profiler.ProfileMiddleware',
+	# 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
+	)
 #===============================================================================
-
-# PASSWORD_HASHERS = (
-# 	'django.contrib.auth.hashers.SHA1PasswordHasher',  # Still use the old hashing until I pass to 1.4
-# 	'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-# 	'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-# 	'django.contrib.auth.hashers.BCryptPasswordHasher',
-# 	'django.contrib.auth.hashers.MD5PasswordHasher',
-# 	'django.contrib.auth.hashers.CryptPasswordHasher',
-# )
 
 TAM_VIAGGI_PAGINA = 100
 
@@ -298,9 +286,5 @@ except ImportError:
 
 for app, desc in PLUGGABLE_APPS.items():
 	INSTALLED_APPS.append(app)
-
-# from celeryconfig import * #@UnusedWildImport
-# import djcelery
-# djcelery.setup_loader()
 
 WSGI_APPLICATION = 'wsgi.application'
