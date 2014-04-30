@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-04-28 10:21+0200\n"
-"PO-Revision-Date: 2014-04-28 09:58+0100\n"
+"POT-Creation-Date: 2014-04-28 11:03+0200\n"
+"PO-Revision-Date: 2014-04-28 11:04+0100\n"
 "Last-Translator: Dario Varotto <dario.varotto@gmail.com>\n"
 "Language-Team: Dariosky <dariosky@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -88,6 +88,14 @@ msgstr "Password:"
 #: .\templates\login.html:36
 msgid "Accedi"
 msgstr "Login"
+
+#: .\templates\corse\cella_partenza_arrivo.inc.html:7
+msgid "ARRIVO"
+msgstr "ARRIVAL"
+
+#: .\templates\corse\cella_partenza_arrivo.inc.html:17
+msgid "PARTENZA"
+msgstr "DEPARTURE"
 
 #: .\views\tamviews.py:1300 .\views\tamviews.py:1301 .\views\varieForm.py:119
 msgid "%d/%m/%Y"
