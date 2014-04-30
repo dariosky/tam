@@ -71,19 +71,19 @@ class FormPrenotazioni(forms.ModelForm):
 		"pulizia numero di pax"
 		value = self.cleaned_data['pax']
 		if value > 50:
-			raise forms.ValidationError(_("Sicuro del numero di persone?"))
+			raise forms.ValidationError(_(u"Sicuro del numero di persone?"))
 		return value
 
 	def clean_is_arrivo(self):
 		value = self.cleaned_data['is_arrivo']
 		if not value in (True, False):
-			raise forms.ValidationError(_("Devi specificare se la corsa è un arrivo o una partenza."))
+			raise forms.ValidationError(_(u"Devi specificare se la corsa è un arrivo o una partenza."))
 		return value
 
 	def clean_is_collettivo(self):
 		value = self.cleaned_data['is_collettivo']
 		if not value in (True, False):
-			raise forms.ValidationError(_("Questo campo è obbligatorio."))
+			raise forms.ValidationError(_(u"Questo campo è obbligatorio."))
 		return value
 
 
@@ -94,7 +94,7 @@ class FormPrenotazioni(forms.ModelForm):
 
 		oraMinima = ora + datetime.timedelta(hours=preavviso_ore)  # bisogna prenotare 48 ore prima
 		if 'data_corsa' in cleaned_data and cleaned_data['data_corsa'] < oraMinima:
-			raise forms.ValidationError(_("Devi prenotare almeno %d ore prima. ") % preavviso_ore)
+			raise forms.ValidationError(_(u"Devi prenotare almeno %d ore prima. ") % preavviso_ore)
 
 		return cleaned_data
 
@@ -243,7 +243,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 			)
 			messages.success(
 				request,
-				_("Prenotazione n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
+				_(u"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
 			)
 			return HttpResponseRedirect(reverse('tamPrenotazioni'))
 		else:  # salvo la modifica
