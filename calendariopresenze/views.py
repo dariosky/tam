@@ -32,7 +32,22 @@ class CalendarForm(forms.Form):
 		return tamdates.normalizeTimeString(data)
 
 
-class CalendarManage(TemplateView):
+class AjaxableResponseMixin(TemplateView):
+	def render_to_response(self, context, **response_kwargs):
+		redirect_url = context.get('redirect_url')
+		message = context.get('message')
+		status = context.get('status')
+		print message, status, redirect_url
+		if self.request.is_ajax() and message and status:
+			return HttpResponse(message, status=status)
+		if redirect_url:
+			if message and 400 <= status < 600:
+				messages.error(self.request, message)
+			return HttpResponseRedirect(reverse(redirect_url))
+		return super(TemplateView, self).render_to_response(context, **response_kwargs)
+
+
+class CalendarManage(AjaxableResponseMixin):
 	template_name = 'calendar/cal_manage.html'
 
 	def get_context_data(self, **kwargs):
@@ -67,39 +82,21 @@ class CalendarManage(TemplateView):
 	def post(self, request, *args, **kwargs):
 		context = self.get_context_data()
 		form = context['form']
-		action = request.POST.get('action', 'new')
+		action = request.POST.get('action')
 		if not context['can_edit']:
-			if request.is_ajax():
-				return HttpResponse("Non hai permessi per modificare vecchie presenze.", status=401)
-			else:
-				messages.error(request, "Non hai permessi per modificare vecchie presenze.")
-				return HttpResponseRedirect(reverse('calendariopresenze-manage'))
-
-		if action == 'delete':
-			if not request.user.has_perm('calendariopresenze.delete_calendar'):
-				if request.is_ajax():
-					return HttpResponse("Non hai permessi per cancellare le presenze.", status=401)
-				else:
-					messages.error(request, "Non hai permessi per cancellare le presenze.")
-					return HttpResponseRedirect(reverse('calendariopresenze-manage'))
-			calendar = Calendar.objects.get(id=request.POST['calendar_id'])
-			caldesc = settings.CALENDAR_DESC[calendar.type]
-			logAction('P',
-			          instance=calendar,
-			          description=u"Presenze: cancellato {name} {calendar}".format(
-				          name=caldesc['name'],
-				          calendar=calendar
-			          )
+			return self.render_to_response(
+				dict(message=u"Non hai permessi per modificare le presenze.",
+				     status=401,
+				     redirect_url='calendariopresenze-manage')
 			)
-			calendar.delete()
-			return HttpResponse("ok", status=200)
+
 		if action == 'new':
 			if not request.user.has_perm('calendariopresenze.add_calendar'):
-				if request.is_ajax():
-					return HttpResponse("Non hai permessi per modificare le presenze.", status=401)
-				else:
-					messages.error(request, "Non hai permessi per modificare le presenze.")
-					return HttpResponseRedirect(reverse('calendariopresenze-manage'))
+				return self.render_to_response(
+					dict(message=u"Non hai permessi per modificare le presenze.",
+					     status=401,
+					     redirect_url='calendariopresenze-manage')
+				)
 			cal_fixed_start = None
 			cal_fixed_end = None
 			subname = None
@@ -163,6 +160,74 @@ class CalendarManage(TemplateView):
 				return HttpResponseRedirect(
 					reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
 				)
+
+		elif action == 'delete':
+			if not request.user.has_perm('calendariopresenze.delete_calendar'):
+				return self.render_to_response(
+					dict(message=u"Non hai permessi per cancellare le presenze.",
+					     status=401,
+					     redirect_url='calendariopresenze-manage')
+				)
+			calendar = Calendar.objects.get(id=request.POST['calendar_id'])
+			caldesc = settings.CALENDAR_DESC[calendar.type]
+			logAction('P',
+			          instance=calendar,
+			          description=u"Presenze: cancellato {name} {calendar}".format(
+				          name=caldesc['name'],
+				          calendar=calendar
+			          )
+			)
+			calendar.delete()
+			return HttpResponse("ok", status=200)
+
+		elif action == 'toggle':
+			if not request.user.has_perm('calendariopresenze.toggle_calendarvalue'):
+				return self.render_to_response(
+					dict(message=u"Non hai permessi per modificare il valore dei calendari.",
+					     status=401,
+					     redirect_url='calendariopresenze-manage')
+				)
+			calendar = Calendar.objects.get(id=request.POST['calendar_id'])
+			caldesc = settings.CALENDAR_DESC[calendar.type]
+			if not 'toggle' in caldesc:
+				return self.render_to_response(
+					dict(message=u"Valore del calendario non modificabile.",
+					     status=400,
+					     redirect_url='calendariopresenze-manage')
+				)
+			old_value = calendar.value
+			caldesc['toggle'](calendar)
+			new_value = calendar.value
+
+			logAction('P',
+			          instance=calendar,
+			          description=u"Presenze: variato {name} {calendar} da {old} a {new}".format(
+				          name=caldesc['name'],
+				          calendar=calendar,
+				          old=old_value,
+				          new=new_value,
+			          )
+			)
+			if request.is_ajax():
+				row_template = get_template('calendar/cal_row.html')
+
+				# I use the context view, adding the things to rendere the row
+				context.update(dict(
+					element=calendar,
+					calDesc=settings.CALENDAR_DESC[calendar.type]
+				))
+				return HttpResponse(row_template.render(RequestContext(request, context)), status=201)
+			else:
+				return HttpResponseRedirect(
+					reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
+				)
+
+		else:
+			return self.render_to_response(
+				dict(message=u"Azione sconosciuta.",
+				     status=400,
+				     redirect_url='calendariopresenze-manage')
+			)
 
 
 class CalendarRank(TemplateView):

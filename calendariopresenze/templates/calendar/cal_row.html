@@ -30,6 +30,11 @@
 			{% if can_edit and perms.calendariopresenze.delete_calendar %}
 				<span class="del"><a data-id="{{ element.id }}" href="#">elimina</a></span>
 			{% endif %}
+
+			{% if can_edit and calDesc.togglable and perms.calendariopresenze.toggle_calendarvalue %}
+				<span class="toggle"><a data-id="{{ element.id }}" href="#">commuta</a></span>
+			{% endif %}
+
 		</td>
 	{% endif %}
 </tr>

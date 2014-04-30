@@ -557,8 +557,9 @@ h2.fatturaTipo5 {
 	min-width: 20em;
 }
 
-#calendar_man .del {
-	float: right
+#calendar_man .del, #calendar_man .toggle {
+	float: right;
+	margin-left: 2px;
 }
 
 .calendar_new {

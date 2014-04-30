@@ -312,4 +312,9 @@ def cal_display_dimezzato(rank_total):
 	return mark_safe(u"{giorni}{fract} {suffix}".format(giorni=result_int, fract=fract, suffix=suffix))
 
 
+def toggle_1or2(calendar):
+	calendar.value = 1 if calendar.value == 2 else 2  # toogle between 1 and 2
+	calendar.save()
+
+
 from django.conf import settings
