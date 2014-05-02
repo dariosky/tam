@@ -290,7 +290,7 @@ class Viaggio(models.Model):
 	                                  db_index=True)
 	# la data finale, di tutto il gruppo di corse, per trovare intersezioni
 	date_end = models.DateTimeField(editable=False, null=True, db_index=True)
-	annullato = models.BooleanField('Corsa annullata', default=False, editable=True)
+	annullato = models.BooleanField('Corsa annullata', default=False, editable=True, db_index=True)
 
 	# per non dover fare query quando visualizzo il viaggio, mi imposto che deriva da una prenotazione
 	is_prenotazione = models.BooleanField('Derivato da prenotazione', default=False, editable=False)
