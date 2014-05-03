@@ -4,6 +4,7 @@ import datetime
 from django.conf import settings
 from django import forms
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db.models import Sum
 from django.http.response import HttpResponseRedirect, HttpResponse
@@ -25,11 +26,18 @@ class CalendarForm(forms.Form):
 
 	def clean_time_from(self):
 		data = self.cleaned_data['time_from']
-		return tamdates.normalizeTimeString(data)
+		time_from =tamdates.normalizeTimeString(data)
+		appendTimeToDate(datetime.date.today(), time_from)
+		return time_from
 
 	def clean_time_to(self):
 		data = self.cleaned_data['time_to']
-		return tamdates.normalizeTimeString(data)
+		time_to = tamdates.normalizeTimeString(data)
+		try:
+			appendTimeToDate(datetime.date.today(), time_to)
+		except ValueError:
+			raise ValidationError("Invalid value")
+		return time_to
 
 
 class AjaxableResponseMixin(TemplateView):
@@ -115,20 +123,34 @@ class CalendarManage(AjaxableResponseMixin):
 					pass
 
 			day = context['day']
-
 			conducente_id = int(request.POST['conducente'])
 			conducente = Conducente.objects.get(id=conducente_id)
 			calendar_type = int(request.POST['type'])
 
 			if 'time_from' in request.POST:
 				string_from = request.POST['time_from']
-				date_start = appendTimeToDate(day, string_from)
+				try:
+					date_start = appendTimeToDate(day, string_from)
+				except ValueError:
+					return self.render_to_response(
+						dict(message=u"Ora iniziale non valida.",
+						     status=400,
+						     redirect_url='calendariopresenze-manage')
+					)
 			else:
 				assert cal_fixed_start
 				date_start = appendTimeFromRegex(day, cal_fixed_start)
+
 			if 'time_to' in request.POST:
 				string_to = request.POST['time_to']
-				date_end = appendTimeToDate(day, string_to)
+				try:
+					date_end = appendTimeToDate(day, string_to)
+				except ValueError:
+					return self.render_to_response(
+						dict(message=u"Ora finale non valida.",
+						     status=400,
+						     redirect_url='calendariopresenze-manage')
+					)
 			else:
 				assert cal_fixed_end
 				date_end = appendTimeFromRegex(day, cal_fixed_end)
@@ -180,7 +202,7 @@ class CalendarManage(AjaxableResponseMixin):
 			return HttpResponse("ok", status=200)
 
 		elif action == 'toggle':
-			if not request.user.has_perm('calendariopresenze.toggle_calendarvalue'):
+			if not request.user.has_perm('calendariopresenze.toggle_calendavalue'):
 				return self.render_to_response(
 					dict(message=u"Non hai permessi per modificare il valore dei calendari.",
 					     status=401,
