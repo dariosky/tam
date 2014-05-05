@@ -251,7 +251,6 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 						riga.save()
 						return HttpResponse('OK.', status=200)
 				return HttpResponse('Non conosco il campo %s.' % object_id, status=500)
-			return HttpResponse('OK.', status=200)
 		return HttpResponse('Azione sconosciuta.', status=500)
 
 
@@ -271,7 +270,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
 
 @permission_required('fatturazione.generate', '/')
-@transaction.commit_on_success
+@transaction.atomic
 def nuova_fattura(request, fatturazione):
 	tipo = fatturazione.codice
 	if fatturazione.ask_progressivo:

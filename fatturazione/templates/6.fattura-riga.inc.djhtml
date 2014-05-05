@@ -1,11 +1,21 @@
 {% load staticfiles %}{% load url from future %}
 <tr class='priceRow'>
-	<td style='{% if not readonly %}width:40px; {%endif%}border:0;'>
+	<td style='{% if not readonly %}width:60px; {%endif%}border:0;'>
 		{% if not readonly %}
 		{% if perms.fatturazione.generate and not readonly %}
 			<img src="{% static 'img/delbtn.png' %}" class='delrow actionButton noprint' title='cancella riga' />
 		{% endif %}
-		{% if riga.viaggio %}<a href="{% url "tamNuovaCorsa2Id" riga.viaggio.id %}" target="_blank" title='Corsa collegata'><img src="{% static 'img/tam_16.png' %}" class='noprint'/></a>{%endif%}
+		{% if riga.viaggio %}
+			<a href="{% url "tamNuovaCorsa2Id" riga.viaggio.id %}"
+			   {% if riga.viaggio.prenotazione %}
+			   		class='prenotazione' title='Corsa collegata - {{ riga.viaggio.prenotazione.pk }}'
+			   {% else %}
+			   		title='Corsa collegata'
+			   {% endif %}
+			   target="_blank" >
+				<img src="{% static 'img/tam_16.png' %}" class='noprint'/>{% if riga.viaggio.prenotazione.had_attachment %}<img src="{% static "img/attachment.gif" %}"/>{% endif %}
+			</a>
+		{%endif%}
 		<input name='row' type="hidden" value='{{riga.id}}'/>
 		{%endif%}
 	</td>
