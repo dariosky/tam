@@ -166,7 +166,7 @@ def get_gunicorn_command(daemon=True):
 	return "{env_path}/bin/gunicorn {options_string} {wsgi_app}".format(
 		env_path=env.VENV_FOLDER,
 		options_string=" ".join(options),
-		wsgi_app="wsgi:application",
+		wsgi_app=env.WSGI_APPLICATION,
 	)
 
 

@@ -202,7 +202,7 @@ class CalendarManage(AjaxableResponseMixin):
 			return HttpResponse("ok", status=200)
 
 		elif action == 'toggle':
-			if not request.user.has_perm('calendariopresenze.toggle_calendavalue'):
+			if not request.user.has_perm('calendariopresenze.toggle_calendarvalue'):
 				return self.render_to_response(
 					dict(message=u"Non hai permessi per modificare il valore dei calendari.",
 					     status=401,
