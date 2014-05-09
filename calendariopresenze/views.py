@@ -26,7 +26,7 @@ class CalendarForm(forms.Form):
 
 	def clean_time_from(self):
 		data = self.cleaned_data['time_from']
-		time_from =tamdates.normalizeTimeString(data)
+		time_from = tamdates.normalizeTimeString(data)
 		appendTimeToDate(datetime.date.today(), time_from)
 		return time_from
 
@@ -189,7 +189,14 @@ class CalendarManage(AjaxableResponseMixin):
 					     status=401,
 					     redirect_url='calendariopresenze-manage')
 				)
-			calendar = Calendar.objects.get(id=request.POST['calendar_id'])
+			try:
+				calendar = Calendar.objects.get(id=request.POST['calendar_id'])
+			except Calendar.DoesNotExist:
+				return self.render_to_response(
+					dict(message=u"Il calendario indicato non esiste più.",
+					     status=400,
+					     redirect_url='calendariopresenze-manage')
+				)
 			caldesc = settings.CALENDAR_DESC[calendar.type]
 			logAction('P',
 			          instance=calendar,
@@ -208,7 +215,14 @@ class CalendarManage(AjaxableResponseMixin):
 					     status=401,
 					     redirect_url='calendariopresenze-manage')
 				)
-			calendar = Calendar.objects.get(id=request.POST['calendar_id'])
+			try:
+				calendar = Calendar.objects.get(id=request.POST['calendar_id'])
+			except Calendar.DoesNotExist:
+				return self.render_to_response(
+					dict(message=u"Il calendario indicato non esiste più.",
+					     status=400,
+					     redirect_url='calendariopresenze-manage')
+				)
 			caldesc = settings.CALENDAR_DESC[calendar.type]
 			if not 'toggle' in caldesc:
 				return self.render_to_response(
