@@ -19,7 +19,7 @@ TEMPLATE_DEBUG = DEBUG
 if DEBUG:
 	# set naive Datetime as errors
 	import warnings
-
+	warnings.simplefilter('error', DeprecationWarning)
 	warnings.filterwarnings(
 		'error', r"DateTimeField received a naive datetime",
 		RuntimeWarning, r'django\.db\.models\.fields')
@@ -272,7 +272,7 @@ SECURE_URL = "/secure/"
 
 PLUGGABLE_APPS = {}
 
-settings_file = os.environ.get('TAM_SETTINGS', 'settings_arte')
+settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
 try:
 	# Dynamically import settings from the indicated sys envoronment var
 	# from settings_local import *
