@@ -136,9 +136,10 @@ def changeLog(request, template_name='static/changelog.html'):
 		                      'Cambio sui costi della sosta nei collettivi in partenza.'),
 		('5.991', '4/4/2014', 'Ottimizzazioni sul calcolo delle classifiche e sulle select dinamiche.'),
 		('6.0', '12/4/2014', mark_safe('<b>Gestione presenze.</b> ' +
-		                               "Le classifiche viaggio tengono conto di ferie/permessi e viaggi contemporanei")),
-		                                 #  ('', '', mark_safe('''''')),
+		                               "Le classifiche viaggio tengono conto di ferie/permessi e viaggi contemporanei")
+		) if 'calendariopresenze' in settings.PLUGGABLE_APPS else "",
 	]
+	#  ('', '', mark_safe('''''')),
 	for version in known_changes[::-1]:
 		if not version: continue  # version può essere vuoto... salto la riga
 		if version[0] and version[0] <= current_version:
