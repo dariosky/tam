@@ -100,11 +100,11 @@ class FormPrenotazioni(forms.ModelForm):
 
 	def __init__(self, *args, **kwargs):
 		super(FormPrenotazioni, self).__init__(*args, **kwargs)
-		self.fields['attachment'] = forms.FileField(
-			label=_("Allegato"),
-			required=False,
-			help_text=_(u"Allega un file alla richiesta (facoltativo).")
-		)
+		# self.fields['attachment'] = forms.FileField(
+		# 	label=_("Allegato"),
+		# 	required=False,
+		# 	help_text=_(u"Allega un file alla richiesta (facoltativo).")
+		# )
 
 		for field_name in self.fields:
 			field = self.fields.get(field_name)
@@ -193,7 +193,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 	if request.method == "POST" and prenotazione:
 		# salvo i valori precedenti e consento la cancellazione
 		for key in form.fields:
-			if key <> "attachment":
+			if key != "attachment":
 				previous_values[key] = getattr(prenotazione, key)
 
 		if "delete" in request.POST:
@@ -206,7 +206,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 	if form.is_valid() and editable:
 		request_attachment = form.cleaned_data['attachment']
 		attachment = None
-		del form.cleaned_data['attachment']
+		# del form.cleaned_data['attachment']
 
 		if request_attachment:
 			# destination = tempfile.NamedTemporaryFile(delete=False)
@@ -222,7 +222,6 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 		# 	destination.write(chunk)
 		# destination.close()
 
-		# assert(False)
 		if id_prenotazione is None:
 			prenotazione = Prenotazione(
 				owner=utentePrenotazioni,

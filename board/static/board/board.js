@@ -145,7 +145,7 @@ function addMessage(message, hilight) {
 	$('<div/>', {class: 'm'}).text(message.message).appendTo(messageDiv);
 	if (attachment) {
 		var attachDiv = $('<div/>', {class: 'attachment'});
-		attachDiv.append($('<a/>', {href: attachment.url}).html(attachment.name));
+		attachDiv.append($('<a/>', {href: attachment.url, target:"_blank"}).html(attachment.name));
 		messageDiv.append(attachDiv);
 	}
 	messageDiv.append($('<div/>', {class: 'del-mark'}));
