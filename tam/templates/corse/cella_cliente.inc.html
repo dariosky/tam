@@ -1,18 +1,26 @@
 {% load staticfiles %}{% load url from future %}
 <div class="cliente">
-	{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/><a href="{% url "tamPrivatoId" viaggio.passeggero.pk %}?next={{ full_request_path }}">{{ viaggio.passeggero }}</a>{% endif %}{% endif %}
+	{% if viaggio.cliente %}{{ viaggio.cliente }}{% else %}<i>Privato</i>{% if viaggio.passeggero %}:<br/>
+		<a href="{% url "tamPrivatoId" viaggio.passeggero.pk %}?next={{ full_request_path }}">{{ viaggio.passeggero }}</a>
+	{% endif %}{% endif %}
 </div>
 {% if viaggio.is_prenotazione %}
-	{% if viaggio.prenotazione %}prenotazione {{viaggio.prenotazione.id}}
+	{% if viaggio.prenotazione %}prenotazione {{ viaggio.prenotazione.id }}
 		{% if viaggio.prenotazione.had_attachment %}
-			<img src="{%  static "img/attachment.gif" %}" title="Un allegato è già stato inviato"/>
+			{% if viaggio.prenotazione.attachment %}
+				<a href="{{ viaggio.prenotazione.attachment.url }}" target="_blank">
+					<img src="{% static "img/attachment.gif" %}" title="Un allegato è già stato inviato"/>
+				</a>
+			{% else %}
+				<img src="{% static "img/attachment.gif" %}" title="Un allegato è già stato inviato"/>
+			{% endif %}
 		{% endif %}
 		<br/>
-	{% endif%}
+	{% endif %}
 {% endif %}
 {{ viaggio.numero_passeggeri }} pax
-{% if viaggio.esclusivo%}
-	<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi" />
+{% if viaggio.esclusivo %}
+	<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi"/>
 {% else %}
-	<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo" />
+	<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo"/>
 {% endif %}

@@ -1,27 +1,36 @@
 {% load staticfiles %}{% load url from future %}
 <tr class='priceRow'>
-	<td style='{% if not readonly %}width:60px; {%endif%}border:0;'>
+	<td style='{% if not readonly %}width:60px; {% endif %}border:0;'>
 		{% if not readonly %}
-		{% if perms.fatturazione.generate and not readonly %}
-			<img src="{% static 'img/delbtn.png' %}" class='delrow actionButton noprint' title='cancella riga' />
+			{% if perms.fatturazione.generate and not readonly %}
+				<img src="{% static 'img/delbtn.png' %}" class='delrow actionButton noprint' title='cancella riga'/>
+			{% endif %}
+			{% if riga.viaggio %}
+				<a href="{% url "tamNuovaCorsa2Id" riga.viaggio.id %}"
+						{% if riga.viaggio.prenotazione %}
+				   class='prenotazione' title='Corsa collegata - Prenotazione {{ riga.viaggio.prenotazione.pk }}'
+						{% else %}
+				   title='Corsa collegata'
+						{% endif %}
+				   target="_blank"><img src="{% static 'img/tam_16.png' %}" class='noprint'/></a>
+				{% if riga.viaggio.prenotazione and riga.viaggio.prenotazione.had_attachment %}
+					{% if riga.viaggio.prenotazione.attachment %}
+						<a href="{{ riga.viaggio.prenotazione.attachment.url }}" target="_blank">
+							<img src="{% static "img/attachment.gif" %}" title="Vedi l'allegato"/>
+						</a>
+					{% else %}
+						<img src="{% static "img/attachment.gif" %}"/>
+					{% endif %}
+				{% endif %}
+			{% endif %}
+			<input name='row' type="hidden" value='{{ riga.id }}'/>
 		{% endif %}
-		{% if riga.viaggio %}
-			<a href="{% url "tamNuovaCorsa2Id" riga.viaggio.id %}"
-			   {% if riga.viaggio.prenotazione %}
-			   		class='prenotazione' title='Corsa collegata - {{ riga.viaggio.prenotazione.pk }}'
-			   {% else %}
-			   		title='Corsa collegata'
-			   {% endif %}
-			   target="_blank" >
-				<img src="{% static 'img/tam_16.png' %}" class='noprint'/>{% if riga.viaggio.prenotazione.had_attachment %}<img src="{% static "img/attachment.gif" %}"/>{% endif %}
-			</a>
-		{%endif%}
-		<input name='row' type="hidden" value='{{riga.id}}'/>
-		{%endif%}
 	</td>
-	<td class='{%if bigEdit or smallEdit %}editable{%endif%}' id='riga-desc-{{riga.id}}'>{{ riga.descrizione }}</td>
-	<td class='{%if bigEdit%}editable {%endif%}qta' id='riga-qta-{{riga.id}}'>{{ riga.qta }}</td>
-	<td class='{%if bigEdit%}editable {%endif%}prezzo' id='riga-prezzo-{{riga.id}}'>{{ riga.prezzo|floatformat:"2" }}</td>
-	<td class='{%if bigEdit%}editable {%endif%}iva' id='riga-iva-{{riga.id}}'>{{ riga.iva }}</td>
+	<td class='{% if bigEdit or smallEdit %}editable{% endif %}'
+		id='riga-desc-{{ riga.id }}'>{{ riga.descrizione }}</td>
+	<td class='{% if bigEdit %}editable {% endif %}qta' id='riga-qta-{{ riga.id }}'>{{ riga.qta }}</td>
+	<td class='{% if bigEdit %}editable {% endif %}prezzo'
+		id='riga-prezzo-{{ riga.id }}'>{{ riga.prezzo|floatformat:"2" }}</td>
+	<td class='{% if bigEdit %}editable {% endif %}iva' id='riga-iva-{{ riga.id }}'>{{ riga.iva }}</td>
 	<td class='prezzo totale'>{{ riga.val_totale|floatformat:"2" }}</td>
 </tr>

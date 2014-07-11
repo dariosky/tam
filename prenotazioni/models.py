@@ -1,4 +1,6 @@
 # coding: utf-8
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
@@ -7,16 +9,18 @@ import datetime
 from prenotazioni.util import preavviso_ore, prenotaCorsa
 from tam import tamdates
 # Regole da rispettare:
-# 	non mostro i prezzi
+# non mostro i prezzi
 # 	creo/modifico solo se ad almeno TOT ore dalla data prenotazione
 # 	non posso modificare se il viaggio è già confermato
 
 TIPI_PAGAMENTO = (
-	('D', _('Diretto')),
-	('H', _('Hotel')),  # diventa "conto finemese"
-	('F', _('Fattura')),  # fattura richiesta
+('D', _('Diretto')),
+('H', _('Hotel')),  # diventa "conto finemese"
+('F', _('Fattura')),  # fattura richiesta
 )
 
+fs = FileSystemStorage(location=settings.SECURE_STORE_LOCATION,
+                       base_url=settings.SECURE_URL)
 
 # Create your models here.
 class UtentePrenotazioni(models.Model):
@@ -32,7 +36,7 @@ class UtentePrenotazioni(models.Model):
 		permissions = (('manage_permissions', 'Gestisci utenti prenotazioni'),)
 
 	def __unicode__(self):
-		return "%(user)s - %(clienti)s da '%(luogo)s' - %(email)s" % {
+		return u"%(user)s - %(clienti)s da '%(luogo)s' - %(email)s" % {
 		"user": self.user.username,
 		"clienti": ", ".join([c.nome for c in self.clienti.all()]),
 		"luogo": self.luogo.nome,
@@ -77,18 +81,24 @@ class Prenotazione(models.Model):
 	                               on_delete=models.PROTECT,
 	)
 
+	attachment = models.FileField(_("Allegato"),
+	                              storage=fs,
+	                              upload_to='prenotazioni/%Y/%m',
+	                              null=True, blank=True,
+	                              help_text=_(u"Allega un file alla richiesta (facoltativo).")
+	)
 	had_attachment = models.BooleanField("Allegato passato", editable=False, default=False)
 	# had_attachment è vero quando in qualche momento ho ottenuto un allegato
 
 	class Meta:
 		verbose_name_plural = "Prenotazioni"
-		ordering = ("cliente", "-data_corsa", "owner")
+		ordering = ("-data_registrazione", "cliente", "owner")
 
 	def __unicode__(self):
-		result = "%s - %s" % (self.cliente, self.owner.user.username)
-		result += " - " + ("arrivo" if self.is_arrivo else "partenza")
-		result += " %s" % self.luogo
-		result += " del %s" % self.data_corsa.astimezone(tamdates.tz_italy).strftime('%d/%m/%Y %H:%M')
+		result = u"%s - %s" % (self.cliente, self.owner.user.username)
+		result += u" - " + (u"arrivo" if self.is_arrivo else u"partenza")
+		result += u" %s" % self.luogo
+		result += u" del %s" % self.data_corsa.astimezone(tamdates.tz_italy).strftime('%d/%m/%Y %H:%M')
 		return result
 
 	def is_editable(self):
