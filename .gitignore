@@ -33,7 +33,9 @@ run_server
 
 /static/*
 !/static/.htaccess
+!/static/robots.txt
 /media/brand
 /media_secured/
 
 /logs
+/_dev/
