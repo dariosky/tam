@@ -45,7 +45,7 @@
     display: none;
 }
 
-#board .message:hover .del-mark{
+#board .message:hover .del-mark, #board .message.active .del-mark{
     display: block;
 }
 

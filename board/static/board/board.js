@@ -129,11 +129,15 @@ $(function () {
 		}
 	});
 
+	$('.toggle-active').on('click', function(){
+		$(this).toggleClass('active');
+	});
+
 });
 
 function addMessage(message, hilight) {
 	var newHilightDuration = 5000;
-	var messageDiv = $('<div/>', {class: 'message', id: 'message-' + message.id});
+	var messageDiv = $('<div/>', {class: 'message toggle-active', id: 'message-' + message.id});
 	var headDiv = $('<div/>', {class: 'head'}).appendTo(messageDiv);
 	headDiv.append($('<div/>', {class: 'date'}).html(message.date));
 	headDiv.append($('<div/>', {class: 'author'}).html(message.author));
