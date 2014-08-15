@@ -43,7 +43,7 @@ def archiveFromViaggio(viaggio):
 		path=viaggio.html_tragitto,
 		pax=viaggio.numero_passeggeri,
 		flag_esclusivo=viaggio.esclusivo,
-		conducente="%s" % viaggio.conducente,
+		conducente=u"%s" % viaggio.conducente,
 		flag_richiesto=viaggio.conducente_richiesto,
 		cliente=(viaggio.cliente and viaggio.cliente.nome) or (viaggio.passeggero and viaggio.passeggero.nome),
 		prezzo=viaggio.prezzo,
@@ -114,7 +114,7 @@ def do_archiviazione(user, end_date):
 	# if settings.DEBUG:
 	# raise Exception("Per archiviare devi uscire dal DEBUG mode.")
 
-	filtroViaggi = Q(data__lt=end_date, conducente__isnull=False, padre__isnull=True)
+	filtroViaggi = Q(data__lt=end_date, padre__isnull=True)
 	to_archive = Viaggio.objects.select_related("da", "a", "cliente", "conducente",
 	                                            "passeggero").filter(filtroViaggi)
 	# Optimizations: mi faccio dare solo i modelli che mi interessano
@@ -179,4 +179,4 @@ def do_archiviazione(user, end_date):
 if __name__ == '__main__':
 	logger.setLevel(logging.DEBUG)
 	do_archiviazione(User.objects.get(id=1),
-	                 timezone('Europe/Rome').localize(datetime.datetime(2012, 6, 1)))
+	                 timezone('Europe/Rome').localize(datetime.datetime(2014, 1, 1)))

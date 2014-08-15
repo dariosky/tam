@@ -1,6 +1,6 @@
 {% load utilTag %}{% load staticfiles %}
 <tr>
-	<td>{{ viaggio.data|date:"D j F, H:i" }}<br>
+	<td>{{ viaggio.data|date:"D j F Y, H:i" }}<br>
 		{{ viaggio.path|safe }}
 	</td>
 	<td>{{ viaggio.cliente|default:"<i>Privato</i>" }}<br>
