@@ -22,8 +22,8 @@ urlpatterns = patterns('tam.views.tamviews',
     url(r'^corsa/clear/$', 'corsaClear', name="tamCorsaClear"),
 
     url(r'^corsa/(?P<id>\d*)/$', 'corsa', name="tamNuovaCorsaId"),
-    url(r'^corsa/(?P<id>\d*)/dettagli/$', 'corsa', {"step":2}, name="tamNuovaCorsa2Id"),
-    url(r'^corsa/(?P<id>\d*)/delete/$', 'corsa', {"delete":True}, name="tamCorsaIdDel"),
+    url(r'^corsa/(?P<id>\d*)/dettagli/$', 'corsa', {"step": 2}, name="tamNuovaCorsa2Id"),
+    url(r'^corsa/(?P<id>\d*)/delete/$', 'corsa', {"delete": True}, name="tamCorsaIdDel"),
     url(r'^corsa/(?P<id>\d*)/copy/$', 'corsaCopy', name="tamCorsaCopy"),
 
     url(r'^cliente/$', 'cliente', name="tamCliente"),

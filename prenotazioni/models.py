@@ -78,7 +78,7 @@ class Prenotazione(models.Model):
 	viaggio = models.OneToOneField(Viaggio,
 	                               null=True,
 	                               editable=False,
-	                               on_delete=models.PROTECT,
+	                               # on_delete=models.SET_NULL,  # allow delete a viaggio, deleting the prenotazione
 	)
 
 	attachment = models.FileField(_("Allegato"),
