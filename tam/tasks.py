@@ -8,24 +8,19 @@ import djangotasks
 
 
 #===============================================================================
-def humanizeTime(ms):
+def humanizeTime(sec):
 	result = ""
-	if ms >= 1000:
-		sec = ms / 1000
-		ms = ms % 1000
-		if sec >= 60:
-			mins = sec / 60
-			if mins >= 60:
-				hr = mins / 60
-				mins = mins % 60
-				result += "%d hour " % hr
-			if mins:
-				result += "%d min " % mins
-			sec = sec % 60
-		if sec:
-			result += "%d sec " % sec
-	if ms:
-		result += "%d ms" % ms
+	if sec >= 60:
+		mins = sec / 60
+		if mins >= 60:
+			hr = mins / 60
+			mins %= 60
+			result += "%d hour " % hr
+		if mins:
+			result += "%d min " % mins
+		sec %= 60
+	if sec:
+		result += "%d sec " % sec
 	return result
 
 def print_timing(func):
