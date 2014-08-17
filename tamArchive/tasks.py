@@ -30,9 +30,9 @@ def archiveFromViaggio(viaggio):
 	@rtype : ViaggioArchive
 	"""
 	# try:
-	# 	path = viaggio.get_html_tragitto()
+	# path = viaggio.get_html_tragitto()
 	# except:
-	# 	path = "invalid path"
+	# path = "invalid path"
 	# 	print path
 
 
@@ -63,6 +63,9 @@ def archiveFromViaggio(viaggio):
 def daRicordareDelViaggio(ricordi, viaggio):
 	""" Ricorda quello che serve dalle classifiche di un viaggio """
 	if not viaggio.annullato:
+		if not viaggio.conducente:
+			logger.warning("Il viaggio %d non ha un conducente." % viaggio.id)
+			return ricordi
 		conducente_id = viaggio.conducente.id
 		ricordiConducente = ricordi.get(conducente_id, {})
 		campiMemoria = ('punti_diurni', 'punti_notturni',
@@ -179,4 +182,4 @@ def do_archiviazione(user, end_date):
 if __name__ == '__main__':
 	logger.setLevel(logging.DEBUG)
 	do_archiviazione(User.objects.get(id=1),
-	                 timezone('Europe/Rome').localize(datetime.datetime(2014, 1, 1)))
+	                 timezone('Europe/Rome').localize(datetime.datetime(2014, 2, 1)))
