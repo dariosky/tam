@@ -1,5 +1,5 @@
 {% load url from future %}{% load staticfiles %}{% load compressed %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="it">
 <head>
 	<title>{% block title %}TaM{% endblock %}{% if tam_stealth %} - Stealth version{% endif %}</title>
@@ -36,7 +36,7 @@
 		{% block conducenti %}<a href="{% url "tamConducenti" %}" class='menuGroup'>Classifiche</a>{% endblock %}
 		{% block util %}<a href="{% url "tamUtil" %}" class='menuGroup'>Strumenti</a>{% endblock %}
 
-		{% if not tam_stealth %}<img src="{% static "img/tam_16.png" %}" class="loghetto" alt="" />{% endif %}
+		<img src="{% static "img/tam_16.png" %}" class="loghetto" alt="" />
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}
 </div>
@@ -75,7 +75,6 @@
         {% else %}
             Versione non registrata.
         {% endif %}
-		<a href="mailto:dario.varotto@gmail.com">by Dario Varotto</a>
 	</p>
 </div>
 {% endblock footer %}
