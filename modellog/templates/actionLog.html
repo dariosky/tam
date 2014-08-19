@@ -3,10 +3,10 @@
 {% block title %}Log delle modifiche &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Log delle modifiche.</h1>
+<h1>Log delle modifiche</h1>
 
 <form action="" method="get" id="filterForm">
-	<div style="float:right;">
+	<div>
 		Modifiche tardive: <input type="checkbox" name="preInsert"  {% if filterPreInsert %}checked='checked'{% endif %} />
 		Filtra per:
 		<select name="action" class="selectFilter">

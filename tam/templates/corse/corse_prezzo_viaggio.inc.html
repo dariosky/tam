@@ -1,6 +1,7 @@
 {% load url from future %}{% spaceless %}
-<span class='lordo{% if viaggio.prezzo == 0 %} error{% endif %}'>{{ viaggio.prezzo }}</span>
+<div class='lordo{% if viaggio.prezzo == 0 %} error{% endif %}'>{{ viaggio.prezzo }}</div>
 {% if viaggio.annullato  %}<br/>{% if nolink %}ANNULLATO{% else %}<a href="{% url "tamNuovaCorsa2Id" viaggio.id %}">ANNULLATO</a>{% endif %}{% else %}
+<div class="pricedetail">
 {% if viaggio.commissione %}- c{{ viaggio.commissione }}{% ifequal viaggio.tipo_commissione "P" %}%{% endifequal %}{% endif %}
 {% if viaggio.costo_autostrada %}- a{{ viaggio.costo_autostrada }}{% endif %}
 {% if viaggio.pagamento_differito or viaggio.fatturazione%}{{viaggio.incidenza_differto}}{% endif %}
@@ -9,6 +10,7 @@
 {% if viaggio.costo_sosta %}- s{{ viaggio.costo_sosta }}{% endif %}
 {% if viaggio.prezzo_sosta %}+{{viaggio.prezzo_sosta}} {{viaggio.incidenza_prezzo_sosta}}{% endif %}
 =
+</div>
 {% if nolink %}
 	<strong>{{ viaggio.prezzo_finale|floatformat:2 }}€</strong>
 {% else %}

@@ -143,6 +143,7 @@ def changeLog(request, template_name='static/changelog.html'):
 		('6.1', '11/7/2014', "Conservazione sicura degli allegati alle prenotazioni.") if 'prenotazioni' in settings.PLUGGABLE_APPS else "",
 		('6.11', '22/7/2014', "Fix board per device touch.") if 'board' in settings.PLUGGABLE_APPS else "",
 		('6.12', '15/8/2014', "Archiviazione con data personalizzabile e aggiornamenti vari."),
+		('6.15', '19/8/2014', "Cambiamenti al layout, mobile friendly."),
 	]
 	# ('', '', mark_safe('''''')),
 	for version in known_changes[::-1]:

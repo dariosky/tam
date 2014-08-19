@@ -66,26 +66,43 @@ a:hover {
 	width: auto;
 	background: white url(../img/header_fade.png) repeat-x top;
 	/*max-width: 100%;*/
-	min-width: 600px;
-	left: 38px;
-	right: 38px;
+	/*min-width: 600px;*/
+	left: 0;
+	right: 0;
 	top: 0;
 	margin: 0;
 	/*margin: 0 30px auto;*/
-	padding: 3px 10px;
-	border: medium rgb(255, 204, 102) groove;
+	padding: 3px 20px;
+	/*border: medium rgb(255, 204, 102) groove;*/
 	font-weight: bold;
 	position: fixed;
 	z-index: 900;
+	border-bottom: 1px solid;
+}
+
+.navBar a {
+	color: black;
+	font-weight: normal;
+	display: inline-block;
+	padding: 5px 20px;
+	background: rgba(255, 255, 255, 0.2);
+	text-decoration: none;
+	font-family: sans-serif;
+	/*border: 1px solid;*/
+}
+.navBar a:hover {
+	background: white;
 }
 
 #footer {
 	text-align: left;
 	margin: 0 30px auto;
 	max-width: 100%;
-	min-width: 600px;
+	/*min-width: 600px;*/
 	font-size: .7em;
 	font-family: sans-serif;
+	/*border-top: 1px solid black;*/
+	padding-top: 5px;
 }
 
 .navBar .menuGroup:not(:first-child) {
@@ -94,12 +111,12 @@ a:hover {
 
 .content {
 	max-width: 100%;
-	min-width: 600px;
+	/*min-width: 600px;*/
 	text-align: justify;
 	background: white url(../img/v-grad-inv.png) repeat-x bottom;
-	margin: 2em 30px auto;
+	margin: 3em 5px auto;
 	padding: 5px 10px 40px 10px;
-	border: medium rgb(255, 204, 102) groove;
+	/*border: medium rgb(255, 204, 102) groove;*/
 }
 
 .mainlogo {
@@ -107,6 +124,7 @@ a:hover {
 }
 
 .mainlogo img {
+	max-width: 100%;
 	margin: 0;
 	padding: 0;
 }
@@ -324,6 +342,17 @@ td img {
 	margin: 0;
 	padding: 0;
 }
+#listaCorsePadding {
+	/* all'inizio della lista corse per non farla coprire dai search filter */
+	height: 2em;
+}
+#filterForm #select_clienti {
+	width: 130px;
+}
+#filterForm >div {
+	float: right;
+	text-align: right;
+}
 
 #id_note {
 	width: 90%;
@@ -535,10 +564,14 @@ h2.fatturaTipo5 {
 .cellaPrezzo a {
 	font-weight: bold; /*nella cella prezzo, i link (il netto) sono in grossetto */
 }
+.cellaPrezzo img {
+	display: block;
+	margin: 0 auto;
+}
 
 #listaCorse select {
 	text-align: center;
-	padding: 5px 10px;
+	/*padding: 5px 10px;*/
 	width: 100%;
 	display: block;
 }
@@ -622,6 +655,35 @@ input.error {
 	cursor: pointer;
 }
 
+select, input {
+	/* all input should have a minimal height */
+	/*min-height: 32px;*/
+	padding: 5px 10px;
+}
+
+/* TABLET and smaller */
+@media only screen and (max-width: 1024px) {
+}
+/*PHONES*/
+@media only screen and (max-width: 1023px) {
+	.trip_detail {
+		display: none;
+	}
+	.note {
+		max-width: 100px !important;
+	}
+	.cellaPrezzo {
+		max-width: 100px !important;
+	}
+	.cellaPrezzo *:not(a):not(img):not(.lordo) {
+		/* hide some price detail */
+		display: none;
+		/*color: silver;*/
+	}
+}
+
+
+
 @media print {
 	/* print stylesheet */
 	* {
@@ -646,6 +708,7 @@ input.error {
 
 .note {
 	max-width: 400px;
+	word-wrap: break-word;
 }
 
 .warning td {

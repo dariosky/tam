@@ -32,12 +32,11 @@
 		{% include "classifiche/descrizione-classifica-viaggio.inc.html" %}
 
 		{% if viaggio.is_valid %}
-			{{ viaggio.km }} km.
+			<div class="km">{{ viaggio.km }} km.</div>
 		{% else %}
-			<span class='errorlist'>{{ viaggio.km }} km.</span>
+			<div class='errorlist'>{{ viaggio.km }} km.</div>
 		{% endif %}
 
-		<br/>
 		{% include "corse/corse_prezzo_viaggio.inc.html" %}
 		{% include "corse/flags.inc.html" %}
 	</td>

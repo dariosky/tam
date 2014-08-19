@@ -1,6 +1,6 @@
 {% extends "prenotazioni_email/htmlMailTemplate.html" %}
 
-{% block message %}<h1>La prenotazione è stata {{ azione }}.</h1>
+{% block message %}<h1>La prenotazione è stata {{ azione }}</h1>
 
 I dettagli della corsa:
 <b>{% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %} {{ prenotazione.luogo }}</b> alle ore {{ prenotazione.data_corsa|date:"H:i" }} del {{ prenotazione.data_corsa|date:"j/m/Y" }}
