@@ -15,6 +15,7 @@
 }
 
 .tablesorter {
+	border-collapse: collapse;
 	font-family: "arial", sans-serif;
 	background-color: #CDCDCD;
 	margin: 10px 0 15px;
@@ -722,11 +723,11 @@ select, input {
 }
 
 .annullato td {
-	background-color: #DDD !important;
+	background-color: #AAA !important;
 }
 
 .even td {
-	background-color: #F5F5F5;
+	background-color: #EEE;
 }
 
 .odd td {

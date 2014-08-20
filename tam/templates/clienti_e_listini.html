@@ -3,61 +3,98 @@
 {% block title %}Clienti e listini &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
+	<div id="accordion">
+		<div>
+			<h2>Clienti e passeggeri</h2>
 
-    <a href="{% url "tamCliente" %}"><img src="{% static "img/addbtn.png" %}" alt="+" /> Nuovo Cliente</a><br/>
-    <a href="{% url "tamPrivati" %}">Elenco passeggeri privati</a><br/>
-    {% if clienti %}
-		<table id="clienti" class="tablesorter">
-			<thead>
-				<tr>
-					<th>Nome</th>
-					<th>Dettagli</th>
-					<th>Listino</th>
-				</tr>
-			</thead>
-			<tbody>
-			{% for cliente in clienti %}
-				<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
-	   				<td>
-	   				    <img style="float:right;" src="{{ cliente.icon }}" title="{{ cliente.tipo }}" alt="{{ cliente.tipo }}" />
-						<a href="{% url "tamClienteId" cliente.id %}">{{ cliente }}</a>
-					</td>
-					<td>
-						{% if cliente.fatturazione %}<img src="{% static 'flag/fattura.png' %}" alt="fattura" />  {% endif %}
-						{% if cliente.pagamento_differito %}<img src="{% static 'flag/timedelta.png' %}" alt="posticipato" />{% endif %}
-						{% if cliente.incassato_albergo %}<img src="{% static 'flag/incassato.png' %}" alt="fine mese" />{% endif %}
-						{% if cliente.commissione %} commissione: {{ cliente.commissione }}{% ifequal cliente.tipo_commissione "P" %}%{% else %}€{% endifequal %}{% endif %}
-					</td>
-					<td><a href="{% url "tamListinoId" cliente.listino.id %}">{{ cliente.listino.nome }}</a></td>
-				</tr>
-			{% endfor %}
-			</tbody>
-		</table>
-	{% else %}
-		<h3>Nessun cliente è stato definito.</h3>
-	{% endif %}
+			<div>
+				<a href="{% url "tamCliente" %}"><img src="{% static "img/addbtn.png" %}" alt="+"/> Nuovo
+					Cliente</a><br/>
+				<a href="{% url "tamPrivati" %}">Elenco passeggeri privati</a><br/>
 
-	<a href="{% url 'tamNuovoListino' %}"><img src="{% static 'img/addbtn.png' %}" alt="+" /> Nuovo Listino</a><br/>
-	{% if listini %}
-		<table id="listini" class="tablesorter">
-			<thead>
-				<tr>
-					<th>Nome</th>
-					<th>Tratte</th>
-				</tr>
-			</thead>
-			<tbody>
-			{% for listino in listini %}
-				<tr>
-	   				<td><a href="{% url "tamListinoId" listino.id %}">{{ listino.nome }}</a></td>
-					<td>{{ listino.prezzolistino__count }}</td>
-				</tr>
-			{% endfor %}
-			</tbody>
-		</table>
-	{% else %}
-		<h3>Nessun listino è stato definito.</h3>
-	{% endif %}
+				{% if clienti %}
+					<table id="clienti" class="tablesorter">
+						<thead>
+						<tr>
+							<th>Nome</th>
+							<th>Dettagli</th>
+							<th>Listino</th>
+						</tr>
+						</thead>
+						<tbody>
+						{% for cliente in clienti %}
+							<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
+								<td>
+									<img style="float:right;" src="{{ cliente.icon }}" title="{{ cliente.tipo }}"
+										 alt="{{ cliente.tipo }}"/>
+									<a href="{% url "tamClienteId" cliente.id %}">{{ cliente }}</a>
+								</td>
+								<td>
+									{% if cliente.fatturazione %}
+										<img src="{% static 'flag/fattura.png' %}" alt="fattura"/>  {% endif %}
+									{% if cliente.pagamento_differito %}
+										<img src="{% static 'flag/timedelta.png' %}" alt="posticipato"/>{% endif %}
+									{% if cliente.incassato_albergo %}
+										<img src="{% static 'flag/incassato.png' %}" alt="fine mese"/>{% endif %}
+									{% if cliente.commissione %} commissione:
+										{{ cliente.commissione }}{% ifequal cliente.tipo_commissione "P" %}%{% else %}€
+										{% endifequal %}{% endif %}
+								</td>
+								<td><a href="{% url "tamListinoId" cliente.listino.id %}">{{ cliente.listino.nome }}</a>
+								</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<h3>Nessun cliente è stato definito.</h3>
+				{% endif %}
 
+			</div>
+		</div>
 
+		<div>
+			<h2>Listini</h2>
+
+			<div>
+				<a href="{% url 'tamNuovoListino' %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo
+					Listino</a><br/>
+				{% if listini %}
+					<table id="listini" class="tablesorter">
+						<thead>
+						<tr>
+							<th>Nome</th>
+							<th>Tratte</th>
+						</tr>
+						</thead>
+						<tbody>
+						{% for listino in listini %}
+							<tr>
+								<td><a href="{% url "tamListinoId" listino.id %}">{{ listino.nome }}</a></td>
+								<td>{{ listino.prezzolistino__count }}</td>
+							</tr>
+						{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<h3>Nessun listino è stato definito.</h3>
+				{% endif %}
+			</div>
+		</div>
+	</div>
 {% endblock %}
+
+{% block bottom %}
+	<script type="text/javascript">
+		$(document).ready(function () {
+			$("#accordion").find("div").accordion({
+				header: "h2",
+				alwaysOpen: false,
+				active: false,
+				animated: false,
+				collapsible: true
+			});
+			//$("#accordion .selected").removeClass("selected");
+		});
+	</script>
+{% endblock bottom %}
