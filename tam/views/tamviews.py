@@ -711,6 +711,8 @@ def getList(request, model=Luogo.objects, field="nome", format="txt", fields=Non
 
 
 def clienti(request, template_name="clienti_e_listini.html"):
+	mediabundleJS = ('tamUI',)
+	mediabundleCSS = ('tamUI',)
 	listini = Listino.objects.annotate(Count('prezzolistino'))
 	clienti = Cliente.objects.filter(attivo=True).select_related('listino')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
