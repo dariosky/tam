@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from prenotazioni.models import Prenotazione
 from tam import tamdates
 from tam.models import Viaggio, Luogo
@@ -212,6 +212,11 @@ def fixAction(request, template_name="utils/fixAction.html"):
 		cursor = connection.cursor()
 		cursor.execute(query_asset_sub)
 		connection.commit()
+		prossimiviaggi = Viaggio.objects.filter(data__gt=tamdates.ita_today() - datetime.timedelta(days=15))
+		messageLines.append("Ricalcolo completamente i prossimi viaggi: %s." % len(prossimiviaggi))
+		for viaggio in prossimiviaggi:
+			viaggio.html_tragitto = viaggio.get_html_tragitto()
+			viaggio.save()
 
 	if request.POST.get("setEndDates"):
 		# add end dates to latest viaggio (I suppose we don't need it the old ones)

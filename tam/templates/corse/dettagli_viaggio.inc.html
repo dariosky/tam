@@ -3,16 +3,16 @@
 {% if viaggio.punti_diurni or viaggio.punti_notturni %}
 <div class='supplementari'>
 	{%if viaggio.punti_diurni %}
-		{% for i in viaggio.punti_diurni_interi_list %}<img src="{{ STATIC_URL }}img/morning.png" alt="*" />{% endfor %}
-		{% if viaggio.punti_diurni_quarti == 0.25 %}<img src="{{ STATIC_URL }}img/morning14.png" alt="1/4" />{% endif %}
-		{% if viaggio.punti_diurni_quarti == 0.50 %}<img src="{{ STATIC_URL }}img/morning24.png" alt="2/4" />{% endif %}
-		{% if viaggio.punti_diurni_quarti == 0.75 %}<img src="{{ STATIC_URL }}img/morning34.png" alt="3/4" />{% endif %}
+		{% for i in viaggio.punti_diurni_interi_list %}<i class="sprite icon-morning"></i>{% endfor %}
+		{% if viaggio.punti_diurni_quarti == 0.25 %}<i class="sprite icon-morning14"></i>{% endif %}
+		{% if viaggio.punti_diurni_quarti == 0.50 %}<i class="sprite icon-morning24"></i>{% endif %}
+		{% if viaggio.punti_diurni_quarti == 0.75 %}<i class="sprite icon-morning34"></i>{% endif %}
 	{% endif %}
 	{%if viaggio.punti_notturni %}
-		{% for i in viaggio.punti_notturni_interi_list %}<img src="{{ STATIC_URL }}img/night.png" alt="*" />{% endfor %}
-		{% if viaggio.punti_notturni_quarti == 0.25 %}<img src="{{ STATIC_URL }}img/night14.png" alt="1/4" />{% endif %}
-		{% if viaggio.punti_notturni_quarti == 0.50 %}<img src="{{ STATIC_URL }}img/night24.png" alt="2/4" />{% endif %}
-		{% if viaggio.punti_notturni_quarti == 0.75 %}<img src="{{ STATIC_URL }}img/night34.png" alt="3/4" />{% endif %}
+		{% for i in viaggio.punti_notturni_interi_list %}<i class="sprite icon-night"></i>{% endfor %}
+		{% if viaggio.punti_notturni_quarti == 0.25 %}<i class="sprite icon-night14"></i>{% endif %}
+		{% if viaggio.punti_notturni_quarti == 0.50 %}<i class="sprite icon-night24"></i>{% endif %}
+		{% if viaggio.punti_notturni_quarti == 0.75 %}<i class="sprite icon-night34"></i>{% endif %}
 	{% endif %}
 </div>
 {% endif %}
@@ -20,7 +20,7 @@
 {% with nextfratello=viaggio.nextfratello tratta_start=viaggio.tratta_start tratta_end=viaggio.tratta_end %}
 	{# *** TRATTA INIZIALE *** #}
     {% if tratta_start %}
-    	{% if viaggio.prefratello %}{{ viaggio.prefratello.a }} <img src="{{ STATIC_URL }}img/arrow_right.png" alt="..." />{% endif %}
+    	{% if viaggio.prefratello %}{{ viaggio.prefratello.a }} <i class="sprite icon-arrow_right"></i>{% endif %}
 		{% if tratta_start.is_valid %}
 			partenza alle {{ viaggio.date_start|date:"H:i" }}
 		{% else %}
@@ -32,7 +32,7 @@
 	{# *** TRATTA CENTRALE *** #}
 	{% if viaggio.tratta %}
 	    {% if viaggio.tratta.is_valid %}
-	        {{ viaggio.da }} {% if viaggio.da.speciale == 'A' %}<img src='{{ STATIC_URL }}flag/luogo-airport.png' /> (attendo 30 minuti){% endif%}
+	        {{ viaggio.da }} {% if viaggio.da.speciale == 'A' %}<i class="sprite icon-airport"></i> (attendo 30 minuti){% endif%}
 	        - {% if nextfratello %}{{ nextfratello.da }}{% else %}{{ viaggio.a }}{% endif %}
 	    {% else %}
         	<a href="{% url "tamTrattaId" viaggio.tratta.id %}" class="errorlist">tratta scononosciuta</a>
@@ -50,7 +50,7 @@
     {% endif %}
 {% if nextfratello %}
     {% with viaggio.sostaFinaleMinuti as minutifermo  %}{% ifnotequal minutifermo 0 %}sosta di {{ minutifermo }} m.{% endifnotequal %}{% endwith %}
-	<img src="{{ STATIC_URL }}img/arrow_right.png" alt="..." />
+	<i class="sprite icon-arrow_right"></i>
 {% else %}
 	ritorno alle {{ viaggio.get_date_end|date:"H:i" }}
 {% endif %}

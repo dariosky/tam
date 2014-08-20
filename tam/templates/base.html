@@ -6,6 +6,7 @@
 	<meta http-equiv="content-type" content="text/xhtml+xml; charset=utf-8"/>
 	<!--[if ie]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><![endif]-->
 	{% if not tam_stealth %}<link rel="icon" href="{% static "img/tam.ico" %}" type="image/ico"/>{% endif %}
+	<link rel="stylesheet" type="text/css" href="{% static 'tam_sprites.css' %}"/>
 	{% if mediabundleCSS %}
 		{% for bundle in mediabundleCSS %}{% compressed_css bundle %}{% endfor %}
 	{% else %}
@@ -27,7 +28,7 @@
 		{% block corse %}<a href="/" class='menuGroup'>TaM</a>
 		{% if perms.tam.add_viaggio %}
 			<span>&raquo; <a href="{% url "tamNuovaCorsa" %}" class='menuGroup'>
-			<img src="{% static "img/addbtn.png" %}" alt=""/> Nuova corsa</a>
+				<i class="sprite icon-addbtn"></i> Nuova corsa</a>
 			</span>
 		{% endif %}
 		{% endblock corse%}
@@ -36,7 +37,7 @@
 		{% block conducenti %}<a href="{% url "tamConducenti" %}" class='menuGroup'>Classifiche</a>{% endblock %}
 		{% block util %}<a href="{% url "tamUtil" %}" class='menuGroup'>Strumenti</a>{% endblock %}
 
-		<img src="{% static "img/tam_16.png" %}" class="loghetto" alt="" />
+		<i class="sprite icon-tam_16 loghetto"></i>
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}
 </div>

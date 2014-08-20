@@ -43,7 +43,7 @@
 
 	<td>
 	{% if viaggio.padre_id %}
-		<img src="{% static "img/arrow_join.png" %}" alt='' />
+		<i class="sprite icon-arrow_join"></i>
 		{% if distinct and viaggio.conducente %}<br>{{ viaggio.conducente }}{% endif %}
 	{% else %}
 		{% if viaggio.annullato %}
@@ -76,7 +76,7 @@
 						{% endwith %}
 					{% endif %}
 				{% endif %}
-				{% if confirmed %}<br/><img alt="confermato" src="{% static "img/ok.png" %}" /> {% endif %}
+				{% if confirmed %}<br/><i class="sprite icon-ok"></i>{% endif %}
 			{% endwith %}
 		{% endif %}
 	{% endif %}

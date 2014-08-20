@@ -159,8 +159,9 @@ def descrizioneDivisioneClassifiche(viaggio):
 		elif tipo_classifica == 'punti':
 			field = classifica.get('mapping_field')
 			punti = getattr(viaggio, field)
-			if punti > 0 :
-				result += ('<img src="%s" alt="DV" />' % staticfiles_storage.url('img/casina.png')) * punti
+			if punti > 0:
+				#
+				result += '<i class="sprite icon-casina"></i>' * punti
 				result += '<br/>'
 				result += "%(punti)d x %(valore)s nei %(nome)s.<br/>" % {"punti":punti,
 																		 "valore":viaggio.prezzoPunti,
