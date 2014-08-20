@@ -308,8 +308,14 @@ td img {
 	text-align: center;
 	position: fixed;
 	top: 100px;
-	left: 2px;
-	border: silver 2px ridge;
+	left: 0px;
+	width: 30px;
+	border: silver 1px solid;
+}
+#selActions a {
+	padding: 10px 0;
+	margin: 10px 0;
+	display: block;
 }
 
 /* paginator */
@@ -565,7 +571,7 @@ h2.fatturaTipo5 {
 .cellaPrezzo a {
 	font-weight: bold; /*nella cella prezzo, i link (il netto) sono in grossetto */
 }
-.cellaPrezzo img {
+.cellaPrezzo img, .cellaPrezzo .sprite {
 	display: block;
 	margin: 0 auto;
 }
@@ -768,4 +774,9 @@ i.vson {
 	font-family: Times, Georgia, Serif;
 	text-align: center;
 	z-index: 1000;
+}
+
+.sprite {
+	display: inline-block;
+	vertical-align: middle;
 }

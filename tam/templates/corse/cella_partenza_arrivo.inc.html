@@ -6,7 +6,8 @@
 		{% if viaggio.a.id == viaggio.luogoDiRiferimento_id %}
 			{% trans "ARRIVO" %}<br>{{ viaggio.da }}
 		{% else %}
-			{{ viaggio.da }}<br><img src="{% static "img/fout.png" %}" alt="Arrivo" />{{ viaggio.a }}
+			{{ viaggio.da }}<br>
+			<i class="sprite icon-fout"></i>{{ viaggio.a }}
 		{% endif %}
 		{% if viaggio.is_long %}</strong>{% endif %}
 	</td>

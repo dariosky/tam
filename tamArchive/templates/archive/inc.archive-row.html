@@ -34,7 +34,7 @@
 	<td>
 		{% if viaggio.punti_abbinata %}
 			{% num_range viaggio.punti_abbinata as punti_abbinata %}
-			{% for punto in punti_abbinata %}<img src="{% static "img/casina.png" %}" alt='DV'>{% endfor %}
+			{% for punto in punti_abbinata %}<i class="sprite icon-casina"></i>{% endfor %}
 			<br>
 		{% endif %}
 		{{ viaggio.prezzo }}<br>{{ viaggio.prezzo_detail|safe }}

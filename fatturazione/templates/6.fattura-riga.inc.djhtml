@@ -12,7 +12,7 @@
 						{% else %}
 				   title='Corsa collegata'
 						{% endif %}
-				   target="_blank"><img src="{% static 'img/tam_16.png' %}" class='noprint'/></a>
+				   target="_blank"><i class="sprite icon-tam_16 noprint"></i></a>
 				{% if riga.viaggio.prenotazione and riga.viaggio.prenotazione.had_attachment %}
 					{% if riga.viaggio.prenotazione.attachment %}
 						<a href="{{ riga.viaggio.prenotazione.attachment.url }}" target="_blank">

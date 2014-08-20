@@ -20,7 +20,7 @@
 {% endif %}
 {{ viaggio.numero_passeggeri }} pax
 {% if viaggio.esclusivo %}
-	<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi"/>
+	<i class="sprite icon-t"></i>
 {% else %}
-	<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo"/>
+	<i class="sprite icon-c"></i>
 {% endif %}
