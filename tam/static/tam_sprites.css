@@ -1,0 +1,223 @@
+/*
+Icon classes can be used entirely standalone. They are named after their original file names.
+
+```html
+<i class="icon-home"></i>
+```
+*/
+.icon-addbtn {
+  background-image: url(tam_sprites.png);
+  background-position: -113px -38px;
+  width: 16px;
+  height: 12px;
+}
+.icon-airport {
+  background-image: url(tam_sprites.png);
+  background-position: -16px -73px;
+  width: 16px;
+  height: 16px;
+}
+.icon-arrow_join {
+  background-image: url(tam_sprites.png);
+  background-position: 0px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-arrow_right {
+  background-image: url(tam_sprites.png);
+  background-position: 0px -73px;
+  width: 16px;
+  height: 16px;
+}
+.icon-assoc {
+  background-image: url(tam_sprites.png);
+  background-position: -113px -62px;
+  width: 10px;
+  height: 10px;
+}
+.icon-attachment {
+  background-image: url(tam_sprites.png);
+  background-position: -63px -16px;
+  width: 11px;
+  height: 16px;
+}
+.icon-attachment_big {
+  background-image: url(tam_sprites.png);
+  background-position: 0px 0px;
+  width: 32px;
+  height: 32px;
+}
+.icon-c {
+  background-image: url(tam_sprites.png);
+  background-position: -125px -26px;
+  width: 12px;
+  height: 12px;
+}
+.icon-card {
+  background-image: url(tam_sprites.png);
+  background-position: -113px 0px;
+  width: 25px;
+  height: 14px;
+}
+.icon-casina {
+  background-image: url(tam_sprites.png);
+  background-position: -26px -89px;
+  width: 16px;
+  height: 15px;
+}
+.icon-delbtn {
+  background-image: url(tam_sprites.png);
+  background-position: -113px -14px;
+  width: 16px;
+  height: 12px;
+}
+.icon-excel {
+  background-image: url(tam_sprites.png);
+  background-position: -16px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-fat_off {
+  background-image: url(tam_sprites.png);
+  background-position: -113px -26px;
+  width: 12px;
+  height: 12px;
+}
+.icon-fat_on {
+  background-image: url(tam_sprites.png);
+  background-position: -125px -50px;
+  width: 12px;
+  height: 12px;
+}
+.icon-fattura {
+  background-image: url(tam_sprites.png);
+  background-position: -42px -89px;
+  width: 50px;
+  height: 14px;
+}
+.icon-fin {
+  background-image: url(tam_sprites.png);
+  background-position: 0px -89px;
+  width: 26px;
+  height: 15px;
+}
+.icon-fout {
+  background-image: url(tam_sprites.png);
+  background-position: -80px -73px;
+  width: 26px;
+  height: 15px;
+}
+.icon-frecciagiu {
+  background-image: url(tam_sprites.png);
+  background-position: -23px -32px;
+  width: 15px;
+  height: 23px;
+}
+.icon-frecciaverde {
+  background-image: url(tam_sprites.png);
+  background-position: -38px -32px;
+  width: 24px;
+  height: 17px;
+}
+.icon-hbar {
+  background-image: url(tam_sprites.png);
+  background-position: -137px -26px;
+  width: 1px;
+  height: 10px;
+}
+.icon-incassato {
+  background-image: url(tam_sprites.png);
+  background-position: -63px 0px;
+  width: 50px;
+  height: 16px;
+}
+.icon-morning {
+  background-image: url(tam_sprites.png);
+  background-position: -64px -73px;
+  width: 16px;
+  height: 16px;
+}
+.icon-morning14 {
+  background-image: url(tam_sprites.png);
+  background-position: -48px -73px;
+  width: 16px;
+  height: 16px;
+}
+.icon-morning24 {
+  background-image: url(tam_sprites.png);
+  background-position: -32px -73px;
+  width: 16px;
+  height: 16px;
+}
+.icon-morning34 {
+  background-image: url(tam_sprites.png);
+  background-position: -96px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-night {
+  background-image: url(tam_sprites.png);
+  background-position: -80px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-night14 {
+  background-image: url(tam_sprites.png);
+  background-position: -64px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-night24 {
+  background-image: url(tam_sprites.png);
+  background-position: -48px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-night34 {
+  background-image: url(tam_sprites.png);
+  background-position: -32px -57px;
+  width: 16px;
+  height: 16px;
+}
+.icon-ok {
+  background-image: url(tam_sprites.png);
+  background-position: 0px -32px;
+  width: 23px;
+  height: 25px;
+}
+.icon-smallX {
+  background-image: url(tam_sprites.png);
+  background-position: -129px -14px;
+  width: 9px;
+  height: 10px;
+}
+.icon-t {
+  background-image: url(tam_sprites.png);
+  background-position: -113px -50px;
+  width: 12px;
+  height: 12px;
+}
+.icon-tam_16 {
+  background-image: url(tam_sprites.png);
+  background-position: -90px -16px;
+  width: 16px;
+  height: 16px;
+}
+.icon-timedelta {
+  background-image: url(tam_sprites.png);
+  background-position: -63px -32px;
+  width: 50px;
+  height: 16px;
+}
+.icon-train {
+  background-image: url(tam_sprites.png);
+  background-position: -74px -16px;
+  width: 16px;
+  height: 16px;
+}
+.icon-x_del {
+  background-image: url(tam_sprites.png);
+  background-position: -32px 0px;
+  width: 31px;
+  height: 31px;
+}
