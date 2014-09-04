@@ -263,6 +263,9 @@ LOG_PATH={GUNICORN_LOGFILE}
 PID_PATH={GUNICORN_PID_FILE}
 PORT={GUNICORN_PORT}
 
+cd {REPOSITORY_FOLDER}
+sh {VENV_FOLDER}/bin/activate
+
 start_server () {{
   if [ -f $PID_PATH ]; then
     if [ "$(ps -p `cat $PID_PATH` | wc -l)" -gt 1 ]; then

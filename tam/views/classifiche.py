@@ -94,7 +94,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 			if key in classifiche_definite_byId:
 				classifiche_definite_byId[key]['dati'].append((classifica[key], conducente.nick, classifica))
 				if key == 'punti_abbinata':
-					classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0)
+					classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0, annullato=False)
 					classifica["celle_abbinate"] = []
 					if conducente.classifica_iniziale_puntiDoppiVenezia:	# aggiungo i punti iniziali
 						prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
@@ -114,7 +114,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 			classifica_definita['min'] = 0
 			classifica_definita['max'] = 1
 		if classifica_definita.get("type") == "punti" and classifica_definita['min']: # abbiamo un minimo da conguagliare
-			punti_assocMin = classifica_definita['min'] # punti comuni a tutti gli attivi da conguagliare
+			punti_assocMin = classifica_definita['min']     # punti comuni a tutti gli attivi da conguagliare
 			totaleConguaglioAbbinate = 0
 			for key, nick, classifica in classifica_definita['dati']:
 				totaleConguaglioAbbinate += sum([punto['valore'] for punto in classifica["celle_abbinate"][:punti_assocMin]])
