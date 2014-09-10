@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from django.conf import settings
 
 CLASSIFICHE = [
@@ -34,13 +34,13 @@ CLASSIFICHE = [
 ]
 
 NOMI_CAMPI_CONDUCENTE = {
-"classifica_iniziale_diurni": "Supplementari diurni",
-"classifica_iniziale_notturni": "Supplementari notturni",
-"classifica_iniziale_puntiDoppiVenezia": "Punti VE-TV",
-"classifica_iniziale_prezzoDoppiVenezia": "Valore punti VE-TV",
-"classifica_iniziale_doppiPadova": "Valore Doppi Padova",
-"classifica_iniziale_long": "Valore Lunghe",
-"classifica_iniziale_medium": "Valore Corte (Padova)",
+	"classifica_iniziale_diurni": "Supplementari diurni",
+	"classifica_iniziale_notturni": "Supplementari notturni",
+	"classifica_iniziale_puntiDoppiVenezia": "Punti VE-TV",
+	"classifica_iniziale_prezzoDoppiVenezia": "Valore punti VE-TV",
+	"classifica_iniziale_doppiPadova": "Valore Doppi Padova",
+	"classifica_iniziale_long": "Valore Lunghe",
+	"classifica_iniziale_medium": "Valore Corte (Padova)",
 }
 
 from decimal import Decimal
@@ -63,7 +63,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
 	#	print "Valore totale:", valoreTotale
 	if da["VEorTV"]:
 		# i VE/TV singoli con valore >=75€ vanno nelle lunghe
-		if da["num_bacini"] == 1 and viaggio.lordo() >= 75:
+		if da["num_bacini"] == 1 and viaggio.lordo() >= 75 and da["total_pax"] < 4:
 			viaggio.prezzoVenezia = valoreTotale
 		else:
 			if viaggio.km_conguagliati:
@@ -136,6 +136,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 		nome = luogo.nome.lower()
 		return ("venezia" in nome or "treviso" in nome)
 
+	total_pax = 0
 	for cursore in [viaggio] + list(viaggio.viaggio_set.all()):
 		if VEorTV is False and (specialPlace(cursore.da) or specialPlace(cursore.a)):
 			VEorTV = True
@@ -143,7 +144,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 		if cursore.da.bacino: bacino = cursore.da.bacino  # prendo il luogo o il bacino
 		if not bacino in baciniDiPartenza:
 			baciniDiPartenza.append(bacino)
-		#logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
+		total_pax += cursore.numero_passeggeri
+	#logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
 	num_bacini = len(baciniDiPartenza)
 	#	if len(baciniDiPartenza) > 1:	# se partono tutti dalla stessa zona, non la considero un'abbinata
 	#		partiAbbinamento = kmTotali / kmPuntoAbbinate	# è un Decimal
@@ -184,12 +186,12 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 	#		#logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
 	#		#				viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
 	#		puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
-	result = {
+	return {
 	"kmTotali": kmTotali,
 	"num_bacini": num_bacini,
 	"VEorTV": VEorTV,
+	"total_pax": total_pax,
 	}
-	return result
 
 
 def get_value(viaggio, forzaSingolo=False):

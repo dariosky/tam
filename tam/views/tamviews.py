@@ -1218,16 +1218,6 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 	# estendo la selezione a tutti i figli dei selezionati, e tutti i padri
 	viaggi = list(viaggi_selezionati)  # copia dei viaggi
 
-
-	# for viaggio in viaggi_selezionati:
-	# 	if viaggio.padre_id and (not viaggio.padre in viaggi): # segno i padri precedenti da aggiornare
-	# 		viaggi.append(viaggio.padre)
-	# 		print "Estendo la selezione al padre di %s, ovvero %s" % (viaggio.id, viaggio.padre.id)
-	# 	for figlio in viaggio.viaggio_set.all():    # anche tutti i figli vanno aggiornati
-	# 		if figlio not in viaggi:
-	# 			print "Estendo la selezione al figlio di %s, ovvero %s" % (viaggio.id, figlio.id)
-	# 			viaggi.append(figlio)
-
 	if len(viaggi) > 1:
 		primo = viaggi[0]
 	else:
@@ -1277,7 +1267,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 					              contatore, viaggio.abbuono_fisso))
 					viaggio.abbuono_fisso = 5
 
-		viaggio.save()  # salvo i vari viaggi, poi farò il ricalcolo
+		viaggio.save(updateViaggi=False)  # salvo i vari viaggi, poi farò il ricalcolo
 		contatore += 1
 
 	for viaggio in viaggi:
