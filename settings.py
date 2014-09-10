@@ -19,14 +19,15 @@ TEMPLATE_DEBUG = DEBUG
 if DEBUG:
 	# set naive Datetime as errors
 	import warnings
+
 	warnings.simplefilter('error', DeprecationWarning)
 	warnings.filterwarnings(
 		'error', r"DateTimeField received a naive datetime",
 		RuntimeWarning, r'django\.db\.models\.fields')
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 
 ADMINS = (
-('Dario Varotto', 'dario.varotto@gmail.com'),
+	('Dario Varotto', 'dario.varotto@gmail.com'),
 )
 
 MANAGERS = ADMINS
@@ -79,7 +80,7 @@ STATICFILES_DIRS = (  # Put strings here, like "/home/html/static" or "C:/www/dj
 STATICFILES_FINDERS = (
 	'django.contrib.staticfiles.finders.FileSystemFinder',
 	'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-	#'django.contrib.staticfiles.finders.DefaultStorageFinder',
+	# 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 STATICFILES_STORAGE = 'tam.storage.PipelineCachedStorage'
 
@@ -88,17 +89,17 @@ jqueryUIURL = 'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
 jqueryUICSSURL = 'js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css'
 
 PIPELINE_CSS = {
-'tam': {'source_filenames': ['css/tam.css'], 'output_filename': 'css/tam.min.css'},
-'tam-stealth': {'source_filenames': ['css/tam-stealth.css'], 'output_filename': 'css/tam-stealth.min.css'},
-'tamUI': {
-'source_filenames': (
-jqueryUICSSURL,
-'css/tam.css',
-),
-'output_filename': 'css/tamUI.min.css',
-},
-'prenotazioni': {'source_filenames': ('css/prenotazioni.css',), 'output_filename': 'css/prenotazioni.min.css'},
-'codapresenze': {'source_filenames': ('css/codapresenze.css',), 'output_filename': 'css/codapresenze.min.css'},
+	'tam': {'source_filenames': ['css/tam.css'], 'output_filename': 'css/tam.min.css'},
+	'tam-stealth': {'source_filenames': ['css/tam-stealth.css'], 'output_filename': 'css/tam-stealth.min.css'},
+	'tamUI': {
+		'source_filenames': (
+			jqueryUICSSURL,
+			'css/tam.css',
+		),
+		'output_filename': 'css/tamUI.min.css',
+	},
+	'prenotazioni': {'source_filenames': ('css/prenotazioni.css',), 'output_filename': 'css/prenotazioni.min.css'},
+	'codapresenze': {'source_filenames': ('css/codapresenze.css',), 'output_filename': 'css/codapresenze.min.css'},
 }
 
 PIPELINE_JS = {
@@ -138,15 +139,90 @@ PIPELINE_DISABLE_WRAPPER = True
 # List of callables that know how to import templates from various sources.
 if not DEBUG:
 	TEMPLATE_LOADERS = (
-	('django.template.loaders.cached.Loader', (  # cache template loaders
-	                                             'django.template.loaders.filesystem.Loader',
-	                                             'django.template.loaders.app_directories.Loader',
+		('django.template.loaders.cached.Loader', (  # cache template loaders
+		                                             'django.template.loaders.filesystem.Loader',
+		                                             'django.template.loaders.app_directories.Loader',
+		)
+		),
 	)
-	),
-	)
-#PIPELINE_ENABLED = True
+# PIPELINE_ENABLED = True
 
 PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify')
+
+if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
+	os.mkdir(os.path.join(PROJECT_PATH, "logs"))
+
+LOGGING = {
+	'version': 1,
+	'disable_existing_loggers': False,
+	'filters': {
+		'require_debug_false': {
+			'()': 'django.utils.log.RequireDebugFalse'
+		},
+		'require_debug_true': {
+			'()': 'django.utils.log.RequireDebugTrue'
+		}
+	},
+	'formatters': {
+		'main_formatter': {
+			'format': '%(levelname)s:%(name)s: %(message)s '
+			          '(%(asctime)s; %(filename)s:%(lineno)d)',
+			'datefmt': "%Y-%m-%d %H:%M:%S",
+		},
+	},
+	'handlers': {
+		'mail_admins': {
+			'level': 'ERROR',
+			'filters': ['require_debug_false'],
+			'class': 'django.utils.log.AdminEmailHandler'
+		},
+		'console': {
+			'level': 'DEBUG',
+			'filters': ['require_debug_true'],
+			'class': 'logging.StreamHandler',
+			'formatter': 'main_formatter',
+		},
+		'production_file': {
+			'level': 'INFO',
+			'class': 'logging.handlers.RotatingFileHandler',
+			'filename': os.path.join(PROJECT_PATH, 'logs', 'main.log'),
+			'maxBytes': 1024 * 1024 * 3,  # x MB
+			'backupCount': 7,
+			'formatter': 'main_formatter',
+			'filters': ['require_debug_false'],
+		},
+		'debug_file': {
+			'level': 'DEBUG',
+			'class': 'logging.handlers.RotatingFileHandler',
+			'filename': os.path.join(PROJECT_PATH, 'logs', 'main_debug.log'),
+			'maxBytes': 1024 * 1024 * 3,  # x MB
+			'backupCount': 7,
+			'formatter': 'main_formatter',
+			'filters': ['require_debug_true'],
+		},
+		'null': {
+			"class": 'django.utils.log.NullHandler',
+		}
+	},
+	'loggers': {
+		'django.request': {
+			'handlers': ['mail_admins', 'console'],
+			'level': 'ERROR',
+			'propagate': True,
+		},
+		'django': {
+			'handlers': ['null', ],
+		},
+		'django.db': {
+			'handlers': ['null', ],
+			'propagate': False,
+		},
+		'': {
+			'handlers': ['console', 'production_file', 'debug_file'],
+			'level': "DEBUG",
+		},
+	}
+}
 
 MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'django.middleware.gzip.GZipMiddleware',
                         'django.middleware.common.CommonMiddleware',
@@ -242,9 +318,8 @@ if use_debug_toolbar:
 	INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
 
 if DEBUG:
-	MIDDLEWARE_CLASSES+=(
-	'tam.middleware.profiler.ProfileMiddleware',
-	# 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
+	MIDDLEWARE_CLASSES += (
+		'tam.middleware.profiler.ProfileMiddleware',  # 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
 	)
 #===============================================================================
 

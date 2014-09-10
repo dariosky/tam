@@ -169,14 +169,13 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 		#logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
 		#				viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
 		puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
-	result = {
-	"kmTotali": kmTotali,
-	"puntiAbbinamento": puntiAbbinamento,
-	"valorePunti": valorePunti,
-	"rimanenteInLunghe": rimanenteInLunghe,
-	"pricy": pricy
+	return {
+		"kmTotali": kmTotali,
+		"puntiAbbinamento": puntiAbbinamento,
+		"valorePunti": valorePunti,
+		"rimanenteInLunghe": rimanenteInLunghe,
+		"pricy": pricy,
 	}
-	return result
 
 
 def get_value(viaggio, forzaSingolo=False):
