@@ -672,7 +672,7 @@ select, input {
 @media only screen and (max-device-width: 1024px) {
 }
 /*PHONES*/
-@media only screen and (max-device-width: 1023px) {
+@media only screen and (max-device-width: 1023px) and (orientation : portrait) {
 	.trip_detail {
 		display: none;
 	}
