@@ -2,8 +2,9 @@ from decimal import Decimal
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 
+
 def moneyfmt(value, places=2, curr='', sep='.', dp=',',
-			 pos='', neg='-', trailneg=''):
+             pos='', neg='-', trailneg=''):
 	"""Convert Decimal to a money formatted string.
 	
 	places:  required number of places after the decimal point
@@ -28,7 +29,7 @@ def moneyfmt(value, places=2, curr='', sep='.', dp=',',
 	'<0.02>'
 	
 	"""
-	q = Decimal(10) ** -places	  # 2 places --> '0.01'
+	q = Decimal(10) ** -places  # 2 places --> '0.01'
 	sign, digits, exp = value.quantize(q).as_tuple()
 	result = []
 	digits = map(str, digits)
@@ -56,7 +57,8 @@ class NumberedCanvas(canvas.Canvas):
 	def __init__(self, *args, **kwargs):
 		canvas.Canvas.__init__(self, *args, **kwargs)
 		self._saved_page_states = []
-#		oldTemplate = None	# reset count at any template change
+
+	# oldTemplate = None	# reset count at any template change
 
 	def showPage(self):
 		#pagina = getattr(self, 'pagina', 1)
@@ -87,4 +89,4 @@ class NumberedCanvas(canvas.Canvas):
 		self.setFont("Helvetica", 7)
 		width = self._pagesize[0]
 		self.drawRightString(width / 2, 1 * cm,
-			"Pagina %d di %d" % (pagenum, page_count))
+		                     "Pagina %d di %d" % (pagenum, page_count))
