@@ -67,6 +67,7 @@ class FattureConsorzio(ModelloFattura):
 
 class FattureNoIVA(ModelloFattura):
 	# Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
+	#   con pagamento differito
 
 	nome = "Fatture esenti IVA"
 	descrizione = """Le fatture che i consorziati fanno ai clienti, ma esentate IVA (ex ricevute).
