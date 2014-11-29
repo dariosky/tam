@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load staticfiles %}{% load url from future %}{% load compressed %}<!DOCTYPE html>
+{% load staticfiles %}{% load url from future %}{% load pipeline %}<!DOCTYPE html>
 <html>
 <head>
 	<title>{{ license_owner }} - {% blocktrans %}Sistema di prenotazione online{% endblocktrans %}</title>
@@ -21,8 +21,8 @@
 	<link href="{% static 'bootstrap-datepicker/css/datepicker.css' %}" rel="stylesheet">
 	<link href="{% static 'chosen/chosen.css' %}" rel="stylesheet"/>
 
-	{% compressed_css 'prenotazioni' %}
-	{% if tam_stealth %}{% compressed_css 'tam-stealth' %}{% endif %}
+	{% stylesheet 'prenotazioni' %}
+	{% if tam_stealth %}{% stylesheet 'tam-stealth' %}{% endif %}
 
 	<script src="{% static 'js/jquery.min.js' %}"></script>
 

@@ -480,6 +480,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 
 	form = FormClass(request.POST or None, instance=viaggio)
 	if step == 1:
+		form.fields['cliente'].queryset = Cliente.objects.filter(attivo=True)
 		can_fast_create = not getattr(settings, "PREVENT_FAST_CREATE", False) or request.user.has_perm(
 			'tam.fastinsert_passenger')
 		form.fields["passeggero"].can_fast_create = can_fast_create
@@ -714,7 +715,7 @@ def clienti(request, template_name="clienti_e_listini.html"):
 	mediabundleJS = ('tamUI',)
 	mediabundleCSS = ('tamUI',)
 	listini = Listino.objects.annotate(Count('prezzolistino'))
-	clienti = Cliente.objects.filter(attivo=True).select_related('listino')
+	clienti = Cliente.objects.filter().select_related('listino')
 	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 
