@@ -1,5 +1,5 @@
 {% extends "base.html" %}{% load url from future %}
-{% load staticfiles compressed %}
+{% load staticfiles pipeline %}
 {% block title %}{{fattura.nome_fattura}} {{fattura.descrittore}} &raquo; {{ block.super }} {% endblock %}
 
 {% block css %}
@@ -35,8 +35,8 @@
 
 {% block bottom %}
 {% if not readonly %}
-	{% compressed_js 'jquery.editable' %}
-	{% compressed_js 'fattura' %}
+	{% javascript 'jquery.editable' %}
+	{% javascript 'fattura' %}
 {% else %}
 	<script type="text/javascript">
 		$('.editable').removeClass('editable');
