@@ -6,6 +6,9 @@ $(document).ready(function () {
         csrf_token= $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
 
     var doRequestCoda = function (data) {
+        if (typeof(data)=='undefined') {
+            data={}
+        }
         data['csrfmiddlewaretoken'] = csrf_token;
         $.post('', data)
             .fail(function (data) {
