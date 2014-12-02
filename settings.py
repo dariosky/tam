@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.16"
+TAM_VERSION = "6.17"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico"):
@@ -225,17 +225,16 @@ LOGGING = {
 }
 
 MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'django.middleware.gzip.GZipMiddleware',
-                        'django.middleware.common.CommonMiddleware',
                         'django.contrib.sessions.middleware.SessionMiddleware',
-                        'django.middleware.locale.LocaleMiddleware',
-                        # 'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
-                        'django.contrib.messages.middleware.MessageMiddleware',
+                        'django.middleware.common.CommonMiddleware',
+                        'django.middleware.csrf.CsrfViewMiddleware', # check requests for csrf
                         'django.contrib.auth.middleware.AuthenticationMiddleware',
+                        'django.middleware.locale.LocaleMiddleware',
+                        'django.contrib.messages.middleware.MessageMiddleware',
                         'tam.middleware.loginRequirement.RequireLoginMiddleware',
-                        # 	'django.middleware.doc.XViewMiddleware',	# currently useless?
+                        'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
                         'django.middleware.transaction.TransactionMiddleware',
-
                         'tam.middleware.threadlocals.ThreadLocals',
 )
 

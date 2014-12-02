@@ -6,6 +6,7 @@
 	<h1>Attivazione</h1>
 
 <form action="." method="post">
+	{% csrf_token %}
     <div>
         Qui attiviamo Tam, scegli i parametri per l'attivazione e dai l'ok.<br/>
         <br/>

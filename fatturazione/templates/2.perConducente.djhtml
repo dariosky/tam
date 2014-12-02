@@ -9,6 +9,7 @@
 		{{ fatture }} fatture / {{ lista.count }} corse. Data generazione: {{ data_generazione|date:"d/m/Y" }}<br />
 		{% if lista %}
 		<form method="post" action="">
+			{% csrf_token %}
 		<div id='goto' class='floatingBlock'>
 			<a href="#genera"><img src='{% static 'img/frecciagiu.png' %}' title='genera {{ fatturazione.nome }}'></a>
 		</div>

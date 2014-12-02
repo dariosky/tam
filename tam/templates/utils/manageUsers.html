@@ -3,45 +3,51 @@
 {% block title %}Impostazione dei permessi &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Impostazioni permessi</h1>
+	<h1>Impostazioni permessi</h1>
 
-<form method="get" action=".">
-<p>
-	<label for="selectedUser">Seleziona l'utente da gestire.</label>
-	<select name="selectedUser" id="selectedUser">
-	{% for iterUser in users %}
-		<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %} value="{{ iterUser.username }}">
-			{{ iterUser.username }}{% if iterUser.prenotazioni %} - prenotazioni{% endif %}
-		</option>
-	{% endfor %}
-	</select>
-	<input type="submit" value="Seleziona" />
-</p>
-</form>
-<p><a href="{% url "newUser" %}">Nuovo utente</a></p>
-{% if selectedUser %}
-	<form method="post" action=".">
-		dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
+	<form method="get" action=".">
 		<p>
-			Nuova password <input type="password" name="password"> riconferma: <input type="password" name="passwordbis">
-		</p>
-		<p id='user_group' {% if utentePrenotazioni %}style="display:none"{% endif %}>
-			Gruppo di appartenenza:
-			<select name="selectedGroup" multiple="multiple">
-			{% for iterGroup in groups %}
-				<option{% if iterGroup.selected %} selected="selected"{% endif %}>{{ iterGroup.name }}</option>
-			{% endfor %}
+			<label for="selectedUser">Seleziona l'utente da gestire.</label>
+			<select name="selectedUser" id="selectedUser">
+				{% for iterUser in users %}
+					<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %}
+															   value="{{ iterUser.username }}">
+						{{ iterUser.username }}{% if iterUser.prenotazioni %} - prenotazioni{% endif %}
+					</option>
+				{% endfor %}
 			</select>
+			<input type="submit" value="Seleziona"/>
 		</p>
-		<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
-
-		{% if manage_prenotazioni %}
-			{% include "utils/manageUsers-prenotazioni.inc.html" %}
-		{% endif %}
-
-		<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
 	</form>
-{% endif %}
+	<p><a href="{% url "newUser" %}">Nuovo utente</a></p>
+	{% if selectedUser %}
+		<form method="post" action=".">
+			{% csrf_token %}
+			<p>
+				dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
+
+			<p>
+				<label>Nuova password:<input type="password" name="password"></label>
+				<label>riconferma: <input type="password" name="passwordbis"></label>
+			</p>
+
+			<p id='user_group' {% if utentePrenotazioni %}style="display:none"{% endif %}>
+				<label for="selectedGroup">Gruppo di appartenenza:</label>
+				<select name="selectedGroup" id='selectedGroup' multiple="multiple">
+					{% for iterGroup in groups %}
+						<option{% if iterGroup.selected %} selected="selected"{% endif %}>{{ iterGroup.name }}</option>
+					{% endfor %}
+				</select>
+			</p>
+			<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
+
+			{% if manage_prenotazioni %}
+				{% include "utils/manageUsers-prenotazioni.inc.html" %}
+			{% endif %}
+
+			<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
+		</form>
+	{% endif %}
 
 {% endblock content %}
 
@@ -49,33 +55,34 @@
 	{{ block.super }}
 	{% if manage_prenotazioni %}
 		<script type="text/javascript" src="/static/js/jquery.asmselect.js"></script>
-		<link rel="stylesheet" type="text/css" href="/static/css/jquery.asmselect.css" />
+		<link rel="stylesheet" type="text/css" href="/static/css/jquery.asmselect.css"/>
 	{% endif %}
 	<script type="text/javascript">
-		$(document).ready(function(){
+		$(document).ready(function () {
+			var $esclusivoBlock = $('#esclusivoBlock').find('input');
 
-			$('#esclusivoBlock input').change(
-				function(){
-					var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
-					if (utente_prenotazioni) {
-						$('#configuratore_prenotazioni').show('slow');
-						$('#user_group').hide('slow');
+			$esclusivoBlock.change(
+					function () {
+						var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
+						if (utente_prenotazioni) {
+							$('#configuratore_prenotazioni').show('slow');
+							$('#user_group').hide('slow');
+
+						}
+						else {
+							$('#configuratore_prenotazioni').hide('slow');
+							$('#user_group').show('slow');
+						}
 
 					}
-					else {
-						$('#configuratore_prenotazioni').hide('slow');
-						$('#user_group').show('slow');
-					}
-
-				}
 			);
-			$('#esclusivoBlock input').change();
+			$esclusivoBlock.change();
 
-			$("#configuratore_prenotazioni select[multiple]").asmSelect({
-				highlight:true,
-				removeLabel:"rimuovi",
-				highlightAddedLabel:"Aggiunto: ",
-				highlightRemovedLabel:"Rimosso: "
+			$("#configuratore_prenotazioni").find("select[multiple]").asmSelect({
+				highlight: true,
+				removeLabel: "rimuovi",
+				highlightAddedLabel: "Aggiunto: ",
+				highlightRemovedLabel: "Rimosso: "
 			});
 		});
 	</script>

@@ -2,16 +2,18 @@ $(document).ready(function () {
     var auto_refresh_interval = 90;
     var count = auto_refresh_interval;   // update every TOT seconds
     //var countdown;
-    var counter_object = $("#counter");
+    var counter_object = $("#counter"),
+        csrf_token= $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
 
     var doRequestCoda = function (data) {
+        data['csrfmiddlewaretoken'] = csrf_token;
         $.post('', data)
             .fail(function (data) {
                 alert("C'è stato un errore.");
                 console.log(data);
             })
             .done(function (coda) {
-                console.log("Success. Elementi:", coda.length);
+                //console.log("Success. Elementi:", coda.length);
                 ricreaCoda(coda);
             });
     };

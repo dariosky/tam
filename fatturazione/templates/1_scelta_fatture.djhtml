@@ -26,6 +26,7 @@
 
 			{% if lista %}
 				<form method="post" action="{% url f.d.urlname_generazione %}">
+					{% csrf_token %}
 					<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
 					{% if f.d.ask_progressivo %}
 						<div>

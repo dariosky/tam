@@ -8,6 +8,7 @@
 <div>
 	Da qui puoi avviare dei backup manuali del database e scaricarli se ne hai i permessi.
 	<form action="" method="post">
+		{% csrf_token %}
 	{% if backupInfo.backups %}
 			<table class="tablesorter">
 				<thead>

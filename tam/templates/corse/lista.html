@@ -20,6 +20,7 @@
 	</div>
     {% if viaggi %}
 		<form id="viaggioActions" action="" method="post">
+			{% csrf_token %}
 			<div>
 				<input id="assoType" type="hidden" name="assoType" value="" />
 			</div>

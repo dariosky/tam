@@ -23,6 +23,7 @@
 
     <div id='codacomandi'>
         <form action="" method="POST">
+			{% csrf_token %}
             <h2>Accodati a:</h2>
             {% for piazza in piazze %}
                 <div>{{ piazza }}</div>

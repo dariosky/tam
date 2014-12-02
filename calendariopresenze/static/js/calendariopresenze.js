@@ -1,5 +1,7 @@
 $(function () {
-	var $calendar_man = $('#calendar_man');
+	var $calendar_man = $('#calendar_man'),
+		csrf_token= $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
+
 
 
 // hide the "go to day" submit button and react on change
@@ -54,7 +56,7 @@ $(function () {
 		var $this = $(this),
 			calendar_id = $this.attr('data-id');
 		if (confirm('Sicuro di voler eliminare questo evento?')) {
-			$.post('', {action: 'delete', calendar_id: calendar_id})
+			$.post('', {action: 'delete', calendar_id: calendar_id, csrfmiddlewaretoken: csrf_token})
 				.fail(function (data) {
 					alert("Errore nella cancellazione del calendario.\n" + data.responseText)
 				})
@@ -69,7 +71,7 @@ $(function () {
 		e.preventDefault();
 		var $this = $(this),
 			calendar_id = $this.attr('data-id');
-		$.post('', {action: 'toggle', calendar_id: calendar_id})
+		$.post('', {action: 'toggle', calendar_id: calendar_id, csrfmiddlewaretoken: csrf_token})
 			.fail(function (data) {
 				alert("Errore nella commutazione del valore del calendario.\n" + data.responseText)
 			})

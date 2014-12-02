@@ -20,6 +20,7 @@
 						{% for viewmode in caldesc.display_as %}
 							{% if  viewmode.mode == 'button' %}
 								<form method="post" action="">
+									{% csrf_token %}
 									<input name="day_string" type="hidden" value="{{ selected_day }}">
 									<input type="hidden" name="type" value="{{ type }}">
 									<input type="hidden" name="subname" value="{{ viewmode.name }}">
@@ -29,6 +30,7 @@
 							{% elif viewmode.mode == "timedelta" %}
 								<div>
 									<form method="post" action="">
+										{% csrf_token %}
 										{#	Time based cal #}
 										dalle
 									<span>
