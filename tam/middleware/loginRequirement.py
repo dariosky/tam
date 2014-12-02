@@ -1,5 +1,6 @@
 # coding=utf-8
 """ Each request needs an authenticathed user """
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import mail_admins
 from django.http import HttpResponseRedirect
@@ -31,11 +32,11 @@ class RequireLoginMiddleware(object):
 				prenotazioni_user = False
 
 			if prenotazioni_user and not prenotazioni_view:
-				#messages.error(request, "Gli utenti del servizio prenotazioni non hanno accesso a questa pagina.")
+				# messages.error(request, "Gli utenti del servizio prenotazioni non hanno accesso a questa pagina.")
 				return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
 			elif not prenotazioni_user and prenotazioni_view:
-				#messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
+				# messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
 				return HttpResponseRedirect(reverse('tamCorse'))
 			else:
 				if request.user.is_authenticated():
@@ -49,8 +50,16 @@ class RequireLoginMiddleware(object):
 def csrf_failure_view(request, reason=''):
 	response = render_to_response('403.html', {}, context_instance=RequestContext(request))
 	response.status_code = 403
-	mail_admins(
-		"403 alert",
-		"%s got hit in the face with Forbidden shovel" % request.user
-	)
+	message_tokens = [u"%s got hit in the face with Forbidden shovel" % request.user]
+	message_tokens.append("in: %s" % request.path)
+	post_data = request.POST.copy()
+	if 'password' in post_data:
+		del post_data['password']
+	message_tokens.append("from: %s" % request.environ['HTTP_REFERER'])
+	message_tokens.append("POST:\n" + unicode(post_data))
+	if not settings.DEBUG:
+		mail_admins(
+			"403 alert",
+			"\n".join(message_tokens)
+		)
 	return response
