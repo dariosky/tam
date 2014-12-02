@@ -3,17 +3,20 @@
 {% block title %}Nuovo utente &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Creazione nuovo utente</h1>
+	<h1>Creazione nuovo utente</h1>
 
-<p>
+
 	Inserisci i dati del nuovo utente.
 	<form action="." method="post">
-	<table>
-		{{ form }}
-		<tr><td>
-			<input type="submit" name="send" value="Crea utente"/>
-		</td></tr>
-	</table>
+		{% csrf_token %}
+		<table>
+			{{ form }}
+			<tr>
+				<td>
+					<input type="submit" name="send" value="Crea utente"/>
+				</td>
+			</tr>
+		</table>
 	</form>
-</p>
+
 {% endblock %}

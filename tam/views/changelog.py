@@ -145,6 +145,7 @@ def changeLog(request, template_name='static/changelog.html'):
 		('6.12', '15/8/2014', "Archiviazione con data personalizzabile e aggiornamenti vari."),
 		('6.15', '19/8/2014', "Cambiamenti al layout, mobile friendly."),
 		('6.16', '6/10/2014', "Nascondo i clienti inattivi."),
+		('6.17', '2/11/2014', "CSRF e clickjacking protections."),
 	]
 	# ('', '', mark_safe('''''')),
 	for version in known_changes[::-1]:

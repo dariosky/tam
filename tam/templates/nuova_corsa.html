@@ -10,10 +10,12 @@
         Sicuro di voler cancellare la corsa:<br/>
 			{{ viaggio }}<br/>
         <form action="" method="post">
+			{% csrf_token %}
 			<p><input type="submit" name="OK" value="Si" /> <input type="submit" value="No" /></p>
 		</form>
     {% else %}
 	<form action="" method="post" id="nuovaCorsa">
+		{% csrf_token %}
         {% if form.non_field_errors %}
 			{{ form.non_field_errors }}
 		{% endif %}

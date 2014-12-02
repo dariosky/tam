@@ -59,6 +59,7 @@
 						{% with viaggio.classifica as classificaViaggio %}
 						{% if classificaViaggio %}
 							<form action="" method="post">
+								{% csrf_token %}
 								<input type="hidden" name="viaggio" value="{{ viaggio.id }}" />
 								<select name="conducente">
 									{% for conducente, cname, cavailable, ctags in classificaViaggio %}

@@ -40,6 +40,7 @@
 			<td colspan="{{ classifica_definita.min }}">
 			{% if confirmConguaglio %}
 				<form method="post" action="">
+					{% csrf_token %}
 					<input type="submit" name="conguaglia" value="Memorizza" style='width:100%'>
 				</form>
 			{% else %}

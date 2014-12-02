@@ -17,6 +17,7 @@
 {% block content %}
 <a href="{% url "tamVisualizzazioneFatture" %}" class='noprint'>Torna all'elenco fatture</a>
 <h1 class='noprint'>{{fattura.nome_fattura}} {{fattura.descrittore}}</h1>
+{% csrf_token %}
 
 {% include "fat_model/_fattura.djhtml" %}
 
