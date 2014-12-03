@@ -53,21 +53,23 @@
 			{% if prezzolistino %}
 				Prezzo da listino {{prezzolistino.listino}}
 				{% if viaggio.esclusivo %}
-					<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi" />
+					<i class="sprite icon-t"></i>
 				{%else%}
-					<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo" />
+					<i class="sprite icon-c"></i>
 				{%endif%}
-				{% if prezzoDaListinoDiurno %}<img src='{% static "img/morning.png" %}' />{%else%}<img src='{% static "img/night.png" %}' />{% endif %}
+				{% if prezzoDaListinoDiurno %}<i class="sprite icon-morning"></i>{%else%}<i class="sprite icon-night"></i>{% endif %}
 				{{ prezzo_da_listino|floatformat:"2" }}€
 			{% endif %}
-			{% if fatturazione_forzata == 'S' %}<img src='{% static "flag/fat_on.png" %}' title='Fatturazione forzata da listino' />{% endif %}
-			{% if fatturazione_forzata == 'N' %}<img src='{% static "flag/fat_off.png" %}' title='Fatturazione disattivata da listino'/>{% endif %}
+			{% if fatturazione_forzata == 'S' %}<i title='Fatturazione forzata da listino' class="sprite icon-fat_on"></i>{% endif %}
+			{% if fatturazione_forzata == 'N' %}<i title='Fatturazione disattivata da listino' class="sprite icon-fat_off"></i>{% endif %}
 			<table style='text-align:left; margin:auto;'>
 				{{ form }}
 				{% if viaggio.passeggero %}
 					<tr>
 						<th>
-							Note permanenti del privato <br/>{{ viaggio.passeggero.nome }}:
+							<label for="id_dati_privato">
+								Note permanenti del privato <br/>{{ viaggio.passeggero.nome }}:
+							</label>
 						</th>
 						<td>
 							<textarea id="id_dati_privato" style="background-color:lightyellow" rows="10" cols="40" name="datiPrivato">{% if viaggio.passeggero.dati %}{{ viaggio.passeggero.dati }}{% endif %}</textarea>
@@ -88,13 +90,7 @@
             {% else %}
                 {% if new %}<input type="button" id="clear" name="clear" value="Reset"/>{% endif %}
 			{% endifnotequal %}
-			<input type="submit" id="actionButton" name="proceed" value={% ifequal step 2 %}
-																				{% if not id %}
-																					"Crea corsa"
-																				{% else %}
-																					"Modifica corsa"
-																				{% endif %}
-																			{% else %}"Avanti {% if id %}e salva{% endif %}"{% endifequal %} />
+			<input type="submit" id="actionButton" name="proceed" value="{{ continue_title }}" />
             {% if not new %}
 				{% ifnotequal step 1 %}
 					<a href="{% url "tamCorsaCopy" viaggio.pk %}">copia</a>
@@ -104,7 +100,7 @@
                     {% if deleteUrl and perms.tam.delete_viaggio %}
 							<br/>
 							<a href="{{ deleteUrl }}">
-								<img src="{% static "img/delbtn.png" %}" alt="Cancella corsa" />
+								<i class="sprite icon-delbtn"></i>
 		                    </a>
 					{% endif %}
                 {% endwith %}
@@ -132,24 +128,30 @@
 {% endblock content %}
 
 {% block bottom %}
-<script type="text/javascript">
-	$( function() {
-		$("#clear").click( function(){ document.location="{% url "tamCorsaClear" %}"; });
-		var formChanged=false;
-		$("input").on('change', function(){
-			formChanged=true;
+	<script type="text/javascript">
+		$(function () {
+			$("#clear").click(function () {
+				document.location = "{% url "tamCorsaClear" %}";
+			});
+			var formChanged = false;
+			$("input").on('change', function () {
+				formChanged = true;
+			});
+			//$("input:submit").live('click', function(){formChanged=false;});
+			$(document).on("click", "input:submit", function () {
+				formChanged = false;
+			});
+			function askConfirm() {
+				if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
+			}
+
+			window.onbeforeunload = askConfirm;
+			var placeholder_for_icon = $("#id_abbuono_fisso").parent();
+			{% if da_speciale == "A" %}
+				placeholder_for_icon.append('<i class="sprite icon-airport"></i>');
+			{% elif da_speciale == "S" %}
+				placeholder_for_icon.append('<i class="sprite icon-train"></i>');
+			{% endif%}
 		});
-		//$("input:submit").live('click', function(){formChanged=false;});
-		$(document).on("click", "input:submit", function(){formChanged=false;});
-		function askConfirm(){
-			if (formChanged) return "Non hai salvato, sei sicuro di voler continuare?";
-		}
-		window.onbeforeunload=askConfirm;
-		{% if da_speciale == "A" %}
-			$("#id_abbuono_fisso").parent().append('<img src="{% static "flag/luogo-airport.png" %}" />');
-		{% elif da_speciale == "S" %}
-			$("#id_abbuono_fisso").parent().append('<img src="{% static "flag/luogo-train.png" %}" />');
-		{% endif%}
-	} );
-</script>
+	</script>
 {% endblock bottom %}

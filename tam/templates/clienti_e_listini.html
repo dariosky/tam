@@ -8,7 +8,7 @@
 			<h2>Clienti e passeggeri</h2>
 
 			<div>
-				<a href="{% url "tamCliente" %}"><img src="{% static "img/addbtn.png" %}" alt="+"/> Nuovo
+				<a href="{% url "tamCliente" %}"><i class="sprite icon-addbtn"></i> Nuovo
 					Cliente</a><br/>
 				<a href="{% url "tamPrivati" %}">Elenco passeggeri privati</a><br/>
 
@@ -25,20 +25,17 @@
 						{% for cliente in clienti %}
 							<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
 								<td>
-									<img style="float:right;" src="{{ cliente.icon }}" title="{{ cliente.tipo }}"
-										 alt="{{ cliente.tipo }}"/>
+									<i style='float: right' class="sprite icon-clienttype_{{ cliente.tipo }}"></i>
 									<a href="{% url "tamClienteId" cliente.id %}">{{ cliente }}</a>
 								</td>
 								<td>
-									{% if cliente.fatturazione %}
-										<img src="{% static 'flag/fattura.png' %}" alt="fattura"/>  {% endif %}
-									{% if cliente.pagamento_differito %}
-										<img src="{% static 'flag/timedelta.png' %}" alt="posticipato"/>{% endif %}
-									{% if cliente.incassato_albergo %}
-										<img src="{% static 'flag/incassato.png' %}" alt="fine mese"/>{% endif %}
+									{% if cliente.fatturazione %}<i class="sprite icon-fattura"></i>{% endif %}
+									{% if cliente.pagamento_differito %}<i class="sprite icon-timedelta"></i>{% endif %}
+									{% if cliente.incassato_albergo %}<i class="sprite icon-incassato"></i>{% endif %}
 									{% if cliente.commissione %} commissione:
-										{{ cliente.commissione }}{% ifequal cliente.tipo_commissione "P" %}%{% else %}€
-										{% endifequal %}{% endif %}
+										{{ cliente.commissione }}
+										{% if cliente.tipo_commissione == "P" %}%{% else %}€{% endif %}
+									{% endif %}
 								</td>
 								<td><a href="{% url "tamListinoId" cliente.listino.id %}">{{ cliente.listino.nome }}</a>
 								</td>
@@ -57,7 +54,7 @@
 			<h2>Listini</h2>
 
 			<div>
-				<a href="{% url 'tamNuovoListino' %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo
+				<a href="{% url 'tamNuovoListino' %}"><i class="sprite icon-addbtn"></i> Nuovo
 					Listino</a><br/>
 				{% if listini %}
 					<table id="listini" class="tablesorter">

@@ -7,37 +7,37 @@ Icon classes can be used entirely standalone. They are named after their origina
 */
 .icon-addbtn {
   background-image: url(tam_sprites.png);
-  background-position: -113px -38px;
+  background-position: -120px -75px;
   width: 16px;
   height: 12px;
 }
 .icon-airport {
   background-image: url(tam_sprites.png);
-  background-position: -16px -73px;
+  background-position: -32px -73px;
   width: 16px;
   height: 16px;
 }
 .icon-arrow_join {
   background-image: url(tam_sprites.png);
-  background-position: 0px -57px;
+  background-position: -79px -16px;
   width: 16px;
   height: 16px;
 }
 .icon-arrow_right {
   background-image: url(tam_sprites.png);
-  background-position: 0px -73px;
+  background-position: -63px -32px;
   width: 16px;
   height: 16px;
 }
 .icon-assoc {
   background-image: url(tam_sprites.png);
-  background-position: -113px -62px;
+  background-position: -16px -103px;
   width: 10px;
   height: 10px;
 }
 .icon-attachment {
   background-image: url(tam_sprites.png);
-  background-position: -63px -16px;
+  background-position: -66px -57px;
   width: 11px;
   height: 16px;
 }
@@ -49,61 +49,79 @@ Icon classes can be used entirely standalone. They are named after their origina
 }
 .icon-c {
   background-image: url(tam_sprites.png);
-  background-position: -125px -26px;
+  background-position: -114px -89px;
   width: 12px;
   height: 12px;
 }
 .icon-card {
   background-image: url(tam_sprites.png);
-  background-position: -113px 0px;
+  background-position: -95px -75px;
   width: 25px;
   height: 14px;
 }
 .icon-casina {
   background-image: url(tam_sprites.png);
-  background-position: -26px -89px;
+  background-position: -95px -32px;
   width: 16px;
   height: 15px;
 }
+.icon-clienttype_A {
+  background-image: url(tam_sprites.png);
+  background-position: -95px -47px;
+  width: 49px;
+  height: 14px;
+}
+.icon-clienttype_D {
+  background-image: url(tam_sprites.png);
+  background-position: -51px -89px;
+  width: 51px;
+  height: 14px;
+}
+.icon-clienttype_H {
+  background-image: url(tam_sprites.png);
+  background-position: 0px -89px;
+  width: 51px;
+  height: 14px;
+}
 .icon-delbtn {
   background-image: url(tam_sprites.png);
-  background-position: -113px -14px;
+  background-position: 0px -103px;
   width: 16px;
   height: 12px;
 }
 .icon-excel {
   background-image: url(tam_sprites.png);
-  background-position: -16px -57px;
+  background-position: -79px -32px;
   width: 16px;
   height: 16px;
 }
 .icon-fat_off {
   background-image: url(tam_sprites.png);
-  background-position: -113px -26px;
+  background-position: -102px -89px;
   width: 12px;
   height: 12px;
 }
 .icon-fat_on {
   background-image: url(tam_sprites.png);
-  background-position: -125px -50px;
+  background-position: -80px -73px;
   width: 12px;
   height: 12px;
 }
 .icon-fattura {
   background-image: url(tam_sprites.png);
-  background-position: -42px -89px;
+  background-position: -95px -61px;
   width: 50px;
   height: 14px;
 }
 .icon-fin {
   background-image: url(tam_sprites.png);
-  background-position: 0px -89px;
+  background-position: -111px -32px;
   width: 26px;
   height: 15px;
 }
 .icon-fout {
   background-image: url(tam_sprites.png);
-  background-position: -80px -73px;
+  background-position: -111px -16px;
   width: 26px;
   height: 15px;
 }
@@ -121,61 +139,61 @@ Icon classes can be used entirely standalone. They are named after their origina
 }
 .icon-hbar {
   background-image: url(tam_sprites.png);
-  background-position: -137px -26px;
+  background-position: -137px -16px;
   width: 1px;
   height: 10px;
 }
 .icon-incassato {
   background-image: url(tam_sprites.png);
-  background-position: -63px 0px;
+  background-position: -95px 0px;
   width: 50px;
   height: 16px;
 }
 .icon-morning {
   background-image: url(tam_sprites.png);
-  background-position: -64px -73px;
+  background-position: -63px 0px;
   width: 16px;
   height: 16px;
 }
 .icon-morning14 {
   background-image: url(tam_sprites.png);
-  background-position: -48px -73px;
+  background-position: -64px -73px;
   width: 16px;
   height: 16px;
 }
 .icon-morning24 {
   background-image: url(tam_sprites.png);
-  background-position: -32px -73px;
+  background-position: -16px -73px;
   width: 16px;
   height: 16px;
 }
 .icon-morning34 {
   background-image: url(tam_sprites.png);
-  background-position: -96px -57px;
+  background-position: 0px -73px;
   width: 16px;
   height: 16px;
 }
 .icon-night {
   background-image: url(tam_sprites.png);
-  background-position: -80px -57px;
+  background-position: -79px -48px;
   width: 16px;
   height: 16px;
 }
 .icon-night14 {
   background-image: url(tam_sprites.png);
-  background-position: -64px -57px;
+  background-position: -95px -16px;
   width: 16px;
   height: 16px;
 }
 .icon-night24 {
   background-image: url(tam_sprites.png);
-  background-position: -48px -57px;
+  background-position: -79px 0px;
   width: 16px;
   height: 16px;
 }
 .icon-night34 {
   background-image: url(tam_sprites.png);
-  background-position: -32px -57px;
+  background-position: -50px -57px;
   width: 16px;
   height: 16px;
 }
@@ -187,31 +205,31 @@ Icon classes can be used entirely standalone. They are named after their origina
 }
 .icon-smallX {
   background-image: url(tam_sprites.png);
-  background-position: -129px -14px;
+  background-position: -136px -75px;
   width: 9px;
   height: 10px;
 }
 .icon-t {
   background-image: url(tam_sprites.png);
-  background-position: -113px -50px;
+  background-position: -126px -89px;
   width: 12px;
   height: 12px;
 }
 .icon-tam_16 {
   background-image: url(tam_sprites.png);
-  background-position: -90px -16px;
+  background-position: -63px -16px;
   width: 16px;
   height: 16px;
 }
 .icon-timedelta {
   background-image: url(tam_sprites.png);
-  background-position: -63px -32px;
+  background-position: 0px -57px;
   width: 50px;
   height: 16px;
 }
 .icon-train {
   background-image: url(tam_sprites.png);
-  background-position: -74px -16px;
+  background-position: -48px -73px;
   width: 16px;
   height: 16px;
 }

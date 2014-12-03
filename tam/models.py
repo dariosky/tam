@@ -996,11 +996,6 @@ class Cliente(models.Model):
 			result += "(inattivo)"
 		return result
 
-	def icon(self):
-		""" Ritorno l'icona associata al tipo cliente """
-		return staticfiles_storage.url('tipiCliente/%s.png' % self.tipo)
-
-
 	def url(self):
 		return reverse("tamClienteId", kwargs={"id_cliente": self.id})
 
