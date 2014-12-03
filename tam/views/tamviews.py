@@ -414,6 +414,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		messages.error(request, "Non hai il permesso di creare nuove corse.")
 		return HttpResponseRedirect("/")
 
+	continue_title = "-"
+	if step == 2:
+		continue_title = "Crea corsa" if not id else "Modifica corsa"
+	else:
+		continue_title = "Avanti" if not id else "Avanti e salva"
+
 	if not profilo.luogo:
 		messages.warning(request, "Non hai ancora definito un luogo preferito.")
 	new = id is None

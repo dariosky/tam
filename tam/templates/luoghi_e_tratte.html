@@ -8,7 +8,7 @@
 			<h2>Tratte</h2>
 
 			<div>
-				<a href="{% url "tamNuovaTratta" %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuova Tratta</a><br/>
+				<a href="{% url "tamNuovaTratta" %}"><i class="sprite icon-addbtn"></i> Nuova Tratta</a><br/>
 				{% if tratte %}
 					<table id="tratte" class="tablesorter">
 						<thead>
@@ -45,9 +45,8 @@
 			<h2>Bacini e luoghi</h2>
 
 			<div>
-				<a href="{% url "tamNuovoBacino" %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo Bacino</a><br/>
-				<a href="{% url "tamNuovoLuogo" %}"><img src="{% static 'img/addbtn.png' %}" alt="+"/> Nuovo
-					Luogo</a><br/>
+				<a href="{% url "tamNuovoBacino" %}"><i class="sprite icon-addbtn"></i> Nuovo Bacino</a><br/>
+				<a href="{% url "tamNuovoLuogo" %}"><i class="sprite icon-addbtn"></i> Nuovo Luogo</a><br/>
 				{% if bacini or unbacined %}
 					<table id="luoghi" class="tablesorter">
 						<thead>
@@ -66,10 +65,8 @@
 									<td></td>
 									<td>
 										<a href="{% url "tamLuogoId" luogo.id %}">{{ luogo }}</a>
-										{% if luogo.speciale == "A" %}
-											<img src="{% static 'flag/luogo-airport.png' %}" alt="air"/>{% endif %}
-										{% if luogo.speciale == "S" %}
-											<img src="{% static 'flag/luogo-train.png' %}" alt="train"/>{% endif %}
+										{% if luogo.speciale == "A" %}<i class="sprite icon-airport"></i>{% endif %}
+										{% if luogo.speciale == "S" %}<i class="sprite icon-train"></i>{% endif %}
 									</td>
 								</tr>
 							{% endfor %}
@@ -86,10 +83,8 @@
 									<td></td>
 									<td>
 										<a href="{% url "tamLuogoId" luogo.id %}">{{ luogo }}</a>
-										{% if luogo.speciale == "A" %}
-											<img src="{% static 'flag/luogo-airport.png' %}" alt="air"/>{% endif %}
-										{% if luogo.speciale == "S" %}
-											<img src="{% static 'flag/luogo-train.png' %}" alt="train"/>{% endif %}
+										{% if luogo.speciale == "A" %}<i class="sprite icon-airport"></i>{% endif %}
+										{% if luogo.speciale == "S" %}<i class="sprite icon-train"></i>{% endif %}
 									</td>
 								</tr>
 							{% endfor %}
