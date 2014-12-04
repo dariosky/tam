@@ -7,8 +7,8 @@
 	<h1>Generazione fatture</h1>
 	<div id='date_range'>
 		<form method='get' action=''>
-			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
-			a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<label>da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'></label>
+			<label>a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'></label>
 			<input type="submit" value="Trova corse fatturabili"/>
 		</form>
 	</div>
@@ -19,7 +19,7 @@
 	{{ f.lista.count }} corse.
 	<div style='display:none;'>
 		<div id='goto{{f.d.codice}}' class='floatingBlock'>
-			<a href="#genera{{f.d.codice}}"><img src='{% static 'img/frecciagiu.png' %}' title='genera {{f.d.nome}}'></a>
+			<a href="#genera{{f.d.codice}}"><i title='genera {{f.d.nome}}' class="sprite icon-frecciagiu"></i></a>
 		</div>
 		<p style='white-space: pre-line;'>{{ f.d.descrizione}}</p>
 		{% with f.lista as lista %}
@@ -30,8 +30,8 @@
 					<input type='hidden' name='data_generazione' value='{{ f.parametri.data_generazione|date:"d/m/Y" }}' />
 					{% if f.d.ask_progressivo %}
 						<div>
-							Anno <input type='text' name='anno' maxlength="4" value="{{ f.parametri.anno_consorzio }}">
-							Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{ f.parametri.progressivo }}">
+							<label>Anno <input type='text' name='anno' maxlength="4" value="{{ f.parametri.anno_consorzio }}"></label>
+							<label>Progressivo iniziale <input type='text' name='progressivo' maxlength="5" value="{{ f.parametri.progressivo }}"></label>
 						</div>
 					{% endif %}
 					<div class='fatturaTipo{{f.d.codice}}'>

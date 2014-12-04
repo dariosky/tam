@@ -446,7 +446,9 @@ td img {
 .floatingBlock {
 	/* i div galleggianti con degli strumenti */
 	position: absolute;
-	left: 2px;
+	left: -13px;
+	margin-top: 50px;
+	top: 30px;
 	text-align: center;
 	padding: 10px;
 	width: 30px;

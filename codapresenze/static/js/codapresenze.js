@@ -12,8 +12,9 @@ $(document).ready(function () {
         data['csrfmiddlewaretoken'] = csrf_token;
         $.post('', data)
             .fail(function (data) {
-                alert("C'è stato un errore.");
-                console.log(data);
+                //alert("C'è stato un errore.");
+                window.location = '/';
+                //console.log(data);
             })
             .done(function (coda) {
                 //console.log("Success. Elementi:", coda.length);
