@@ -61,4 +61,4 @@ window.scrollableGoto = function scrollableGoto(scroller) {
 
 if ($.datepicker) {
 	$(".datepicker").datepicker();
-};
+}
