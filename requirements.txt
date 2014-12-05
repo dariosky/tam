@@ -21,3 +21,6 @@ psycopg2
 # deployment
 fabric
 gunicorn
+
+# mails
+djrill

@@ -14,7 +14,7 @@ ADMIN_MAIL = ",".join(["%s <%s>" % (name, email) for (name, email) in settings.A
 
 def notifyByMail(to=None, subject="",
                  context=None, contextText=None, messageTxtTemplateName=None,
-                 messageHtmlTemplateName=None, bcc=(ADMIN_MAIL,),
+                 messageHtmlTemplateName=None, bcc=None,
                  reply_to=None, attachments=None,
                  from_email=None,
                  **kwargs):
