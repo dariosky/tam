@@ -116,7 +116,6 @@ def update_database():
 	with virtualenv():
 		with cd(env.REPOSITORY_FOLDER):
 			# update database, both standard apps and south migrated
-			run("python manage.py syncdb")
 			run("python manage.py migrate")
 
 

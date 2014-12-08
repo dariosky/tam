@@ -22,7 +22,8 @@ def get_secure_attachment_subfolder(filename, fs, timepath):
 		return result
 
 
-board_upload_to = lambda instance, filename: get_secure_attachment_subfolder(filename, fs, 'board/%Y/%m')
+def board_upload_to(instance, filename):
+	return get_secure_attachment_subfolder(filename, fs, 'board/%Y/%m')
 
 
 class BoardMessage(models.Model):

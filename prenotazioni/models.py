@@ -13,9 +13,9 @@ from tam import tamdates
 # non posso modificare se il viaggio è già confermato
 
 TIPI_PAGAMENTO = (
-('D', _('Diretto')),
-('H', _('Hotel')),  # diventa "conto finemese"
-('F', _('Fattura')),  # fattura richiesta
+	('D', _('Diretto')),
+	('H', _('Hotel')),  # diventa "conto finemese"
+	('F', _('Fattura')),  # fattura richiesta
 )
 
 
@@ -40,7 +40,8 @@ class UtentePrenotazioni(models.Model):
 		}
 
 
-prenotazioni_upload_to = lambda instance, filename: get_secure_attachment_subfolder(filename, fs, 'prenotazioni/%Y/%m')
+def prenotazioni_upload_to(instance, filename):
+	return get_secure_attachment_subfolder(filename, fs, 'prenotazioni/%Y/%m')
 
 
 class Prenotazione(models.Model):
