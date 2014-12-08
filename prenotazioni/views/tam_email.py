@@ -4,7 +4,7 @@ from django.template import Context
 from django.template.loader import get_template
 from prenotazioni.views.emailMultiRelated import EmailMultiRelated
 import os
-from email.MIMEBase import MIMEBase
+from email.mime.base import MIMEBase
 import logging
 from prenotazioni.models import Prenotazione
 from django.utils.safestring import mark_safe
