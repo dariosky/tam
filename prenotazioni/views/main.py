@@ -16,7 +16,7 @@ from django.contrib import messages
 from django.forms.fields import TypedChoiceField
 from prenotazioni.views.tam_email import notifyByMail
 from django.conf import settings
-from email.MIMEBase import MIMEBase
+from email.mime.base import MIMEBase
 from email import Encoders
 import os
 from tam.models import Viaggio, Cliente
@@ -135,7 +135,7 @@ class FormPrenotazioni(forms.ModelForm):
 
 
 @prenotazioni
-@transaction.commit_on_success  # commit solo se tutto OK
+@transaction.atomic  # commit solo se tutto OK
 def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html'):
 	utentePrenotazioni = request.user.prenotazioni
 

@@ -10,6 +10,7 @@
 
     <div>
         <form id='boardForm' action='' method='post' enctype="multipart/form-data">
+			{% csrf_token %}
             <div id='board'>
                {% comment %}
                     {% for message in board_messages %}

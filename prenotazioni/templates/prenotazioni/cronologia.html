@@ -74,9 +74,9 @@
 					<td>{{ viaggio.data|date:"j F Y, H:i" }}<br/>
 						{{ viaggio.numero_passeggeri }} pax
 						{% if not viaggio.esclusivo %}
-							<img width="12px" height="12px" src="{% static "img/c.ico" %}" alt="collettivo"/>
+							<i title="servizio collettivo" class="sprite icon-c"></i>
 						{% else %}
-							<img width="12px" height="12px" src="{% static "img/t.ico" %}" alt="taxi"/>
+							<i title="servizio taxi" class="sprite icon-t"></i>
 						{% endif %}
 					</td>
 					{% if viaggio.is_prenotazione %}
@@ -97,8 +97,9 @@
 										{% endif %}
 									</a>
 									{% if prenotazione.had_attachment %}
-										<div><img src="{% static "img/attachment.gif" %}"
-												  title="{% trans "Un allegato è già stato inviato" %}"/></div>
+										<div>
+											<i title="Un allegato è già stato inviato" class="sprite icon-attachment"></i>
+										</div>
 									{% endif %}
 								</td>
 							{% endif %}

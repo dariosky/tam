@@ -8,11 +8,10 @@
 	{% if viaggio.prenotazione %}prenotazione {{ viaggio.prenotazione.id }}
 		{% if viaggio.prenotazione.had_attachment %}
 			{% if viaggio.prenotazione.attachment %}
-				<a href="{{ viaggio.prenotazione.attachment.url }}" target="_blank">
-					<img src="{% static "img/attachment.gif" %}" title="Un allegato è già stato inviato"/>
-				</a>
+				<a href="{{ viaggio.prenotazione.attachment.url }}" target="_blank"><i title="Vedi l'allegato"
+																					   class="sprite icon-attachment"></i></a>
 			{% else %}
-				<img src="{% static "img/attachment.gif" %}" title="Un allegato è già stato inviato"/>
+				<i title="Vedi l'allegato" class="sprite icon-attachment"></i>
 			{% endif %}
 		{% endif %}
 		<br/>

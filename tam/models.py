@@ -1,4 +1,5 @@
 # coding: utf-8
+from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db import connections
 from django.utils.translation import ugettext as _
@@ -233,8 +234,7 @@ class Viaggio(models.Model):
 	abbuono_fisso = models.DecimalField(max_digits=9, decimal_places=2, default=0)  # fino a 9999.99
 	abbuono_percentuale = models.IntegerField(default=0)  # abbuono percentuale
 
-	help_sosta = "Verrà aggiunto al prezzo scontato del %d%%" % settings.SCONTO_SOSTA if settings.SCONTO_SOSTA else ""
-	prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2, default=0, help_text=help_sosta)
+	prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2, default=0)
 
 	incassato_albergo = models.BooleanField("Conto fine mese",
 	                                        default=False)  # flag per indicare se la corsa è incassata dall'albergo (sarà utile per reportistica)
@@ -255,6 +255,7 @@ class Viaggio(models.Model):
 	                               db_index=True)  # conducente (proposto o fissato)
 	conducente_confermato = models.BooleanField("Conducente confermato",
 	                                            default=False)  # True quando il conducente è fissato
+	#, db_index=True TODO:
 
 	note = models.TextField(blank=True)
 	pagato = models.BooleanField(default=False)
@@ -1158,3 +1159,7 @@ PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
 
 # load models required for the tasks
 from tam.tasks import TaskBackup, TaskMovelog, TaskArchive  # @UnusedImport
+
+class UnSerializableFileSystemStorage(FileSystemStorage):
+	def deconstruct(self):
+		return ("tam.models.UnSerializableFileSystemStorage", [], {})
