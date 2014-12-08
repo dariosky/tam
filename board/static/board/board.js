@@ -1,4 +1,5 @@
 $(function () {
+	var csrf_token= $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
 	function statusMessage(message, class_name, hideAfter) {
 		// Set the status message with classtype and hide it after a timeout
 		var oldTimeout = $status.data('timer');
@@ -124,6 +125,7 @@ $(function () {
 		else {
 			var tempForm = $('<form/>', {method: 'POST', action: ''}).css('display', 'none').appendTo($('body'));
 			tempForm.append($('<input/>', {name: 'deleteMessage', value: id}));
+			tempForm.append($('<input/>', {name: 'csrfmiddlewaretoken', type:'hidden', value: csrf_token}));
 			tempForm.submit();
 			return false;
 		}
@@ -145,7 +147,7 @@ function addMessage(message, hilight) {
 	if (attachment) {
 		headDiv.append($("<div/>", {class: 'attachment-mark'}));
 	}
-	console.log("message:", message.message, 'from:', message.author);
+	//console.log("message:", message.message, 'from:', message.author);
 	$('<div/>', {class: 'm'}).text(message.message).appendTo(messageDiv);
 	if (attachment) {
 		var attachDiv = $('<div/>', {class: 'attachment'});

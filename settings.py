@@ -275,7 +275,7 @@ INSTALLED_APPS = [
 	'pipeline',
 
 	'tam',
-	'south',
+	# 'south',  # it's no needed anymore in Django 1.7, thanks for serving us so well
 	'tamArchive',
 
 	'fatturazione',
@@ -291,10 +291,7 @@ LOGIN_REDIRECT_URL = "/"
 
 EMAIL_SUBJECT_PREFIX = "[TaM]"
 
-if DEBUG:
-	SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 14 giorni in debug
-else:
-	SESSION_COOKIE_AGE = 30 * 60  # cookie age in seconds (30 minutes)
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 days of session cookies
 
 # import datetime
 # LICENSE_EXPIRATION = datetime.date(2010, 01, 01)
@@ -312,7 +309,10 @@ if use_debug_toolbar:
 		                     MIDDLEWARE_CLASSES
 	except:
 		pass
-	DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
+	# DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
+	DEBUG_TOOLBAR_CONFIG = {
+		'JQUERY_URL':'',    # use the page jquery
+	}
 	INTERNAL_IPS = ('127.0.0.1',)
 	INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
 
@@ -342,7 +342,9 @@ NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
                             "Ricevute"]
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
+SECURE_STORE_CUSTOM_SUBFOLDER = None
 SECURE_URL = "/secure/"
+
 
 PLUGGABLE_APPS = {}
 

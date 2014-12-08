@@ -1,17 +1,16 @@
 # coding: utf-8
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
+from board.models import fs, get_secure_attachment_subfolder
 from tam.models import Cliente, Luogo, Viaggio
 import datetime
 from prenotazioni.util import preavviso_ore, prenotaCorsa
 from tam import tamdates
 # Regole da rispettare:
 # non mostro i prezzi
-# 	creo/modifico solo se ad almeno TOT ore dalla data prenotazione
-# 	non posso modificare se il viaggio è già confermato
+# creo/modifico solo se ad almeno TOT ore dalla data prenotazione
+# non posso modificare se il viaggio è già confermato
 
 TIPI_PAGAMENTO = (
 ('D', _('Diretto')),
@@ -19,10 +18,7 @@ TIPI_PAGAMENTO = (
 ('F', _('Fattura')),  # fattura richiesta
 )
 
-fs = FileSystemStorage(location=settings.SECURE_STORE_LOCATION,
-                       base_url=settings.SECURE_URL)
 
-# Create your models here.
 class UtentePrenotazioni(models.Model):
 	user = models.OneToOneField(User, related_name='prenotazioni')
 	clienti = models.ManyToManyField(Cliente)
@@ -44,14 +40,17 @@ class UtentePrenotazioni(models.Model):
 		}
 
 
+prenotazioni_upload_to = lambda instance, filename: get_secure_attachment_subfolder(filename, fs, 'prenotazioni/%Y/%m')
+
+
 class Prenotazione(models.Model):
 	owner = models.ForeignKey(UtentePrenotazioni, editable=False, on_delete=models.CASCADE)
 	cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT)
 	data_registrazione = models.DateTimeField(auto_now_add=True)
 
-	data_corsa = models.DateTimeField(_("Data e ora"),
-	                                  help_text=_(
-		                                  "Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora al luogo specificato.")
+	data_corsa = models.DateTimeField(
+		_("Data e ora"),
+		help_text=_("Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora al luogo specificato.")
 	)
 
 	pax = models.IntegerField(default=1)
@@ -75,15 +74,15 @@ class Prenotazione(models.Model):
 	note_cliente = models.CharField(_("Nome del cliente"), max_length=40, blank=True)
 	note = models.TextField(_("Note"), blank=True)
 
-	viaggio = models.OneToOneField(Viaggio,
-	                               null=True,
-	                               editable=False,
-	                               # on_delete=models.SET_NULL,  # allow delete a viaggio, deleting the prenotazione
+	viaggio = models.OneToOneField(
+		Viaggio,
+		null=True,
+		editable=False,  # on_delete=models.SET_NULL,  # allow delete a viaggio, deleting the prenotazione
 	)
 
 	attachment = models.FileField(_("Allegato"),
 	                              storage=fs,
-	                              upload_to='prenotazioni/%Y/%m',
+	                              upload_to=prenotazioni_upload_to,
 	                              null=True, blank=True,
 	                              help_text=_(u"Allega un file alla richiesta (facoltativo).")
 	)

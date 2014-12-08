@@ -19,16 +19,19 @@ from genericUtils import *
 from django.db import models
 
 # Creo gli eventuali permessi mancanti
-from django.contrib.auth.management import create_permissions
-from django.db.models import get_apps
+
 from django.db.models.aggregates import Count
 from django.core.urlresolvers import reverse
 import logging
 from django.db.models.query_utils import Q
 from django.db.models.deletion import ProtectedError
 # from django.utils.safestring import mark_safe
-for app in get_apps():
-	create_permissions(app, None, 2)
+
+# from django.db.models import get_apps
+# from django.contrib.auth.management import create_permissions
+# for app in get_apps():
+# 	create_permissions(app, None, 2)
+
 from django.db import connections
 from django.contrib import messages
 from django.conf import settings
@@ -490,6 +493,9 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		can_fast_create = not getattr(settings, "PREVENT_FAST_CREATE", False) or request.user.has_perm(
 			'tam.fastinsert_passenger')
 		form.fields["passeggero"].can_fast_create = can_fast_create
+	else:
+		help_sosta = "Verrà aggiunto al prezzo scontato del %d%%" % settings.SCONTO_SOSTA if settings.SCONTO_SOSTA else ""
+		form.fields['prezzo_sosta'].help_text = help_sosta
 
 	# *************** GET DEFAULTS ********************************
 	if id:  # modifying

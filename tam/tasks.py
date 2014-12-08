@@ -7,7 +7,7 @@ import time
 import djangotasks
 
 
-#===============================================================================
+# ===============================================================================
 def humanizeTime(sec):
 	result = ""
 	if sec >= 60:
@@ -23,6 +23,7 @@ def humanizeTime(sec):
 		result += "%d sec " % sec
 	return result
 
+
 def print_timing(func):
 	def wrapper(*arg, **kwargs):
 		t1 = time.time()
@@ -30,12 +31,15 @@ def print_timing(func):
 		t2 = time.time()
 		print '%s took %s' % (func.func_name, humanizeTime(t2 - t1))
 		return res
+
 	return wrapper
 
-def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
+
+def single_instance_task(timeout=60 * 60 * 2):  # 2 hour of default timeout
 	""" Stop concurrency using cache,
 		from http://stackoverflow.com/questions/4095940/running-unique-tasks-with-celery
 	"""
+
 	def task_exc(func):
 		def wrapper(*args, **kwargs):
 			lock_id = "task-single-instance-" + func.__name__
@@ -48,25 +52,35 @@ def single_instance_task(timeout=60 * 60 * 2):	# 2 hour of default timeout
 					release_lock()
 			else:
 				print "stop concurrency"
+
 		return wrapper
+
 	return task_exc
-#===============================================================================
+
+# ===============================================================================
 
 
 
 #============================================================
 # Djangotasks uses DB, so each tasktype has a model
 class TaskBackup(models.Model):
-	user = models.ForeignKey(User) # the user who starts the backup
+	user = models.ForeignKey(User)  # the user who starts the backup
+
 	def do(self):
 		print 'Starting backup'
 		from tam.views.backup import doBackup
+
 		doBackup(self.user)
 		print "Fine del backup"
+
+	class Meta:
+		app_label = "tam"
+
+
 djangotasks.register_task(TaskBackup.do, "Run TAM backup")
 
 
-@single_instance_task(60 * 5)	# 5 minutes timeout
+@single_instance_task(60 * 5)  # 5 minutes timeout
 def doBackupTask(user):
 	# ... create the backup action object in the DB
 	backup_task = TaskBackup(user=user)
@@ -82,10 +96,15 @@ def doBackupTask(user):
 class TaskMovelog(models.Model):
 	def do(self):
 		moveLogs()
+
+	class Meta:
+		app_label = "tam"
+
+
 djangotasks.register_task(TaskMovelog.do, "Oldlog move")
 
 
-@single_instance_task(60 * 25)	# 25 minutes timeout
+@single_instance_task(60 * 25)  # 25 minutes timeout
 @print_timing
 @transaction.commit_manually
 @transaction.commit_manually(using='modellog')
@@ -93,11 +112,12 @@ def moveLogs(name='movelogs.job'):
 	from django.contrib.contenttypes.models import ContentType
 	from django.db import connections
 	from modellog.actions import logAction
+
 	print "Cominciamo a spostare"
 	con = connections['default']
 	cursor = con.cursor()
 	try:
-		cursor.execute("SELECT count(*) from tam_actionlog where data>='2012-01-01'") # sposto solo dal 2012
+		cursor.execute("SELECT count(*) from tam_actionlog where data>='2012-01-01'")  # sposto solo dal 2012
 	except:
 		print "no table actionlog"
 		con.set_clean()
@@ -113,10 +133,10 @@ def moveLogs(name='movelogs.job'):
 		cursor.execute("SELECT * from tam_actionlog where data>='2012-01-01' order by data desc limit %d" % chunksize)
 		con.set_clean()
 		oldLogsChunk = cursor.fetchall()
-		logs_to_delete = []	# lista degli ID da cancellare
+		logs_to_delete = []  # lista degli ID da cancellare
 		if not oldLogsChunk: break
 		for oldlog in oldLogsChunk:
-			user_id, content_type_id, object_id, action_type, data, pk, description = oldlog #@UnusedVariable
+			user_id, content_type_id, object_id, action_type, data, pk, description = oldlog  #@UnusedVariable
 			if user_id in usersByID:
 				user = usersByID[user_id]
 			else:
@@ -154,6 +174,7 @@ def moveLogs(name='movelogs.job'):
 	print "Delete table"
 	cursor.execute("drop table tam_actionlog")
 	from tamArchive.tasks import vacuum_db
+
 	vacuum_db()
 	con.commit()
 	print "Fine"
@@ -161,11 +182,18 @@ def moveLogs(name='movelogs.job'):
 
 # Djangotasks uses DB, so each tasktype has a model
 class TaskArchive(models.Model):
-	user = models.ForeignKey(User) # the user who starts the backup
+	user = models.ForeignKey(User)  # the user who starts the backup
 	end_date = models.DateField()
+
 	def do(self):
 		from tamArchive.tasks import do_archiviazione
+
 		do_archiviazione(self.user, self.end_date)
+
+	class Meta:
+		app_label = "tam"
+
+
 djangotasks.register_task(TaskArchive.do, "Run TAM archive")
 
 #@task(name='testtask')

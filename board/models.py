@@ -1,13 +1,28 @@
-#coding: utf-8
+# coding: utf-8
 import os
 from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
+from tam.models import UnSerializableFileSystemStorage
 
 
-fs = FileSystemStorage(location=settings.SECURE_STORE_LOCATION,
-                       base_url=settings.SECURE_URL)
+fs = UnSerializableFileSystemStorage(
+	location=settings.SECURE_STORE_LOCATION,
+	base_url=settings.SECURE_URL)
+
+
+def get_secure_attachment_subfolder(filename, fs, timepath):
+	secure_subfolder = settings.SECURE_STORE_CUSTOM_SUBFOLDER
+	filename = os.path.normpath(fs.get_valid_name(os.path.basename(filename)))
+	result = timezone.now().strftime(timepath) + '/' + filename
+	if secure_subfolder:
+		return secure_subfolder + "/" + result
+	else:
+		return result
+
+
+board_upload_to = lambda instance, filename: get_secure_attachment_subfolder(filename, fs, 'board/%Y/%m')
 
 
 class BoardMessage(models.Model):
@@ -15,7 +30,7 @@ class BoardMessage(models.Model):
 	author = models.ForeignKey(User)
 	message = models.TextField('Messaggio', blank=True, null=True)
 	attachment = models.FileField(storage=fs,
-	                              upload_to='board/%Y/%m',
+	                              upload_to=board_upload_to,
 	                              null=True, blank=True)
 	active = models.BooleanField('Messaggio visibile', default=True)
 
@@ -25,11 +40,15 @@ class BoardMessage(models.Model):
 
 	def __unicode__(self):
 		result = ""
-		if self.attachment: result += "* "
+		if self.attachment:
+			result += "* "
 		result += "%s: %s" % (self.author.username, self.message)
 		if self.attachment:
-			path, filename = os.path.split(self.attachment.file.name)
-			result += " [%s]" % filename
+			try:
+				path, filename = os.path.split(self.attachment.file.name)
+				result += " [%s]" % filename
+			except IOError:
+				result += " [%s]" % "invalid-file"
 		return result
 
 	class Meta:

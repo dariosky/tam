@@ -1,10 +1,12 @@
+# coding=utf-8
 import os.path
 import re
 
-from email.MIMEBase import MIMEBase
+from email.mime.base import MIMEBase
 
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives, SafeMIMEMultipart
+
 
 class EmailMultiRelated(EmailMultiAlternatives):
 	"""
@@ -14,10 +16,11 @@ class EmailMultiRelated(EmailMultiAlternatives):
 	related_subtype = 'related'
 
 	def __init__(self, subject='', body='', from_email=None, to=None, bcc=None,
-			connection=None, attachments=None, headers=None, alternatives=None):
+	             connection=None, attachments=None, headers=None, alternatives=None):
 		# self.related_ids = []
 		self.related_attachments = []
-		return super(EmailMultiRelated, self).__init__(subject, body, from_email, to, bcc, connection, attachments, headers, alternatives)
+		super(EmailMultiRelated, self).__init__(subject, body, from_email, to, bcc, connection, attachments, headers,
+		                                        alternatives)
 
 	def attach_related(self, filename=None, content=None, mimetype=None):
 		"""
@@ -72,8 +75,8 @@ class EmailMultiRelated(EmailMultiAlternatives):
 		attachment = super(EmailMultiRelated, self)._create_attachment(filename, content, mimetype)
 		if filename:
 			mimetype = attachment['Content-Type']
-			del(attachment['Content-Type'])
-			del(attachment['Content-Disposition'])
+			del (attachment['Content-Type'])
+			del (attachment['Content-Disposition'])
 			attachment.add_header('Content-Disposition', 'inline', filename=filename)
 			attachment.add_header('Content-Type', mimetype, name=filename)
 			attachment.add_header('Content-ID', '<%s>' % filename)
