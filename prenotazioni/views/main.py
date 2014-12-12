@@ -50,7 +50,7 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
 	if extra_context:
 		context.update(extra_context)
 
-	from_email=getattr(settings, 'PRENOTAZIONI_FROM_EMAIL', None)
+	from_email = getattr(settings, 'PRENOTAZIONI_FROM_EMAIL', None)
 	if settings.DEBUG:
 		print "Sono in test. non invio la mail da {from_email}".format(from_email=from_email)
 	else:
@@ -68,7 +68,7 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
 
 class FormPrenotazioni(forms.ModelForm):
 	def clean_pax(self):
-		"pulizia numero di pax"
+		""" Pulizia numero di pax """
 		value = self.cleaned_data['pax']
 		if value > 50:
 			raise forms.ValidationError(_(u"Sicuro del numero di persone?"))
@@ -76,7 +76,7 @@ class FormPrenotazioni(forms.ModelForm):
 
 	def clean_is_arrivo(self):
 		value = self.cleaned_data['is_arrivo']
-		if not value in (True, False):
+		if value not in (True, False):
 			raise forms.ValidationError(_(u"Devi specificare se la corsa è un arrivo o una partenza."))
 		return value
 
@@ -101,9 +101,9 @@ class FormPrenotazioni(forms.ModelForm):
 	def __init__(self, *args, **kwargs):
 		super(FormPrenotazioni, self).__init__(*args, **kwargs)
 		# self.fields['attachment'] = forms.FileField(
-		# 	label=_("Allegato"),
-		# 	required=False,
-		# 	help_text=_(u"Allega un file alla richiesta (facoltativo).")
+		# label=_("Allegato"),
+		# required=False,
+		# help_text=_(u"Allega un file alla richiesta (facoltativo).")
 		# )
 
 		for field_name in self.fields:
@@ -127,10 +127,17 @@ class FormPrenotazioni(forms.ModelForm):
 
 	class Meta:
 		model = Prenotazione
+		fields = ['cliente', 'data_corsa',
+		          'pax', 'is_collettivo', 'is_arrivo',
+		          'luogo',
+		          'pagamento', 'note_camera', 'note_cliente',
+		          'note', 'attachment',
+		]
+		# fields = '__all__'
 		widgets = {
-		'is_arrivo': forms.RadioSelect,
-		'is_collettivo': forms.RadioSelect,
-		'pagamento': forms.RadioSelect,
+			'is_arrivo': forms.RadioSelect,
+			'is_collettivo': forms.RadioSelect,
+			'pagamento': forms.RadioSelect,
 		}
 
 
@@ -161,7 +168,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				request,
 				_(u"La prenotazione non è più modificabile.")
 			)
-		# return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+			# return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 	else:
 		prenotazione = None
 		editable = True
@@ -219,7 +226,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 				'attachment; filename="%s"' % os.path.basename(request_attachment.name)
 			)
 		# for chunk in attachment.chunks():
-		# 	destination.write(chunk)
+		# destination.write(chunk)
 		# destination.close()
 
 		if id_prenotazione is None:
@@ -263,12 +270,12 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 
 				if newValue <> oldValue:
 					changes[key] = (field.label, oldValue, newValue)
-				# 				messages.success(
-				# 						request,
-				# 						"Cambiato %s da %s a %s" % (form.fields[key].label,
-				# 													oldValue,
-				# 													newValue)
-				# 						)
+					# messages.success(
+					# request,
+					# 						"Cambiato %s da %s a %s" % (form.fields[key].label,
+					# 													oldValue,
+					# 													newValue)
+					# 						)
 			if changes or attachment:
 				stringhe_cambiamenti = []
 				for key in changes:
@@ -295,12 +302,12 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
 	return render_to_response(
 		template_name,
 		{
-		"utentePrenotazioni": utentePrenotazioni,
-		"form": form,
-		"editable": editable,
-		"prenotazione": prenotazione,
-		"cliente_unico": cliente_unico,
-		"logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+			"utentePrenotazioni": utentePrenotazioni,
+			"form": form,
+			"editable": editable,
+			"prenotazione": prenotazione,
+			"cliente_unico": cliente_unico,
+			"logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
 		},
 		context_instance=RequestContext(request))
 
@@ -352,15 +359,15 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 			data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
 			data_fine = adesso + datetime.timedelta(days=15)
 		elif filtroData == 'adv':  # filtro avanzato da data - a data
+			start_string = request.GET.get('dstart')
+			end_string = request.GET.get('dend')
 			try:
-				start_string = request.GET.get('dstart')
-				end_string = request.GET.get('dend')
 				data_inizio = tamdates.parseDateString(start_string).replace(hour=0, minute=0)
 				data_fine = tamdates.parseDateString(end_string).replace(hour=23, minute=59)  # fino a fine giornata
 			except AttributeError:
 				messages.warning(request,
 				                 _(u"Errore nel processare l'intervallo di date {start}-{end}.").format(
-				                 start=start_string, end=end_string)
+					                 start=start_string, end=end_string)
 				)
 				return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
@@ -373,7 +380,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	if data_fine: viaggi = viaggi.filter(data__lte=data_fine)
 	viaggi = viaggi.order_by("-data")
 
-	#print "Ho %d viaggi da mostrare" % viaggi.count()
+	# print "Ho %d viaggi da mostrare" % viaggi.count()
 
 	# divido viaggi in pagine
 	paginator = Paginator(viaggi, 50, orphans=5)  # pagine da tot viaggi
@@ -396,19 +403,19 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 	return render_to_response(
 		template_name,
 		{
-		"utentePrenotazioni": utentePrenotazioni,
-		"prenotazioni": prenotazioni,
-		"viaggi": viaggi,
-		"cliente_unico": cliente_unico,
-		"clienti_attivi": clienti_attivi,
-		"cliente_selezionato": cliente_selezionato,
+			"utentePrenotazioni": utentePrenotazioni,
+			"prenotazioni": prenotazioni,
+			"viaggi": viaggi,
+			"cliente_unico": cliente_unico,
+			"clienti_attivi": clienti_attivi,
+			"cliente_selezionato": cliente_selezionato,
 
-		"current_date_filter": filtroData,
-		"data_inizio": data_inizio.strftime('%d/%m/%Y') if data_inizio else "",
-		"data_fine": data_fine.strftime('%d/%m/%Y') if data_fine else "",
+			"current_date_filter": filtroData,
+			"data_inizio": data_inizio.strftime('%d/%m/%Y') if data_inizio else "",
+			"data_fine": data_fine.strftime('%d/%m/%Y') if data_fine else "",
 
-		"paginator": paginator,
-		"thisPage": thisPage,
-		"logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+			"paginator": paginator,
+			"thisPage": thisPage,
+			"logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
 		},
 		context_instance=RequestContext(request))

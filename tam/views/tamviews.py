@@ -816,6 +816,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 	class ListinoForm(forms.ModelForm):
 		class Meta:
 			model = Listino
+			fields = '__all__'
 
 	form = ListinoForm(u"new_name" in request.POST and request.POST or None, instance=listino)
 
@@ -974,7 +975,7 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 	user = request.user
 	actionName = getActionName(delete=delete, nuovo=nuovo)
 
-	permissionName = "tam.%(action)s_%(module)s" % {"action": actionName, "module": Model._meta.module_name}
+	permissionName = "tam.%(action)s_%(module)s" % {"action": actionName, "module": Model._meta.model_name}
 	allowed = user.has_perm(permissionName)
 	if not allowed:
 		messages.error(request, "Operazione non concessa.")
@@ -1003,7 +1004,7 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None, redirectO
 		class Meta:
 			model = Model
 			exclude = excludedFields
-
+			fields = '__all__'
 	try:
 		instance = id and Model.objects.get(id=id) or None
 	except Model.DoesNotExist:
@@ -1384,7 +1385,7 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 						nuovoPadre.updatePrecomp()  # aggiorno tutto alla fine
 
 				messages.success(request,
-				                 "Ho creato %s copie della corsa (%d corse in tutto)." % (len(nuoviPadri), corseCreate))
+				                 "Ho creato %s copie (%d corse in tutto)." % (len(nuoviPadri), corseCreate))
 				return HttpResponseRedirect(reverse("tamCorse"))
 
 			for field in form.fields:

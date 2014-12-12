@@ -234,7 +234,7 @@ MIDDLEWARE_CLASSES = (  #	'mediagenerator.middleware.MediaMiddleware',  # 	'djan
                         'tam.middleware.loginRequirement.RequireLoginMiddleware',
                         'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-                        'django.middleware.transaction.TransactionMiddleware',
+                        # 'django.middleware.transaction.TransactionMiddleware',    # deprecated in django 1.6
                         'tam.middleware.threadlocals.ThreadLocals',
 )
 

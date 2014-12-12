@@ -32,7 +32,7 @@
 	{% if perms.fatturazione.generate %}
 	<div>
 		<a href='{% url f.d.urlname_manuale %}'>
-		<img src='{% static 'img/addbtn.png' %}' id='newFattura' class='actionButton' title='Nuova {{ f.d.nome }} manuale' />
+			<i title='Nuova {{ f.d.nome }} manuale' id='newFattura' class="sprite icon-addbtn"></i>
 		Nuova {{ f.d.nome }} manuale.
 		</a>
 	</div>

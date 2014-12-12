@@ -117,7 +117,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
                               context_instance=RequestContext(request))
 
 
-@transaction.commit_on_success
+@transaction.atomic
 @permission_required('fatturazione.generate', '/')
 # template_name, tipo, filtro, keys, order_by, manager
 def genera_fatture(request, fatturazione):
