@@ -1,6 +1,6 @@
 # coding: utf-8
 from django.core.cache import cache
-from django.contrib import messages
+# from django.contrib import messages
 from django.contrib.auth.models import User
 from django.db import transaction, models
 import time
@@ -106,8 +106,8 @@ djangotasks.register_task(TaskMovelog.do, "Oldlog move")
 
 @single_instance_task(60 * 25)  # 25 minutes timeout
 @print_timing
-@transaction.commit_manually
-@transaction.commit_manually(using='modellog')
+# @transaction.commit_manually
+# @transaction.commit_manually(using='modellog')
 def moveLogs(name='movelogs.job'):
 	from django.contrib.contenttypes.models import ContentType
 	from django.db import connections
@@ -159,11 +159,11 @@ def moveLogs(name='movelogs.job'):
 
 		percent = count * 100 / totalcount
 		if logs_to_delete:
-			delete_query = "Delete from tam_actionlog where id in (%s)" % ",".join(logs_to_delete)
+			delete_query = "delete from tam_actionlog where id in (%s)" % ",".join(logs_to_delete)
 			#print delete_query
 			cursor.execute(delete_query)
 			con.commit()
-		transaction.commit(using="modellog")
+		# transaction.commit(using="modellog")
 		if oldPercent is None or percent >= oldPercent + 5:
 			print "%s%%" % percent,
 			oldPercent = percent
