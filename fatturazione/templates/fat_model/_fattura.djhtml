@@ -28,7 +28,7 @@
 			{% endfor %}
 			{% if perms.fatturazione.generate and not readonly %}
 			<tr class='noprint'><td style='border:0'>
-				<img src='{% static 'img/addbtn.png' %}' id='newRow' class='actionButton' title='Aggiungi una nuova riga' />
+				<i class="sprite icon-addbtn actionButton" id='newRow' title='Aggiungi una nuova riga' ></i>
 			</td></tr>
 			{% endif %}
 			<tr style='text-align:right;'><td colspan=5 style='border:0'>Imponibile</td><td id='tot_imponibile'>{{fattura.val_imponibile|floatformat:"2"}}</td></tr>

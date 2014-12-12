@@ -11,7 +11,7 @@
 		<form method="post" action="">
 		{% csrf_token %}
 		<div id='goto' class='floatingBlock'>
-			<a href="#genera"><img src='{% static 'img/frecciagiu.png' %}' title='genera {{ fatturazione.nome }}'></a>
+			<a href="#genera"><i title='genera {{ fatturazione.nome }}' class="sprite icon-frecciagiu"></i></a>
 		</div>
 		<input type='hidden' name='anno' value='{{anno}}'>
 		<input type='hidden' name='progressivo' value='{{progressivo_iniziale}}'>
