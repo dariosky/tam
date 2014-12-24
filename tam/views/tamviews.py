@@ -3,7 +3,6 @@ import json
 import dateutil.parser
 from django.shortcuts import render_to_response, HttpResponse, get_object_or_404
 from django.http import HttpResponseRedirect  #use the redirects
-#from django.contrib import auth	# I'll use authentication
 from django.contrib.auth.models import User, Group
 from django import forms
 from django.utils.translation import ugettext as _
@@ -11,9 +10,7 @@ from django.template.context import RequestContext  # Context with steroid
 from tam.models import Luogo, get_classifiche, Cliente, \
 	PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, Listino, \
 	ProfiloUtente, Viaggio, Passeggero
-# from modellog.actions import logAction
 from django.db import IntegrityError
-#from django.db import connection
 from django.core.paginator import Paginator
 from genericUtils import *
 from django.db import models
@@ -534,7 +531,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 		cliente = step1.get("cliente", None)
 		#		form.initial["data"]=datetime.datetime.now()	# 5/10/2009 tolgo il default per la data
 		if step == 1:
-			#form.initial['privato'] = cliente is None
+			form.initial['privato'] = cliente is None   # why was it commented?
 			#print "privato",form.initial['privato']
 			if not step1:
 				form.initial["da"] = form.initial[
@@ -548,7 +545,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html", delete=Fal
 						print "Initial should be the PK"
 						pass
 		elif step == 2:
-			#			"Sono in creazione, provo a popolare step2 con i default del cliente %s" % cliente
+			# "Sono in creazione, provo a popolare step2 con i default del cliente %s" % cliente
 			viaggio = Viaggio(**step1)
 			viaggio.luogoDiRiferimento = profilo.luogo
 			viaggio.updatePrecomp()
