@@ -3,84 +3,90 @@
 {% block title %}Log delle modifiche &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Log delle modifiche</h1>
+	<h1>Log delle modifiche</h1>
 
-<form action="" method="get" id="filterForm">
-	<div>
-		Modifiche tardive: <input type="checkbox" name="preInsert"  {% if filterPreInsert %}checked='checked'{% endif %} />
-		Filtra per:
-		<select name="action" class="selectFilter">
-			<option value="">Tutte le azioni</option>
-			<option value="A"{% if filterAction == 'A' %} selected="selected"{% endif %}>Creazione</option>
-			<option value="M"{% if filterAction == "M" %} selected="selected"{% endif %}>Modifica</option>
-			<option value="D"{% if filterAction == "D" %} selected="selected"{% endif %}>Cancellazione</option>
+	<form action="" method="get" id="filterForm">
+		<div>
+			<label for="preInsert">Modifiche tardive:</label> <input id="preInsert" type="checkbox" name="preInsert"
+																	 {% if filterPreInsert %}checked='checked'{% endif %}/>
+			<label for="action">Filtra per:</label>
+			<select name="action" id="action" class="selectFilter">
+				<option value="">Tutte le azioni</option>
+				<option value="A"{% if filterAction == 'A' %} selected="selected"{% endif %}>Creazione</option>
+				<option value="M"{% if filterAction == "M" %} selected="selected"{% endif %}>Modifica</option>
+				<option value="D"{% if filterAction == "D" %} selected="selected"{% endif %}>Cancellazione</option>
 
-			<option value="B"{% if filterAction == "B" %} selected="selected"{% endif %}>Backup richiesto</option>
-			<option value="G"{% if filterAction == "G" %} selected="selected"{% endif %}>Backup scaricato</option>
+				<option value="B"{% if filterAction == "B" %} selected="selected"{% endif %}>Backup richiesto</option>
+				<option value="G"{% if filterAction == "G" %} selected="selected"{% endif %}>Backup scaricato</option>
 
-			<option value="K"{% if filterAction == "K" %} selected="selected"{% endif %}>Archiviazione</option>
-			<option value="F"{% if filterAction == "F" %} selected="selected"{% endif %}>Appianamento</option>
+				<option value="K"{% if filterAction == "K" %} selected="selected"{% endif %}>Archiviazione</option>
+				<option value="F"{% if filterAction == "F" %} selected="selected"{% endif %}>Appianamento</option>
 
-			<option value="L"{% if filterAction == "L" %} selected="selected"{% endif %}>Login</option>
-			<option value="O"{% if filterAction == "O" %} selected="selected"{% endif %}>Logout</option>
+				<option value="L"{% if filterAction == "L" %} selected="selected"{% endif %}>Login</option>
+				<option value="O"{% if filterAction == "O" %} selected="selected"{% endif %}>Logout</option>
 
-			<option value="X"{% if filterAction == "X" %} selected="selected"{% endif %}>Excel</option>
+				<option value="X"{% if filterAction == "X" %} selected="selected"{% endif %}>Excel</option>
 
-			<option value="C"{% if filterAction == "C" %} selected="selected"{% endif %}>Fatturazione</option>
+				<option value="C"{% if filterAction == "C" %} selected="selected"{% endif %}>Fatturazione</option>
 
-			<option value="P"{% if filterAction == "P" %} selected="selected"{% endif %}>Presenze</option>
+				<option value="P"{% if filterAction == "P" %} selected="selected"{% endif %}>Presenze</option>
 
-		</select>
-		<select name="user" class="selectFilter">
-			<option value="">Tutti gli utenti</option>
-			{% for utente in utenti %}
-				<option value="{{ utente.id }}"{% ifequal utente.id filterUtente %} selected="selected"{% endifequal %}>{{ utente }}</option>
-			{% endfor %}
-		</select>
-		<input class="filterOkBTN" type="submit" value="Filtra" style="padding:0 15px; margin:0;"/>
-	</div>
-</form>
+			</select>
+			<select name="user" class="selectFilter">
+				<option value="">Tutti gli utenti</option>
+				{% for utente in utenti %}
+					<option value="{{ utente.id }}"{% ifequal utente.id filterUtente %}
+							selected="selected"{% endifequal %}>{{ utente }}</option>
+				{% endfor %}
+			</select>
+			<input class="filterOkBTN" type="submit" value="Filtra" style="padding:0 15px; margin:0;"/>
+		</div>
+	</form>
 
-{% if thisPage.has_other_pages %}
-	<div class="countblock">
+	{% if thisPage.has_other_pages %}
+		<div class="countblock">
 			{% include "paginator.inc.html" %}
-	</div>
-{% endif %}
-<table class="tablesorter">
-	<tr>
-		<th>Ora modifica</th><th>Utente</th><th>Oggetto</th><th>Azione</th>
-	</tr>
+		</div>
+	{% endif %}
+	<table class="tablesorter">
+		<tr>
+			<th>Ora modifica</th>
+			<th>Utente</th>
+			<th>Oggetto</th>
+			<th>Azione</th>
+		</tr>
 
-{% for action in actions %}
-	<tr>
-		<td {% ifequal action.modelName "viaggio" %}{% if action.hilight %}style="background-color:orange;"{% endif %}{% endifequal %}>
-			{% ifequal action.data.date today %}
-				<span class="today">{{ action.data|date:"H:i" }}</span>
-			{% else %}
-				<span class="date">{{ action.data|date:"D d M, Y H:i" }}</span>
-			{% endifequal %}
-
-		</td>
-		<td>{{ action.user }}</td>
-		<td>
-			{% with action.obj as obj %}
-				{% if obj %}
-					{% if obj.url %}
-						<a href='{{ obj.url }}'>{{ action.modelName }} {{ obj }}</a>
+		{% for action in actions %}
+			<tr>
+				<td {% ifequal action.modelName "viaggio" %}{% if action.hilight %}style="background-color:orange;"
+				{% endif %}{% endifequal %}>
+					{% ifequal action.data.date today %}
+						<span class="today">{{ action.data|date:"H:i" }}</span>
 					{% else %}
-						{{ action.modelName }} {{ obj }}
-					{% endif %}
-				{% endif %}
-			{% endwith %}
-		</td>
-		<td><img src="{{ action.icon }}" alt="{{ action.action_type}}" /> {{ action.description }}</td>
-	</tr>
-{% endfor %}
-</table>
-{% if thisPage.has_other_pages %}
-	<div class="countblock">
+						<span class="date">{{ action.data|date:"D d M, Y H:i" }}</span>
+					{% endifequal %}
+
+				</td>
+				<td>{{ action.user }}</td>
+				<td>
+					{% with action.obj as obj %}
+						{% if obj %}
+							{% if obj.url %}
+								<a href='{{ obj.url }}'>{{ action.modelName }} {{ obj }}</a>
+							{% else %}
+								{{ action.modelName }} {{ obj }}
+							{% endif %}
+						{% endif %}
+					{% endwith %}
+				</td>
+				<td><img src="{{ action.icon }}" alt="{{ action.action_type }}"/> {{ action.description }}</td>
+			</tr>
+		{% endfor %}
+	</table>
+	{% if thisPage.has_other_pages %}
+		<div class="countblock">
 			{% include "paginator.inc.html" %}
-	</div>
-{% endif %}
+		</div>
+	{% endif %}
 
 {% endblock %}
