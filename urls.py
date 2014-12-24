@@ -51,10 +51,11 @@ if settings.DEBUG:
 	# )
 
 
-def errorview(request):
-	raise Exception("Eccezione di test.")
-
+handler500 = 'tam.views.manviews.errors500'
+handler404 = 'tam.views.manviews.errors400'
 
 urlpatterns += patterns('',
-                        url('^500/', errorview, name='error-test')
+                        url('^500/', handler500, name='error-test'),
+                        url('^ping/', 'tam.views.manviews.pingview', name='ping-test')
 )
+
