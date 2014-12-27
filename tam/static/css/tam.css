@@ -15,7 +15,7 @@
 }
 
 .tablesorter {
-	border-collapse: collapse;
+	/*border-collapse: collapse;*/
 	font-family: "arial", sans-serif;
 	background-color: #CDCDCD;
 	margin: 10px 0 15px;
