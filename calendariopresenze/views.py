@@ -284,7 +284,8 @@ class CalendarRank(TemplateView):
 				continue
 			ranks = []
 			for conducente in Conducente.objects.filter(attivo=True,
-			                                            presenze__date_start__year=year,
+														# 1/1/2015 no more presenze reset every year
+			                                            # presenze__date_start__year=year,
 			                                            presenze__type=key) \
 					.annotate(tot=Sum('presenze__value')) \
 					.order_by('-tot'):

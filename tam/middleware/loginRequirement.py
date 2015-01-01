@@ -60,7 +60,7 @@ def csrf_failure_view(request, reason=''):
 		del post_data['password']
 	message_tokens.append("from: %s" % request.environ['HTTP_REFERER'])
 	message_tokens.append("POST:\n" + unicode(post_data))
-	if not settings.DEBUG and False:    # ok, let's disable notifications of 403
+	if not settings.DEBUG:    # ok, let's disable notifications of 403
 		mail_admins(
 			"403 alert",
 			"\n".join(message_tokens)
