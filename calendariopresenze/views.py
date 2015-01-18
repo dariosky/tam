@@ -313,7 +313,7 @@ class CalendarByConducente(TemplateView):
 		context['conducente'] = conducente
 		context['caldesc'] = caldesc
 		calendars = Calendar.objects.filter(conducente=conducente,
-		                                    date_start__year=year,
+		                                    # date_start__year=year,
 		                                    type=caltype,
 		)
 		context['calendars'] = calendars
