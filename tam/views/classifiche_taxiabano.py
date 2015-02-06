@@ -5,7 +5,7 @@ CLASSIFICHE = [
 	{"nome": "Supplementari serali",
 	 "mapping_field": "puntiNotturni",
 	 'type': 'supplementari',
-	 'image': "img/night.png",
+	 'image': "night",
 	 'viaggio_field': 'punti_notturni',
 	},
 	{"nome": "Venezia-Treviso",

@@ -1,4 +1,5 @@
 #coding:utf-8
+from django.conf import settings
 from modellog.actions import logAction
 import xlsUtil
 import xlwt
@@ -20,8 +21,8 @@ corseField['abbuono_fisso'] = 'Abbuono [€]'
 corseField['abbuono_percentuale'] = 'Abbuono [%]'
 corseField['prezzo_sosta'] = 'Sosta'
 corseField['fatturazione'] = 'Fattura?'
-corseField['incassato_albergo'] = 'Inc.albergo?'
-corseField['pagamento_differito'] = 'Posticipato?'
+corseField['incassato_albergo'] = 'ContoFM?'
+corseField['pagamento_differito'] = 'Fatturazione esente IVA?'
 corseField['cartaDiCredito'] = 'Carta?'
 corseField['conducente.nick'] = 'Conducente'
 corseField['note'] = 'note'
@@ -47,8 +48,11 @@ def djangoManagerToTable(self, fields):
 					else:
 						break
 			else:
-
-				related = record.__getattribute__(field)
+				if field == "incassato_albergo" and getattr(settings,'TAM_EXPORT_EXCEL_FINEMESE_LORDO', False):
+					# a request to put contofinemese as lordo
+					related = record.__getattribute__("prezzo") if record.__getattribute__(field) else 0
+				else:
+					related = record.__getattribute__(field)
 
 			if callable(related):
 				related = related()  # if it's a method call it
