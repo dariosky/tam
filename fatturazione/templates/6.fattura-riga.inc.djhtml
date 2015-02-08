@@ -3,7 +3,7 @@
 	<td style='{% if not readonly %}width:60px; {% endif %}border:0;'>
 		{% if not readonly %}
 			{% if perms.fatturazione.generate and not readonly %}
-				<img src="{% static 'img/delbtn.png' %}" class='delrow actionButton noprint' title='cancella riga'/>
+				<i class="sprite icon-delbtn delrow actionButton noprint" title='cancella riga'></i>
 			{% endif %}
 			{% if riga.viaggio %}
 				<a href="{% url "tamNuovaCorsa2Id" riga.viaggio.id %}"

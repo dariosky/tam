@@ -28,7 +28,7 @@
 </a>
 {% if perms.fatturazione.generate %}
 	<div style="text-align: center">
-		<img src="{% static 'img/delbtn.png' %}" class='delfat actionButton noprint' title='cancella fattura' />
+		<i class="sprite icon-delbtn delfat actionButton noprint" title='cancella fattura'></i>
 	</div>
 {% endif %}
 

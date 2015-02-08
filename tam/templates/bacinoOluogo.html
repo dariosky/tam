@@ -21,7 +21,7 @@
 						    {% with instance.delete_url as deleteUrl %}
 						        {% if deleteUrl %}
 				                    <a href="{{ deleteUrl }}">
-										<img src="{% static 'img/delbtn.png' %}" alt="Cancella {{ verbose_name }}" />
+										<i class="sprite icon-delbtn" title="Cancella {{ verbose_name }}"></i>
 				                    </a>
 		                        {% endif %}
 		                    {% endwith %}
