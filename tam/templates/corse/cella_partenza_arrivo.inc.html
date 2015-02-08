@@ -17,7 +17,7 @@
 		{% if viaggio.da.id == viaggio.luogoDiRiferimento_id %}
 			{% trans "PARTENZA" %}<br>{{ viaggio.a }}
 		{% else %}
-			{{ viaggio.da }}<br><img src="{% static "img/fin.png" %}" alt="Partenza" />{{ viaggio.a }}
+			{{ viaggio.da }}<br><i class="sprite icon-fin"></i>{{ viaggio.a }}
 		{% endif %}
 		{% if viaggio.is_long %}</strong>{% endif %}
 	</td>
