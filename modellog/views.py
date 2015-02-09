@@ -49,10 +49,13 @@ def actionLog(request, template_name="actionLog.html"):
 	content_type = None
 	viaggioType = ContentType.objects.get(app_label="tam", model='viaggio')
 	if filterType:
-		try:
-			content_type = ContentType.objects.get(app_label="tam", model=filterType)
-		except:
-			messages.error(request, "Tipo di oggetto da loggare non valido %s." % filterType)
+		if filterType == 'fattura':
+			content_type = ContentType.objects.get(app_label="fatturazione", model='fattura')
+		else:
+			try:
+				content_type = ContentType.objects.get(app_label="tam", model=filterType)
+			except ContentType.DoesNotExist:
+				messages.error(request, "Tipo di oggetto da loggare non valido %s." % filterType)
 
 	actions = ActionLog.objects.all()
 	if filterUtente:        # rendo filterUtente un intero
@@ -67,7 +70,6 @@ def actionLog(request, template_name="actionLog.html"):
 		except:
 			messages.error(request, "ID %s non valido." % filterId)
 			filterId = ""
-
 	if filterUtente:
 		logging.debug("Filtro per utente %s" % filterUtente)
 		actions = actions.filter(user_id=filterUtente)
