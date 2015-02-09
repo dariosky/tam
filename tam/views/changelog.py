@@ -147,6 +147,7 @@ def changeLog(request, template_name='static/changelog.html'):
 		('6.16', '6/10/2014', "Nascondo i clienti inattivi."),
 		('6.17', '2/11/2014', "CSRF e clickjacking protections."),
 		('6.18', '2/11/2014', "Django 1.7 e varie migliorie."),
+		('6.19', '9/2/2015', "Maggior dettaglio nel log della fatturazione."),
 	]
 	# ('', '', mark_safe('''''')),
 	for version in known_changes[::-1]:

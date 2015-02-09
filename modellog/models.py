@@ -20,6 +20,7 @@ class ActionLog(models.Model):
 
 	modelName = models.CharField(max_length='20', null=True, blank=True, default=None)
 	instance_id = models.IntegerField(null=True, blank=True, default=None)
+	# why the hell I stopped using contentTypes?
 	#	content_type = models.ForeignKey(ContentType)
 	#	object_id = models.PositiveIntegerField()
 	#	content_object = generic.GenericForeignKey('content_type', 'object_id')
@@ -48,11 +49,18 @@ class ActionLog(models.Model):
 		if not guessed_modelname:
 			return None
 		guessed_modelname = guessed_modelname[0].upper() + guessed_modelname[1:]
+		result = None
 		try:
 			class_name = getattr(tamModels, guessed_modelname)
-			return class_name.objects.get(id=self.instance_id)
+			result = class_name.objects.get(id=self.instance_id)
 		except:
-			return None
+			try:
+				import fatturazione.models as fatModels
+				class_name = getattr(fatModels, guessed_modelname)
+				result = class_name.objects.get(id=self.instance_id)
+			except:
+				pass
+		return result
 
 	def icon(self):
 		""" Ritorno l'icona associata al tipo cliente """

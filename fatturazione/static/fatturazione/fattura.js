@@ -1,5 +1,6 @@
 $(function () {
-	var csrf_token= $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
+	var csrf_token = $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
+
 	function myParse(string) {
 		string = string.replace(",", ".");
 		return parseFloat(string)
@@ -65,7 +66,7 @@ $(function () {
 						}
 					}
 					else {
-						messageBox(xhr.responseText);
+						messageBox(xhr.responseText || "Si è verificato un errore", "error");
 						$this.html(pre);
 					}
 				});
@@ -84,8 +85,10 @@ $(function () {
 			if (!confirm('Sicuro di voler cancellare la riga?')) return;
 			var row = $(this).closest('tr');
 			$.post("",
-				{action: 'delete-row', row: row.find('input:hidden').val(),
-					csrfmiddlewaretoken:csrf_token}
+				{
+					action: 'delete-row', row: row.find('input:hidden').val(),
+					csrfmiddlewaretoken: csrf_token
+				}
 			)
 				.complete(function (xhr, data) {
 					if (xhr.status == 200) {
@@ -96,7 +99,7 @@ $(function () {
 
 					}
 					else {
-						messageBox(xhr.responseText);
+						messageBox(xhr.responseText || "Si è verificato un errore", "error");
 					}
 				})
 		}
@@ -106,14 +109,14 @@ $(function () {
 		function () {
 			if (!confirm('Sicuro di voler cancellare l\'intera fattura?')) return false;
 			$.post("",
-				{action: 'delete-fat', csrfmiddlewaretoken:csrf_token}
+				{action: 'delete-fat', csrfmiddlewaretoken: csrf_token}
 			)
 				.complete(function (xhr, data) {
 					if (xhr.status == 200) {
 						document.location = xhr.responseText;
 					}
 					else {
-						messageBox(xhr.responseText);
+						messageBox(xhr.responseText || "Si è verificato un errore", "error");
 					}
 				})
 		}
@@ -123,7 +126,7 @@ $(function () {
 	$('#newRow').click(
 		function () {
 			var lastRow = $(this).closest('tr');
-			$.post("", {action: 'append-row', csrfmiddlewaretoken:csrf_token})
+			$.post("", {action: 'append-row', csrfmiddlewaretoken: csrf_token})
 				.complete(function (xhr, data) {
 					if (xhr.status == 200) {
 						var newRow = $(xhr.responseText); // return the row to insert
@@ -131,7 +134,7 @@ $(function () {
 						lastRow.before(newRow);
 					}
 					else {
-						messageBox(xhr.responseText);
+						messageBox(xhr.responseText || "Si è verificato un errore", "error");
 					}
 				})
 		}

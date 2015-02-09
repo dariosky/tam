@@ -197,7 +197,7 @@ def genera_fatture(request, fatturazione):
 				else:
 					viaggio = elemento
 
-				if elemento.key <> lastKey:
+				if elemento.key != lastKey:
 					# TESTATA
 					fattura = Fattura(tipo=tipo)
 					data_fattura = data_generazione
