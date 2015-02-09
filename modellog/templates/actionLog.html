@@ -32,7 +32,7 @@
 				<option value="P"{% if filterAction == "P" %} selected="selected"{% endif %}>Presenze</option>
 
 			</select>
-			<select name="user" class="selectFilter">
+			<select name="user" class="selectFilter" title="Utenti">
 				<option value="">Tutti gli utenti</option>
 				{% for utente in utenti %}
 					<option value="{{ utente.id }}"{% ifequal utente.id filterUtente %}
