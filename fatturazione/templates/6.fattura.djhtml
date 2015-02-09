@@ -1,46 +1,48 @@
 {% extends "base.html" %}{% load url from future %}
 {% load staticfiles pipeline %}
-{% block title %}{{fattura.nome_fattura}} {{fattura.descrittore}} &raquo; {{ block.super }} {% endblock %}
+{% block title %}{{ fattura.nome_fattura }} {{ fattura.descrittore }} &raquo; {{ block.super }} {% endblock %}
 
 {% block css %}
-{{ block.super }}
-	<link href="{% static 'fatturazione/fatture.css' %}" rel="stylesheet" type="text/css" />
+	{{ block.super }}
+	<link href="{% static 'fatturazione/fatture.css' %}" rel="stylesheet" type="text/css"/>
 	{% if not readonly %}
-	<style type="text/css">
-		.editable, .editable * {
-			background-color: #eee;
-		}
-	</style>
+		<style type="text/css">
+			.editable, .editable * {
+				background-color: #eee;
+			}
+		</style>
 	{% endif %}
 {% endblock css %}
 
 {% block content %}
-<a href="{% url "tamVisualizzazioneFatture" %}" class='noprint'>Torna all'elenco fatture</a>
-<h1 class='noprint'>{{fattura.nome_fattura}} {{fattura.descrittore}}</h1>
-{% csrf_token %}
+	<a href="{% url "tamVisualizzazioneFatture" %}" class='noprint'>Torna all'elenco fatture</a>
+	<h1 class='noprint'>{{ fattura.nome_fattura }} {{ fattura.descrittore }}</h1>
+	{% csrf_token %}
 
-{% include "fat_model/_fattura.djhtml" %}
+	{% include "fat_model/_fattura.djhtml" %}
 
-<a href='{% url "tamExportFattura" id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
+	<a href='{% url "tamExportFattura" id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
+		<div style="text-align: center">
+			<img src='{% static 'fatturazione/print_icon.png' %}' title='Versione stampabile'
+				 alt='Versione stampabile'/>
+		</div>
+	</a>
 	<div style="text-align: center">
-		<img src='{% static 'fatturazione/print_icon.png' %}' title='Versione stampabile' alt='Versione stampabile' />
+		<a href="{{ fattura.log_url }}" class="noprint">elenco modifiche</a><br/>
+		{% if perms.fatturazione.generate %}
+			<i class="sprite icon-delbtn delfat actionButton noprint" title='cancella fattura'></i>
+		{% endif %}
 	</div>
-</a>
-{% if perms.fatturazione.generate %}
-	<div style="text-align: center">
-		<i class="sprite icon-delbtn delfat actionButton noprint" title='cancella fattura'></i>
-	</div>
-{% endif %}
 
 {% endblock %}
 
 {% block bottom %}
-{% if not readonly %}
-	{% javascript 'jquery.editable' %}
-	{% javascript 'fattura' %}
-{% else %}
-	<script type="text/javascript">
-		$('.editable').removeClass('editable');
-	</script>
-{% endif %}
+	{% if not readonly %}
+		{% javascript 'jquery.editable' %}
+		{% javascript 'fattura' %}
+	{% else %}
+		<script type="text/javascript">
+			$('.editable').removeClass('editable');
+		</script>
+	{% endif %}
 {% endblock bottom %}
