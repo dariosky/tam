@@ -1,9 +1,17 @@
 {% extends "base.html" %}{% load staticfiles %}
 {% block title %}Classifica presenze &raquo; {{ block.super }}{% endblock %}
 {% block content %}
-	<h1>Classifica presenze</h1>
+	<h1>Classifica presenze {{ year }}</h1>
+	{% if previous_year %}
+		<a href="{% url "calendariopresenze-rank" year=previous_year %}">calendario {{ previous_year }}</a>
+	{% endif %}
+	{% if next_year %}
+		- <a href="{% url "calendariopresenze-rank" year=next_year %}">calendario {{ next_year }}</a>
+	{% endif %}
+	<hr/>
 	{% for key, caldesc in calendars.items %}
 		<h2>{{ caldesc.name }}</h2>
+		{% if caldesc.calendar_reset_date %}dal {{ caldesc.calendar_reset_date|date:"d/m/Y" }}{% endif %}
 		<table class="calendar tablesorter {{ caldesc.tags }}">
 			<thead>
 			<tr>

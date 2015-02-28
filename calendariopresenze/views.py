@@ -6,10 +6,11 @@ from django import forms
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.template.loader import get_template
+from django.utils import timezone
 from django.views.generic.base import TemplateView
 from calendariopresenze.models import Calendar, pretty_duration
 from modellog.actions import logAction
@@ -268,27 +269,41 @@ class CalendarManage(AjaxableResponseMixin):
 class CalendarRank(TemplateView):
 	template_name = "calendar/cal_rank.html"
 
-	def dispatch(self, request, year=None, *args, **kwargs):
+	def dispatch(self, request, *args, **kwargs):
+		# redirect to current year as default
+		year = kwargs.pop('year', None)
 		if year is None:
-			return HttpResponseRedirect(reverse('calendariopresenze-rank', kwargs={'year': datetime.date.today().year}))
+			return HttpResponseRedirect(reverse('calendariopresenze-rank', kwargs={'year': timezone.now().year}))
 		return super(CalendarRank, self).dispatch(request, *args, **kwargs)
 
 	def get_context_data(self, **kwargs):
 		context = super(CalendarRank, self).get_context_data(**kwargs)
 		year = int(self.kwargs['year'])
 		context['year'] = year
+		now = timezone.now()
+		previous_year = year - 1
+		next_year = year + 1 if year < now.year else None
 		calendars = copy.copy(settings.CALENDAR_DESC)
 		for key, caldesc in calendars.items():
 			if "hide_rank" in caldesc:
 				del calendars[key]
 				continue
 			ranks = []
-			for conducente in Conducente.objects.filter(attivo=True,
-														# 1/1/2015 no more presenze reset every year
-			                                            # presenze__date_start__year=year,
-			                                            presenze__type=key) \
-					.annotate(tot=Sum('presenze__value')) \
-					.order_by('-tot'):
+			calendar_filter_query = Q(attivo=True, presenze__type=key)  # calendar do not reset by default
+			if caldesc.get('rank_start'):
+				month, day = caldesc['rank_start']
+				calendar_reset_date = tamdates.date_enforce(datetime.datetime(year=year, month=month, day=day))
+				if now < calendar_reset_date:
+					# we have to reach the reset date, show the previous Y
+					calendar_reset_date = calendar_reset_date.replace(year=year - 1)
+				caldesc['calendar_reset_date'] = calendar_reset_date
+				caldesc['calendar_reset_date_end'] = calendar_reset_date.replace(year=calendar_reset_date.year + 1)
+				calendar_filter_query = calendar_filter_query & Q(presenze__date_start__gte=calendar_reset_date,
+				                                                  presenze__date_start__lt=caldesc[
+					                                                  'calendar_reset_date_end'], )
+			conducenti_da_annotare = Conducente.objects.filter(calendar_filter_query)
+			context["conducenti_da_annotare"] = conducenti_da_annotare
+			for conducente in conducenti_da_annotare.annotate(tot=Sum('presenze__value')).order_by('-tot'):
 				if 'display' in caldesc:
 					value = conducente.tot
 					if 'rank_display' in caldesc:
@@ -298,25 +313,28 @@ class CalendarRank(TemplateView):
 				ranks.append({'name': conducente.nome, 'conducente_id': conducente.id, 'value': value})
 			caldesc['rank'] = ranks
 		context['calendars'] = calendars
+		context.update(dict(year=year, previous_year=previous_year, next_year=next_year))
 		return context
 
 
-class CalendarByConducente(TemplateView):
+class CalendarByConducente(CalendarRank):
 	template_name = "calendar/cal_view.html"
 
-	def get_context_data(self, year, conducente_id, caltype, **kwargs):
-		year = int(year)
+	def get_context_data(self, **kwargs):
+		conducente_id = kwargs.get('conducente_id')
+		caltype = kwargs.get('caltype')
 		caltype = int(caltype)
 		context = super(CalendarByConducente, self).get_context_data(**kwargs)
 		conducente = Conducente.objects.get(id=conducente_id)
-		caldesc = settings.CALENDAR_DESC[caltype]
+
 		context['conducente'] = conducente
-		context['caldesc'] = caldesc
-		calendars = Calendar.objects.filter(conducente=conducente,
-		                                    # date_start__year=year,
-		                                    type=caltype,
-		)
-		context['calendars'] = calendars
+		caldesc = context['calendars'][caltype]
+		calendar_query = Q(conducente=conducente, type=caltype)
+		if 'calendar_reset_date' in caldesc:
+			calendar_query = calendar_query & Q(date_start__gte=caldesc['calendar_reset_date'],
+			                                    date_start__lt=caldesc['calendar_reset_date_end'], )
+
+		context['calendars'] = Calendar.objects.filter(calendar_query)
 		return context
 
 
