@@ -103,8 +103,8 @@ class Fattura(models.Model):
 		return INVOICES_FOOTERS.get(self.tipo, [])
 
 	def log_url(self):
-		# <a href="{% url "actionLog" %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
-		return reverse('actionLog') + "?type=fattura&amp;id=%d" % self.id
+		# <a href="{% url "actionLog" %}?type=fattura&amp;id={{ viaggio.id }}">log</a>
+		return mark_safe(reverse('actionLog') + "?type=fattura&amp;id=%d" % self.id)
 
 
 class RigaFattura(models.Model):
