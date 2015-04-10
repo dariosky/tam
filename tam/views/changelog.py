@@ -149,8 +149,9 @@ def changeLog(request, template_name='static/changelog.html'):
 		('6.17', '2/11/2014', "CSRF e clickjacking protections."),
 		('6.18', '2/11/2014', "Django 1.7 e varie migliorie."),
 		('6.19', '9/2/2015', "Maggior dettaglio nel log della fatturazione."),
-		('6.20', '28/2/2015',
-		 "Presenze resettabili custom." if 'calendariopresenze' in settings.PLUGGABLE_APPS else "" ),
+		('6.20', '28/2/2015', "Presenze resettabili custom.") if 'calendariopresenze' in settings.PLUGGABLE_APPS else "",
+        ('6.30', '10/4/2015',
+         "Visualizzazione allegati prenotazioni.") if 'prenotazioni' in settings.PLUGGABLE_APPS else "",
 	]
 	# ('', '', mark_safe('''''')),
 	for version in known_changes[::-1]:

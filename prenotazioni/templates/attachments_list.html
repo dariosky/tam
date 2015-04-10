@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load staticfiles humanize l10n %}
+{% load url from future %}
+{% block title %}Visualizzazione allegati &raquo; {{ block.super }} {% endblock %}
+{% block content %}
+	<h1>Visualizzazione allegati prenotazioni</h1>
+	<div id='date_range'>
+		<form method='get' action=''>
+			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
+			a <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<input type="submit" value="Trova allegati"/>
+		</form>
+		<a href="?mese=cur">{{ quick_month_names.0 }}</a>
+		<a href="?mese=prev">{{ quick_month_names.1 }}</a>
+		<a href="?mese=prevprev">{{ quick_month_names.2 }}</a>
+	</div>
+	{% for cliente, lista in gruppo_prenotazioni.items %}
+		<div>
+			<h2 class='accordhead'>{{ cliente }}</h2>
+			<table class='tablesorter'>
+				<tr>
+					<th>Prenotazione</th>
+					<th>Descrizione</th>
+					<th>Data</th>
+					<th>Allegato</th>
+				</tr>
+				{% for prenotazione in lista %}
+					<tr>
+						<td>{{ prenotazione.id }}</td>
+						<td>
+							{% if prenotazione.is_arrivo %}ARRIVO{% else %}PARTENZA{% endif %} {{ prenotazione.luogo }}
+						</td>
+						<td>{{ prenotazione.data_corsa }}</td>
+						<td>
+							{% if prenotazione.attachment %}
+								<a href="{{ prenotazione.attachment.url }}" target="_blank"><i
+										title="Vedi l'allegato" class="sprite icon-attachment"></i>
+									{{ prenotazione.attachment.name }}
+								</a>
+							{% else %}
+								<i title="Allegato inviato solo via mail" class="sprite icon-attachment"></i>
+								Verifica mail del {{ prenotazione.data_registrazione }}
+							{% endif %}
+						</td>
+					</tr>
+				{% endfor %}
+			</table>
+
+			{{ lista|length }} prenotazioni.
+		</div>
+	{% endfor %}
+
+{% endblock content %}
+
+{% block bottom %}
+	<script type="text/javascript">
+		$(function () {
+			$(".accordhead").click(function () {
+				$(this).next().toggle('slow');
+				return false;
+			});
+
+			$('#date_range input[type=text]').datepicker();
+		});
+	</script>
+{% endblock bottom %}
