@@ -12,16 +12,32 @@
 	min-width: 200px;
 }
 
-#coda>div, #codacomandi div {
+#coda>div, #codacomandi .place, #codacomandi #dequeue, #codacomandi #refresh {
     float:left;
+	min-width: 150px;
     border: 2px solid black;
-    padding:10px;
+    padding: 25px;
     max-width: 200px;
     white-space: pre-line;
     margin:0 5px 5px 0;
-    background-color: white;
     text-align: center;
     border-radius: 5px;
+	cursor: pointer;
+	background-color:#eee;
+}
+#coda>div {
+	background-color: white;
+}
+#separator {
+	clear: both;
+	display: block;
+	height: 30px;
+	background: transparent;
+}
+#codacomandi #dequeue {
+	background: tomato;
+	color: white;
+	font-weight: bolder;
 }
 
 #coda>div {
@@ -44,7 +60,6 @@
     font-weight: bolder;
 }
 
-#codacomandi div {
-    cursor: pointer;
-    background-color:#eee;
+h2 {
+	margin:30px 0;
 }
