@@ -26,10 +26,10 @@
 			{% csrf_token %}
             <h2>Accodati a:</h2>
             {% for piazza in piazze %}
-                <div>{{ piazza }}</div>
+                <div class="place">{{ piazza }}</div>
             {% endfor %}
 
-            <br style="clear: both"/>
+            <div id="separator"></div>
 
             <div id='dequeue'>Esci dalla coda</div>
             <div id='refresh'><i class="sprite icon-assoc"></i> Aggiorna</div>
