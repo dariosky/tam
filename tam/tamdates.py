@@ -130,6 +130,6 @@ if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
 	tz_italy = pytz.timezone('UTC')
 else:
 	# Tutto in UTC, ma reinterpreto come CET
-	logging.debug("in DB everything is TZ aware")
+	# logging.debug("in DB everything is TZ aware")
 	tz_italy = pytz.timezone('Europe/Rome')
 timezone.activate(tz_italy)
