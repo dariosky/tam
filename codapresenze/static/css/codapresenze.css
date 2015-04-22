@@ -1,67 +1,74 @@
 #coda {
-    background:#fbeed5;
-    padding: 30px 10px;
+	background: #fbeed5;
+	padding: 30px 10px;
 	clear: both;
 }
+
 #user-choser {
 	float: right;
 }
+
 #user-choser select {
 	height: 3em;
 	margin: 20px;
 	min-width: 200px;
 }
 
-#coda>div, #codacomandi .place, #codacomandi #dequeue, #codacomandi #refresh {
-    float:left;
-	min-width: 150px;
-    border: 2px solid black;
-    padding: 25px;
-    max-width: 200px;
-    white-space: pre-line;
-    margin:0 5px 5px 0;
-    text-align: center;
-    border-radius: 5px;
+#coda > div, #codacomandi .place, #codacomandi #dequeue, #codacomandi #refresh {
+	float: left;
+	width: 80px;
+	min-height: 35px;
+	border: 2px solid black;
+	padding: 25px;
+	max-width: 200px;
+	white-space: pre-line;
+	margin: 0 5px 5px 0;
+	text-align: center;
+	border-radius: 5px;
 	cursor: pointer;
-	background-color:#eee;
+	background-color: #eee;
 }
 
-#coda>div {
+#coda > div {
 	background-color: white;
 	padding: 10px;
+	font-size: 10pt;
+	cursor: inherit;
 }
+
 #separator {
 	clear: both;
 	display: block;
 	height: 30px;
 	background: transparent;
 }
+
 #codacomandi #dequeue {
 	background: tomato;
 	color: white;
 	font-weight: bolder;
 }
 
-#coda>div {
-    width: 180px;
+#coda > div {
+	width: 180px;
 }
 
 #coda div.name {
-    font-size: 19pt;
+	font-size: 19pt;
 }
 
 #coda div.current {
-    background-color: springgreen;
+	background-color: springgreen;
 }
 
 #coda span {
-    display:block;
+	display: block;
 }
 
 #coda span.place {
-    font-weight: bolder;
+	font-weight: bolder;
 }
 
 h2 {
-	margin:10px 0;
+	margin: 10px 0;
 }
