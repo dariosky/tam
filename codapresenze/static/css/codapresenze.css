@@ -29,6 +29,10 @@
 	background-color: #eee;
 }
 
+#codacomandi #dequeue, #codacomandi #refresh {
+	float: right;
+}
+
 #coda > div {
 	background-color: white;
 	padding: 10px;
@@ -37,7 +41,7 @@
 }
 
 #separator {
-	clear: both;
+	/*clear: both;*/
 	display: block;
 	height: 30px;
 	background: transparent;
