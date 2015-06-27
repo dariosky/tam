@@ -45,13 +45,16 @@ from djangotasks import signals
 
 LOG = logging.getLogger("djangotasks")
 
+
 def _get_model_name(model_class):
     return smart_unicode(model_class._meta)
+
 
 def _get_model_class(model_name):
     model = models.get_model(*model_name.split("."))
     if model == None:
-        raise Exception("%s is not a registered model, cannot use this task" % model_name)
+        raise Exception(
+            "%s is not a registered model, cannot use this task" % model_name)
     return model
 
 
@@ -76,27 +79,37 @@ class TaskManager(models.Manager):
 
     def register_task(self, method, documentation, *required_methods):
         import inspect
+
         if not inspect.ismethod(method):
             raise Exception(repr(method) + " is not a class method")
         model = _get_model_name(method.im_class)
-        if len(required_methods) == 1 and required_methods[0].__class__ in [list, tuple]:
+        if len(required_methods) == 1 and required_methods[0].__class__ in [
+            list, tuple]:
             required_methods = required_methods[0]
 
         for required_method in required_methods:
             if not inspect.ismethod(required_method):
-                raise Exception(repr(required_method) + " is not a class method")
-            if required_method.im_func.__name__ not in [method_name for method_name, _, _ in TaskManager.DEFINED_TASKS[model]]:
-                raise Exception(repr(required_method) + " is not registered as a task method for model " + model)
+                raise Exception(
+                    repr(required_method) + " is not a class method")
+            if required_method.im_func.__name__ not in [method_name for
+                                                        method_name, _, _ in
+                                                        TaskManager.DEFINED_TASKS[
+                                                            model]]:
+                raise Exception(repr(
+                    required_method) + " is not registered as a task method for model " + model)
 
         TaskManager.DEFINED_TASKS[model].append((method.im_func.__name__,
                                                  documentation if documentation else '',
-                                                 ','.join(required_method.im_func.__name__
-                                                          for required_method in required_methods)))
+                                                 ','.join(
+                                                     required_method.im_func.__name__
+                                                     for required_method in
+                                                     required_methods)))
 
     def task_for_object(self, the_class, object_id, method, status_in=None):
         model = _get_model_name(the_class)
         if method not in [m for m, _, _ in TaskManager.DEFINED_TASKS[model]]:
-            raise Exception("Method '%s' not registered for model '%s'" % (method, model))
+            raise Exception(
+                "Method '%s' not registered for model '%s'" % (method, model))
 
         taskdef = [taskdef for taskdef in TaskManager.DEFINED_TASKS[model]
                    if taskdef[0] == method][0]
@@ -105,6 +118,7 @@ class TaskManager(models.Manager):
             status_in = dict(STATUS_TABLE).keys()
 
         from django.core.exceptions import MultipleObjectsReturned
+
         try:
             task, created = self.get_or_create(model=model,
                                                method=method,
@@ -112,7 +126,8 @@ class TaskManager(models.Manager):
                                                status__in=status_in,
                                                archived=False)
         except MultipleObjectsReturned, e:
-            LOG.exception("Integrity error: multiple non-archived tasks, should not occur. Attempting recovery by archiving all tasks for this object and method, and recreating them")
+            LOG.exception(
+                "Integrity error: multiple non-archived tasks, should not occur. Attempting recovery by archiving all tasks for this object and method, and recreating them")
             objects = self.filter(model=model,
                                   method=method,
                                   object_id=str(object_id),
@@ -127,7 +142,8 @@ class TaskManager(models.Manager):
         if created:
             self.filter(pk=task.pk).update(description=taskdef[1])
 
-        LOG.debug("Created task %d on model=%s, method=%s, object_id=%s", task.id, model, method, object_id)
+        LOG.debug("Created task %d on model=%s, method=%s, object_id=%s",
+                  task.id, model, method, object_id)
         return self.get(pk=task.pk)
 
     def tasks_for_object(self, the_class, object_id):
@@ -138,7 +154,8 @@ class TaskManager(models.Manager):
 
     def task_for_function(self, function):
         function_name = _to_function_name(function)
-        function_task = FunctionTask.objects.get_or_create(function_name=function_name)
+        function_task = FunctionTask.objects.get_or_create(
+            function_name=function_name)
         return self.task_for_object(FunctionTask, function_name,
                                     FunctionTask.run_function_task.func_name)
 
@@ -165,7 +182,8 @@ class TaskManager(models.Manager):
                 continue
 
             if required_task.status == 'requested_cancel':
-                raise Exception("Required task being cancelled, please try again")
+                raise Exception(
+                    "Required task being cancelled, please try again")
 
             if required_task.status in ['cancelled', 'unsuccessful']:
                 # re-run it
@@ -179,57 +197,68 @@ class TaskManager(models.Manager):
     def cancel_task(self, pk):
         task = self.get(pk=pk)
         if task.status not in ["scheduled", "running"]:
-            raise Exception("Cannot cancel task that has not been scheduled or is not running")
+            raise Exception(
+                "Cannot cancel task that has not been scheduled or is not running")
 
         # If the task is still scheduled, mark it requested for cancellation also:
         # if it is currently starting, that's OK, it'll stay marked as "requested_cancel" in mark_start
         self._set_status(pk, "requested_cancel", ["scheduled", "running"])
 
-
     # The methods below are for internal use on the server. Don't use them directly.
     def _create_task(self, model, method, object_id):
-        return Task.objects.task_for_object(_get_model_class(model), object_id, method,
-                                            ["defined", "scheduled", "running", "requested_cancel"])
+        return Task.objects.task_for_object(_get_model_class(model), object_id,
+                                            method,
+                                            ["defined", "scheduled", "running",
+                                             "requested_cancel"])
 
     def append_log(self, pk, log):
         if log:
             # not possible to make it completely atomic in Django, it seems
-            rowcount = self.filter(pk=pk).update(log=(self.get(pk=pk).log + log))
+            rowcount = self.filter(pk=pk).update(
+                log=(self.get(pk=pk).log + log))
             if rowcount == 0:
-                raise Exception(("Failed to save log for task %d, task does not exist; log was:\n" % pk) + log)
+                raise Exception((
+                                    "Failed to save log for task %d, task does not exist; log was:\n" % pk) + log)
 
     def mark_start(self, pk, pid):
         # Set the start information in all cases: That way, if it has been set
         # to "requested_cancel" already, it will be cancelled at the next loop of the scheduler
-        rowcount = self.filter(pk=pk).update(pid=pid, start_date=datetime.now())
+        rowcount = self.filter(pk=pk).update(pid=pid,
+                                             start_date=datetime.now())
         if rowcount == 0:
-            raise Exception("Failed to mark task with ID %d as started, task does not exist" % pk)
+            raise Exception(
+                "Failed to mark task with ID %d as started, task does not exist" % pk)
 
     def _set_status(self, pk, new_status, existing_status):
         if isinstance(existing_status, str):
-            existing_status = [ existing_status ]
+            existing_status = [existing_status]
 
         if existing_status:
-            rowcount = self.filter(pk=pk).filter(status__in=existing_status).update(status=new_status)
+            rowcount = self.filter(pk=pk).filter(
+                status__in=existing_status).update(status=new_status)
         else:
             rowcount = self.filter(pk=pk).update(status=new_status)
         if rowcount == 0:
             LOG.warning('Failed to change status from %s to "%s" for task %s',
-                        "or".join('"' + status + '"' for status in existing_status) if existing_status else '(any)',
+                        "or".join('"' + status + '"' for status in
+                                  existing_status) if existing_status else '(any)',
                         new_status, pk)
 
         return rowcount != 0
 
     def mark_finished(self, pk, new_status, existing_status):
-        rowcount = self.filter(pk=pk).filter(status=existing_status).update(status=new_status, end_date=datetime.now())
+        rowcount = self.filter(pk=pk).filter(status=existing_status).update(
+            status=new_status, end_date=datetime.now())
         if rowcount == 0:
-            LOG.warning('Failed to mark tasked as finished, from status "%s" to "%s" for task %s. May have been finished in a different thread already.',
-                        existing_status, new_status, pk)
+            LOG.warning(
+                'Failed to mark tasked as finished, from status "%s" to "%s" for task %s. May have been finished in a different thread already.',
+                existing_status, new_status, pk)
         else:
             LOG.info('Task %s finished with status "%s"', pk, new_status)
             # Sending a task completion Signal including the task and the object
             task = self.get(pk=pk)
-            object = _get_model_class(task.model).objects.get(pk=task.object_id)
+            object = _get_model_class(task.model).objects.get(
+                pk=task.object_id)
             signals.task_completed.send(sender=self, task=task, object=object)
 
     # This is for use in the scheduler only. Don't use it directly.
@@ -241,11 +270,12 @@ class TaskManager(models.Manager):
 
             the_class = _get_model_class(self.current_task.model)
             object = the_class.objects.get(pk=self.current_task.object_id)
-            the_method =  getattr(object, self.current_task.method)
+            the_method = getattr(object, self.current_task.method)
 
             the_method()
         finally:
             import sys
+
             sys.stdout.flush()
             sys.stderr.flush()
 
@@ -295,6 +325,10 @@ class TaskManager(models.Manager):
                 # only start one task at a time
                 break
 
+    class Meta:
+        app_label = "djangotasks"
+
+
 STATUS_TABLE = [('defined', 'ready to run'),
                 ('scheduled', 'scheduled'),
                 ('running', 'in progress',),
@@ -306,7 +340,6 @@ STATUS_TABLE = [('defined', 'ready to run'),
 
 
 class Task(models.Model):
-
     model = models.CharField(max_length=200)
     method = models.CharField(max_length=200)
 
@@ -320,19 +353,22 @@ class Task(models.Model):
                               default="defined",
                               choices=STATUS_TABLE,
                               )
-    description = models.CharField(max_length=100, default='', null=True, blank=True)
+    description = models.CharField(max_length=100, default='', null=True,
+                                   blank=True)
     log = models.TextField(default='', null=True, blank=True)
 
-    archived = models.BooleanField(default=False) # for history
+    archived = models.BooleanField(default=False)  # for history
 
     def __unicode__(self):
-        return u'%s - %s.%s.%s' % (self.id, self.model.split('.')[-1], self.object_id, self.method)
+        return u'%s - %s.%s.%s' % (
+            self.id, self.model.split('.')[-1], self.object_id, self.method)
 
     def status_string(self):
         return dict(STATUS_TABLE)[self.status]
 
     def status_for_display(self):
-        return '<span class="%s">%s</span>' % (self.status, self.status_string())
+        return '<span class="%s">%s</span>' % (
+            self.status, self.status_string())
 
     status_for_display.allow_tags = True
     status_for_display.admin_order_field = 'status'
@@ -340,30 +376,40 @@ class Task(models.Model):
 
     def complete_log(self, directly_required_only=False):
         return '\n'.join([required_task.formatted_log()
-                          for required_task in self._unique_required_tasks(directly_required_only)])
+                          for required_task in
+                          self._unique_required_tasks(directly_required_only)])
 
     def get_required_tasks(self):
         taskdef = self._get_task_definition()
-        return [Task.objects.task_for_object(_get_model_class(self.model), self.object_id, method)
-                for method in taskdef[2].split(',') if method] if taskdef else []
+        return [Task.objects.task_for_object(_get_model_class(self.model),
+                                             self.object_id, method)
+                for method in taskdef[2].split(',') if
+                method] if taskdef else []
 
     def can_run(self):
-        return self.status not in ["scheduled", "running", "requested_cancel", ] #"successful"
+        return self.status not in ["scheduled", "running",
+                                   "requested_cancel", ]  # "successful"
 
     def formatted_log(self):
         from django.utils.dateformat import format
+
         FORMAT = "N j, Y \\a\\t P T"
         if self.status in ['cancelled', 'successful', 'unsuccessful']:
-            return (self.description + ' started' + ((' on ' + format(self.start_date, FORMAT)) if self.start_date else '') +
+            return (self.description + ' started' + ((' on ' + format(
+                self.start_date, FORMAT)) if self.start_date else '') +
                     (("\n" + self.log) if self.log else "") + "\n" +
-                    self.description + ' ' + self.status_string() + ((' on ' + format(self.end_date, FORMAT)) if self.end_date else '') +
+                    self.description + ' ' + self.status_string() + ((
+                                                                         ' on ' + format(
+                                                                             self.end_date,
+                                                                             FORMAT)) if self.end_date else '') +
                     (' (%s)' % self.duration if self.duration else ''))
         elif self.status in ['running', 'requested_cancel']:
-            return (self.description + ' started' + ((' on ' + format(self.start_date, FORMAT)) if self.start_date else '') +
+            return (self.description + ' started' + ((' on ' + format(
+                self.start_date, FORMAT)) if self.start_date else '') +
                     (("\n" + self.log) if self.log else "") + "\n" +
                     self.description + ' ' + self.status_string())
         else:
-            return self.description + ' ' +  self.status_string()
+            return self.description + ' ' + self.status_string()
 
     # Only for use by the manager: do not call directly, except in tests
     def do_run(self):
@@ -375,7 +421,8 @@ class Task(models.Model):
             try:
                 # Do not start if it's not marked as scheduled
                 # This ensures that we can have multiple schedulers
-                if not Task.objects._set_status(self.pk, "running", "scheduled"):
+                if not Task.objects._set_status(self.pk, "running",
+                                                "scheduled"):
                     return
                 # execute the managemen utility, with the same python path as the current process
                 env = dict(os.environ)
@@ -397,7 +444,8 @@ class Task(models.Model):
                     line = proc.stdout.readline()
                     buf += line
 
-                    if (time.time() - t > 1): # Save the log once every second max
+                    if (
+                                    time.time() - t > 1):  # Save the log once every second max
                         Task.objects.append_log(self.pk, buf)
                         buf = ''
                         t = time.time()
@@ -415,19 +463,26 @@ class Task(models.Model):
                 returncode = proc.returncode
 
             except Exception, e:
-                LOG.exception("Exception in calling thread for task %s", self.pk)
+                LOG.exception("Exception in calling thread for task %s",
+                              self.pk)
                 import traceback
+
                 stack = traceback.format_exc()
                 try:
-                    Task.objects.append_log(self.pk, "Exception in calling thread: " + str(e) + "\n" + stack)
+                    Task.objects.append_log(self.pk,
+                                            "Exception in calling thread: " + str(
+                                                e) + "\n" + stack)
                 except Exception, ee:
-                    LOG.exception("Second exception while trying to save the first exception to the log for task %s!", self.pk)
+                    LOG.exception(
+                        "Second exception while trying to save the first exception to the log for task %s!",
+                        self.pk)
 
             Task.objects.mark_finished(self.pk,
                                        "successful" if returncode == 0 else "unsuccessful",
                                        "running")
 
         import thread
+
         thread.start_new_thread(exec_thread, ())
 
     def _do_cancel(self):
@@ -444,12 +499,16 @@ class Task(models.Model):
                 return
 
             import signal
+
             os.kill(self.pid, signal.SIGTERM)
         except OSError, e:
             # could happen if the process *just finished*. Fail cleanly
-            raise Exception('Failed to cancel task model=%s, method=%s, object=%s: %s' % (self.model, self.method, self.object_id, str(e)))
+            raise Exception(
+                'Failed to cancel task model=%s, method=%s, object=%s: %s' % (
+                    self.model, self.method, self.object_id, str(e)))
         finally:
-            Task.objects.mark_finished(self.pk, "cancelled", "requested_cancel")
+            Task.objects.mark_finished(self.pk, "cancelled",
+                                       "requested_cancel")
 
     def _unique_required_tasks(self, directly_required_only=False):
         unique_required_tasks = []
@@ -467,7 +526,7 @@ class Task(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self._find_method() # will raise an exception if the method of this task is not registered
+            self._find_method()  # will raise an exception if the method of this task is not registered
 
             # time to archive the old ones
             Task.objects.filter(model=self.model,
@@ -479,11 +538,17 @@ class Task(models.Model):
 
     def _get_task_definition(self):
         if self.model not in TaskManager.DEFINED_TASKS:
-            LOG.warning("A task on model=%s exists in the database, but is not defined in the code", self.model)
+            LOG.warning(
+                "A task on model=%s exists in the database, but is not defined in the code",
+                self.model)
             return None
-        taskdefs = [taskdef for taskdef in TaskManager.DEFINED_TASKS[self.model] if taskdef[0] == self.method]
+        taskdefs = [taskdef for taskdef in
+                    TaskManager.DEFINED_TASKS[self.model] if
+                    taskdef[0] == self.method]
         if len(taskdefs) == 0:
-            LOG.debug("A task on model=%s and method=%s exists in the database, but is not defined in the code", self.model, self.method)
+            LOG.debug(
+                "A task on model=%s and method=%s exists in the database, but is not defined in the code",
+                self.model, self.method)
             return None
         return taskdefs[0]
 
@@ -498,15 +563,20 @@ class Task(models.Model):
             min, sec = divmod((delta.days * 86400) + delta.seconds, 60)
             hour, min = divmod(min, 60)
             str = ((hour, 'hour'), (min, 'minute'), (sec, 'second'))
-            return ', '.join(['%d %s%s' % (x[0], x[1],'s' if x[0] > 1 else '')
+            return ', '.join(['%d %s%s' % (x[0], x[1], 's' if x[0] > 1 else '')
                               for x in str if (x[0] > 0)])
 
     duration = property(_compute_duration)
 
     objects = TaskManager()
 
+    class Meta:
+        app_label = "djangotasks"
+
+
 def _to_function_name(function):
     import inspect
+
     if not inspect.isfunction(function):
         raise Exception(repr(function) + " is not a function")
     return function.__module__ + '.' + function.__name__
@@ -523,17 +593,25 @@ def _to_function(function_name):
 class FunctionTask(models.Model):
     function_name = models.CharField(max_length=255,
                                      primary_key=True)
+
     def run_function_task(self):
         function = _to_function(self.function_name)
         return function()
 
-Task.objects.register_task(FunctionTask.run_function_task, "Run a function task")
+    class Meta:
+        app_label = "djangotasks"
 
 
-if 'DJANGOTASK_DAEMON_THREAD' in dir(settings) and settings.DJANGOTASK_DAEMON_THREAD:
+Task.objects.register_task(FunctionTask.run_function_task,
+                           "Run a function task")
+
+if 'DJANGOTASK_DAEMON_THREAD' in dir(
+        settings) and settings.DJANGOTASK_DAEMON_THREAD:
     import logging
+
     logging.getLogger().addHandler(logging.StreamHandler())
     logging.getLogger().setLevel(logging.INFO)
 
     import thread
+
     thread.start_new_thread(Task.objects.scheduler, ())

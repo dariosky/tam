@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load url from future %}
+{% extends "base.html" %}
 {% load staticfiles pipeline %}
 {% block title %}{{ fattura.nome_fattura }} {{ fattura.descrittore }} &raquo; {{ block.super }} {% endblock %}
 

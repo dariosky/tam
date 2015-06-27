@@ -1,4 +1,4 @@
-{% load url from future %}
+
 
 <h2>Prenotazioni</h2>
 <p>
@@ -31,7 +31,7 @@
 			</option>
 		{% endfor %}
 	</select>
-	
+
 	<p>
 	Luogo in cui si trova il cliente:
 	<select name='prenotazioni_luogo'>
@@ -43,7 +43,7 @@
 		{% endfor %}
 	</select>
 	</p>
-	
+
 	<p>
 		<label for="operatore">Nome dell'operatore:</label>
 		<input type='text' name='operatore' id='operatore' value='{{ utentePrenotazioni.nome_operatore }}' />

@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load url from future %}
+{% extends "base.html" %}
 
 {% block title %}Gestione backup &raquo; {{ block.super }}{% endblock %}
 
@@ -40,7 +40,7 @@
 			</table>
 		{% else %}
 			<p>Non sono presenti backup del database.</p>
-		{% endif %}	
+		{% endif %}
 		<p>
 			<input type="submit" name="backup" value="Backup DB" class="bigButton"/>
 		</p>

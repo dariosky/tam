@@ -1,4 +1,4 @@
-{% load url from future %}{% spaceless %}
+{% spaceless %}
 <div class='lordo{% if viaggio.prezzo == 0 %} error{% endif %}'>{{ viaggio.prezzo }}</div>
 {% if viaggio.annullato  %}<br/>{% if nolink %}ANNULLATO{% else %}<a href="{% url "tamNuovaCorsa2Id" viaggio.id %}">ANNULLATO</a>{% endif %}{% else %}
 <div class="pricedetail">

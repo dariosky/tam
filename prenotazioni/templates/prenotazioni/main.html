@@ -1,16 +1,16 @@
 {% extends 'prenotazioni/base.html' %}
-{% load i18n %}{% load url from future %}{% load tz %}
+{% load i18n %}{% load tz %}
 {% block content %}
 	{% if prenotazione %}
 		<h3>{% trans "Prenotazione" %} {{ prenotazione.id }}</h3>
 	{% endif %}
-	
+
 	{{ utentePrenotazioni.nome_operatore }} {% trans "per" %}
 	{% if cliente_unico %}{{ cliente_unico }}{% endif %}
 	<form action='' method="post" enctype="multipart/form-data" id='preForm'>
 		{% csrf_token %}
 		{{ form.as_p }}
-		
+
 		{% if editable %}
 			<input type='submit'
 				   name='prenota'
@@ -30,7 +30,7 @@
 			</script>
 		{% endif %}
 	</form>
-	
+
 	<a href='{% url 'tamCronoPrenotazioni' %}'>
 
 	<div style='text-align:center'>

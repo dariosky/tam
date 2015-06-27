@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load url from future %}
+{% extends "base.html" %}
 
 {% block title %}Strumenti per l'archiviazione &raquo; {{ block.super }}{% endblock %}
 
@@ -10,10 +10,10 @@
 {% csrf_token %}
 <div>
 	<h2>Archivio corse</h2>
-	
+
 		Archivia tutte le corse ed i log fino al {{ form.end_date }} mantenendo le classifiche inalterate.<br/>
 		<input type="submit" name="preview" value="Anteprima archiviazione" /><br/>
-	
+
 	<a href="{% url "tamArchiveView" %}"><strong>Consulta qui tutte le corse archiviate.</strong></a>
 </div>
 </form>

@@ -1,4 +1,4 @@
-{% load url from future %}<thead>
+<thead>
 	<tr>
 		<th>Cliente</th>
 	    <th><input type="checkbox" id='check_{{f.d.codice}}'/></th>
