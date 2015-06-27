@@ -1,5 +1,5 @@
 # Django related
-django<1.8
+django<1.9
 south
 django-debug-toolbar
 

@@ -2,7 +2,7 @@ import os
 import re
 
 has_url_pattern = re.compile(r'\{%\s*url')
-# {% load url from future %}
+#
 future_url_pattern = re.compile(r'\{%\s*load\s+url\s+from\s+future')
 url_comma_parameters = re.compile(r'\{%\s*url\s*(.*?)%\}', re.DOTALL)
 param_tokenizer = re.compile(r'[,\s]+')
@@ -25,7 +25,7 @@ for dirpath, dirnames, filenames in os.walk('.'):
 					warning = []
 					future_url = re.search(future_url_pattern, content)
 					if not future_url:
-						error.append("Future URL missing: {% load url from future %}")
+						error.append("Future URL missing: ")
 					parameters = re.findall(url_comma_parameters, content)
 					for parameter in parameters:
 						#print parameter

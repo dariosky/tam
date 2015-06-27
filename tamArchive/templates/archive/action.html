@@ -1,4 +1,4 @@
-{% extends "base.html" %}{% load url from future %}
+{% extends "base.html" %}
 {% load humanize %}
 
 {% block title %}Archiviazione &raquo; {{ block.super }}{% endblock %}
@@ -23,7 +23,7 @@
 				Archivio <strong>{{ archiveCount|intcomma }}</strong>/{{ archiveTotalCount|intcomma }} corse.<br/>
 				Elimino <strong>{{ logCount|intcomma }}</strong>/{{ logTotalCount|intcomma }} azioni dal log.
 			</p>
-	
+
 			<input type="hidden" name="end_date" value="{{ end_date_string }}"/>
 			<input type="submit" name="archive" value="Archivia" class="bigButton" /><br/>
 			(attenzione, l'azione è irreversibile).<br/>
@@ -31,7 +31,7 @@
 			<h2>Non è necessaria l'archiviazione.</h2>
 			<p>Non è presente nulla prima di questa data.</p>
 		{% endif %}
-	
+
 </div>
 </form>
 

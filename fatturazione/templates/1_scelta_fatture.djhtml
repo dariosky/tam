@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-{% load url from future %}
 {% block title %}Generazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
 
