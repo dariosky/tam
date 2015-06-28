@@ -2,7 +2,7 @@
 from django.core.files.storage import FileSystemStorage
 from django.db import models
 from django.db import connections
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse  # to resolve named urls
 from django.template.loader import render_to_string
 from django.contrib.auth.models import User
@@ -35,7 +35,7 @@ def get_classifiche():
         Restituisce una lista di dizionari, ognuna con i valori del conducente.
         Utilizzo una query fuori dall'ORM di Django per migliorare le prestazioni.
     """
-    #	logging.debug("Ottengo le classifiche globali.")
+    # logging.debug("Ottengo le classifiche globali.")
     cursor = connections['default'].cursor()
     query = """
 		select
@@ -305,43 +305,31 @@ class Viaggio(models.Model):
                                    editable=False)
 
     # tipo (null: non è abbinata, P: partenza, successiva altrimenti)
-    is_abbinata = models.CharField(max_length=1, null=True, blank=True,
-                                   editable=False)
+    is_abbinata = models.CharField(max_length=1, null=True, blank=True, editable=False)
 
-    punti_notturni = models.DecimalField(max_digits=6, decimal_places=2,
-                                         default=0,
-                                         editable=False)
-    punti_diurni = models.DecimalField(max_digits=6, decimal_places=2,
-                                       default=0, editable=False)
+    punti_notturni = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False)
+    punti_diurni = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False)
 
     # numero di chilometri per la riga (le 3 tratte)
-    km = models.IntegerField(default=0,
-                             editable=False)
+    km = models.IntegerField(default=0, editable=False)
 
     # tipo di viaggio True se è un arrivo
-    arrivo = models.BooleanField(default=True,
-                                 editable=False)
+    arrivo = models.BooleanField(default=True, editable=False)
 
     # True se il viaggio ha tutte le tratte definite
-    is_valid = models.BooleanField(default=True,
-                                   editable=False)
+    is_valid = models.BooleanField(default=True, editable=False)
 
     punti_abbinata = models.IntegerField(default=0, editable=False)
-    prezzoPunti = models.DecimalField(max_digits=9, decimal_places=2,
-                                      editable=False, default=0)
+    prezzoPunti = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
 
-    prezzoVenezia = models.DecimalField(max_digits=9, decimal_places=2,
-                                        editable=False, default=0)
-    prezzoPadova = models.DecimalField(max_digits=9, decimal_places=2,
-                                       editable=False, default=0)
+    prezzoVenezia = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
+    prezzoPadova = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
     prezzoDoppioPadova = models.DecimalField(max_digits=9, decimal_places=2,
                                              editable=False, default=0)
-    prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2,
-                                        editable=False, default=0)
+    prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
     date_start = models.DateTimeField(editable=False,
                                       default=tamdates.date_enforce(
-                                          datetime.datetime(2009, 1, 1, 0, 0,
-                                                            0)),
+                                          datetime.datetime(2009, 1, 1, 0, 0, 0)),
                                       db_index=True)
     # la data finale, di tutto il gruppo di corse, per trovare intersezioni
     date_end = models.DateTimeField(editable=False, null=True, db_index=True)
@@ -395,7 +383,7 @@ class Viaggio(models.Model):
         """
         # print "updateprecomp:", self.id
         if doitOnFather and self.padre_id:
-            #			logging.debug("Ricorro al padre di %s: %s" % (self.pk, self.padre.pk))
+            # logging.debug("Ricorro al padre di %s: %s" % (self.pk, self.padre.pk))
             self.padre.updatePrecomp(
                 forceDontSave=forceDontSave)  # run update on father instead
             return
@@ -430,18 +418,17 @@ class Viaggio(models.Model):
         self.km = self.get_kmrow()  # richiede le tratte
 
         # costo della sosta 12€/h, richiede tratte, usa _isabbinata e nexbro
-        self.costo_sosta = Decimal(
-            self.sostaFinaleMinuti()) * 12 / 60
+        self.costo_sosta = Decimal(self.sostaFinaleMinuti()) * 12 / 60
 
         self.is_abbinata = self._is_abbinata()
         self.is_valid = self._is_valid()  # richiede le tratte
 
         forzaSingolo = (numDoppi is 0)
-        self.prezzo_finale = self.get_value(
-            forzaSingolo=forzaSingolo)  # richiede le tratte
+        # richiede le tratte
+        self.prezzo_finale = self.get_value(forzaSingolo=forzaSingolo)
 
-        self.punti_diurni = self.punti_notturni = Decimal(
-            0)  # Precalcolo i punti disturbo della corsa
+        # Precalcolo i punti disturbo della corsa
+        self.punti_diurni = self.punti_notturni = Decimal(0)
         self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
         self.punti_abbinata = self.prezzoPunti = 0
         process_classifiche(viaggio=self, force_numDoppi=numDoppi)
@@ -588,6 +575,7 @@ class Viaggio(models.Model):
     def save(self, *args, **kwargs):
         """Ridefinisco il salvataggio dei VIAGGI
             per popolarmi i campi calcolati"""
+        assert self.luogoDiRiferimento is not None, "Missing reference place"
         if 'updateViaggi' in kwargs:
             updateViaggi = kwargs['updateViaggi']
             del (kwargs['updateViaggi'])
@@ -640,7 +628,8 @@ class Viaggio(models.Model):
         """ Return True if travel is an ARRIVO referring to luogo """
         # logging.debug("is_arrivo")
         luogo = self.luogoDiRiferimento
-        if not luogo: return False  # non ho un riferimento
+        if not luogo:
+            return False  # non ho un riferimento
         # aggiungo un tag ad ogni viaggio a seconda se è un arrivo o meno
         bacinoPredefinito = luogo.bacino
 
@@ -873,10 +862,13 @@ class Viaggio(models.Model):
 
     def _is_abbinata(self, simpleOne=False):
         """ True se la corsa un'abbinata (padre o figlio)
-            se simpleOne==False controllo anche le differenze tra abbinata in Successione e abbinata in Partenza
+            se simpleOne==False controllo anche le differenze
+            tra abbinata in Successione e abbinata in Partenza
         """
         # print("Abbinata? %s" % self.id)
-        if self.id is None: return False  # prima di salvare non sono un'abbinata (viaggio_set.count() mi darebbe tutte le corse
+        if self.id is None:
+            # prima di salvare non sono un'abbinata (viaggio_set.count() mi darebbe tutte le corse
+            return False if simpleOne else None
         if self.padre_id or self.viaggio_set.count() > 0:
             if simpleOne: return True
             if self._is_collettivoInPartenza():
