@@ -309,7 +309,7 @@ td img {
   text-align: center;
   position: fixed;
   top: 100px;
-  left: 0px;
+  left: 0;
   width: 30px;
   border: silver 1px solid;
 }
@@ -722,9 +722,7 @@ select, input {
 }
 
 .warning td {
-  background-image: url(../img/v-grad-red.png);
-  background-repeat: repeat-x;
-  background-position: bottom;
+  background: url(../img/v-grad-red.png) repeat-x bottom;
 }
 
 .prenotazione {
@@ -745,23 +743,6 @@ select, input {
 
 input[type="button"], input[type="submit"], input[type="reset"], input[type="file"], button {
   min-height: 30px
-}
-
-/* viaggio figlio */
-i.vfat {
-  width: 15px;
-  height: 23px;
-  display: block;
-  margin: 3px auto;
-  background-image: url(../img/frecciagiu.png);
-}
-
-i.vson {
-  width: 24px;
-  height: 17px;
-  margin: 3px auto;
-  display: block;
-  background-image: url(../img/frecciaverde.png);
 }
 
 #overlay {

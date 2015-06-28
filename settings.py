@@ -313,7 +313,7 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 days of session cookies
 
 # ===============================================================================
 # Set to True to use the debug_toolbar
-use_debug_toolbar = DEBUG and True
+use_debug_toolbar = DEBUG and False
 if use_debug_toolbar:
     DEBUG_TOOLBAR_CONFIG = {
         'JQUERY_URL': '',  # use the page jquery

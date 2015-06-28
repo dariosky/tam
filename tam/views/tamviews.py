@@ -594,7 +594,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
             viaggio.luogoDiRiferimento = profilo.luogo
             viaggio.updatePrecomp()
             da, a = step1["da"], step1["a"]
-            #			"Cerco il prezzo listino da %s a %s." % (da, a)
+            # "Cerco il prezzo listino da %s a %s." % (da, a)
 
             default = {}
             if cliente:
@@ -606,9 +606,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                 default["commissione"] = cliente.commissione
                 prezzolistino = None
                 if cliente.listino:
-                    prezzolistino = cliente.listino.get_prezzo(da, a,
-                                                               tipo_servizio=viaggio.esclusivo and "T" or "C",
-                                                               pax=viaggio.numero_passeggeri)
+                    prezzolistino = cliente.listino.get_prezzo(
+                        da, a,
+                        tipo_servizio=viaggio.esclusivo and "T" or "C",
+                        pax=viaggio.numero_passeggeri)
 
                 prezzoDaListinoNotturno = viaggio.trattaInNotturna()
                 prezzoDaListinoDiurno = not prezzoDaListinoNotturno
@@ -633,7 +634,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
             default["costo_autostrada"] = viaggio.costo_autostrada_default()
 
-            if da != profilo.luogo and da.speciale != "-":  # creando un viaggio di arrivo da una stazione/aeroporto
+            # creando un viaggio di arrivo da una stazione/aeroporto
+            if da != profilo.luogo and da.speciale != "-":
                 logging.debug(
                     "Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€")
                 if da.speciale == "A":
@@ -1325,18 +1327,8 @@ def resetAssociatiToDefault(viaggio, recurseOnChild=True):
         nodo.save()
 
 
-def gestisciAssociazioni(request, assoType, viaggiIds):
-    """ Gestisce l'associazione disassociazione
-        Riceve assoType con indicato cosa va fatto e una lista di viaggioId
-        Azioni: link, unlink e bus
-    """
-    viaggiIds = map(int, viaggiIds)
+def associate(assoType, viaggiIds, request=None):
     logging.debug("Gestisco le associazioni [%s] %s" % (assoType, viaggiIds))
-    user = request.user
-    if not user.has_perm('tam.change_viaggio'):
-        messages.error(request, "Non hai il permesso di modificare i viaggi.")
-        return HttpResponseRedirect(reverse("tamCorse"))
-
     padri_ids = Viaggio.objects.filter(pk__in=viaggiIds).values_list(
         'padre_id', flat=True)  # ottengo tutti i padri
     # Estendo ai padri
@@ -1375,41 +1367,45 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
                 logging.debug(
                     "Deassocio da un luogo speciale, rimetto l'eventuale abbuono speciale")
                 if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != settings.ABBUONO_AEROPORTI:
-                    messages.info(request,
-                                  "Il %d° viaggio è da un aeroporto rimetto l'abbuono di %d€. Era di %d€." % (
-                                      contatore, settings.ABBUONO_AEROPORTI,
-                                      viaggio.abbuono_fisso))
+                    if request:
+                        messages.info(request,
+                                      "Il %d° viaggio è da un aeroporto rimetto l'abbuono di %d€. Era di %d€." % (
+                                          contatore, settings.ABBUONO_AEROPORTI,
+                                          viaggio.abbuono_fisso))
                     viaggio.abbuono_fisso = settings.ABBUONO_AEROPORTI
                 elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso != settings.ABBUONO_STAZIONI:
-                    messages.info(request,
-                                  "Il %d° viaggio è da una stazione rimetto l'abbuono di %d€. Era di %d€." % (
-                                      contatore, settings.ABBUONO_STAZIONI,
-                                      viaggio.abbuono_fisso))
+                    if request:
+                        messages.info(request,
+                                      "Il %d° viaggio è da una stazione rimetto l'abbuono di %d€. Era di %d€." % (
+                                          contatore, settings.ABBUONO_STAZIONI,
+                                          viaggio.abbuono_fisso))
                     viaggio.abbuono_fisso = settings.ABBUONO_STAZIONI
         elif assoType == 'link':
             # tolgo l'associazione a un viaggio da stazione/aeroporto
             # associando un viaggio da stazione/aeroporto
             if viaggio.da.speciale != "-" and ABBUONI_LUOGO_ABBINATI == False:
-                logging.debug(
-                    "Associo da un luogo speciale, tolgo l'eventuale abbuono speciale")
+                logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono speciale")
                 if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == settings.ABBUONO_AEROPORTI:
-                    messages.info(request,
-                                  "Il %d° viaggio è da un aeroporto tolgo l'abbuono di %d€." % (
-                                      contatore, settings.ABBUONO_AEROPORTI))
+                    if request:
+                        messages.info(request,
+                                      "Il %d° viaggio è da un aeroporto tolgo l'abbuono di %d€." % (
+                                          contatore, settings.ABBUONO_AEROPORTI))
                     viaggio.abbuono_fisso = 0
                 elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso == settings.ABBUONO_STAZIONI:
-                    messages.info(request,
-                                  "Il %d° viaggio è da una stazione tolgo l'abbuono di %d€." % (
-                                      contatore, settings.ABBUONO_STAZIONI))
+                    if request:
+                        messages.info(request,
+                                      "Il %d° viaggio è da una stazione tolgo l'abbuono di %d€." % (
+                                          contatore, settings.ABBUONO_STAZIONI))
                     viaggio.abbuono_fisso = 0
 
             if viaggio != primo:
                 viaggio.padre = primo
             if contatore > 2:
                 if viaggio.abbuono_fisso != 5:
-                    messages.info(request,
-                                  "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (
-                                      contatore, viaggio.abbuono_fisso))
+                    if request:
+                        messages.info(request,
+                                      "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (
+                                          contatore, viaggio.abbuono_fisso))
                     viaggio.abbuono_fisso = 5
 
         viaggio.save(
@@ -1417,10 +1413,24 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
         contatore += 1
 
     for viaggio in viaggi:
-        if viaggio.padre_id is None:  # sia il reset che l'update ricorre sui figli, lo faccio solo sui padri
+        # sia il reset che l'update ricorre sui figli, lo faccio solo sui padri
+        if viaggio.padre_id is None:
             # print "aggiorno", viaggio.pk
             resetAssociatiToDefault(viaggio)
             viaggio.updatePrecomp()
+
+
+def gestisciAssociazioni(request, assoType, viaggiIds):
+    """ Gestisce l'associazione disassociazione
+        Riceve assoType con indicato cosa va fatto e una lista di viaggioId
+        Azioni: link, unlink e bus
+    """
+    viaggiIds = map(int, viaggiIds)
+    user = request.user
+    if not user.has_perm('tam.change_viaggio'):
+        messages.error(request, "Non hai il permesso di modificare i viaggi.")
+        return HttpResponseRedirect(reverse("tamCorse"))
+    associate(assoType=assoType, viaggiIds=viaggiIds, request=request)
 
 
 def corsaCopy(request, id, template_name="corsa-copia.html"):
