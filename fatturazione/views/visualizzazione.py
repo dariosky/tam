@@ -1,68 +1,72 @@
 # coding:utf-8
 
+import datetime
+from decimal import Decimal
+
 from django.template.context import RequestContext
 from django.shortcuts import render_to_response
-from fatturazione.models import Fattura, RigaFattura
-import datetime
-from tam.tamdates import parseDateString
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.aggregates import Max
-from fatturazione.views.util import ultimoProgressivoFattura
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from fatturazione.views.pdf import render_to_reportlab  # , render_with_pisa
-from modellog.actions import logAction
 from django.db import transaction
-from decimal import Decimal
 from django.contrib import messages
+
+from fatturazione.models import Fattura, RigaFattura
+from tam.tamdates import parse_datestring, MONTH_NAMES
+from fatturazione.views.util import ultimoProgressivoFattura
+from fatturazione.views.pdf import render_to_reportlab
+from modellog.actions import logAction
 from fatturazione.views.generazione import DEFINIZIONE_FATTURE, \
     FATTURE_PER_TIPO
 import tam.tamdates as tamdates
-
-month_names = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
-               "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"]
 
 
 @permission_required('fatturazione.view', '/')
 def view_fatture(request, template_name="5_lista-fatture.djhtml"):
     get_mese_fatture = request.GET.get('mese', None)
     oggi = tamdates.ita_today()
-    quick_month_names = [month_names[(oggi.month - 3) % 12],
-                         month_names[(oggi.month - 2) % 12],
-                         month_names[(oggi.month - 1) % 12]]  # current month
+    quick_month_names = [MONTH_NAMES[(oggi.month - 3) % 12],
+                         MONTH_NAMES[(oggi.month - 2) % 12],
+                         MONTH_NAMES[(oggi.month - 1) % 12]]  # current month
     quick_month_names.reverse()
 
     if get_mese_fatture:
         if get_mese_fatture == "cur":
             data_start = oggi.replace(day=1)
-            data_end = (data_start + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
+            data_end = (data_start + datetime.timedelta(days=32)).replace(
+                day=1) - datetime.timedelta(days=1)
         elif get_mese_fatture == 'prev':
             data_end = oggi.replace(day=1) - datetime.timedelta(days=1)  # vado a fine mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio del mese precedente
         elif get_mese_fatture == 'prevprev':  # due mesi fa
-            data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(day=1) - datetime.timedelta(
+            data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
+                day=1) - datetime.timedelta(
                 days=1)  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese_fatture)
     else:
-        data_start = parseDateString(  # dal primo del mese scorso
+        data_start = parse_datestring(  # dal primo del mese scorso
                                        request.GET.get("data_start"),
                                        default=(
-                                           tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(
+                                           tamdates.ita_today().replace(
+                                               day=1) - datetime.timedelta(days=1)).replace(
                                            day=1)
                                        )
-        data_end = parseDateString(  # all'ultimo del mese scorso
+        data_end = parse_datestring(  # all'ultimo del mese scorso
                                      request.GET.get("data_end"),
                                      default=tamdates.ita_today()
                                      )
 
     gruppo_fatture = []
     for fatturazione in DEFINIZIONE_FATTURE:
-        selezione = Fattura.objects.filter(tipo=fatturazione.codice, data__gte=data_start, data__lte=data_end)
+        selezione = Fattura.objects.filter(tipo=fatturazione.codice, data__gte=data_start,
+                                           data__lte=data_end)
         order_on_view = getattr(fatturazione, 'order_on_view', ['emessa_da', 'data', 'emessa_a'])
-        selezione = selezione.order_by(*order_on_view)  # ordinamento delle fatture in visualizzazione
+        selezione = selezione.order_by(
+            *order_on_view)  # ordinamento delle fatture in visualizzazione
         dictFatturazione = {"d": fatturazione,  # la definizione della fatturazione
                             "lista": selezione,
                             }
@@ -90,7 +94,8 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 
 
 @permission_required('fatturazione.view', '/')
-def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, template_name="6.fattura.djhtml"):
+def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
+            template_name="6.fattura.djhtml"):
     """ Vedo la fattura ed (eventualmente) ne consento la modifica """
     try:
         if id_fattura:
@@ -108,7 +113,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
     # gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
     smallEdit = request.user.has_perm('fatturazione.smalledit') \
-                and fattura.tipo in ('2', '5')  # le fatture conducente IVATE e NON consentono gli smalledit
+                and fattura.tipo in (
+    '2', '5')  # le fatture conducente IVATE e NON consentono gli smalledit
     editable = bigEdit or smallEdit
     readonly = not editable
 
@@ -130,7 +136,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
         if action == 'delete-row':
             if not bigEdit:
-                return HttpResponse('Non hai permessi per cancellare le righe delle fatture.', status=400)
+                return HttpResponse('Non hai permessi per cancellare le righe delle fatture.',
+                                    status=400)
             try:
                 rowid = int(request.POST.get('row'))
                 # if rowid in fattura.righe.values_list('id', flat=True):
@@ -143,16 +150,19 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
         if action == 'append-row':
             if not bigEdit:
-                return HttpResponse('Non hai permessi sufficienti per aggiungere righe.', status=400)
+                return HttpResponse('Non hai permessi sufficienti per aggiungere righe.',
+                                    status=400)
             ultimaRiga = fattura.righe.aggregate(Max('riga'))['riga__max'] or 0
             riga = RigaFattura(descrizione="riga inserita manualmente",
                                qta=1,
                                prezzo=0,
-                               iva=10 if not fattura.tipo in ('3', '4', '5') else 0,  # tipi esenti IVA
+                               iva=10 if not fattura.tipo in ('3', '4', '5') else 0,
+                               # tipi esenti IVA
                                riga=ultimaRiga + 10)
             riga.fattura = fattura
             riga.save()
-            logAction('C', instance=fattura, description="Riga inserita manualmente.", user=request.user)
+            logAction('C', instance=fattura, description="Riga inserita manualmente.",
+                      user=request.user)
             return render_to_response('6.fattura-riga.inc.djhtml',
                                       {
                                           "riga": riga,
@@ -164,21 +174,26 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
 
         if action == 'set':
             object_id = request.POST.get('id')
-            smallcampi_modificabili = ('fat_anno', 'fat_progressivo', 'fat_note')  # modificabili in testata
-            if smallEdit and (object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
+            smallcampi_modificabili = (
+            'fat_anno', 'fat_progressivo', 'fat_note')  # modificabili in testata
+            if smallEdit and (
+                    object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
                 # posso modificare il campo in quanto è una modifica consentita
                 pass
             else:
                 if not bigEdit:
-                    return HttpResponse('Non hai permessi sufficienti per modificare le fatture.', status=400)
+                    return HttpResponse('Non hai permessi sufficienti per modificare le fatture.',
+                                        status=400)
 
             object_value = request.POST.get('value')
-            header_ids = {'fat_mittente': 'emessa_da', 'fat_note': 'note', 'fat_destinatario': 'emessa_a',
+            header_ids = {'fat_mittente': 'emessa_da', 'fat_note': 'note',
+                          'fat_destinatario': 'emessa_a',
                           'fat_anno': 'anno', 'fat_progressivo': 'progressivo',
                           'fat_data': 'data',
                           }
             header_numerici = ['fat_anno', 'fat_progressivo']
-            logAction('C', instance=fattura, description=u"%s modificato in %s." % (object_id, object_value),
+            logAction('C', instance=fattura,
+                      description=u"%s modificato in %s." % (object_id, object_value),
                       user=request.user)
             if object_id in header_ids:
                 # print("cambio il valore di testata da %s a %s" % ( getattr(fattura, header_ids[object_id]),
@@ -189,42 +204,32 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
                         object_value = None
                     else:
                         try:
-                            object_value = int(object_value.replace(',', '.'))  # altrimenti richiedo un numerico
+                            object_value = int(
+                                object_value.replace(',', '.'))  # altrimenti richiedo un numerico
                         except Exception, e:
                             return HttpResponse('Ho bisogno di un valore numerico.', status=500)
                 if object_id == "fat_progressivo" and fattura.tipo == "1":
-                    esistenti = Fattura.objects.filter(anno=fattura.anno, progressivo=int(object_value),
+                    esistenti = Fattura.objects.filter(anno=fattura.anno,
+                                                       progressivo=int(object_value),
                                                        tipo=fattura.tipo)
                     if esistenti.count() > 0:
-                        return HttpResponse("Esiste già una fattura con questo progressivo.", status=500)
+                        return HttpResponse("Esiste già una fattura con questo progressivo.",
+                                            status=500)
                 if object_id == "fat_data":
-                    try:
-                        value_string = object_value
-                        translate_months = dict(gennaio="january",
-                                                febbraio="february",
-                                                marzo="march",
-                                                aprile="april",
-                                                maggio="may",
-                                                giugno="june",
-                                                luglio="july",
-                                                agosto="august",
-                                                settembre="september",
-                                                ottobre="october",
-                                                novembre="november",
-                                                dicembre="december",
-                                                )
-                        for m_ita, m_eng in translate_months.items():
-                            value_string = value_string.replace(m_ita, m_eng)
-                        object_value = datetime.datetime.strptime(value_string, "%d %B %Y")
-                    except:
-                        return HttpResponse("Non sono riuscito a interpretare la data.", status=500)
+                    parsed_date = parse_datestring(object_value)
+                    if parsed_date:
+                        object_value = parsed_date
+                    else:
+                        return HttpResponse("Non sono riuscito a interpretare la data.",
+                                            status=400)
 
                 # print header_ids[object_id], "=",  object_value
                 setattr(fattura, header_ids[object_id], object_value)
                 fattura.save()
                 return HttpResponse('Header changed.', status=200)
             else:
-                row_ids = {'riga-desc-': 'descrizione', 'riga-qta-': 'qta', 'riga-prezzo-': 'prezzo',
+                row_ids = {'riga-desc-': 'descrizione', 'riga-qta-': 'qta',
+                           'riga-prezzo-': 'prezzo',
                            'riga-iva-': 'iva'}
                 row_numerici = ['riga-qta-', 'riga-prezzo-', 'riga-iva-']
                 for prefix in row_ids.keys():
@@ -233,7 +238,9 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
                             riga_id = int(object_id[len(prefix):])
                             riga = fattura.righe.get(id=riga_id)
                         except:
-                            return HttpResponse('Non ho trovato la riga corrispondente a %s.' % object_id, status=500)
+                            return HttpResponse(
+                                'Non ho trovato la riga corrispondente a %s.' % object_id,
+                                status=500)
                         if prefix in row_numerici:
                             # print "Converto il valore in un numerico"
                             # tolgo i punti delle migliaia e metto il punto come separatore decimali
@@ -251,7 +258,8 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None, te
                                         object_value = int(object_value)
                                 except Exception, e:
                                     # print e
-                                    return HttpResponse('Ho bisogno di un valore numerico.', status=500)
+                                    return HttpResponse('Ho bisogno di un valore numerico.',
+                                                        status=500)
                         # print "cambio la riga %d" % riga_id
                         # print "imposto il valore %s" % object_value
                         setattr(riga, row_ids[prefix], object_value)
@@ -338,11 +346,11 @@ def exportfattura(request, id_fattura, export_type='html'):
 
 @permission_required('fatturazione.view', '/')
 def exportmultifattura(request, tipo, export_type='html'):
-    data_start = parseDateString(  # dal primo del mese scorso
+    data_start = parse_datestring(  # dal primo del mese scorso
                                    request.GET.get("data_start"),
                                    default=None
                                    )
-    data_end = parseDateString(  # all'ultimo del mese scorso
+    data_end = parse_datestring(  # all'ultimo del mese scorso
                                  request.GET.get("data_end"),
                                  default=None
                                  )

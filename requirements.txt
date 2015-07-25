@@ -24,3 +24,6 @@ gunicorn
 
 # mails
 djrill
+
+#tests
+pytest-django

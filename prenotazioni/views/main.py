@@ -2,11 +2,10 @@
 from collections import OrderedDict
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from fatturazione.views import month_names
 from markViews import prenotazioni
 from django import forms
 from prenotazioni.models import Prenotazione
-from tam.tamdates import parseDateString
+from tam.tamdates import parse_datestring, MONTH_NAMES
 from tam.widgets import MySplitDateTimeField, MySplitDateWidget
 from django.utils.translation import ugettext as _
 from django.forms.widgets import Input
@@ -365,8 +364,8 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
             start_string = request.GET.get('dstart')
             end_string = request.GET.get('dend')
             try:
-                data_inizio = tamdates.parseDateString(start_string).replace(hour=0, minute=0)
-                data_fine = tamdates.parseDateString(end_string).replace(hour=23, minute=59)  # fino a fine giornata
+                data_inizio = tamdates.parse_datestring(start_string).replace(hour=0, minute=0)
+                data_fine = tamdates.parse_datestring(end_string).replace(hour=23, minute=59)  # fino a fine giornata
             except AttributeError:
                 messages.warning(request,
                                  _(u"Errore nel processare l'intervallo di date {start}-{end}.").format(
@@ -427,9 +426,9 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 def attachments_list(request):
     get_mese = request.GET.get('mese', None)
     oggi = tamdates.ita_today()
-    quick_month_names = [month_names[(oggi.month - 3) % 12],
-                         month_names[(oggi.month - 2) % 12],
-                         month_names[(oggi.month - 1) % 12]]  # current month
+    quick_month_names = [MONTH_NAMES[(oggi.month - 3) % 12],
+                         MONTH_NAMES[(oggi.month - 2) % 12],
+                         MONTH_NAMES[(oggi.month - 1) % 12]]  # current month
     quick_month_names.reverse()
 
     if get_mese:
@@ -446,13 +445,13 @@ def attachments_list(request):
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese)
     else:
-        data_start = parseDateString(  # dal primo del mese scorso
+        data_start = parse_datestring(  # dal primo del mese scorso
                                        request.GET.get("data_start"),
                                        default=(
                                            tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(
                                            day=1)
                                        )
-        data_end = parseDateString(  # all'ultimo del mese scorso
+        data_end = parse_datestring(  # all'ultimo del mese scorso
                                      request.GET.get("data_end"),
                                      default=tamdates.ita_today()
                                      )
