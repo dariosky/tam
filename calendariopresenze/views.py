@@ -61,7 +61,7 @@ class CalendarManage(AjaxableResponseMixin):
 	def get_context_data(self, **kwargs):
 		context = super(CalendarManage, self).get_context_data(**kwargs)
 		day_string = self.request.GET.get('day', None)
-		day = tamdates.parseDateString(day_string, default=ita_today())
+		day = tamdates.parse_datestring(day_string, default=ita_today())
 		# this filter is valid until the next day
 		nextday = day + datetime.timedelta(days=1)
 		context['nextday'] = nextday  # I'll use this to check if the range goes ahead on days

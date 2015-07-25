@@ -17,7 +17,6 @@ verranno aggiungi in visualizzazione:
 			 'min', 'max': con i valori chiave massimi e minimi
 
 """
-from django.db import transaction
 from django.utils.safestring import mark_safe
 import pytz
 
@@ -65,8 +64,7 @@ kmPuntoAbbinate = Decimal(120)
 
 def process_classifiche(viaggio, force_numDoppi=None):
     if viaggio.is_abbinata and viaggio.padre is None:  # per i padri abbinati
-        da = dettagliAbbinamento(viaggio,
-                                 force_numDoppi=force_numDoppi)  # trovo i dettagli
+        da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
         # print("Sono il padre di un abbinata da %s chilometri. Pricy: %s.\n%s"%(da["kmTotali"], da["pricy"], da) )
         if da["puntiAbbinamento"] > 0:
             viaggio.punti_abbinata = da["puntiAbbinamento"]
@@ -79,8 +77,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
                 prezzoNetto = da["rimanenteInLunghe"]
                 if da["kmTotali"] >= getattr(settings, 'KM_PER_LUNGHE', 50):
                     viaggio.prezzoVenezia = prezzoNetto
-                elif 25 <= da["kmTotali"] < getattr(settings, 'KM_PER_LUNGHE',
-                                                    50):
+                elif 25 <= da["kmTotali"] < getattr(settings, 'KM_PER_LUNGHE', 50):
                     viaggio.prezzoPadova = prezzoNetto
     elif viaggio.padre_id is None:  # corse non abbinate, o abbinate che non fanno alcun punto
         if viaggio.is_long():
@@ -102,6 +99,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
         Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
     """
+    from tam.views.tamUtils import conta_bacini_partenza
+
     kmNonConguagliati = 0
     partiAbbinamento = 0
     valoreDaConguagliare = 0
@@ -115,7 +114,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
     kmTotali = viaggio.get_kmtot()
     # logging.debug("Km totali di %s: %s"%(viaggio.pk, kmTotali))
 
-    if kmTotali == 0: return locals()
+    if kmTotali == 0:
+        return locals()
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
 
@@ -126,26 +126,21 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
     # valoreDaConguagliare = viaggio.get_valuetot(forzaSingolo=forzaSingolo) * (kmNonConguagliati) / kmTotali
     # logging.debug("Valore da conguagliare %s"% valoreDaConguagliare)
 
-    baciniDiPartenza = []
-    for cursore in [viaggio] + list(viaggio.viaggio_set.all()):
-        bacino = cursore.da
-        if cursore.da.bacino: bacino = cursore.da.bacino
-        if not bacino in baciniDiPartenza:
-            baciniDiPartenza.append(bacino)
-            # logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
-    if len(
-            baciniDiPartenza) > 1:  # se partono tutti dalla stessa zona, non la considero un'abbinata
+    baciniDiPartenza = conta_bacini_partenza([viaggio] + list(viaggio.viaggio_set.all()))
+
+    # se partono tutti dalla stessa zona, non la considero un'abbinata
+    if len(baciniDiPartenza) > 1:
         partiAbbinamento = kmTotali / kmPuntoAbbinate  # è un Decimal
         puntiAbbinamento = int(partiAbbinamento)
     # logging.debug("Casette abbinamento %d, sarebbero %s" % (puntiAbbinamento, partiAbbinamento))
 
     if (force_numDoppi is not None) and (force_numDoppi != puntiAbbinamento):
         # logging.debug("Forzo il numero di doppi a %d." % force_numDoppi)
-        puntiAbbinamento = min(force_numDoppi,
-                               puntiAbbinamento)  # forzo di punti doppio, max quello calcolato
+        # forzo di punti doppio, max quello calcolato
+        puntiAbbinamento = min(force_numDoppi, puntiAbbinamento)
 
-    kmRimanenti = kmTotali - (
-        puntiAbbinamento * kmPuntoAbbinate)  # il resto della divisione per 120
+    # il resto della divisione per 120
+    kmRimanenti = kmTotali - (puntiAbbinamento * kmPuntoAbbinate)
 
     if puntiAbbinamento:
         rimanenteInLunghe = kmRimanenti * Decimal(
@@ -216,28 +211,28 @@ def get_value(viaggio, forzaSingolo=False):
         if viaggio.is_long():
             if renditaChilometrica < Decimal("0.65"):
                 importoViaggio *= renditaChilometrica / Decimal("0.65")
-                #					logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
+                # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
         elif viaggio.is_medium():
             if renditaChilometrica < Decimal("0.8"):
                 importoViaggio *= renditaChilometrica / Decimal("0.8")
-                #							logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
+                # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
 
-    if (
-                viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:  # tolgo gli abbuoni (per differito o altro)
-        importoViaggio = importoViaggio * (
-            100 - settings.SCONTO_FATTURATE) / Decimal(100)
+    if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:
+        # tolgo gli abbuoni (per differito o altro)
+        importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
     if viaggio.abbuono_fisso:
         importoViaggio -= viaggio.abbuono_fisso
     if viaggio.abbuono_percentuale:
         importoViaggio = importoViaggio * (
-            Decimal(1) - viaggio.abbuono_percentuale / Decimal(
-                100))  # abbuono in percentuale
+            Decimal(1) - viaggio.abbuono_percentuale / Decimal(100)
+        )  # abbuono in percentuale
     importoViaggio = importoViaggio - viaggio.costo_sosta
 
     if settings.SCONTO_SOSTA:
+        # aggiungo il prezzo della sosta scontato del 25%
         importoViaggio += viaggio.prezzo_sosta * (
-            Decimal(1) - settings.SCONTO_SOSTA / Decimal(
-                100))  # aggiungo il prezzo della sosta scontato del 25%
+            Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
+        )
     else:
         importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
     return importoViaggio.quantize(Decimal('.01'))
@@ -332,55 +327,4 @@ def toggle_1or2(calendar):
 
 
 from django.conf import settings
-
-if __name__ == '__main__':
-    from tam.models import Viaggio, Luogo
-    import django
-    import datetime
-    from tam.views.tamviews import associate
-
-    django.setup()
-
-    with transaction.atomic():
-        abano = Luogo.objects.get(nome=".Abano Montegrotto")
-        venezia = Luogo.objects.get(nome=".VENEZIA  AEROPORTO")
-        arrivo_singolo = Viaggio(
-            data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 12)),
-            da=venezia,
-            a=abano,
-            prezzo=Decimal("60"),
-            numero_passeggeri=2,
-            esclusivo=False,
-            luogoDiRiferimento=abano,
-        )
-        arrivo_singolo.costo_autostrada = arrivo_singolo.costo_autostrada_default()
-        arrivo_singolo.abbuono_fisso = settings.ABBUONO_AEROPORTI
-        arrivo_singolo.updatePrecomp(force_save=True)
-
-        arrivo_v1 = Viaggio(
-            data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 12)),
-            da=venezia,
-            a=abano,
-            prezzo=Decimal("30"),
-            numero_passeggeri=1,
-            esclusivo=False,
-            luogoDiRiferimento=abano,
-        )
-        arrivo_v1.costo_autostrada = arrivo_v1.costo_autostrada_default()
-        arrivo_v1.abbuono_fisso = settings.ABBUONO_AEROPORTI
-        arrivo_v1.updatePrecomp(force_save=True)
-        arrivo_v2 = Viaggio(
-            data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 12)),
-            da=venezia,
-            a=abano,
-            prezzo=Decimal("30"),
-            numero_passeggeri=1,
-            esclusivo=False,
-            luogoDiRiferimento=abano,
-        )
-        arrivo_v2.costo_autostrada = arrivo_v2.costo_autostrada_default()
-        arrivo_v2.abbuono_fisso = settings.ABBUONO_AEROPORTI
-        arrivo_v2.updatePrecomp(force_save=True)
-
-        associate(assoType='link', viaggiIds=[arrivo_v1.id, arrivo_v2.id])
 

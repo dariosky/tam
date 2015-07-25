@@ -259,22 +259,22 @@ def listaCorse(request, template_name="corse/lista.html"):
         filtroWhenAvanzato = True
         if request.GET.has_key('dstart'):
             try:
-                data_inizio = tamdates.parseDateString(
+                data_inizio = tamdates.parse_datestring(
                     request.GET.get('dstart'))
                 request.session["dstart"] = data_inizio.strftime('%d/%m/%Y')
             except:
                 pass
         elif "dstart" in request.session:
-            data_inizio = tamdates.parseDateString(request.session["dstart"])
+            data_inizio = tamdates.parse_datestring(request.session["dstart"])
 
         if request.GET.has_key('dend'):
             try:
-                data_fine = tamdates.parseDateString(request.GET.get('dend'))
+                data_fine = tamdates.parse_datestring(request.GET.get('dend'))
                 request.session["dend"] = data_fine.strftime('%d/%m/%Y')
             except:
                 pass
         elif "dend" in request.session:
-            data_fine = tamdates.parseDateString(request.session["dend"])
+            data_fine = tamdates.parse_datestring(request.session["dend"])
 
     if data_inizio and data_fine and (data_fine <= data_inizio):
         data_fine = data_inizio + datetime.timedelta(days=1)
@@ -1349,7 +1349,7 @@ def associate(assoType, viaggiIds, request=None):
     if len(viaggi) > 1:
         primo = viaggi[0]
     else:
-        primo = None
+        primo = None,
 
     contatore = 1
     # di standard gli abbinati non hanno abbuoni per aeroporto/stazioni
@@ -1363,7 +1363,7 @@ def associate(assoType, viaggiIds, request=None):
 
             # rimetto l'associazione a un viaggio da stazione/aeroporto
             # settings.ABBUONI_LUOGO_ABBINATI indica se gli abbinati da luoghi speciali hanno diritto a un abbuono
-            if viaggio.da.speciale != "-" and ABBUONI_LUOGO_ABBINATI == False:
+            if viaggio.da.speciale != "-" and not ABBUONI_LUOGO_ABBINATI:
                 logging.debug(
                     "Deassocio da un luogo speciale, rimetto l'eventuale abbuono speciale")
                 if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != settings.ABBUONO_AEROPORTI:
@@ -1383,7 +1383,7 @@ def associate(assoType, viaggiIds, request=None):
         elif assoType == 'link':
             # tolgo l'associazione a un viaggio da stazione/aeroporto
             # associando un viaggio da stazione/aeroporto
-            if viaggio.da.speciale != "-" and ABBUONI_LUOGO_ABBINATI == False:
+            if viaggio.da.speciale != "-" and not ABBUONI_LUOGO_ABBINATI:
                 logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono speciale")
                 if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == settings.ABBUONO_AEROPORTI:
                     if request:

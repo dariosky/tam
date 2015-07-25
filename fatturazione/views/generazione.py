@@ -42,7 +42,7 @@ Generazione Ricevute (viaggi con pagamento posticipato)
 
 from django.shortcuts import render_to_response
 from django.template.context import RequestContext
-from tam.tamdates import parseDateString
+from tam.tamdates import parse_datestring
 from django.conf import settings
 import tam.tamdates as tamdates
 
@@ -60,13 +60,13 @@ for fatturazione in DEFINIZIONE_FATTURE:
 
 @permission_required('fatturazione.generate', '/')
 def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
-    data_start = parseDateString(  # dal primo del mese scorso
+    data_start = parse_datestring(  # dal primo del mese scorso
                                    request.GET.get("data_start"),
                                    default=(tamdates.ita_today().replace(
                                        day=1) - datetime.timedelta(
                                        days=1)).replace(day=1)
                                    )
-    data_end = parseDateString(  # all'ultimo del mese scorso
+    data_end = parse_datestring(  # all'ultimo del mese scorso
                                  request.GET.get("data_end"),
                                  default=tamdates.ita_today().replace(
                                      day=1) - datetime.timedelta(days=1)
@@ -151,7 +151,7 @@ def genera_fatture(request, fatturazione):
         messages.error(request, "Devi selezionare qualche corsa da fatturare.")
         return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
-    data_generazione = parseDateString(request.POST['data_generazione'])
+    data_generazione = parse_datestring(request.POST['data_generazione'])
     if fatturazione.ask_progressivo:  # la generazione fatture consorzio richiede anno e progressivo - li controllo
         try:
             anno = int(request.POST.get("anno"))

@@ -372,6 +372,22 @@ class Viaggio(models.Model):
         """ Restituisco come il viaggio si divide nelle classifiche """
         return descrizioneDivisioneClassifiche(self)
 
+    def classifiche(self):
+        """
+        A dictionary with the classifiche of this Viaggio
+        @return: dict(str:Decimal)
+        """
+        return dict(
+            finale=self.prezzo_finale,
+            sosta=self.prezzo_sosta,
+            prezzoVenezia=self.prezzoVenezia,
+            prezzoPadova=self.prezzoPadova,
+            prezzoDoppioPadova=self.prezzoDoppioPadova,
+            puntiAbbinata=self.punti_abbinata,
+            puntiDiurni=self.punti_diurni,
+            puntiNotturni=self.punti_notturni,
+        )
+
     def updatePrecomp(self, doitOnFather=True, force_save=False,
                       forceDontSave=False, numDoppi=None):
         """ Aggiorna tutti i campi precalcolati del viaggio.
