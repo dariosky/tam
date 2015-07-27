@@ -344,6 +344,7 @@ CACHES = {
 NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
                             "FattureConducente", "FattureConducenteNoIva",
                             "Ricevute"]
+MIN_PRICE_FOR_TAXSTAMP = 77.47
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
 SECURE_STORE_CUSTOM_SUBFOLDER = None
