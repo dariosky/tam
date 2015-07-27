@@ -5,6 +5,7 @@ Created on 11/set/2011
 @author: Dario
 '''
 import datetime
+from django.db.models import Max
 from tam.models import Viaggio, ProfiloUtente
 from modellog.actions import logAction
 from django.http import HttpResponseRedirect
@@ -61,16 +62,16 @@ for fatturazione in DEFINIZIONE_FATTURE:
 @permission_required('fatturazione.generate', '/')
 def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
     data_start = parse_datestring(  # dal primo del mese scorso
-                                   request.GET.get("data_start"),
-                                   default=(tamdates.ita_today().replace(
-                                       day=1) - datetime.timedelta(
-                                       days=1)).replace(day=1)
-                                   )
+                                    request.GET.get("data_start"),
+                                    default=(tamdates.ita_today().replace(
+                                        day=1) - datetime.timedelta(
+                                        days=1)).replace(day=1)
+                                    )
     data_end = parse_datestring(  # all'ultimo del mese scorso
-                                 request.GET.get("data_end"),
-                                 default=tamdates.ita_today().replace(
-                                     day=1) - datetime.timedelta(days=1)
-                                 )
+                                  request.GET.get("data_end"),
+                                  default=tamdates.ita_today().replace(
+                                      day=1) - datetime.timedelta(days=1)
+                                  )
     # prendo i viaggi da fatturare
     # dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
     gruppo_fatture = []
@@ -131,6 +132,18 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
                               context_instance=RequestContext(request))
 
 
+def on_fattura_end(fattura, esente_iva):
+    # add the tax stamp if needed at the end of the invoice
+    if esente_iva and fattura.val_totale() >= settings.MIN_PRICE_FOR_TAXSTAMP:
+        # alle esenti IVA metto l'imposta di bollo
+        aggregation = fattura.righe.aggregate(Max('riga'))
+        num_riga = aggregation.get('riga__max', 0) + 10
+        riga_fattura = RigaFattura(
+            descrizione="Imposta di bollo", qta=1, iva=0,
+            prezzo=Decimal("2.00"), riga=num_riga)
+        fattura.righe.add(riga_fattura)
+
+
 @transaction.atomic
 @permission_required('fatturazione.generate', '/')
 # template_name, tipo, filtro, keys, order_by, manager
@@ -168,7 +181,7 @@ def genera_fatture(request, fatturazione):
         if ultimo_progressivo >= progressivo:
             messages.error(request,
                            "Il progressivo è troppo piccolo, ho già la %s %s/%s." % (
-                           nomi_fatture[tipo], anno, ultimo_progressivo))
+                               nomi_fatture[tipo], anno, ultimo_progressivo))
             return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
     else:
         progressivo = 0  # nelle ricevute lo uso per ciclare
@@ -196,8 +209,9 @@ def genera_fatture(request, fatturazione):
     lastKey = None
     for elemento in lista:
         key = [getattr(elemento, keyName) for keyName in keys]
-        if lastKey <> key:
-            if lastKey <> None: progressivo += 1
+        if lastKey != key:
+            if lastKey != None:
+                progressivo += 1
             lastKey = key
             fatture += 1
 
@@ -210,6 +224,7 @@ def genera_fatture(request, fatturazione):
     if request.method == "POST":
         if request.POST.has_key("generate"):
             lastKey = None
+            fattura = None
             fatture_generate = 0
 
             for elemento in lista:
@@ -219,6 +234,8 @@ def genera_fatture(request, fatturazione):
                     viaggio = elemento
 
                 if elemento.key != lastKey:
+                    if fattura:
+                        on_fattura_end(fattura, esente_iva)
                     # TESTATA
                     fattura = Fattura(tipo=tipo)
                     data_fattura = data_generazione
@@ -227,7 +244,8 @@ def genera_fatture(request, fatturazione):
                         fattura.anno = anno
                         fattura.progressivo = viaggio.progressivo_fattura
 
-                    if fatturazione.destinatario == "cliente":  # popolo il destinatario della fattura
+                    if fatturazione.destinatario == "cliente":
+                        # popolo il destinatario della fattura
                         if viaggio.cliente:
                             fattura.cliente = viaggio.cliente
                             fattura.emessa_a = viaggio.cliente.dati or viaggio.cliente.nome
@@ -258,14 +276,6 @@ def genera_fatture(request, fatturazione):
                         esente_iva = fatturazione.esente_iva(elemento)
                     else:
                         esente_iva = fatturazione.esente_iva
-
-                    if esente_iva:
-                        # alle esenti IVA metto l'imposta di bollo
-                        riga_fattura = RigaFattura(
-                            descrizione="Imposta di bollo", qta=1, iva=0,
-                            prezzo=Decimal("2.00"), riga=riga)
-                        fattura.righe.add(riga_fattura)
-                        riga += 10
 
                     lastKey = elemento.key
 
@@ -321,6 +331,8 @@ def genera_fatture(request, fatturazione):
                 fattura.righe.add(riga_fattura)  # salvo la riga
                 riga += 10
 
+            if fattura:
+                on_fattura_end(fattura, esente_iva)
             message = "Generate %d %s." % (fatture_generate, plurale)
             messages.success(request, message)
             logAction('C', description=message, user=request.user)

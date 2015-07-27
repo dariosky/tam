@@ -52,10 +52,9 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
                                        request.GET.get("data_start"),
                                        default=(
                                            tamdates.ita_today().replace(
-                                               day=1) - datetime.timedelta(days=1)).replace(
-                                           day=1)
+                                               day=1) - datetime.timedelta(days=1)).replace(day=1)
                                        )
-        data_end = parse_datestring(  # all'ultimo del mese scorso
+        data_end = parse_datestring(  # a oggi
                                      request.GET.get("data_end"),
                                      default=tamdates.ita_today()
                                      )

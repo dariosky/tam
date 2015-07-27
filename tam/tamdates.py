@@ -3,6 +3,7 @@
 # This born on march 2013 when webfaction servers went to UTC
 # It contains some helper to keep dates sane on indicated timezone
 # ===============================================================================
+from collections import OrderedDict
 
 from django.utils import timezone
 import datetime
@@ -13,19 +14,20 @@ import re
 
 logger = logging.getLogger('tam.dates')
 
-MONTH_TRANSLATIONS = dict(gennaio="january",
-                          febbraio="february",
-                          marzo="march",
-                          aprile="april",
-                          maggio="may",
-                          giugno="june",
-                          luglio="july",
-                          agosto="august",
-                          settembre="september",
-                          ottobre="october",
-                          novembre="november",
-                          dicembre="december",
-                          )
+MONTH_TRANSLATIONS = OrderedDict(
+    [("gennaio", "january"),
+     ("febbraio", "february"),
+     ("marzo", "march"),
+     ("aprile", "april"),
+     ("maggio", "may"),
+     ("giugno", "june"),
+     ("luglio", "july"),
+     ("agosto", "august"),
+     ("settembre", "september"),
+     ("ottobre", "october"),
+     ("novembre", "november"),
+     ("dicembre", "december")]
+)
 MONTH_NAMES = map(str.capitalize, MONTH_TRANSLATIONS.keys())
 
 
@@ -50,13 +52,17 @@ def normalizeTimeString(time_string):
 
 def parse_datestring(s, default=None):
     """ Parse datestring as it was in Italy trying some format """
+    if not s:
+        return default
+    s = s.replace(",", "").replace("  ", " ").lower()
     for m_ita, m_eng in MONTH_TRANSLATIONS.items():
         s = s.replace(m_ita, m_eng)  # bring the eventual months in English
-    s = s.replace(",", "").replace("  ", " ")
+
     naive_date_time = None
-    for time_format in ('%d/%m/%Y', '%m/%d/%Y', "%d %B %Y", "%B %d %Y"):
+    for time_format in ('%d/%m/%Y', "%d %B %Y", "%B %d %Y"):
         try:
             naive_date_time = datetime.datetime.strptime(s, time_format)
+            break
         except ValueError as e:
             logger.warning("Error parsing date. %s" % e)
     if naive_date_time is None:
