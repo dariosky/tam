@@ -5,7 +5,7 @@
 	<title>{{ license_owner }} - {% blocktrans %}Sistema di prenotazione online{% endblocktrans %}</title>
 	<meta name="description" content="{% trans "TaM - Sistema di prenotazione online" %}"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<link rel="shortcut icon" href="{{ STATIC_URL }}prenotazioni/ico/favicon.ico" type="image/x-icon"/>
+	<link rel="shortcut icon" href="{% static 'prenotazioni/ico/favicon.ico' %}" type="image/x-icon"/>
 	<link rel="apple-touch-icon-precomposed" sizes="144x144"
 		  href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-144-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="114x114"
@@ -37,7 +37,7 @@
 
 <div id='mainContent'>
 	<a href="/">
-		<h2><img src="{% static "img/tam_16.png" %}" class="loghetto" alt=""/>
+		<h2><img src="{% static "sprites/tam_16.png" %}" class="loghetto" alt=""/>
 			{% blocktrans %}Servizio prenotazioni{% endblocktrans %}
 		</h2>
 	</a>
