@@ -175,5 +175,5 @@ def notLicensed(request, template_name="registration/license.html"):
 def get_license_detail():
 	license_owner = getattr(settings, 'LICENSE_OWNER', None)
 	license_expiration = getattr(settings, 'LICENSE_EXPIRATION', None)
-	license_valid = not license_expiration or (datetime.date.today()<=license_expiration)
+	license_valid = not license_expiration or (datetime.date.today() <= license_expiration)
 	return locals()
