@@ -296,6 +296,7 @@ INSTALLED_APPS = [
     'fatturazione',
 
     'modellog',
+    'securestore',
     # 'license',
 
     'djangotasks',  # let's use djangotasks instead of celery

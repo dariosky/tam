@@ -88,7 +88,6 @@ class FormPrenotazioni(forms.ModelForm):
             raise forms.ValidationError(_(u"Questo campo è obbligatorio."))
         return value
 
-
     def clean(self):
         """ Controlli di validità dell'intera form """
         cleaned_data = self.cleaned_data

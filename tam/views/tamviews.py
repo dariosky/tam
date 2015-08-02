@@ -814,6 +814,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None,
 
         class Meta:
             model = Cliente
+            fields = '__all__'
 
     cliente = None
     viaggi_del_cliente = None
@@ -1189,6 +1190,7 @@ def passeggero(request, template_name="passeggero.html", id=None,
         class Meta:
             model = Passeggero
             exclude = excludedFields
+            fields = "__all__"
 
     try:
         instance = id and Passeggero.objects.get(id=id) or None
