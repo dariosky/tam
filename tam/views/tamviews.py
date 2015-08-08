@@ -1351,7 +1351,7 @@ def associate(assoType, viaggiIds, request=None):
     if len(viaggi) > 1:
         primo = viaggi[0]
     else:
-        primo = None,
+        primo = None
 
     contatore = 1
     # di standard gli abbinati non hanno abbuoni per aeroporto/stazioni
