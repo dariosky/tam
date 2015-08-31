@@ -371,3 +371,6 @@ for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
 WSGI_APPLICATION = 'wsgi.application'
+
+# Max numbers of rows allowed for XLS export
+MAX_XLS_ROWS = 15 * 1000

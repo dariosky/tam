@@ -69,10 +69,9 @@ def xlsResponse(request, querySet):
 
     numViaggi = querySet.count()
     logging.debug("Export to EXCEL %d viaggi." % numViaggi)
-    maxViaggi = 3000
-    if numViaggi > maxViaggi:
+    if numViaggi > settings.MAX_XLS_ROWS:
         messages.error(request,
-                       "Non puoi esportare in Excel più di %d viaggi contemporaneamente." % maxViaggi)
+                       "Non puoi esportare in Excel più di %d viaggi contemporaneamente." % settings.MAX_XLS_ROWS)
         return HttpResponseRedirect("/")  # back home
 
     # from guppy import hpy
