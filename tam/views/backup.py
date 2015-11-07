@@ -14,7 +14,7 @@ import logging
 import os
 import time
 from django.contrib import messages
-from tam.tasks import doBackupTask, single_instance_task
+from tam.tasks import single_instance_task
 import sys
 import subprocess
 from tam import tamdates

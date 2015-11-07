@@ -1307,7 +1307,7 @@ process_value = settings.GET_VALUE_FUNCTION
 PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
 
 # load models required for the tasks
-from tam.tasks import TaskBackup, TaskMovelog, TaskArchive  # @UnusedImport
+# from tam.tasks import TaskBackup, TaskArchive  # @UnusedImport
 
 
 class UnSerializableFileSystemStorage(FileSystemStorage):

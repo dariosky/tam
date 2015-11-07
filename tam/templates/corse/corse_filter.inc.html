@@ -13,7 +13,7 @@
 		</select>
 		<select name="filterConducente" class="selectFilter" id='select_conducenti'>
 			{% if conducenteFiltrato %}<option value="{{ conducenteFiltrato.id }}" selected>{{ conducenteFiltrato.nick }}</option>{% endif %}
-			<option value="">Tutti i conducenti</option>
+			<option value="">Tutti i soci</option>
 			<option value="Non confermate"{% ifequal "Non confermate" filterConducente %} selected="selected"{% endifequal %}>Non confermate</option>
 			{% comment %}
 			{% for conducente in conducenti %} <option value="{{ conducente.id }}"{% ifequal conducente.id filterConducente %} selected="selected"{% endifequal %}>{{ conducente }}</option>

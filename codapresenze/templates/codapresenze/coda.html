@@ -9,7 +9,7 @@
     <h1 style="float:left">Coda Presenze</h1>
     <div id="user-choser">
         {% if perms.codapresenze.editall %}
-            <label for="conducente">Conducente:</label><select id='conducente'>
+            <label for="conducente">Socio:</label><select id='conducente'>
             {% for utente in utenti %}
                 <option{% if utente == request.user %} selected="selected"{% endif %}>
                     {{ utente.username }}
