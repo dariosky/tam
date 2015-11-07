@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Conducenti e classifiche &raquo; {{ block.super }}{% endblock %}
+{% block title %}Soci e classifiche &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
 <h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
@@ -17,10 +17,10 @@
     	{% endfor %}
 
     </div>
-	
+
 	{% if not confirmConguaglio %}
 		{% include "elenco-conducenti.inc.html" %}
-	{% endif %}    
+	{% endif %}
 
 {% endblock content%}
 

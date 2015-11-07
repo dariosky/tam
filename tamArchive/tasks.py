@@ -84,10 +84,11 @@ def daRicordareDelViaggio(ricordi, viaggio):
 
 def do_archiviazioneTask(user, end_date):
     """ Crea il task per l'archiviazione e lo schedula """
-    from tam.models import TaskArchive
+    raise Exception("Not implemented")
+    # from tam.models import TaskArchive
 
-    archiviazione_task = TaskArchive(user=user, end_date=end_date)
-    archiviazione_task.save()
+    # archiviazione_task = TaskArchive(user=user, end_date=end_date)
+    # archiviazione_task.save()
 
     # ...and finally defer the task
     # task = djangotasks.task_for_object(archiviazione_task.do)
