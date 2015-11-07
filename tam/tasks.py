@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 import time
 
+
 # ===============================================================================
 def humanizeTime(sec):
     result = ""
@@ -53,24 +54,6 @@ def single_instance_task(timeout=60 * 60 * 2):  # 2 hour of default timeout
         return wrapper
 
     return task_exc
-
-
-# ===============================================================================
-
-# ============================================================
-# Djangotasks uses DB, so each tasktype has a model
-class TaskBackup(models.Model):
-    user = models.ForeignKey(User)  # the user who starts the backup
-
-    def do(self):
-        print 'Starting backup'
-        from tam.views.backup import doBackup
-
-        doBackup(self.user)
-        print "Fine del backup"
-
-    class Meta:
-        app_label = "tam"
 
 
 ############################################################################
@@ -152,20 +135,6 @@ def moveLogs(name='movelogs.job'):
     vacuum_db()
     con.commit()
     print "Fine"
-
-
-# Djangotasks uses DB, so each tasktype has a model
-class TaskArchive(models.Model):
-    user = models.ForeignKey(User)  # the user who starts the backup
-    end_date = models.DateField()
-
-    def do(self):
-        from tamArchive.tasks import do_archiviazione
-
-        do_archiviazione(self.user, self.end_date)
-
-    class Meta:
-        app_label = "tam"
 
 
 if __name__ == '__main__':
