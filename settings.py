@@ -299,7 +299,6 @@ INSTALLED_APPS = [
     'securestore',
     # 'license',
 
-    'djangotasks',  # let's use djangotasks instead of celery
     'djrill',
 ]
 
