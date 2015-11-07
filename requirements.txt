@@ -20,7 +20,9 @@ psycopg2
 
 # deployment
 fabric
-gunicorn
+gunicorn==18.0
+# setproctitle to set the process title, doesn't work on Windows
+# setproctitle
 
 # mails
 djrill
