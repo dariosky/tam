@@ -18,8 +18,7 @@ from tam.tamdates import parse_datestring, MONTH_NAMES
 from fatturazione.views.util import ultimoProgressivoFattura
 from fatturazione.views.pdf import render_to_reportlab
 from modellog.actions import logAction
-from fatturazione.views.generazione import DEFINIZIONE_FATTURE, \
-    FATTURE_PER_TIPO
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE, FATTURE_PER_TIPO
 import tam.tamdates as tamdates
 
 

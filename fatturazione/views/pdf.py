@@ -261,9 +261,17 @@ def render_to_reportlab(context):
 
         righe = fattura.righe.all()
 
-        if fatturazione.codice == "5" and not "Imposta di bollo" in [r.descrizione for r in righe]:
-            # print "5 esente iva con barbatrucco"
+        raggruppa_barbatrucco = False
+        if fatturazione.codice == "5":
             totale = sum([r.val_totale() for r in righe])
+            conducente = righe[0].conducente if righe else None
+            if "Imposta di bollo" not in [r.descrizione for r in righe]:
+                if not (totale < settings.MIN_PRICE_FOR_TAXSTAMP and conducente.emette_ricevute):
+                    raggruppa_barbatrucco = True
+
+        if raggruppa_barbatrucco:
+            # print "5 esente iva con barbatrucco"
+
             netto = totale / Decimal(1.1)
 
             class RigaTotaleIvata(object):  # una riga che fa corrispondere il totale
@@ -359,6 +367,7 @@ def render_to_reportlab(context):
 
 if __name__ == '__main__':
     from fatturazione.models import Fattura
+
     # fattura = Fattura.objects.get(id=183)
     # render_to_reportlab(context={"fattura":fattura})
     fatture = Fattura.objects.filter(data__gte=datetime.date(2012, 9, 1),
