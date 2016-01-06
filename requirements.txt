@@ -2,9 +2,10 @@
 django<1.9
 south
 django-debug-toolbar
+django-debug-toolbar-template-timings
 
 # static files
-django-pipeline
+django-pipeline < 1.6
 
 # exports
 xlrd

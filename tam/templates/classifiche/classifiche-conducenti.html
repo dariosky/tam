@@ -3,39 +3,37 @@
 {% block title %}Soci e classifiche &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
+    <h1>{% if confirmConguaglio %}Conferma il conguaglio delle abbinate{% else %}Classifiche{% endif %}</h1>
 
     <div id="accordion">
-    	{% for classifica_definita in classifiche_definite %}
-    		{% if classifica_definita.type == "punti" %}
-    			{% include "classifiche/classifica-punti.inc.html" %}
-    		{% elif classifica_definita.type == "supplementari" %}
-    			{% include "classifiche/classifica-supplementari.inc.html" %}
-    		{% else %}
-    			{% include "classifiche/classifica-prezzo.inc.html" %}
-    		{% endif %}
-    	{% endfor %}
-
+        {% for classifica_definita in classifiche_definite %}
+            {% if classifica_definita.type == "punti" %}
+                {% include "classifiche/classifica-punti.inc.html" %}
+            {% elif classifica_definita.type == "supplementari" %}
+                {% include "classifiche/classifica-supplementari.inc.html" %}
+            {% else %}
+                {% include "classifiche/classifica-prezzo.inc.html" %}
+            {% endif %}
+        {% endfor %}
+        {% if not confirmConguaglio %}
+            {% include "elenco-conducenti.inc.html" %}
+        {% endif %}
     </div>
 
-	{% if not confirmConguaglio %}
-		{% include "elenco-conducenti.inc.html" %}
-	{% endif %}
-
-{% endblock content%}
+{% endblock content %}
 
 {% block bottom %}
-{% if not confirmConguaglio %}
-<script type="text/javascript">
-    $(document).ready( function() {
-		$("#accordion").find('div').accordion({
-				header: "h2",
-				alwaysOpen: false,
-				active: false,
-				collapsible: true
-			});
-		//$("#accordion .selected").removeClass("selected");
-    });
-</script>
-{% endif %}
+    {% if not confirmConguaglio %}
+        <script type="text/javascript">
+            $(document).ready(function () {
+                $("#accordion").find('div').accordion({
+                    header: "h2",
+                    alwaysOpen: false,
+                    active: false,
+                    collapsible: true
+                });
+                //$("#accordion .selected").removeClass("selected");
+            });
+        </script>
+    {% endif %}
 {% endblock bottom %}

@@ -38,21 +38,21 @@ def get_classifiche():
     # logging.debug("Ottengo le classifiche globali.")
     cursor = connections['default'].cursor()
     query = """
-		select
-			c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
-			coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
-			coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
-			coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
-			coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
-			coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
-			coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
-		from tam_conducente c
-			left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
-		where c.attivo --and c.nick='2'
-			and not coalesce(v.annullato, false)
-		group by c.id, c.nick
-		order by conducente_nick
-	"""
+        select
+            c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
+            coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
+            coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
+            coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
+            coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
+            coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
+            coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
+        from tam_conducente c
+            left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
+        where c.attivo --and c.nick='2'
+            and not coalesce(v.annullato, false)
+        group by c.id, c.nick
+        order by conducente_nick
+    """
     cursor.execute(query, ())
     results = cursor.fetchall()
 
@@ -613,7 +613,7 @@ class Viaggio(models.Model):
             self.passeggero = None
 
         # inserisco data e ID del gruppo per gli ordinamenti
-        self.id_padre = self.padre.id if self.padre_id is not None else self.id
+        self.id_padre = self.padre_id if self.padre_id is not None else self.id
         self.data_padre = self.padre.data if self.padre_id is not None else self.data
 
         logging.debug("Update di *%s*." % self.pk)

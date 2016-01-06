@@ -1,6 +1,5 @@
 # coding: utf-8
 from django.conf import settings
-from tam.models import Viaggio
 
 
 def getDefault(viaggio):
@@ -13,6 +12,7 @@ def getDefault(viaggio):
         I default che vengono dal listino sono:
             prezzo, fatturazione, commissione e tipo_commissione
 
+        @param viaggio: il viaggio di cui ottenere alcuni valori di default
     """
     default = {}
     cliente = viaggio.cliente

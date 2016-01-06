@@ -92,6 +92,7 @@ a:hover {
   font-family: sans-serif;
   /*border: 1px solid;*/
 }
+
 .navBar a:hover {
   background: white;
 }
@@ -313,6 +314,7 @@ td img {
   width: 30px;
   border: silver 1px solid;
 }
+
 #selActions a {
   padding: 10px 0;
   margin: 10px 0;
@@ -350,14 +352,17 @@ td img {
   margin: 0;
   padding: 0;
 }
+
 #listaCorsePadding {
   /* all'inizio della lista corse per non farla coprire dai search filter */
   height: 2em;
 }
+
 #filterForm #select_clienti {
   width: 130px;
 }
-#filterForm >div {
+
+#filterForm > div {
   float: right;
   text-align: right;
 }
@@ -574,6 +579,7 @@ h2.fatturaTipo5 {
 .cellaPrezzo a {
   font-weight: bold; /*nella cella prezzo, i link (il netto) sono in grossetto */
 }
+
 .cellaPrezzo img, .cellaPrezzo .sprite {
   display: block;
   margin: 0 auto;
@@ -674,8 +680,9 @@ select, input {
 /* TABLET and smaller */
 @media only screen and (max-device-width: 1024px) {
 }
+
 /*PHONES*/
-@media only screen and (max-device-width: 1023px) and (orientation : portrait) {
+@media only screen and (max-device-width: 1023px) and (orientation: portrait) {
   .trip_detail {
     display: none;
   }
@@ -691,8 +698,6 @@ select, input {
     /*color: silver;*/
   }
 }
-
-
 
 @media print {
   /* print stylesheet */
@@ -764,3 +769,9 @@ input[type="button"], input[type="submit"], input[type="reset"], input[type="fil
   display: inline-block;
   vertical-align: middle;
 }
+
+.clearfix {
+  clear: both;
+}
+
+@import "stats";
