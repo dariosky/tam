@@ -5,10 +5,10 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.40"
+TAM_VERSION = "6.46"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
-if host in ("dariosky", "acido", "dario", "dico", "accio"):
+if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
     DEBUG = True  # siamo in Test
 else:
     DEBUG = False
@@ -82,6 +82,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 STATICFILES_STORAGE = 'tam.storage.PipelineCachedStorage'
@@ -91,60 +92,119 @@ jqueryUIURL = 'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
 jqueryUICSSURL = 'js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css'
 
 PIPELINE_CSS = {
-    'tam': {'source_filenames': ['css/tam.css'],
-            'output_filename': 'css/tam.min.css'},
-    'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
-                    'output_filename': 'css/tam-stealth.min.css'},
-    'tamUI': {
-        'source_filenames': (
-            jqueryUICSSURL,
-            'css/tam.css',
-        ),
-        'output_filename': 'css/tamUI.min.css',
-    },
-    'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
-                     'output_filename': 'css/prenotazioni.min.css'},
-    'codapresenze': {'source_filenames': ('css/codapresenze.css',),
-                     'output_filename': 'css/codapresenze.min.css'},
+        'tam': {'source_filenames': ['css/tam.css'],
+                'output_filename': 'css/tam.min.css'},
+        'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
+                        'output_filename': 'css/tam-stealth.min.css'},
+        'tamUI': {
+            'source_filenames': (
+                jqueryUICSSURL,
+                'css/tam.css',
+            ),
+            'output_filename': 'css/tamUI.min.css',
+        },
+        'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
+                         'output_filename': 'css/prenotazioni.min.css'},
+        'codapresenze': {'source_filenames': ('css/codapresenze.css',),
+                         'output_filename': 'css/codapresenze.min.css'},
 }
 
 PIPELINE_JS = {
-    'tam': {
-        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                             'js/tam-common.js'],
-        'output_filename': 'tam.min.js'
-    },
-    'tamUI': {
-        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                             jqueryUIURL, 'js/calendarPreferences.js',
-                             'js/tam-common.js'],
-        'output_filename': 'tamUI.min.js'
-    },
-    'tamCorse': {
-        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                             jqueryUIURL,
-                             'js/calendarPreferences.js',
-                             'js/tam-common.js',
-                             'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
-        'output_filename': 'tamCorse.min.js'
-    },
-    'jquery.editable': {
-        'source_filenames': ['js/jquery.editable-1.3.3.js'],
-        'output_filename': 'js/jquery.editable.min.js',
-    },
-    'fattura': {
-        'source_filenames': ['fatturazione/fattura.js'],
-        'output_filename': 'js/fattura.min.js',
-    },
-    'codapresenze': {
-        'source_filenames': ['js/codapresenze.js'],
-        'output_filename': 'js/codapresenze.min.js',
-    },
+        'tam': {
+            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                                 'js/tam-common.js'],
+            'output_filename': 'tam.min.js'
+        },
+        'tamUI': {
+            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                                 jqueryUIURL, 'js/calendarPreferences.js',
+                                 'js/tam-common.js'],
+            'output_filename': 'tamUI.min.js'
+        },
+        'tamCorse': {
+            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                                 jqueryUIURL,
+                                 'js/calendarPreferences.js',
+                                 'js/tam-common.js',
+                                 'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
+            'output_filename': 'tamCorse.min.js'
+        },
+        'jquery.editable': {
+            'source_filenames': ['js/jquery.editable-1.3.3.js'],
+            'output_filename': 'js/jquery.editable.min.js',
+        },
+        'fattura': {
+            'source_filenames': ['fatturazione/fattura.js'],
+            'output_filename': 'js/fattura.min.js',
+        },
+        'codapresenze': {
+            'source_filenames': ['js/codapresenze.js'],
+            'output_filename': 'js/codapresenze.min.js',
+        },
 }
 PIPELINE_DISABLE_WRAPPER = True
 
 PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH,
                                        'node_modules/.bin/yuglify')
+
+# Pipeline 1.6 is still in early stages - here the settings
+PIPELINE = dict(
+    PIPELINE_ENABLED=True,
+    STYLESHEETS={
+        'tam': {'source_filenames': ['css/tam.css'],
+                'output_filename': 'css/tam.min.css'},
+        'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
+                        'output_filename': 'css/tam-stealth.min.css'},
+        'tamUI': {
+            'source_filenames': (
+                jqueryUICSSURL,
+                'css/tam.css',
+            ),
+            'output_filename': 'css/tamUI.min.css',
+        },
+        'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
+                         'output_filename': 'css/prenotazioni.min.css'},
+        'codapresenze': {'source_filenames': ('css/codapresenze.css',),
+                         'output_filename': 'css/codapresenze.min.css'},
+    },
+    JAVASCRIPT={
+        'tam': {
+            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                                 'js/tam-common.js'],
+            'output_filename': 'tam.min.js'
+        },
+        'tamUI': {
+            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                                 jqueryUIURL, 'js/calendarPreferences.js',
+                                 'js/tam-common.js'],
+            'output_filename': 'tamUI.min.js'
+        },
+        'tamCorse': {
+            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                                 jqueryUIURL,
+                                 'js/calendarPreferences.js',
+                                 'js/tam-common.js',
+                                 'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
+            'output_filename': 'tamCorse.min.js'
+        },
+        'jquery.editable': {
+            'source_filenames': ['js/jquery.editable-1.3.3.js'],
+            'output_filename': 'js/jquery.editable.min.js',
+        },
+        'fattura': {
+            'source_filenames': ['fatturazione/fattura.js'],
+            'output_filename': 'js/fattura.min.js',
+        },
+        'codapresenze': {
+            'source_filenames': ['js/codapresenze.js'],
+            'output_filename': 'js/codapresenze.min.js',
+        },
+    },
+    DISABLE_WRAPPER=True,
+    YUGLIFY_BINARY=os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify'),
+    CSS_COMPRESSOR='pipeline.compressors.yuglify.YuglifyCompressor',
+    JS_COMPRESSOR='pipeline.compressors.yuglify.YuglifyCompressor',
+)
 
 if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
     os.mkdir(os.path.join(PROJECT_PATH, "logs"))
@@ -247,7 +307,6 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
         ],
-        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
@@ -261,6 +320,15 @@ TEMPLATES = [
 
                 "license.context_processors.license_details",
             ],
+            'loaders': (
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ) if DEBUG  else (
+                ('django.template.loaders.cached.Loader', (
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                )),
+            ),
         },
     },
 ]
@@ -300,6 +368,7 @@ INSTALLED_APPS = [
     # 'license',
 
     'djrill',
+    'stats',
 ]
 
 LOGIN_URL = "/login/"
@@ -319,7 +388,25 @@ if use_debug_toolbar:
     DEBUG_TOOLBAR_CONFIG = {
         'JQUERY_URL': '',  # use the page jquery
     }
-    INSTALLED_APPS = INSTALLED_APPS + ['debug_toolbar']
+    DEBUG_TOOLBAR_PANELS = [
+        'debug_toolbar.panels.versions.VersionsPanel',
+        'debug_toolbar.panels.timer.TimerPanel',
+        'debug_toolbar.panels.settings.SettingsPanel',
+        'debug_toolbar.panels.headers.HeadersPanel',
+        'debug_toolbar.panels.request.RequestPanel',
+        'debug_toolbar.panels.sql.SQLPanel',
+        'debug_toolbar.panels.staticfiles.StaticFilesPanel',
+        'debug_toolbar.panels.templates.TemplatesPanel',
+        'debug_toolbar.panels.cache.CachePanel',
+        'debug_toolbar.panels.signals.SignalsPanel',
+        'debug_toolbar.panels.logging.LoggingPanel',
+        'debug_toolbar.panels.redirects.RedirectsPanel',
+        'template_timings_panel.panels.TemplateTimings.TemplateTimings',
+    ]
+    INSTALLED_APPS += [
+        'debug_toolbar',
+        'template_timings_panel'
+    ]
 
 if DEBUG:
     MIDDLEWARE_CLASSES += (

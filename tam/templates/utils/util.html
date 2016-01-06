@@ -35,6 +35,11 @@
 				src="{% static 'fatturazione/invoice-icon.png' %}" alt=""/>Visualizzazione Fatture</a></div>
 	{% endif %}
 
+    {% if perms.fatturazione.view %}
+        <div class="btnbox"><a href="{% url "tamStats" %}"><img
+                src="{% static 'buuf/stats.png' %}" alt=""/>Reports</a></div>
+    {% endif %}
+
 	{% if 'prenotazioni' in PLUGGABLE_APPS %}
 		<div class="btnbox"><a href="{% url "tamPrenotazioni-attachment-list" %}">
 			<img src="{% static "img/guestbook.png" %}" alt=""/>Allegati prenotazioni</a></div>

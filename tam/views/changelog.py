@@ -176,6 +176,9 @@ def changeLog(request, template_name='static/changelog.html'):
          "Visualizzazione allegati prenotazioni.") if 'prenotazioni' in settings.PLUGGABLE_APPS else "",
         ('6.38', '27/6/2015', "Django 1.8 e pulizia."),
         ('6.40', '26/7/2015', "Imposta di bollo so se importo >= minimo."),
+        ('6.45', '7/11/2015', "Alleggerita la procedura di backup, ora piu' veloce."),
+        ('6.46', '16/12/2015', "Fix al minimo per imposta di bollo"),
+        ('6.5', '25/12/2015', "Report corse/fatture"),
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:
