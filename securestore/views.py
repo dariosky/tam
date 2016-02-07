@@ -2,10 +2,11 @@
 import logging
 import mimetypes
 import os
+from wsgiref.util import FileWrapper
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
-from django.core.servers.basehttp import FileWrapper
 from django.http.response import HttpResponseRedirect
 from django.template.loader import get_template
 from django.template import Context

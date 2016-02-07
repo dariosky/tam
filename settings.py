@@ -92,55 +92,55 @@ jqueryUIURL = 'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
 jqueryUICSSURL = 'js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css'
 
 PIPELINE_CSS = {
-        'tam': {'source_filenames': ['css/tam.css'],
-                'output_filename': 'css/tam.min.css'},
-        'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
-                        'output_filename': 'css/tam-stealth.min.css'},
-        'tamUI': {
-            'source_filenames': (
-                jqueryUICSSURL,
-                'css/tam.css',
-            ),
-            'output_filename': 'css/tamUI.min.css',
-        },
-        'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
-                         'output_filename': 'css/prenotazioni.min.css'},
-        'codapresenze': {'source_filenames': ('css/codapresenze.css',),
-                         'output_filename': 'css/codapresenze.min.css'},
+    'tam': {'source_filenames': ['css/tam.css'],
+            'output_filename': 'css/tam.min.css'},
+    'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
+                    'output_filename': 'css/tam-stealth.min.css'},
+    'tamUI': {
+        'source_filenames': (
+            jqueryUICSSURL,
+            'css/tam.css',
+        ),
+        'output_filename': 'css/tamUI.min.css',
+    },
+    'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
+                     'output_filename': 'css/prenotazioni.min.css'},
+    'codapresenze': {'source_filenames': ('css/codapresenze.css',),
+                     'output_filename': 'css/codapresenze.min.css'},
 }
 
 PIPELINE_JS = {
-        'tam': {
-            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                                 'js/tam-common.js'],
-            'output_filename': 'tam.min.js'
-        },
-        'tamUI': {
-            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                                 jqueryUIURL, 'js/calendarPreferences.js',
-                                 'js/tam-common.js'],
-            'output_filename': 'tamUI.min.js'
-        },
-        'tamCorse': {
-            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                                 jqueryUIURL,
-                                 'js/calendarPreferences.js',
-                                 'js/tam-common.js',
-                                 'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
-            'output_filename': 'tamCorse.min.js'
-        },
-        'jquery.editable': {
-            'source_filenames': ['js/jquery.editable-1.3.3.js'],
-            'output_filename': 'js/jquery.editable.min.js',
-        },
-        'fattura': {
-            'source_filenames': ['fatturazione/fattura.js'],
-            'output_filename': 'js/fattura.min.js',
-        },
-        'codapresenze': {
-            'source_filenames': ['js/codapresenze.js'],
-            'output_filename': 'js/codapresenze.min.js',
-        },
+    'tam': {
+        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                             'js/tam-common.js'],
+        'output_filename': 'tam.min.js'
+    },
+    'tamUI': {
+        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                             jqueryUIURL, 'js/calendarPreferences.js',
+                             'js/tam-common.js'],
+        'output_filename': 'tamUI.min.js'
+    },
+    'tamCorse': {
+        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
+                             jqueryUIURL,
+                             'js/calendarPreferences.js',
+                             'js/tam-common.js',
+                             'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
+        'output_filename': 'tamCorse.min.js'
+    },
+    'jquery.editable': {
+        'source_filenames': ['js/jquery.editable-1.3.3.js'],
+        'output_filename': 'js/jquery.editable.min.js',
+    },
+    'fattura': {
+        'source_filenames': ['fatturazione/fattura.js'],
+        'output_filename': 'js/fattura.min.js',
+    },
+    'codapresenze': {
+        'source_filenames': ['js/codapresenze.js'],
+        'output_filename': 'js/codapresenze.min.js',
+    },
 }
 PIPELINE_DISABLE_WRAPPER = True
 
@@ -258,7 +258,7 @@ LOGGING = {
             'filters': ['require_debug_true'],
         },
         'null': {
-            "class": 'django.utils.log.NullHandler',
+            "class": 'logging.NullHandler',
         }
     },
     'loggers': {

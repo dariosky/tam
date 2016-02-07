@@ -18,7 +18,7 @@ class ActionLog(models.Model):
     # user = models.ForeignKey(User, null=True, blank=True, default=None)
     action_type = models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
 
-    modelName = models.CharField(max_length='20', null=True, blank=True,
+    modelName = models.CharField(max_length=20, null=True, blank=True,
                                  default=None)
     instance_id = models.IntegerField(null=True, blank=True, default=None)
 
@@ -38,7 +38,7 @@ class ActionLog(models.Model):
         longName = {"A": "Creazione", "M": "Modifica", "D": "Cancellazione"}[
             self.action_type]
         return "%s di un %s - %s.\n  %s" % (
-        longName, self.content_type, self.user, self.description)
+            longName, self.content_type, self.user, self.description)
 
     def user(self):
         """ The user who made the action """

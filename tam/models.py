@@ -85,6 +85,7 @@ class Luogo(models.Model):
                                 default="",
                                 choices=(("-", "-"), ("A", "Aeroporto"),
                                          ("S", "Stazione")))
+
     # una delle località sarà  la predefinita... tra le proprietà  dell'utente
 
     class Meta:
@@ -256,7 +257,7 @@ class Viaggio(models.Model):
                                          default=False)
     commissione = models.DecimalField("Quota consorzio", max_digits=9,
                                       decimal_places=2,
-                                      default=0)  # fissa in euro
+                                      default=0)  # in euro o percentuale, a seconda del tipo
     tipo_commissione = models.CharField("Tipo di quota", max_length=1,
                                         choices=TIPICOMMISSIONE, default="F")
     numero_pratica = models.CharField(max_length=20, null=True, blank=True)
@@ -832,7 +833,7 @@ class Viaggio(models.Model):
         if self.conducente_richiesto:
             return {}
         if self.date_start < tamdates.date_enforce(
-                datetime.datetime(2012, 3, 1)):
+            datetime.datetime(2012, 3, 1)):
             metodo = fasce_uno_due
         else:
             metodo = getattr(settings, "METODO_FASCE", fasce_semilineari)
@@ -867,9 +868,9 @@ class Viaggio(models.Model):
         if nextbro and nextbro.da == self.a:  # se il successivo parte da dove arrivo è sicuramente un collettivo in successione
             return False
         if nextbro and nextbro.data < \
-                        self.data + datetime.timedelta(
-                    minutes=get_tratta(self.da, self.a).minuti + (
-                            30 if self.da.speciale == "A" else 0)):
+                self.data + datetime.timedelta(
+                minutes=get_tratta(self.da, self.a).minuti + (
+                    30 if self.da.speciale == "A" else 0)):
             # tengo conto che questa corsa dura 30 minuti in più se parte da un aereoporto
             #			logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
             return True
@@ -911,8 +912,8 @@ class Viaggio(models.Model):
         tratta = self.tratta
         tratta_end = self.tratta_end
         if (tratta_start is None or tratta_start.is_valid()) and (
-                        tratta is None or tratta.is_valid()) and (
-                        tratta_end is None or tratta_end.is_valid()):
+                    tratta is None or tratta.is_valid()) and (
+                    tratta_end is None or tratta_end.is_valid()):
             return True
         else:
             return False
@@ -1112,7 +1113,7 @@ class Cliente(models.Model):
                                 null=True, blank=True)
     commissione = models.DecimalField("Quota consorzio", max_digits=9,
                                       decimal_places=2,
-                                      default=0)  # fissa in euro
+                                      default=0)  # in euro o percentuale, a seconda del tipo
     tipo_commissione = models.CharField("Tipo di quota", max_length=1,
                                         choices=TIPICOMMISSIONE, default="F")
     attivo = models.BooleanField(default=True)
@@ -1204,7 +1205,7 @@ class PrezzoListino(models.Model):
 
     commissione = models.DecimalField("Quota consorzio", max_digits=9,
                                       decimal_places=2, null=True,
-                                      default=0)  # fissa in euro
+                                      default=0)  # in euro o percentuale, a seconda del tipo
     tipo_commissione = models.CharField("Tipo di quota", max_length=1,
                                         choices=TIPICOMMISSIONE, default="F")
     ultima_modifica = models.DateField(auto_now=True)
@@ -1245,7 +1246,7 @@ class PrezzoListino(models.Model):
             self.prezzo_notturno)
         if self.commissione:
             if self.tipo_commissione == "P":
-                result += u"con quota del %d%% " % (self.commissione)
+                result += u"con quota del %d%% " % self.commissione
             else:
                 result += u"con quota di %d€ " % self.commissione
         result += self.stringa_dettaglio()
@@ -1279,6 +1280,7 @@ class Conguaglio(models.Model):
     def __unicode__(self):
         return "%s, %s: %s" % (self.data, self.conducente, self.dare)
 
+
 # Comincia a loggare i cambiamenti a questi Modelli
 from modellog.actions import startLog, stopLog
 
@@ -1305,6 +1307,7 @@ process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 process_value = settings.GET_VALUE_FUNCTION
 
 PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
+
 
 # load models required for the tasks
 # from tam.tasks import TaskBackup, TaskArchive  # @UnusedImport
