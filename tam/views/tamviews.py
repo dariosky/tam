@@ -101,6 +101,7 @@ def listaCorse(request, template_name="corse/lista.html"):
     user = request.user
     profilo, created = ProfiloUtente.objects.get_or_create(user=user)
     dontHilightFirst = True
+    TAM = settings.TAM
     #	messages.debug(request, "Messaggio di debug.")
     #	messages.info(request, "Messaggio di info.")
     #	messages.success(request, "Messaggio di success.")
@@ -199,7 +200,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 
     if u"filterConducente" in request.GET:
         filterConducente = request.GET["filterConducente"]
-        if filterConducente not in ("Non confermate", ""):
+        # filterConducente should be an int or one of these few special string
+        if filterConducente not in ("Non confermate", "", 'bus'):
             try:
                 filterConducente = int(filterConducente)
             except:
@@ -229,16 +231,17 @@ def listaCorse(request, template_name="corse/lista.html"):
     viaggi = Viaggio.objects.all()  # mostro tutti i figli, non raggruppo per padre
     # viaggi = viaggi.filter(Q(padre_id=81833) | Q(id=81833)) #TMP:
     if filterCliente or (
-                filterFlag != "Tutti i flag") or outputFormat:  # non raggruppo
+            filterFlag != "Tutti i flag") or outputFormat:  # non raggruppo
         distinct = True
 
     # viaggi=Viaggio.objects.filter(pk=5266)	#TMP
     if filterConducente:
         if filterConducente == "Non confermate":
             viaggi = viaggi.filter(conducente__isnull=True)
+        elif filterConducente=='bus' and TAM.get('SPECIAL_FILTERS',{}).get('BUS', False):
+            viaggi = viaggi.filter(conducente__nome__icontains="bus")  # "bus" in the name
         else:
-            viaggi = viaggi.filter(
-                conducente=filterConducente)  # filtro il conducente
+            viaggi = viaggi.filter(conducente=filterConducente)  # filtro il conducente
             conducenteFiltrato = Conducente.objects.get(id=filterConducente)
 
     filtriWhen = [("next", "Prossime corse"), ("all", "Tutte le date"),
@@ -471,7 +474,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
         destination1 = reverse("tamNuovaCorsaId", kwargs={"id": id})
         destination2 = reverse("tamNuovaCorsa2Id", kwargs={"id": id})
     if viaggio and viaggio.vecchioConfermato() and not user.has_perm(
-            'tam.change_oldviaggio'):
+        'tam.change_oldviaggio'):
         messages.error(request,
                        "Non puoi cambiare i vecchi viaggi confermati.")
         return HttpResponseRedirect("/")
@@ -507,7 +510,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
     if step == 2:  # Integrity controls when accessing STEP2
         if (not id) and (
-                not step1):  # sono in step2 ma non ho definito nulla della step1
+            not step1):  # sono in step2 ma non ho definito nulla della step1
             return HttpResponseRedirect(destination1)
         if "back" in request.GET:  # back to step1
             return HttpResponseRedirect(destination1)
@@ -880,6 +883,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
 
     if id:
         listino = Listino.objects.get(id=id)  # modifying an existing Client
+
     # else:
     #		ListinoForm = forms.form_for_model(Listino)
 
@@ -1035,7 +1039,7 @@ def conducente(*args, **kwargs):
     kwargs['fields_descriptions'] = settings.NOMI_CAMPI_CONDUCENTE
 
     if not request.user.has_perm(
-            'tam.change_classifiche_iniziali'):  # gli utenti base non possono cambiare molto dei conducenti
+        'tam.change_classifiche_iniziali'):  # gli utenti base non possono cambiare molto dei conducenti
         kwargs["excludedFields"] = [
             'classifica_iniziale_diurni', "classifica_iniziale_notturni",
             "classifica_iniziale_puntiDoppiVenezia",
@@ -1246,6 +1250,7 @@ def profilo(request, *args, **kwargs):
     kwargs[
         "note"] = u"Puoi definire un po' di dettagli per l'utente %s." % request.user
     return bacino(request, *args, **kwargs)
+
 
 # tengo la vista per vedere le classifiche separata
 from tam.views.classifiche import classificheconducenti
@@ -1572,9 +1577,7 @@ def resetSessions(request, template_name="utils/resetSessions.html"):
 
             connection = connections['default']
             cursor = connection.cursor()
-            query = """
-				delete from django_session
-			"""
+            query = "delete from django_session"
             cursor.execute(query)
             transaction.commit_unless_managed()
 
@@ -1681,7 +1684,7 @@ def permissions(request, username=None,
                     utentePrenotazioni.save()
                     logging.debug("Setting clients to user prenotazioni")
                     for cliente_id in request.POST.getlist(
-                            'prenotazioni_clienti'):
+                        'prenotazioni_clienti'):
                         cliente = Cliente.objects.get(id=cliente_id)
                         utentePrenotazioni.clienti.add(cliente)
                         logging.debug("adding %s" % cliente)
