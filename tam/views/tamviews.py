@@ -238,11 +238,16 @@ def listaCorse(request, template_name="corse/lista.html"):
     if filterConducente:
         if filterConducente == "Non confermate":
             viaggi = viaggi.filter(conducente__isnull=True)
-        elif filterConducente=='bus' and TAM.get('SPECIAL_FILTERS',{}).get('BUS', False):
+        elif filterConducente == 'bus' and TAM.get('SPECIAL_FILTERS', {}).get('BUS', False):
             viaggi = viaggi.filter(conducente__nome__icontains="bus")  # "bus" in the name
         else:
-            viaggi = viaggi.filter(conducente=filterConducente)  # filtro il conducente
-            conducenteFiltrato = Conducente.objects.get(id=filterConducente)
+            try:
+                filterConducente = int(filterConducente)
+            except ValueError:
+                filterConducente = None
+            if filterConducente is not None:
+                viaggi = viaggi.filter(conducente=filterConducente)  # filtro il conducente
+                conducenteFiltrato = Conducente.objects.get(id=filterConducente)
 
     filtriWhen = [("next", "Prossime corse"), ("all", "Tutte le date"),
                   ("thisM", "Questo mese"),

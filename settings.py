@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.46"
+TAM_VERSION = "6.47"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
@@ -440,6 +440,17 @@ SECURE_URL = "/secure/"
 
 PLUGGABLE_APPS = {}
 
+# Max numbers of rows allowed for XLS export
+MAX_XLS_ROWS = 15 * 1000
+
+TAM = dict(
+    SPECIAL_FILTERS=dict(
+        BUS=False,    # allow filter bus, for whatever driver name containing "bus"
+    )
+)
+
+# END OF DEFAULTS **************************************************************
+
 settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
 try:
     # Dynamically import settings from the specified sys envoronment var
@@ -457,12 +468,3 @@ for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
 WSGI_APPLICATION = 'wsgi.application'
-
-# Max numbers of rows allowed for XLS export
-MAX_XLS_ROWS = 15 * 1000
-
-TAM = dict(
-    SPECIAL_FILTERS=dict(
-        BUS=True,    # allow filter bus, for whatever driver name containing "bus"
-    )
-)

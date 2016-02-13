@@ -178,6 +178,7 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.40', '26/7/2015', "Imposta di bollo so se importo >= minimo."),
         ('6.45', '7/11/2015', "Alleggerita la procedura di backup, ora piu' veloce."),
         ('6.46', '16/12/2015', "Fix al minimo per imposta di bollo"),
+        ('6.47', '13/2/2016', "BUS filters and framework updates"),
         ('6.5', '25/12/2015', "Report corse/fatture"),
     ]
     # ('', '', mark_safe('''''')),
