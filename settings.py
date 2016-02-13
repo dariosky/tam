@@ -368,7 +368,6 @@ INSTALLED_APPS = [
     # 'license',
 
     'djrill',
-    'stats',
 ]
 
 LOGIN_URL = "/login/"
