@@ -460,3 +460,9 @@ WSGI_APPLICATION = 'wsgi.application'
 
 # Max numbers of rows allowed for XLS export
 MAX_XLS_ROWS = 15 * 1000
+
+TAM = dict(
+    SPECIAL_FILTERS=dict(
+        BUS=True,    # allow filter bus, for whatever driver name containing "bus"
+    )
+)

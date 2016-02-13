@@ -1,5 +1,5 @@
 # Django related
-django<1.9
+django<2
 south
 django-debug-toolbar
 django-debug-toolbar-template-timings
