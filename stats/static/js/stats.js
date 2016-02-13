@@ -9,12 +9,17 @@ $(function () {
 	$('#statsform').submit(
 		function () {
 			var $this = $(this);
+			if ($('input[name="qfilter"]:checked').length == 0) {
+				$this.append(
+					$("<input name='qfilter' type='hidden'/>").val("none")
+				);
+			}
 			var groupers = [];
 			$("#enabled").find('div').each(function () {
 				groupers.push($(this).text().toLowerCase())
 			});
 			$this.append(
-				$("<input name='grouper' type='hidden'/>").val(groupers.join(","))
+				$("<input name='qgrouper' type='hidden'/>").val(groupers.join(",") || "none")
 			);
 		}
 	);

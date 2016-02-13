@@ -1,5 +1,8 @@
 # coding=utf-8
 import datetime
+from decimal import Decimal
+from django.db.models import Case, When, F, DecimalField, ExpressionWrapper
+from django.db.models.aggregates import Sum
 from django.views.generic import TemplateView
 
 from fatturazione.models import Fattura
@@ -64,35 +67,80 @@ class StatsView(MonthDatesMixin):
 
     def get_context_data(self, **kwargs):
         context = super(StatsView, self).get_context_data(**kwargs)
-        key = 'grouper'
+        key = 'qgrouper'
         if key in self.request.GET:
-            context[key] = self.request.GET.get(key).split(",")
+            context[key] = self.request.GET.get(key, "").split(",")
         else:
-            context[key] = self.request.session.get('{}{}'.format(self.session_prefix, key))
+            context[key] = self.request.session.get('{}{}'.format(self.session_prefix, key), [])
 
-        key = 'type'
+        key = 'qtype'
         context[key] = self.request.GET.get(key) or self.request.session.get('{}{}'.format(self.session_prefix, key))
+        if context[key] is None:
+            context[key] = 'corse'
 
-        context['filter'] = (self.request.GET.getlist('filter') or
-                             self.request.session.get(
-                                 '{}{}'.format(self.session_prefix, 'filter')))
-        if context['type'] is None:
-            context['type'] = 'corse'
+        key = 'qfilter'
+        if key in self.request.GET:
+            context[key] = self.request.GET.getlist(key)
+        else:
+            context[key] = self.request.session.get('{}{}'.format(self.session_prefix, key), [])
 
         # save the property in the session
-        for key in ['type', 'grouper', 'filter']:
+        for key in ['qtype', 'qgrouper', 'qfilter']:
             session_key = '{}{}'.format(self.session_prefix, key)
             if self.request.session.get(session_key) != context[key]:
                 self.request.session[session_key] = context[key]
 
         # build the data
-        keys = ('data_start', 'data_end', 'type', 'filter', 'grouper')
+        keys = ('data_start', 'data_end', 'qtype', 'qfilter', 'qgrouper')
         context['data'] = self.get_data(**{key: context[key] for key in keys})
         return context
 
-    def get_data(self, data_start, data_end, type, filter, grouper, **kwargs):
+    def get_data(self, data_start, data_end, qtype, qfilter, qgrouper, **kwargs):
         data_end = data_end + datetime.timedelta(days=1)
-        qs = Viaggio if type == 'corse' else Fattura
+        qs = Viaggio if qtype == 'corse' else Fattura
         qs = qs.objects.all()
         qs = qs.filter(data__gte=data_start, data__lt=data_end)
-        return qs
+        if qtype == 'corse':
+            qs = qs.exclude(annullato=True)
+            if 'finemese' in qfilter:
+                qs = qs.filter(incassato_albergo=True)
+            if 'fatture' in qfilter:
+                qs = qs.filter(fatturazione=True)
+            if 'carte' in qfilter:
+                qs = qs.filter(cartaDiCredito=True)
+
+        data = dict(tot=qs.count())
+        rows = []
+        fields = dict(prezzo=Sum('prezzo'),
+                      commissione=Sum(
+                          ExpressionWrapper(
+                              Case(When(tipo_commissione='F', then=F('commissione')),
+                                   When(tipo_commissione='P', then=F('commissione') * F('prezzo') / 100),
+                                   ),
+                              output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
+                          ),
+
+                      )
+                      )
+        if 'none' in qgrouper:
+            qgrouper.remove('none')
+        if not qgrouper:
+            num_rows = qs.count()
+            qs = qs.aggregate(**fields)
+            headers = ["Totale", "Prezzo", "Commissione"]
+            rows.append(headers)
+            rows.append(("{num} {tipo}".format(num=num_rows, tipo=qtype),
+                         qs['prezzo'],
+                         qs['commissione'].quantize(Decimal("0.01"))))
+        else:
+            fields_name = dict(cliente="cliente", socio='conducente')
+            grouper_fields = [fields_name[c] for c in qgrouper]
+            qs = qs.values(*grouper_fields).annotate(**fields)
+            rows.append(qgrouper + ["Prezzo", "Commissione"])
+            for r in qs:
+                row = []
+                for field in grouper_fields:
+                    row.append(r.get(field))
+                rows.append(row)
+        data['rows'] = rows
+        return data

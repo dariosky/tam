@@ -13,10 +13,10 @@
         <fieldset class="formset">
             <legend>Tipo</legend>
             <label>Corse
-                <input type="radio" name="type" value="corse"{% if type == 'corse' %} checked{% endif %}/>
+                <input type="radio" name="qtype" value="corse"{% if qtype == 'corse' %} checked{% endif %}/>
             </label>
             <label>Fatture
-                <input type="radio" name="type" value="fatture"{% if type == 'fatture' %} checked{% endif %}/>
+                <input type="radio" name="qtype" value="fatture"{% if qtype == 'fatture' %} checked{% endif %}/>
             </label>
         </fieldset>
 
@@ -33,30 +33,33 @@
         </fieldset>
         <fieldset class="formset">
             <legend>Filtro</legend>
-            <label><input type="checkbox" name="filter" value="fatture" {% if 'fatture' in filter %}checked{% endif %}>
+            <label><input type="checkbox" name="qfilter" value="fatture"
+                          {% if 'fatture' in qfilter %}checked{% endif %}>
                 Fatture</label>
-            <label><input type="checkbox" name="filter" value="carte" {% if 'carte' in filter %}checked{% endif %}>
+            <label><input type="checkbox" name="qfilter" value="carte"
+                          {% if 'carte' in qfilter %}checked{% endif %}>
                 Carta</label>
-            <label><input type="checkbox" name="filter" value="finemese"
-                          {% if 'finemese' in filter %}checked{% endif %}> Fine mese</label>
+            <label><input type="checkbox" name="qfilter" value="finemese"
+                          {% if 'finemese' in qfilter %}checked{% endif %}>
+                Fine mese</label>
         </fieldset>
         <fieldset class="formset">
             <legend>Raggruppamento (trascina a destra)</legend>
             <div class="dragcontainer">
                 <div id="available" class="box">
-                    {% if "cliente" not in grouper %}
+                    {% if "cliente" not in qgrouper %}
                         <div class="draggable">Cliente</div>{% endif %}
-                    {% if "conducente" not in grouper %}
-                        <div class="draggable">Conducente</div>{% endif %}
-                    {% if "taxi/collettivo" not in grouper %}
+                    {% if "socio" not in qgrouper %}
+                        <div class="draggable">Socio</div>{% endif %}
+                    {% if "taxi/collettivo" not in qgrouper %}
                         <div class="draggable">Taxi/Collettivo</div>{% endif %}
                 </div>
                 <div id="enabled" class="box">
-                    {% for g in grouper %}
+                    {% for g in qgrouper %}
                         {% if "cliente" == g %}
                             <div class="draggable">Cliente</div>
-                        {% elif "conducente"  == g %}
-                            <div class="draggable">Conducente</div>
+                        {% elif "socio"  == g %}
+                            <div class="draggable">Socio</div>
                         {% elif "taxi/collettivo"  == g %}
                             <div class="draggable">Taxi/Collettivo</div>
                         {% endif %}
@@ -69,10 +72,23 @@
     </form>
     <h2>Report {{ reportname }}</h2>
     <div id="data">
-        {% for row in data %}
-            <div class="row">{{ row }}</div>
-        {% endfor %}
-        <div class="countblock">{{ data|length }}</div>
+        <table class="tablesorter">
+            <tr>
+                {% for h in data.rows|first %}
+                    <th>{{ h }}</th>
+                {% endfor %}
+
+            </tr>
+            {% for row in data.rows|slice:"1:" %}
+                <tr class="row">
+                    {% for cell in row %}
+                        <td>{{ cell }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+
+        <div class="countblock">{{ data.tot }}</div>
     </div>
 {% endblock %}
 
