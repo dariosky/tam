@@ -1,9 +1,8 @@
 # coding=utf-8
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
 from stats.views import StatsView
 
-urlpatterns = patterns(
-    '',
+urlpatterns = [
     url(r'^$', StatsView.as_view(), name="tamStats"),
-)
+]

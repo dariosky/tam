@@ -1,6 +1,9 @@
-from django.conf.urls import url, patterns
+# coding=utf-8
+from django.conf.urls import url
 
-urlpatterns = patterns('codapresenze.views',
-                       url(r'', 'coda', name='codapresenze-home'),  #url(r'socket\.io', 'socketio')
+from .views import coda
 
-)
+urlpatterns = [
+    url(r'', coda, name='codapresenze-home'),
+    # url(r'socket\.io', 'socketio')
+]

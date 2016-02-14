@@ -1,6 +1,7 @@
 # coding=utf-8
-from django.conf.urls import url, patterns
+from django.conf.urls import url
+from .views import actionLog
 
-urlpatterns = patterns('modellog.views',
-	url(r"^log/$", "actionLog", name="actionLog"),
-)
+urlpatterns = [
+    url(r"^log/$", actionLog, name="actionLog"),
+]
