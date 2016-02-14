@@ -1,49 +1,41 @@
 # coding=utf-8
-from django.conf.urls import url, patterns, include
+from django.conf.urls import url, include
 from django.conf import settings
 import os
+from django.views import static
+from django.contrib import admin
+import tam
+
+from tam.views.manviews import pingview
 
 secure_url_regex = settings.SECURE_URL
 if secure_url_regex[0] == '/':
     secure_url_regex = '^' + secure_url_regex[1:]
 
-urlpatterns = patterns(
-    '',
-    (r'', include('tam.urls')),
-    (r'', include('modellog.urls')),
-    (r'^archive/', include('tamArchive.urls')),
+urlpatterns = [
+    url(r'', include('tam.urls')),
+    url(r'', include('modellog.urls')),
+    url(r'^archive/', include('tamArchive.urls')),
     # ( r'', include( 'license.urls' ) ),
-    (r'^fatture/', include('fatturazione.urls')),
-    (secure_url_regex, include('securestore.urls')),
-    (r'^stats/', include('stats.urls')),
-)
+    url(r'^fatture/', include('fatturazione.urls')),
+    url(secure_url_regex, include('securestore.urls')),
+]
 
 # add pluggable apps URL
 for app, desc in settings.PLUGGABLE_APPS.items():
     if 'urls' in desc:
         url_regex, import_location = desc['urls']
-        urlpatterns += patterns(
-            '',
-            url(url_regex, include(import_location)),
-        )
-
-from django.contrib import admin
+        urlpatterns.append(url(url_regex, include(import_location)))
 
 admin.autodiscover()
-urlpatterns += patterns(
-    '',
-    url(r'^admin/', include(admin.site.urls)),
-)
+urlpatterns.append(url(r'^admin/', include(admin.site.urls)))
+
 # Serve media settings to simulate production, we know in REAL production this won't happend
 if settings.DEBUG:
-    urlpatterns += patterns(
-        '',
-
-        # media > /media
-        ("^media/" + r'(?P<path>.*)$', 'django.views.static.serve',
-         {'document_root': os.path.join(os.path.dirname(__file__), "media")}
-         ),
-    )
+    # media > /media
+    urlpatterns.append(url("^media/" + r'(?P<path>.*)$', static.serve,
+                           {'document_root': os.path.join(os.path.dirname(__file__), "media")}
+                           ))
 
 # *** Per servire i staticfiles generati, come in produzione ***
 # urlpatterns += patterns('',
@@ -51,11 +43,10 @@ if settings.DEBUG:
 #                          {'document_root': os.path.join(os.path.dirname(__file__), "static")}),
 # )
 
-handler500 = 'tam.views.manviews.errors500'
-handler404 = 'tam.views.manviews.errors400'
+handler500 = tam.views.manviews.errors500
+handler404 = tam.views.manviews.errors400
 
-urlpatterns += patterns(
-    '',
+urlpatterns += [
     url('^500/', handler500, name='error-test'),
-    url('^ping/', 'tam.views.manviews.pingview', name='ping-test')
-)
+    url('^ping/', pingview, name='ping-test'),
+]

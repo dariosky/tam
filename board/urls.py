@@ -1,7 +1,8 @@
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 
-urlpatterns = patterns ('board.views',
-	url(r'', 'main', name='board-home'),
-	#url(r'socket\.io', 'socketio')
+from .views import main
 
- )
+urlpatterns = [
+    url(r'', main, name='board-home'),
+    # url(r'socket\.io', 'socketio')
+]

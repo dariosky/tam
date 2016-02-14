@@ -1,5 +1,6 @@
 # coding: utf-8
 
+
 class SeparateLogRouter(object):
     """A router to control all database operations on models
        in the modellog application in modellog connection"""
@@ -23,11 +24,11 @@ class SeparateLogRouter(object):
             return True
         return None
 
-    def allow_migrate(self, db, model):
+    def allow_migrate(self, db, app_label, model_name=None, **hints):
         "Make sure the myapp app only appears on the 'other' db"
         # print "creo %s in %s. App=%s?" % (model, db, model._meta.app_label)
         if db == 'modellog':
-            return model._meta.app_label == 'modellog'
-        elif model._meta.app_label == 'modellog':
+            return app_label == 'modellog'
+        elif app_label == 'modellog':
             return False
         return None
