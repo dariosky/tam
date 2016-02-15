@@ -239,7 +239,7 @@ def listaCorse(request, template_name="corse/lista.html"):
         if filterConducente == "Non confermate":
             viaggi = viaggi.filter(conducente__isnull=True)
         elif filterConducente == 'bus' and TAM.get('SPECIAL_FILTERS', {}).get('BUS', False):
-            viaggi = viaggi.filter(conducente__nome__istartswith="bus")  # "bus" in the name
+            viaggi = viaggi.filter(conducente__nick__istartswith="bus")  # "bus" in the name
         else:
             try:
                 filterConducente = int(filterConducente)
