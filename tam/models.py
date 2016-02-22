@@ -38,20 +38,20 @@ def get_classifiche():
     # logging.debug("Ottengo le classifiche globali.")
     cursor = connections['default'].cursor()
     query = """
-        select
-            c.id as conducente_id, c.nick as conducente_nick, c.max_persone as max_persone,
-            coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni as "puntiDiurni",
-            coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni as "puntiNotturni",
-            coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long as "prezzoVenezia",
-            coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium as "prezzoPadova",
-            coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" as "prezzoDoppioPadova",
-            coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" as punti_abbinata
-        from tam_conducente c
-            left join tam_viaggio v on c.id=v.conducente_id and v.conducente_confermato
-        where c.attivo --and c.nick='2'
-            and not coalesce(v.annullato, false)
-        group by c.id, c.nick
-        order by conducente_nick
+        SELECT
+            c.id AS conducente_id, c.nick AS conducente_nick, c.max_persone AS max_persone,
+            coalesce(sum("punti_diurni"),0)+classifica_iniziale_diurni AS "puntiDiurni",
+            coalesce(sum(punti_notturni),0)+classifica_iniziale_notturni AS "puntiNotturni",
+            coalesce(sum("prezzoVenezia"),0) + classifica_iniziale_long AS "prezzoVenezia",
+            coalesce(sum("prezzoPadova"),0) + classifica_iniziale_medium AS "prezzoPadova",
+            coalesce(sum("prezzoDoppioPadova"),0) + "classifica_iniziale_doppiPadova" AS "prezzoDoppioPadova",
+            coalesce(sum("punti_abbinata"),0) + "classifica_iniziale_puntiDoppiVenezia" AS punti_abbinata
+        FROM tam_conducente c
+            LEFT JOIN tam_viaggio v ON c.id=v.conducente_id AND v.conducente_confermato
+        WHERE c.attivo --and c.nick='2'
+            AND NOT coalesce(v.annullato, FALSE)
+        GROUP BY c.id, c.nick
+        ORDER BY conducente_nick
     """
     cursor.execute(query, ())
     results = cursor.fetchall()

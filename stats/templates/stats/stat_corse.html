@@ -16,7 +16,7 @@
                 <input type="radio" name="qtype" value="corse"{% if qtype == 'corse' %} checked{% endif %}/>
             </label>
             <label>Fatture
-                <input type="radio" name="qtype" value="fatture"{% if qtype == 'fatture' %} checked{% endif %}/>
+                <input disabled type="radio" name="qtype" value="fatture"{% if qtype == 'fatture' %} checked{% endif %}/>
             </label>
         </fieldset>
 
@@ -53,6 +53,8 @@
                         <div class="draggable">Socio</div>{% endif %}
                     {% if "taxi/collettivo" not in qgrouper %}
                         <div class="draggable">Taxi/Collettivo</div>{% endif %}
+                    {% if "mese" not in qgrouper %}
+                        <div class="draggable">Mese</div>{% endif %}
                 </div>
                 <div id="enabled" class="box">
                     {% for g in qgrouper %}
@@ -62,6 +64,8 @@
                             <div class="draggable">Socio</div>
                         {% elif "taxi/collettivo"  == g %}
                             <div class="draggable">Taxi/Collettivo</div>
+                        {% elif "mese"  == g %}
+                            <div class="draggable">Mese</div>
                         {% endif %}
                     {% endfor %}
                 </div>

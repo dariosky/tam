@@ -1,14 +1,36 @@
 # coding=utf-8
+import django
+from pprint import pprint
 import datetime
+
+django.setup()
 from decimal import Decimal
-from django.db.models import Case, When, F, DecimalField, ExpressionWrapper
+from django.db.models import Case, When, F, DecimalField, Value, Func
 from django.db.models.aggregates import Sum
 from django.views.generic import TemplateView
 
 from fatturazione.models import Fattura
 from tam import tamdates
 from tam.models import Viaggio
-from tam.tamdates import MONTH_NAMES, parse_datestring
+from tam.tamdates import MONTH_NAMES, parse_datestring, date_enforce
+
+
+class Extract(Func):
+    """
+    source: http://stackoverflow.com/questions/32897891/django-getting-month-from-date-for-aggregation
+    Performs extraction of `what_to_extract` from `*expressions`.
+
+    Arguments:
+        *expressions (string): Only single value is supported, should be field name to
+                               extract from.
+        what_to_extract (string): Extraction specificator.
+
+    Returns:
+        class: Func() expression class, representing 'EXTRACT(`what_to_extract` FROM `*expressions`)'.
+    """
+
+    function = 'EXTRACT'
+    template = '%(function)s(%(what_to_extract)s FROM %(expressions)s  at TIME ZONE \'CET\')'
 
 
 class MonthDatesMixin(TemplateView):
@@ -111,17 +133,19 @@ class StatsView(MonthDatesMixin):
 
         data = dict(tot=qs.count())
         rows = []
-        fields = dict(prezzo=Sum('prezzo'),
+        fields = dict(tot=Sum('prezzo'),
                       commissione=Sum(
-                          ExpressionWrapper(
-                              Case(When(tipo_commissione='F', then=F('commissione')),
-                                   When(tipo_commissione='P', then=F('commissione') * F('prezzo') / 100),
-                                   ),
-                              output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
-                          ),
+                          Case(When(tipo_commissione='F', then=F('commissione')),
+                               When(tipo_commissione='P', then=F('commissione') * F('prezzo') / Value(100)),
+                               ),
+                          output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
 
                       )
                       )
+        if 'socio' in qgrouper:
+            fields['conducente_nome'] = F('conducente__nome')
+        if 'cliente' in qgrouper:
+            fields['cliente_nome'] = F('cliente__nome')
         if 'none' in qgrouper:
             qgrouper.remove('none')
         if not qgrouper:
@@ -133,14 +157,84 @@ class StatsView(MonthDatesMixin):
                          qs['prezzo'],
                          qs['commissione'].quantize(Decimal("0.01"))))
         else:
-            fields_name = dict(cliente="cliente", socio='conducente')
-            grouper_fields = [fields_name[c] for c in qgrouper]
-            qs = qs.values(*grouper_fields).annotate(**fields)
-            rows.append(qgrouper + ["Prezzo", "Commissione"])
+            fields_name = dict(socio='conducente',
+                               mese='year,month')  # the field name in the model
+            fields_name['taxi/collettivo'] = 'esclusivo'
+            grouper_fields = []
+            for c in qgrouper:
+                # the fields in the group by clause
+                grouper_fields += fields_name.get(c, c).split(",")
+            qs = (qs
+                  .order_by()  # remove existing order, or they'll be used as grouper
+                  )
+            if 'mese' in qgrouper:
+                # we do an intermediate annotation, before grouping
+                qs = (qs
+                      .annotate(year=Extract('data', what_to_extract='year'),
+                                month=Extract('data', what_to_extract='month'))
+                      )
+            qs = (qs
+                  .values(*grouper_fields)  # group by
+                  .annotate(**fields)
+                  .order_by(*grouper_fields)
+                  )  # and annotate
+            rows.append(qgrouper + ["Prezzo", "Quota Cons."])
+
             for r in qs:
                 row = []
-                for field in grouper_fields:
-                    row.append(r.get(field))
+                for field in qgrouper:
+                    value = r.get(field)
+                    if field == 'socio':
+                        if r.get('conducente'):
+                            value = r.get('conducente_nome')
+                        else:
+                            value = "*non assegnato*"
+                    elif field == 'cliente':
+                        if value is None:
+                            value = "*nessun cliente*"
+                        else:
+                            value = r.get('cliente_nome')
+                    elif field == 'taxi/collettivo':
+                        value = r.get("esclusivo") and 'taxi' or 'collettivo'
+                    elif field == 'mese':
+                        month = MONTH_NAMES[int(r.get('month')) - 1]
+                        value = "%s %s" % (month, int(r.get('year')))
+                    row.append(value)
+                row += map(lambda x: x.quantize(Decimal("0.01")),
+                           [r.get('tot'), r.get('commissione')]
+                           )
                 rows.append(row)
+                print row
+
         data['rows'] = rows
         return data
+
+
+def testing_annotations():
+    # Testing the query
+    qs = Viaggio.objects.filter(annullato=False,
+                                data__gte=date_enforce(datetime.date(2016, 1, 11)),
+                                data__lt=date_enforce(datetime.date(2016, 2, 14)))
+    qs = (qs
+          .order_by()
+          .annotate(year=Extract('data', what_to_extract='year'),
+                    month=Extract('data', what_to_extract='month'))
+          .values('year', 'month')
+          .annotate(tot=Sum('prezzo'),
+                    commissione=Sum(
+                        Case(When(tipo_commissione='F', then=F('commissione')),
+                             When(tipo_commissione='P', then=F('commissione') * F('prezzo') / Value(100)),
+                             ),
+                        output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
+
+                    ),
+                    conducente__nome=F('conducente__nome')
+                    ).order_by('conducente__nome')
+          )
+    print len(qs)
+    print qs.query
+    pprint(list(qs))
+
+
+if __name__ == '__main__':
+    testing_annotations()
