@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.47"
+TAM_VERSION = "6.5"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
