@@ -154,7 +154,7 @@ class StatsView(MonthDatesMixin):
             headers = ["Totale", "Prezzo", "Commissione"]
             rows.append(headers)
             rows.append(("{num} {tipo}".format(num=num_rows, tipo=qtype),
-                         qs['prezzo'],
+                         qs['tot'],
                          qs['commissione'].quantize(Decimal("0.01"))))
         else:
             fields_name = dict(socio='conducente',
