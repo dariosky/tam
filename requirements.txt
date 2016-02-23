@@ -30,3 +30,6 @@ djrill
 
 #tests
 pytest-django
+
+# template required for pipeline
+jinja2
