@@ -35,7 +35,7 @@
 				src="{% static 'fatturazione/invoice-icon.png' %}" alt=""/>Visualizzazione Fatture</a></div>
 	{% endif %}
 
-    {% if perms.stats.view and 'stats' in PLUGGABLE_APPS %}
+    {% if perms.stats.can_see_stats and 'stats' in PLUGGABLE_APPS %}
         <div class="btnbox"><a href="{% url "tamStats" %}"><img
                 src="{% static 'buuf/stats.png' %}" alt=""/>Reports</a></div>
     {% endif %}

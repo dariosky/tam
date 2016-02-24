@@ -28,7 +28,7 @@ def logAction(action, instance=None, description=u'', user=None, log_date=None):
         instance_id=instance.id if instance else None,
     )
     if instance and modification.modelName == "viaggio" and instance.data < log_date.replace(
-            hour=0, minute=0):
+        hour=0, minute=0):
         modification.hilight = True
     modification.save()
 

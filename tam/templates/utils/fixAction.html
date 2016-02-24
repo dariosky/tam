@@ -3,39 +3,42 @@
 {% block title %}Azioni correttive &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-<h1>Azione correttiva...</h1>
-{% if messageLines %}
-<p>
-	{% for line in messageLines %}
-		<pre style='margin:0'>{{ line }}</pre>
-    {% endfor %}
-</p>
-{% endif %}
+    <h1>Azione correttiva...</h1>
+    {% if messageLines %}
+        <div>
+            {% for line in messageLines %}
+                <pre style='margin:0'>{{ line }}</pre>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-<form method='post' action=''>
-	<input type='submit' name='spostaILog' value='Sposta i log in un DB separato (Asincrono)' />
+    <form method='post' action=''>
+        {% csrf_token %}
+        <input type='submit' name='spostaILog' value='Sposta i log in un DB separato (Asincrono)'/>
 
-	<input type='submit' name='permessiStandard' value='Reset di tutti i permessi e dei gruppi allo standard' />
+        <input type='submit' name='permessiStandard' value='Reset di tutti i permessi e dei gruppi allo standard'/>
 
-    <input type='submit' name='renewTragitto' value='Ricalcolo HTML del tragitto' />
+        <input type='submit' name='renewTragitto' value='Ricalcolo HTML del tragitto'/>
 
-	<input type='submit' name='setEndDates' value='Imposta la data di fine corsa per (versione 6.0)' />
+        <input type='submit' name='setEndDates' value='Imposta la data di fine corsa per (versione 6.0)'/>
 
-	<input type='submit' class='askConfirm' name='deleteAllCorse' value='CANCELLA TUTTE LE CORSE!!!' />
-</form>
-<script>
-	var shouldConfirm = document.getElementsByClassName('askConfirm');
-	for (var i=0; i<shouldConfirm.length; i++) {
-		shouldConfirm[i].onclick = function(e) {
-			return confirm("Sicuro di volerlo fare? È l'ultimo avviso ...");
-		}
-	}
-</script>
+        <input type='submit' class='askConfirm' name='deleteAllCorse' value='CANCELLA TUTTE LE CORSE!!!'/>
 
-{% if error %}
-	<p>
-  	{{ error }}
-	</p>
-{% endif %}
+        <input type='submit' name='setCustomPermissions' value='Set custom permissions'/>
+    </form>
+    <script>
+        var shouldConfirm = document.getElementsByClassName('askConfirm');
+        for (var i = 0; i < shouldConfirm.length; i++) {
+            shouldConfirm[i].onclick = function () {
+                return confirm("Sicuro di volerlo fare? È l'ultimo avviso ...");
+            }
+        }
+    </script>
+
+    {% if error %}
+        <p>
+            {{ error }}
+        </p>
+    {% endif %}
 
 {% endblock %}
