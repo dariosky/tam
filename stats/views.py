@@ -3,6 +3,9 @@ import django
 from pprint import pprint
 import datetime
 
+from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
+
 django.setup()
 from decimal import Decimal
 from django.db.models import Case, When, F, DecimalField, Value, Func
@@ -85,6 +88,10 @@ class MonthDatesMixin(TemplateView):
 
 
 class StatsView(MonthDatesMixin):
+    @method_decorator(permission_required('stats.can_see_stats'))
+    def dispatch(self, request, *args, **kwargs):
+        return super(StatsView, self).dispatch(request, *args, **kwargs)
+
     session_prefix = "stats"
 
     def get_context_data(self, **kwargs):
