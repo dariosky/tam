@@ -366,8 +366,6 @@ INSTALLED_APPS = [
     'modellog',
     'securestore',
     # 'license',
-
-    'djrill',
 ]
 
 LOGIN_URL = "/login/"
@@ -444,7 +442,7 @@ MAX_XLS_ROWS = 15 * 1000
 
 TAM = dict(
     SPECIAL_FILTERS=dict(
-        BUS=False,    # allow filter bus, for whatever driver name containing "bus"
+        BUS=False,  # allow filter bus, for whatever driver name containing "bus"
     )
 )
 
