@@ -6,7 +6,7 @@ from django.views import static
 from django.contrib import admin
 import tam
 
-from tam.views.manviews import pingview
+from tam.views.manviews import pingview, email_test
 
 secure_url_regex = settings.SECURE_URL
 if secure_url_regex[0] == '/':
@@ -49,4 +49,5 @@ handler404 = tam.views.manviews.errors400
 urlpatterns += [
     url('^500/', handler500, name='error-test'),
     url('^ping/', pingview, name='ping-test'),
+    url('^emailtest/', email_test, name='email-test'),
 ]
