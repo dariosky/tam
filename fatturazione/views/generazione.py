@@ -62,16 +62,16 @@ for fatturazione in DEFINIZIONE_FATTURE:
 @permission_required('fatturazione.generate', '/')
 def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
     data_start = parse_datestring(  # dal primo del mese scorso
-                                    request.GET.get("data_start"),
-                                    default=(tamdates.ita_today().replace(
-                                        day=1) - datetime.timedelta(
-                                        days=1)).replace(day=1)
-                                    )
+        request.GET.get("data_start"),
+        default=(tamdates.ita_today().replace(
+            day=1) - datetime.timedelta(
+            days=1)).replace(day=1)
+    )
     data_end = parse_datestring(  # all'ultimo del mese scorso
-                                  request.GET.get("data_end"),
-                                  default=tamdates.ita_today().replace(
-                                      day=1) - datetime.timedelta(days=1)
-                                  )
+        request.GET.get("data_end"),
+        default=tamdates.ita_today().replace(
+            day=1) - datetime.timedelta(days=1)
+    )
     # prendo i viaggi da fatturare
     # dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
     gruppo_fatture = []
@@ -141,7 +141,8 @@ def on_fattura_end(fattura, esente_iva):
         riga_fattura = RigaFattura(
             descrizione="Imposta di bollo", qta=1, iva=0,
             prezzo=Decimal("2.00"), riga=num_riga)
-        fattura.righe.add(riga_fattura)
+        riga_fattura.fattura = fattura
+        riga_fattura.save()
 
 
 @transaction.atomic
@@ -328,7 +329,8 @@ def genera_fatture(request, fatturazione):
 
                     riga_fattura.viaggio = viaggio
 
-                fattura.righe.add(riga_fattura)  # salvo la riga
+                riga_fattura.fattura = fattura
+                riga_fattura.save()
                 riga += 10
 
             if fattura:
