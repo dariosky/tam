@@ -399,11 +399,11 @@ if use_debug_toolbar:
         'debug_toolbar.panels.signals.SignalsPanel',
         'debug_toolbar.panels.logging.LoggingPanel',
         'debug_toolbar.panels.redirects.RedirectsPanel',
-        'template_timings_panel.panels.TemplateTimings.TemplateTimings',
+        # 'template_timings_panel.panels.TemplateTimings.TemplateTimings',
     ]
     INSTALLED_APPS += [
         'debug_toolbar',
-        'template_timings_panel'
+        # 'template_timings_panel'
     ]
 
 if DEBUG:

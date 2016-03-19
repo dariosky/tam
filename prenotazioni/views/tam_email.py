@@ -1,4 +1,9 @@
 # coding: utf-8
+if __name__ == '__main__':
+    import django
+
+    django.setup()
+
 from StringIO import StringIO
 from email.mime.base import MIMEBase
 import requests
@@ -82,6 +87,7 @@ def notifyByMail(to=None, subject="",
         (bcc, 'bcc'),
         (messageText, 'text'),
         (htmlMessage, 'html'),
+        (reply_to, 'h:Reply-To'),
     ):
         if value:
             mail_data[mail_field] = value
