@@ -21,9 +21,10 @@ psycopg2
 
 # deployment
 fabric
-gunicorn==18.0
+gunicorn
 # setproctitle to set the process title, doesn't work on Windows
 # setproctitle
+requests
 
 # mails
 # djrill was for Mandrill, but their free tier has been suspended
@@ -35,3 +36,8 @@ pytest-django
 
 # template required for pipeline
 jinja2
+
+# proper ssl connections
+pyopenssl
+ndg-httpsclient
+pyasn1
