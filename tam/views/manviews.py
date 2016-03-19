@@ -2,7 +2,7 @@
 import django
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 import sys
 from django.http import HttpResponse
 from django.template import Template, RequestContext
@@ -12,11 +12,11 @@ from prenotazioni.views.tam_email import ADMIN_MAIL, notifyByMail
 
 def errors500(request, template_name='500.html'):
     exc_type, exc, trackback = sys.exc_info()
-    return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def errors400(request, template_name='404.html'):
-    return render_to_response(template_name, {}, context_instance=RequestContext(request))
+    return render(request, template_name, {})
 
 
 def errorview(request):
@@ -28,7 +28,7 @@ def pingview(request):
     error = False
     results = ['{{host}}', "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
 
-    response = Template('\n'.join(results)).render(RequestContext(request))
+    response = Template('\n'.join(results)).render(request)
     return HttpResponse(response, status=200 if not error else 500, content_type='text/plain')
 
 
@@ -42,5 +42,5 @@ def email_test(request):
         body="This is the body of the message",
 
     )
-    response = Template('\n'.join(results)).render(RequestContext(request))
+    response = Template('\n'.join(results)).render(request)
     return HttpResponse(response, status=200, content_type='text/plain')

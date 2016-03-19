@@ -1,16 +1,16 @@
-#coding: utf-8
+# coding: utf-8
 import datetime
-#from tam.models import TamLicense
-#from django.http import HttpResponseRedirect	#use the redirects
-#from django.core.urlresolvers import reverse	#to resolve named urls
-#from django import forms
-#import random
-#import base64
-#from hashlib import md5
+# from tam.models import TamLicense
+# from django.http import HttpResponseRedirect	#use the redirects
+# from django.core.urlresolvers import reverse	#to resolve named urls
+# from django import forms
+# import random
+# import base64
+# from hashlib import md5
 from django.conf import settings
-#from Crypto.Cipher import Blowfish
+# from Crypto.Cipher import Blowfish
 
-#def get_license_detail(encodedString=None):
+# def get_license_detail(encodedString=None):
 #	""" Trova i dettagli sulla licenza.
 #		Prende la licenza da stringa se gli viene passata, altrimenti la prende da DB
 #	"""
@@ -43,7 +43,7 @@ from django.conf import settings
 #		pass
 #	return r
 
-#class LicForm(forms.ModelForm):
+# class LicForm(forms.ModelForm):
 #	def clean(self):
 #		encodedLicense=self.cleaned_data.get("license", "")
 #		encodedLicense=encodedLicense.replace(" ","").replace("\n","").replace("\r","")
@@ -55,7 +55,7 @@ from django.conf import settings
 #	class Meta:
 #		model=TamLicense
 
-#def decode(coded):
+# def decode(coded):
 #	from Crypto.Cipher import Blowfish
 #	obj=Blowfish.new(settings.SECRET_KEY, Blowfish.MODE_ECB)
 #	try:
@@ -73,7 +73,7 @@ from django.conf import settings
 #		return ""	#if something goes wrong
 #	return plain
 #
-#def encode(plain):
+# def encode(plain):
 #	obj=Blowfish.new(settings.SECRET_KEY, Blowfish.MODE_ECB)
 #
 #	randcode=str(random.randint(0, 9999999999999))
@@ -93,7 +93,7 @@ from django.conf import settings
 
 
 
-#def licensed(func):
+# def licensed(func):
 #	def wrapCheckLicense(request, *args, **kwargs):
 #		tam_registered_user = settings.TAM_LICENSE_USER
 #		tam_expirtazion_date = settings.TAM_LICENSE_EXPIRATION
@@ -105,27 +105,28 @@ from django.conf import settings
 #	return wrapCheckLicense
 
 from markViews import public
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
+
 
 @public
 def notLicensed(request, template_name="registration/license.html"):
-#	if request.method=="POST":
-#		if not request.user.has_perm('tam.change_tamlicense'):
-#			messages.error(request, "Devi avere i superpoteri per cambiare la licenza.")
-#			return HttpResponseRedirect("/")
-#		for license in TamLicense.objects.all():
-#			license.delete()
-#
-#	form=LicForm(request.POST or None)
-#
-#	if form.is_valid():
-#		form.save()
-#		return HttpResponseRedirect(reverse("tamCorse"))
+    #	if request.method=="POST":
+    #		if not request.user.has_perm('tam.change_tamlicense'):
+    #			messages.error(request, "Devi avere i superpoteri per cambiare la licenza.")
+    #			return HttpResponseRedirect("/")
+    #		for license in TamLicense.objects.all():
+    #			license.delete()
+    #
+    #	form=LicForm(request.POST or None)
+    #
+    #	if form.is_valid():
+    #		form.save()
+    #		return HttpResponseRedirect(reverse("tamCorse"))
 
-	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
-#def activation(request, template_name="registration/activation.html"):
+
+# def activation(request, template_name="registration/activation.html"):
 #	user=request.user
 #	if not user.is_superuser:
 #		messages.error(request, "Devi essere il superuser per accedere all'attivazione.")
@@ -173,7 +174,7 @@ def notLicensed(request, template_name="registration/license.html"):
 #	return render_to_response(template_name, locals(), context_instance=RequestContext(request))
 
 def get_license_detail():
-	license_owner = getattr(settings, 'LICENSE_OWNER', None)
-	license_expiration = getattr(settings, 'LICENSE_EXPIRATION', None)
-	license_valid = not license_expiration or (datetime.date.today() <= license_expiration)
-	return locals()
+    license_owner = getattr(settings, 'LICENSE_OWNER', None)
+    license_expiration = getattr(settings, 'LICENSE_EXPIRATION', None)
+    license_valid = not license_expiration or (datetime.date.today() <= license_expiration)
+    return locals()

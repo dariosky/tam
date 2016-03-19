@@ -6,8 +6,7 @@ from django import forms
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from django.utils.translation import ugettext as _
 import logging
 from django.db import transaction
@@ -27,8 +26,8 @@ archiveNotBefore_days = getattr(settings, "ARCHIVE_NOT_BEFORE_DAYS", 365 * 2)
 def menu(request, template_name="archive/menu.html"):
     dontHilightFirst = True
     if not request.user.has_perm(
-            'tamArchive.archive') and not request.user.has_perm(
-            'tamArchive.flat'):
+        'tamArchive.archive') and not request.user.has_perm(
+        'tamArchive.flat'):
         messages.error(request,
                        "Devi avere accesso o all'archiviazione o all'appianamento.")
         return HttpResponseRedirect(reverse("tamUtil"))
@@ -47,14 +46,14 @@ def menu(request, template_name="archive/menu.html"):
 
     form = ArchiveForm()
 
-    return render_to_response(template_name,
-                              {
-                                  "dontHilightFirst": dontHilightFirst,
-                                  "form": form,
-                                  "mediabundleJS": ('tamUI',),
-                                  "mediabundleCSS": ('tamUI',),
-                              }
-                              , context_instance=RequestContext(request))
+    return render(request,
+                  template_name,
+                  {"dontHilightFirst": dontHilightFirst,
+                   "form": form,
+                   "mediabundleJS": ('tamUI',),
+                   "mediabundleCSS": ('tamUI',),
+                   }
+                  )
 
 
 def action(request, template_name="archive/action.html"):
@@ -100,16 +99,17 @@ def action(request, template_name="archive/action.html"):
 
         return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
-    return render_to_response(template_name,
-                              {"archiveCount": count,
-                               "archiveTotalCount": total_count,
-                               "logCount": log_count,
-                               "logTotalCount": log_total,
-                               "archive_needed": archive_needed,
-                               "end_date": end_date,
-                               "end_date_string": end_date_string,
-                               },
-                              context_instance=RequestContext(request))
+    return render(request,
+                  template_name,
+                  {"archiveCount": count,
+                   "archiveTotalCount": total_count,
+                   "logCount": log_count,
+                   "logTotalCount": log_total,
+                   "archive_needed": archive_needed,
+                   "end_date": end_date,
+                   "end_date_string": end_date_string,
+                   },
+                  )
 
 
 def view(request, template_name="archive/view.html"):
@@ -135,12 +135,11 @@ def view(request, template_name="archive/view.html"):
         thisPage = None
         list = []
 
-    return render_to_response(
-        template_name,
-        {'list': list, 'paginator': paginator,
-         'luogoRiferimento': profile.luogo.nome, 'thisPage': thisPage},
-        context_instance=RequestContext(request)
-    )
+    return render(request,
+                  template_name,
+                  {'list': list, 'paginator': paginator,
+                   'luogoRiferimento': profile.luogo.nome, 'thisPage': thisPage},
+                  )
 
 
 def flat(request, template_name="archive/flat.html"):
@@ -190,6 +189,6 @@ def flat(request, template_name="archive/flat.html"):
         messages.success(request, "Appianamento effettuato.")
         return HttpResponseRedirect(reverse("tamArchiveUtil"))
 
-    return render_to_response(template_name,
-                              {"minimi": minimi, 'flat_needed': flat_needed},
-                              context_instance=RequestContext(request))
+    return render(request,
+                  template_name,
+                  {"minimi": minimi, 'flat_needed': flat_needed})

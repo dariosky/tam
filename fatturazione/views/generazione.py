@@ -22,27 +22,26 @@ from fatturazione.views.util import ultimoProgressivoFattura
 """
 Generazione fatture:
 Chiedo di generare le fatture
-	_fino a_
-	anno
-	progressivo
+    _fino a_
+    anno
+    progressivo
 
 Generazione Fatture consorzio (a cliente):
-	progressivo annuale, ma variabile
-	iva 10% sulle corse
-	possibilità di inserire una riga standard
-	(logo)
+    progressivo annuale, ma variabile
+    iva 10% sulle corse
+    possibilità di inserire una riga standard
+    (logo)
 
 Generazione Fatture Conducenti (a consorzio, tutte le corse fatturabili):
-	progressivo in bianco
-	(senza logo)
+    progressivo in bianco
+    (senza logo)
 
 Generazione Ricevute (viaggi con pagamento posticipato)
 
 
 """
 
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from tam.tamdates import parse_datestring
 from django.conf import settings
 import tam.tamdates as tamdates
@@ -116,20 +115,22 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 
     profile = ProfiloUtente.objects.get(user=request.user)
     luogoRiferimento = profile.luogo
-    return render_to_response(template_name,
-                              {
-                                  "today": oggi,
-                                  "luogoRiferimento": luogoRiferimento,
-                                  "data_start": data_start,
-                                  "data_end": data_end,
-                                  "dontHilightFirst": True,
-                                  "mediabundleJS": ('tamUI',),
-                                  "mediabundleCSS": ('tamUI',),
+    return render(
+        request,
+        template_name,
+        {
+            "today": oggi,
+            "luogoRiferimento": luogoRiferimento,
+            "data_start": data_start,
+            "data_end": data_end,
+            "dontHilightFirst": True,
+            "mediabundleJS": ('tamUI',),
+            "mediabundleCSS": ('tamUI',),
 
-                                  "gruppo_fatture": gruppo_fatture,
-                                  'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
-                              },
-                              context_instance=RequestContext(request))
+            "gruppo_fatture": gruppo_fatture,
+            'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
+        },
+    )
 
 
 def on_fattura_end(fattura, esente_iva):
@@ -340,22 +341,23 @@ def genera_fatture(request, fatturazione):
             logAction('C', description=message, user=request.user)
             return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
-    return render_to_response(template_name,
-                              {
-                                  # riporto i valori che mi arrivano dalla selezione
-                                  "anno": anno,
-                                  "progressivo_iniziale": progressivo_iniziale,
+    return render(request,
+                  template_name,
+                  {
+                      # riporto i valori che mi arrivano dalla selezione
+                      "anno": anno,
+                      "progressivo_iniziale": progressivo_iniziale,
 
-                                  "lista": lista,
-                                  "mediabundleJS": ('tamUI',),
-                                  "mediabundleCSS": ('tamUI',),
-                                  "singolare": nomi_fatture[tipo],
-                                  "fatture": fatture,
-                                  "plurale": plurale,
-                                  #								"error_message":error_message,
-                                  'conducenti_ricevute': conducenti_ricevute,
-                                  'data_generazione': data_generazione,
-                                  'fatturazione': fatturazione,
-                                  'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
-                              },
-                              context_instance=RequestContext(request))
+                      "lista": lista,
+                      "mediabundleJS": ('tamUI',),
+                      "mediabundleCSS": ('tamUI',),
+                      "singolare": nomi_fatture[tipo],
+                      "fatture": fatture,
+                      "plurale": plurale,
+                      #								"error_message":error_message,
+                      'conducenti_ricevute': conducenti_ricevute,
+                      'data_generazione': data_generazione,
+                      'fatturazione': fatturazione,
+                      'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
+                  },
+                  )

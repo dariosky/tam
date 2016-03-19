@@ -1,11 +1,7 @@
 # coding: utf-8
 from StringIO import StringIO
 from email.mime.base import MIMEBase
-
-import django
 import requests
-
-django.setup()
 from django.conf import settings
 from django.template.loader import get_template
 import os

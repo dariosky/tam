@@ -4,8 +4,7 @@ from threading import Thread
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response, HttpResponse
-from django.template.context import RequestContext
+from django.shortcuts import HttpResponse, render
 from glob import glob
 from modellog.actions import logAction
 import datetime
@@ -69,7 +68,7 @@ def getBackupInfo(doCleanup=False):
         for backup in backups[:-backcount + 1]:
             logging.debug("Cancello il backup: %s" % os.path.basename(backup["filename"]))
             os.unlink(backup["filename"])
-    return {"dbname": dbname, "backupdir": backupdir, "backups": backups, }
+    return {"dbname": dbname, "backupdir": backupdir, "backups": backups,}
 
 
 def getbackup(request, backupdate):
@@ -187,8 +186,7 @@ def backup(request, template_name="utils/backup.html"):
         messages.success(request, "Backup del database avviato... sarà pronto tra poco.")
         return HttpResponseRedirect(reverse("tamBackup"))
     backupInfo = getBackupInfo()
-    return render_to_response(template_name, {"backupInfo": backupInfo},
-                              context_instance=RequestContext(request))
+    return render(request, template_name, {"backupInfo": backupInfo})
 
 
 if __name__ == '__main__':

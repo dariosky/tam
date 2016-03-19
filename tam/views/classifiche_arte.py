@@ -8,13 +8,13 @@ function (si usa per popolare i valori nel record del viaggio in modifica)
 type (predefinito è 'prezzo', potrebbe essere anche 'punti' o 'supplementari')
 
 verranno aggiungi in visualizzazione:
-			 'dati': con una lista ordinata per mapping_field di (chiave, conducente.nick, classifica)
-			   dove classifica tiene tutti i dati classifica del conducente (presi da SQL),
-			 	un campo 'conducente'
-			 	se è una classifica a punti tiene anche altri 3 campi:
-			 		abbinate: con tutti i viaggi del conducente ancora non completamente conguagliati
-			 		celle abbinate: una lista di punti del tipo {valore: x, data: x}
-			 'min', 'max': con i valori chiave massimi e minimi
+             'dati': con una lista ordinata per mapping_field di (chiave, conducente.nick, classifica)
+               dove classifica tiene tutti i dati classifica del conducente (presi da SQL),
+                un campo 'conducente'
+                se è una classifica a punti tiene anche altri 3 campi:
+                    abbinate: con tutti i viaggi del conducente ancora non completamente conguagliati
+                    celle abbinate: una lista di punti del tipo {valore: x, data: x}
+             'min', 'max': con i valori chiave massimi e minimi
 
 """
 from django.utils.safestring import mark_safe
@@ -254,16 +254,16 @@ def gettoneDoppioSeFeriale(calendar):
         return 2
     md = reference_date.timetuple()[1:3]
     if md in (
-            (1, 1),  # Capodanno
-            (1, 6),  # Epifania
-            (4, 25),  # 25 aprile
-            (5, 1),  # primo maggio, festa del lavoro
-            (6, 2),  # 2 giugno, festa della repubblica
-            (8, 15),  # ferragosto
-            (11, 1),  # ognissanti
-            (12, 8),  # immacolata
-            (12, 25),  # Natale
-            (12, 26),  # S.Stefano
+        (1, 1),  # Capodanno
+        (1, 6),  # Epifania
+        (4, 25),  # 25 aprile
+        (5, 1),  # primo maggio, festa del lavoro
+        (6, 2),  # 2 giugno, festa della repubblica
+        (8, 15),  # ferragosto
+        (11, 1),  # ognissanti
+        (12, 8),  # immacolata
+        (12, 25),  # Natale
+        (12, 26),  # S.Stefano
     ):
         return 2
 
@@ -327,4 +327,3 @@ def toggle_1or2(calendar):
 
 
 from django.conf import settings
-
