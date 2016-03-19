@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.5"
+TAM_VERSION = "6.6"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
@@ -372,6 +372,7 @@ LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 
 EMAIL_SUBJECT_PREFIX = "[TaM]"
+MAIL_TAG = None
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 days of session cookies
 

@@ -1,4 +1,4 @@
-La prenotazione è stata effettuata.
+La prenotazione è stata {{ azione }}.
 
 I dettagli della corsa:
 {% if prenotazione.is_arrivo %}Arrivo{% else %}Partenza{% endif %} {{ prenotazione.luogo }} alle ore {{ prenotazione.data_corsa|date:"H:i" }} del {{ prenotazione.data_corsa|date:"j/m/Y" }}

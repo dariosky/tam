@@ -180,6 +180,7 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.46', '16/12/2015', "Fix al minimo per imposta di bollo"),
         ('6.47', '13/2/2016', "BUS filters and framework updates"),
         ('6.5', '23/2/2016', "Report corse"),
+        ('6.6', '16/3/2016', "Cambio di backend per l'invio di mail."),
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:

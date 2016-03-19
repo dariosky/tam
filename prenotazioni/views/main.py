@@ -32,7 +32,8 @@ class NumberInput(Input):
 
 
 def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=None):
-    if not attachments: attachments = []
+    if not attachments:
+        attachments = []
     if azione == "create":
         subject = u"Conferma prenotazione TaM n° %d" % prenotazione.id
         prenotazione_suffix = u"effettuata"
@@ -53,7 +54,7 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
         context.update(extra_context)
 
     from_email = getattr(settings, 'PRENOTAZIONI_FROM_EMAIL', None)
-    if settings.DEBUG:
+    if settings.DEBUG and False:
         print "Sono in test. non invio la mail da {from_email}".format(from_email=from_email)
     else:
         notifyByMail(
@@ -84,7 +85,7 @@ class FormPrenotazioni(forms.ModelForm):
 
     def clean_is_collettivo(self):
         value = self.cleaned_data['is_collettivo']
-        if not value in (True, False):
+        if value not in (True, False):
             raise forms.ValidationError(_(u"Questo campo è obbligatorio."))
         return value
 
