@@ -1,12 +1,10 @@
 # coding=utf-8
 """ Each request needs an authenticathed user """
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.mail import mail_admins
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 
@@ -51,7 +49,7 @@ class RequireLoginMiddleware(object):
 
 
 def csrf_failure_view(request, reason=''):
-    response = render_to_response('403.html', {}, context_instance=RequestContext(request))
+    response = render(request, '403.html', {})
     response.status_code = 403
     message_tokens = [u"%s got hit in the face with Forbidden shovel" % request.user]
     message_tokens.append("in: %s" % request.path)

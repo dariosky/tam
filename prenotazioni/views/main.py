@@ -1,7 +1,6 @@
 # coding: utf-8
 from collections import OrderedDict
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from markViews import prenotazioni
 from django import forms
 from prenotazioni.models import Prenotazione
@@ -301,17 +300,17 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                         ),
             )
 
-    return render_to_response(
-        template_name,
-        {
-            "utentePrenotazioni": utentePrenotazioni,
-            "form": form,
-            "editable": editable,
-            "prenotazione": prenotazione,
-            "cliente_unico": cliente_unico,
-            "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
-        },
-        context_instance=RequestContext(request))
+    return render(request,
+                  template_name,
+                  {
+                      "utentePrenotazioni": utentePrenotazioni,
+                      "form": form,
+                      "editable": editable,
+                      "prenotazione": prenotazione,
+                      "cliente_unico": cliente_unico,
+                      "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+                  },
+                  )
 
 
 @prenotazioni
@@ -402,7 +401,8 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
         viaggi = []
     # ----------------------
 
-    return render_to_response(
+    return render(
+        request,
         template_name,
         {
             "utentePrenotazioni": utentePrenotazioni,
@@ -420,7 +420,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
             "thisPage": thisPage,
             "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
         },
-        context_instance=RequestContext(request))
+    )
 
 
 def attachments_list(request):
@@ -446,15 +446,15 @@ def attachments_list(request):
             raise Exception("Unexpected get mese fatture %s" % get_mese)
     else:
         data_start = parse_datestring(  # dal primo del mese scorso
-                                       request.GET.get("data_start"),
-                                       default=(
-                                           tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(
-                                           day=1)
-                                       )
+            request.GET.get("data_start"),
+            default=(
+                tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(
+                day=1)
+        )
         data_end = parse_datestring(  # all'ultimo del mese scorso
-                                     request.GET.get("data_end"),
-                                     default=tamdates.ita_today()
-                                     )
+            request.GET.get("data_end"),
+            default=tamdates.ita_today()
+        )
 
     prenotazioni = Prenotazione.objects.filter(had_attachment=True, data_corsa__gte=data_start,
                                                data_corsa__lt=data_end + datetime.timedelta(days=1))
@@ -464,14 +464,15 @@ def attachments_list(request):
             gruppo_prenotazioni[prenotazione.cliente] = []
         gruppo_prenotazioni[prenotazione.cliente].append(prenotazione)
 
-    return render_to_response('attachments_list.html',
-                              {
-                                  "data_start": data_start.date(),
-                                  "data_end": data_end.date(),
-                                  "quick_month_names": quick_month_names,
-                                  "dontHilightFirst": True,
-                                  "mediabundleJS": ('tamUI',),
-                                  "mediabundleCSS": ('tamUI',),
-                                  "gruppo_prenotazioni": gruppo_prenotazioni,
-                              },
-                              context_instance=RequestContext(request))
+    return render(request,
+                  'attachments_list.html',
+                  {
+                      "data_start": data_start.date(),
+                      "data_end": data_end.date(),
+                      "quick_month_names": quick_month_names,
+                      "dontHilightFirst": True,
+                      "mediabundleJS": ('tamUI',),
+                      "mediabundleCSS": ('tamUI',),
+                      "gruppo_prenotazioni": gruppo_prenotazioni,
+                  },
+                  )

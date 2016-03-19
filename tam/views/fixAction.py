@@ -7,8 +7,7 @@ from tam.models import Viaggio, Luogo
 from django.http import HttpResponseRedirect
 from django.core.urlresolvers import reverse
 import datetime
-from django.shortcuts import render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import render
 from tam.disturbi import trovaDisturbi, fasce_semilineari
 from django.contrib import messages
 
@@ -237,5 +236,4 @@ def fixAction(request, template_name="utils/fixAction.html"):
             codename='can_see_stats')
         messageLines.append("Stats permissions where already there" if not created else "Stats permissions created")
 
-    return render_to_response(template_name, {"messageLines": messageLines, "error": error},
-                              context_instance=RequestContext(request))
+    return render(request, template_name, {"messageLines": messageLines, "error": error})

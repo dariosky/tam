@@ -1,35 +1,23 @@
 # coding: utf-8
 import json
 import dateutil.parser
-from django.shortcuts import render_to_response, HttpResponse, \
-    get_object_or_404
-from django.http import HttpResponseRedirect  # use the redirects
+from django.shortcuts import HttpResponse, get_object_or_404, render
+from django.http import HttpResponseRedirect
 from django.contrib.auth.models import User, Group
 from django import forms
 from django.utils.translation import ugettext as _
-from django.template.context import RequestContext  # Context with steroid
 from tam.models import Luogo, get_classifiche, Cliente, \
-    PrezzoListino, Bacino, Tratta, Conducente, Conguaglio, Listino, \
+    PrezzoListino, Bacino, Tratta, Conducente, Listino, \
     ProfiloUtente, Viaggio, Passeggero
 from django.db import IntegrityError
 from django.core.paginator import Paginator
 from genericUtils import *
 from django.db import models
-
-# Creo gli eventuali permessi mancanti
-
 from django.db.models.aggregates import Count
 from django.core.urlresolvers import reverse
 import logging
 from django.db.models.query_utils import Q
 from django.db.models.deletion import ProtectedError
-# from django.utils.safestring import mark_safe
-
-# from django.db.models import get_apps
-# from django.contrib.auth.management import create_permissions
-# for app in get_apps():
-# 	create_permissions(app, None, 2)
-
 from django.db import connections
 from django.contrib import messages
 from django.conf import settings
@@ -37,7 +25,6 @@ import pdfListino
 
 from tam import tamdates
 import datetime
-from tam.views.changelog import changeLog  # @UnusedImport
 
 
 class Step1Data():
@@ -424,8 +411,7 @@ def listaCorse(request, template_name="corse/lista.html"):
         return xlsResponse(request, tuttiViaggi)
     mediabundleJS = ('tamCorse',)
     mediabundleCSS = ('tamUI',)
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def corsaClear(request, next=None):
@@ -509,9 +495,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                     return HttpResponseRedirect(redirectOk)
                 else:
                     return HttpResponseRedirect(redirectOk)
-        return render_to_response(template_name, locals(),
-                                  context_instance=RequestContext(
-                                      request))  # fine del delete
+        return render(request, template_name, locals())  # fine del delete
 
     if step == 2:  # Integrity controls when accessing STEP2
         if (not id) and (
@@ -759,8 +743,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
             return HttpResponseRedirect(reverse("tamCorse"))
     # raise Exception("Sgnaps")
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def getList(request, model=Luogo.objects, field="nome", format="txt",
@@ -791,8 +774,7 @@ def clienti(request, template_name="clienti_e_listini.html"):
     mediabundleCSS = ('tamUI',)
     listini = Listino.objects.annotate(Count('prezzolistino'))
     clienti = Cliente.objects.filter().select_related('listino')
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def cliente(request, template_name="cliente.html", nomeCliente=None,
@@ -877,8 +859,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None,
         else:
             redirectOk = reverse("tamListini")
         return HttpResponseRedirect(redirectOk)
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def listino(request, template_name="listino.html", id=None, prezzoid=None):
@@ -1023,8 +1004,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
             "tipo_servizio", "tratta__da", "tratta__a",
             "max_pax")
 
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def luoghi(request, template_name="luoghi_e_tratte.html"):
@@ -1034,8 +1014,7 @@ def luoghi(request, template_name="luoghi_e_tratte.html"):
     tratte = Tratta.objects.select_related()
     mediabundleJS = ('tamUI',)
     mediabundleCSS = ('tamUI',)
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def conducente(*args, **kwargs):
@@ -1143,15 +1122,13 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
         # context_vars.extend(extra_dict)
         for field_name, description in fields_descriptions.items():
             form.fields[field_name].label = description
-    return render_to_response(template_name, context_vars,
-                              context_instance=RequestContext(request))
+    return render(request, template_name, context_vars)
 
 
 def privati(request, template_name="passeggeri.html"):
     """ Mostro tutti i passeggeri privati """
     privati = Passeggero.objects.all()
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def passeggero(request, template_name="passeggero.html", id=None,
@@ -1245,8 +1222,7 @@ def passeggero(request, template_name="passeggero.html", id=None,
         # context_vars.extend(extra_dict)
         for field_name, description in fields_descriptions.items():
             form.fields[field_name].label = description
-    return render_to_response(template_name, context_vars,
-                              context_instance=RequestContext(request))
+    return render(request, template_name, context_vars)
 
 
 def profilo(request, *args, **kwargs):
@@ -1294,8 +1270,7 @@ def clonaListino(request, id, template_name="listino-clona.html"):
             new_prezzo.save()
         return HttpResponseRedirect(reverse("tamListini"))
 
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def listinoDelete(request, id, template_name="listino-delete.html"):
@@ -1313,8 +1288,7 @@ def listinoDelete(request, id, template_name="listino-delete.html"):
         listino.delete()
         return HttpResponseRedirect(reverse("tamListini"))
 
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def resetAssociatiToDefault(viaggio, recurseOnChild=True):
@@ -1559,14 +1533,12 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
             askForm = False
 
     jsui = askForm
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def util(request, template_name="utils/util.html"):
     PLUGGABLE_APPS = settings.PLUGGABLE_APPS
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def resetSessions(request, template_name="utils/resetSessions.html"):
@@ -1589,8 +1561,7 @@ def resetSessions(request, template_name="utils/resetSessions.html"):
             # connection.commit()
             return HttpResponseRedirect("/")
 
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def resetUserSession(selectedUser):
@@ -1702,8 +1673,7 @@ def permissions(request, username=None,
             clienti = Cliente.objects.filter(attivo=True)
             luoghi = Luogo.objects.all()
 
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def newUser(request, template_name="utils/newUser.html"):
@@ -1730,8 +1700,7 @@ def newUser(request, template_name="utils/newUser.html"):
         return HttpResponseRedirect(
             reverse("tamManage", kwargs={"username": newUser.username}))
 
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def delUser(request, username, template_name="utils/delUser.html"):
@@ -1749,8 +1718,7 @@ def delUser(request, username, template_name="utils/delUser.html"):
         messages.success(request,
                          "Eliminato l'utente %s." % userToDelete.username)
         return HttpResponseRedirect(reverse("tamManage"))
-    return render_to_response(template_name, locals(),
-                              context_instance=RequestContext(request))
+    return render(request, template_name, locals())
 
 
 def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
@@ -1764,8 +1732,7 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
         resetUserSession(request.user)  # reset delle sessioni
         return HttpResponseRedirect('/')
     # response=password_change(request, template_name=template_name, post_change_redirect='/')
-    return render_to_response(template_name, {'form': form},
-                              context_instance=RequestContext(request))
+    return render(request, template_name, {'form': form})
 
 
 def exportListino(request, id_listino):

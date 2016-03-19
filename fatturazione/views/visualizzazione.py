@@ -2,9 +2,7 @@
 
 import datetime
 from decimal import Decimal
-
-from django.template.context import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.db.models.aggregates import Max
@@ -48,15 +46,15 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
             raise Exception("Unexpected get mese fatture %s" % get_mese_fatture)
     else:
         data_start = parse_datestring(  # dal primo del mese scorso
-                                       request.GET.get("data_start"),
-                                       default=(
-                                           tamdates.ita_today().replace(
-                                               day=1) - datetime.timedelta(days=1)).replace(day=1)
-                                       )
+            request.GET.get("data_start"),
+            default=(
+                tamdates.ita_today().replace(
+                    day=1) - datetime.timedelta(days=1)).replace(day=1)
+        )
         data_end = parse_datestring(  # a oggi
-                                     request.GET.get("data_end"),
-                                     default=tamdates.ita_today()
-                                     )
+            request.GET.get("data_end"),
+            default=tamdates.ita_today()
+        )
 
     gruppo_fatture = []
     for fatturazione in DEFINIZIONE_FATTURE:
@@ -76,19 +74,20 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
     # lista_conducente = Fattura.objects.filter(tipo='2', data__gte=data_start, data__lte=data_end)
     # 	lista_ricevute = Fattura.objects.filter(tipo='3', data__gte=data_start, data__lte=data_end)
 
-    return render_to_response(template_name,
-                              {
-                                  "data_start": data_start.date(),
-                                  "data_end": data_end.date(),
-                                  "dontHilightFirst": True,
-                                  "mediabundleJS": ('tamUI',),
-                                  "mediabundleCSS": ('tamUI',),
+    return render(request,
+                  template_name,
+                  {
+                      "data_start": data_start.date(),
+                      "data_end": data_end.date(),
+                      "dontHilightFirst": True,
+                      "mediabundleJS": ('tamUI',),
+                      "mediabundleCSS": ('tamUI',),
 
-                                  "gruppo_fatture": gruppo_fatture,
-                                  "quick_month_names": quick_month_names,
+                      "gruppo_fatture": gruppo_fatture,
+                      "quick_month_names": quick_month_names,
 
-                              },
-                              context_instance=RequestContext(request))
+                  },
+                  )
 
 
 @permission_required('fatturazione.view', '/')
@@ -112,7 +111,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
     # gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
     smallEdit = request.user.has_perm('fatturazione.smalledit') \
                 and fattura.tipo in (
-    '2', '5')  # le fatture conducente IVATE e NON consentono gli smalledit
+        '2', '5')  # le fatture conducente IVATE e NON consentono gli smalledit
     editable = bigEdit or smallEdit
     readonly = not editable
 
@@ -161,21 +160,22 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
             riga.save()
             logAction('C', instance=fattura, description="Riga inserita manualmente.",
                       user=request.user)
-            return render_to_response('6.fattura-riga.inc.djhtml',
-                                      {
-                                          "riga": riga,
-                                          'readonly': readonly,
-                                          'bigEdit': bigEdit,
-                                          'smallEdit': smallEdit,
-                                      },
-                                      context_instance=RequestContext(request))
+            return render(request,
+                          '6.fattura-riga.inc.djhtml',
+                          {
+                              "riga": riga,
+                              'readonly': readonly,
+                              'bigEdit': bigEdit,
+                              'smallEdit': smallEdit,
+                          },
+                          )
 
         if action == 'set':
             object_id = request.POST.get('id')
             smallcampi_modificabili = (
-            'fat_anno', 'fat_progressivo', 'fat_note')  # modificabili in testata
+                'fat_anno', 'fat_progressivo', 'fat_note')  # modificabili in testata
             if smallEdit and (
-                    object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
+                        object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
                 # posso modificare il campo in quanto è una modifica consentita
                 pass
             else:
@@ -204,7 +204,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
                         try:
                             object_value = int(
                                 object_value.replace(',', '.'))  # altrimenti richiedo un numerico
-                        except Exception, e:
+                        except Exception:
                             return HttpResponse('Ho bisogno di un valore numerico.', status=500)
                 if object_id == "fat_progressivo" and fattura.tipo == "1":
                     esistenti = Fattura.objects.filter(anno=fattura.anno,
@@ -266,20 +266,20 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
                 return HttpResponse('Non conosco il campo %s.' % object_id, status=500)
         return HttpResponse('Azione sconosciuta.', status=500)
 
-
     # print "generate: ", request.user.has_perm('fatturazione.generate')
     # print "smalledit: ", request.user.has_perm('fatturazione.smalledit')
     # print "tipo: ", fattura.tipo
     # 	print "readonly: ", readonly
-    return render_to_response(template_name,
-                              {
-                                  "fattura": fattura,
-                                  'readonly': readonly,
-                                  'bigEdit': bigEdit,
-                                  'smallEdit': smallEdit,
-                                  'logo_url': settings.OWNER_LOGO,
-                              },
-                              context_instance=RequestContext(request))
+    return render(request,
+                  template_name,
+                  {
+                      "fattura": fattura,
+                      'readonly': readonly,
+                      'bigEdit': bigEdit,
+                      'smallEdit': smallEdit,
+                      'logo_url': settings.OWNER_LOGO,
+                  },
+                  )
 
 
 @permission_required('fatturazione.generate', '/')
@@ -338,20 +338,19 @@ def exportfattura(request, id_fattura, export_type='html'):
     if export_type == 'pdf':
         return render_to_reportlab(context)
     else:  # html output by default
-        return render_to_response(template_name, context,
-                                  context_instance=RequestContext(request))
+        return render(request, template_name, context)
 
 
 @permission_required('fatturazione.view', '/')
 def exportmultifattura(request, tipo, export_type='html'):
     data_start = parse_datestring(  # dal primo del mese scorso
-                                   request.GET.get("data_start"),
-                                   default=None
-                                   )
+        request.GET.get("data_start"),
+        default=None
+    )
     data_end = parse_datestring(  # all'ultimo del mese scorso
-                                 request.GET.get("data_end"),
-                                 default=None
-                                 )
+        request.GET.get("data_end"),
+        default=None
+    )
     if not (data_start and data_end):
         messages.error(request, "Specifica le date dell'intervallo da stampare.")
         return HttpResponseRedirect(reverse('tamVisualizzazioneFatture'))
@@ -375,5 +374,4 @@ def exportmultifattura(request, tipo, export_type='html'):
         return render_to_reportlab(context)
     else:  # html output by default
         template_name = 'fat_model/export_fattura_1.djhtml'
-        return render_to_response(template_name, context,
-                                  context_instance=RequestContext(request))
+        return render(request, template_name, context)
