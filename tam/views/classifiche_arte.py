@@ -152,8 +152,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         pricy = False
     else:
         rimanenteInLunghe = Decimal(
-            str(int(
-                valoreTotale - valoreAbbinate)))  # vecchio modo: il rimanente è il rimanente
+            str(int(valoreTotale - valoreAbbinate)))  # vecchio modo: il rimanente è il rimanente
         valorePunti = 0
 
         if kmRimanenti:
@@ -164,14 +163,14 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
             # logging.error("I rimanenti %.2fs km sono a %.2f euro/km" % (kmRimanenti, euroAlKm))
             pricy = euroAlKm > Decimal("1.25")
             # if pricy:
-            #	logging.debug("Metto nei doppi Padova: %s" %rimanenteInLunghe)
+            #   logging.debug("Metto nei doppi Padova: %s" %rimanenteInLunghe)
             # else:
-            #	logging.debug("Metto nei Venezia: %s" %rimanenteInLunghe)
+            #   logging.debug("Metto nei Venezia: %s" %rimanenteInLunghe)
 
     if viaggio.km_conguagliati:
         # Ho già conguagliato dei KM, converto i KM in punti (il valore è definito sopra) quei punti li tolgo ai puntiAbbinamento
         # logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
-        #				viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
+        #               viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
         puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
     return {
         "kmTotali": kmTotali,
@@ -223,16 +222,14 @@ def get_value(viaggio, forzaSingolo=False):
     if viaggio.abbuono_fisso:
         importoViaggio -= viaggio.abbuono_fisso
     if viaggio.abbuono_percentuale:
-        importoViaggio = importoViaggio * (
-            Decimal(1) - viaggio.abbuono_percentuale / Decimal(100)
-        )  # abbuono in percentuale
+        # abbuono in percentuale
+        importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))
     importoViaggio = importoViaggio - viaggio.costo_sosta
 
     if settings.SCONTO_SOSTA:
         # aggiungo il prezzo della sosta scontato del 25%
-        importoViaggio += viaggio.prezzo_sosta * (
-            Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
-        )
+        importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
+                                                  )
     else:
         importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
     return importoViaggio.quantize(Decimal('.01'))
