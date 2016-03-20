@@ -462,8 +462,7 @@ class Viaggio(models.Model):
 
         if self.id:  # itero sui figli
             for figlio in self.viaggio_set.all():
-                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi,
-                                     forceDontSave=forceDontSave)
+                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave)
 
     def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
         # le tre liste con (conducente, stato)
@@ -482,15 +481,12 @@ class Viaggio(models.Model):
 
         # cache conducenti per capienza *************
         if self.numero_passeggeri in conducentiPerCapienza:
-            conducentiConCapienza = conducentiPerCapienza[
-                self.numero_passeggeri]
+            conducentiConCapienza = conducentiPerCapienza[self.numero_passeggeri]
         else:
             # Metto in cache la lista dei clienti
             #  che possono portare almeno X persone
-            conducentiConCapienza = Conducente.objects.filter(
-                max_persone__gte=self.numero_passeggeri)
-            conducentiPerCapienza[
-                self.numero_passeggeri] = conducentiConCapienza
+            conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
+            conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
         # ***************************************************
 
         # {conducente.id: [list of caltoken (name, available, tags)]}
@@ -678,7 +674,6 @@ class Viaggio(models.Model):
         if self.padre_id is None:
             if not self._is_abbinata(simpleOne=True):
                 # self.nextfratello = None
-                self.cache_fratello = None
                 return  # per i singoli ritorno None
             else:
                 padre = self
@@ -687,10 +682,8 @@ class Viaggio(models.Model):
         lastbro = padre
         for fratello in padre.viaggio_set.all():
             if lastbro == self:
-                self.cache_fratello = fratello
                 return fratello
             lastbro = fratello
-        self.cache_fratello = None
 
     def lastfratello(self):
         """ Restituisco l'ultimo viaggio del gruppo """
@@ -889,10 +882,8 @@ class Viaggio(models.Model):
         if self.padre_id or self.viaggio_set.count() > 0:
             if simpleOne: return True
             if self._is_collettivoInPartenza():
-                self.cache_isabbinata = 'P'
                 return "P"  # collettivo in partenza
             else:
-                self.cache_isabbinata = 'S'
                 return "S"  # abbinata
         else:
             return ""  # non abbinata

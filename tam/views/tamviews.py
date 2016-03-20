@@ -1319,14 +1319,11 @@ def associate(assoType, viaggiIds, request=None):
         'padre_id', flat=True)  # ottengo tutti i padri
     # Estendo ai padri
     viaggiIds += padri_ids
-    viaggiIds = [pk for pk in set(viaggiIds) if
-                 pk is not None]  # remove duplicates just to count
-    figli_ids = Viaggio.objects.filter(padre_id__in=viaggiIds).values_list(
-        'id', flat=True)  # ottengo tutti i figli
+    viaggiIds = [pk for pk in set(viaggiIds) if pk is not None]  # remove duplicates just to count
+    figli_ids = Viaggio.objects.filter(padre_id__in=viaggiIds).values_list('id', flat=True)  # ottengo tutti i figli
     # ... e ai figli
     viaggiIds += figli_ids
-    viaggiIds = [pk for pk in set(viaggiIds) if
-                 pk is not None]  # remove duplicates just to count
+    viaggiIds = [pk for pk in set(viaggiIds) if pk is not None]  # remove duplicates just to count
 
     viaggi_selezionati = Viaggio.objects.filter(pk__in=viaggiIds)
     # estendo la selezione a tutti i figli dei selezionati, e tutti i padri
@@ -1335,6 +1332,9 @@ def associate(assoType, viaggiIds, request=None):
     if len(viaggi) > 1:
         primo = viaggi[0]
     else:
+        if assoType == "link":
+            logging.debug('Link a standalone Viaggio? Nothing to do')
+            return
         primo = None
 
     contatore = 1
@@ -1374,18 +1374,21 @@ def associate(assoType, viaggiIds, request=None):
                 if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == settings.ABBUONO_AEROPORTI:
                     if request:
                         messages.info(request,
-                                      "Il %d° viaggio è da un aeroporto tolgo l'abbuono di %d€." % (
-                                          contatore, settings.ABBUONO_AEROPORTI))
+                                      "Il {num}° viaggio è da un aeroporto tolgo l'abbuono di {abbuono}€.".format(
+                                          num=contatore, abbuono=settings.ABBUONO_STAZIONI)
+                                      )
                     viaggio.abbuono_fisso = 0
                 elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso == settings.ABBUONO_STAZIONI:
                     if request:
                         messages.info(request,
-                                      "Il %d° viaggio è da una stazione tolgo l'abbuono di %d€." % (
-                                          contatore, settings.ABBUONO_STAZIONI))
+                                      "Il {num}° viaggio è da una stazione tolgo l'abbuono di {abbuono}€.".format(
+                                          num=contatore, abbuono=settings.ABBUONO_STAZIONI)
+                                      )
                     viaggio.abbuono_fisso = 0
 
             if viaggio != primo:
                 viaggio.padre = primo
+                viaggio.is_abbinata = 'S'  # it's an abbinata!
             if contatore > 2:
                 if viaggio.abbuono_fisso != 5:
                     if request:
@@ -1394,8 +1397,7 @@ def associate(assoType, viaggiIds, request=None):
                                           contatore, viaggio.abbuono_fisso))
                     viaggio.abbuono_fisso = 5
 
-        viaggio.save(
-            updateViaggi=False)  # salvo i vari viaggi, poi farò il ricalcolo
+        viaggio.save(updateViaggi=False)  # salvo i vari viaggi, poi farò il ricalcolo
         contatore += 1
 
     for viaggio in viaggi:

@@ -15,6 +15,7 @@ Desktop.ini
 .settings/
 /nbproject/
 /.idea/
+.cache
 
 /querylog.sql
 _generated_media
