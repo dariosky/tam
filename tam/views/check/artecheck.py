@@ -1,4 +1,7 @@
 # coding=utf-8
+import logging
+import traceback
+
 if __name__ == '__main__':
     import os
     import django
@@ -14,6 +17,7 @@ from django.conf import settings
 from tam.models import Viaggio, Luogo
 from tam.views.tamviews import associate
 
+logger = logging.getLogger('tam.arte.check')
 tz_italy = pytz.timezone('Europe/Rome')
 
 
@@ -36,7 +40,7 @@ def classifica_assertion(classifica, assertions, message=""):
     assert errors == [], "\n".join(errors) + ("\n" + message) if message else ""
 
 
-def unarrivo_vs_dueassociati():
+def arrivo_singolo_o_due_arrivi():
     """
         Test congruenza mail Rob. Lup. 26/6/2015
     """
@@ -90,8 +94,6 @@ def unarrivo_vs_dueassociati():
             # I have to retake the objects from the db
             arrivo_v1.refresh_from_db()
             arrivo_v2.refresh_from_db()
-            print arrivo_v1.classifiche()
-            print arrivo_singolo.classifiche()
 
             classifica_assertion(
                 arrivo_v1.classifiche(),
@@ -100,10 +102,10 @@ def unarrivo_vs_dueassociati():
             )
             raise EndOfTestExeption
     except EndOfTestExeption:
-        print "Everything ok, changes rolledback"
+        logger.info("Ok.")
 
 
-def unarrivo_vs_dueassociati2():
+def partenza_singola_o_due_partenze():
     """
         Test congruenza mail Rob. Lup. 29/8/2015
     """
@@ -161,8 +163,6 @@ def unarrivo_vs_dueassociati2():
             partenza_v1.refresh_from_db()
             partenza_v2.refresh_from_db()
             assert partenza_v1.classifiche()['prezzoVenezia'] == Decimal(56)
-            print "doppia in partenza", partenza_v1.classifiche()
-            print "singolo", partenza_singolo.classifiche()
 
             classifica_assertion(
                 partenza_v1.classifiche(),
@@ -171,9 +171,64 @@ def unarrivo_vs_dueassociati2():
             )
             raise EndOfTestExeption
     except EndOfTestExeption:
-        print "Everything ok, changes rolledback"
+        logger.info("Ok.")
+
+
+def check_associata():
+    """
+        Test congruenza mail Rob. Lup. 26/6/2015
+    """
+    try:
+        with transaction.atomic():
+            abano = Luogo.objects.get(nome=".Abano Montegrotto")
+            venezia = Luogo.objects.get(nome=".VENEZIA  AEROPORTO")
+
+            andata = Viaggio(
+                data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 12)),
+                da=abano,
+                a=venezia,
+                prezzo=Decimal("31"),
+                numero_passeggeri=1,
+                esclusivo=False,
+                luogoDiRiferimento=abano,
+            )
+            andata.costo_autostrada = andata.costo_autostrada_default()
+            andata.updatePrecomp(force_save=True)
+            assert andata.classifiche()['prezzoVenezia'] == Decimal('8.27')
+
+            ritorno = Viaggio(
+                data=tz_italy.localize(datetime.datetime(2020, 6, 27, 13, 12)),
+                da=venezia,
+                a=abano,
+                prezzo=Decimal("31"),
+                numero_passeggeri=1,
+                esclusivo=False,
+                luogoDiRiferimento=abano,
+            )
+            ritorno.costo_autostrada = ritorno.costo_autostrada_default()
+            ritorno.abbuono_fisso = settings.ABBUONO_AEROPORTI
+            ritorno.updatePrecomp(force_save=True)
+            assert ritorno.abbuono_fisso == settings.ABBUONO_AEROPORTI  # it's coming from an airport
+            assert ritorno.classifiche()['prezzoVenezia'] == Decimal('-1.73')
+
+            associate(assoType='link', viaggiIds=[andata.id, ritorno.id])
+
+            # I have to retake the objects from the db
+            andata.refresh_from_db()
+            ritorno.refresh_from_db()
+            classifica = andata.classifiche()
+            assert classifica['puntiAbbinata'] == 1
+            assert andata.prezzoPunti == Decimal('56.40')
+            raise EndOfTestExeption
+    except EndOfTestExeption:
+        logger.info("Ok.")
 
 
 if __name__ == '__main__':
-    # unarrivo_vs_dueassociati()
-    unarrivo_vs_dueassociati2()
+    for test_name in (arrivo_singolo_o_due_arrivi, partenza_singola_o_due_partenze, check_associata):
+        try:
+            logger.info("Testing %s", test_name.__name__)
+            test_name()
+        except:
+            logger.error("FAILED")
+            logger.error(traceback.format_exc())

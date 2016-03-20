@@ -12,7 +12,7 @@ def license_details(request):
     """ Add license detail to request context """
     result = get_license_detail()
     result["tam_version"] = settings.TAM_VERSION
-    result["tam_stealth"] = settings.DEBUG
+    result["tam_stealth"] = False
 
     # Aggiungo al contesto il percorso completo della richiesta (mi serve per i "?next=")
     if request.META["QUERY_STRING"]:

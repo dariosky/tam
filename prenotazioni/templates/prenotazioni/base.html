@@ -1,5 +1,4 @@
-{% load i18n %}
-{% load staticfiles %}{% load pipeline %}<!DOCTYPE html>
+{% load i18n %}{% load staticfiles %}{% load pipeline %}<!DOCTYPE html>
 <html>
 <head>
 	<title>{{ license_owner }} - {% blocktrans %}Sistema di prenotazione online{% endblocktrans %}</title>
@@ -37,7 +36,7 @@
 
 <div id='mainContent'>
 	<a href="/">
-		<h2><img src="{% static "sprites/tam_16.png" %}" class="loghetto" alt=""/>
+		<h2><img src="{% static "img/logo.png" %}" class="tamlogo" alt=""/>
 			{% blocktrans %}Servizio prenotazioni{% endblocktrans %}
 		</h2>
 	</a>

@@ -7,7 +7,7 @@
 
 body {
     padding-bottom: 20px;
-    background: white url(../img/v-grad-yellow.png);
+    background: #FBFFBA;
     background-repeat: repeat-x;
     background-attachment: fixed;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -15,7 +15,8 @@ body {
     line-height: 20px;
 }
 
-.loghetto {
+.tamlogo {
+    max-width: 42px;
     margin-right: 15px;
 }
 
@@ -52,7 +53,7 @@ label {
     padding: 0;
 }
 
-input[type="text"], input[type="password"], input[type="number"]
+input[type="text"], input[type="password"], input[type="number"],
 textarea, select {
     border: 1px solid #CCCCCC;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset;
@@ -61,7 +62,7 @@ textarea, select {
 
 #preForm input[type="text"], #preForm input[type="password"],
 #preForm input[type="submit"], #preForm input[type="number"],
-#preForm textarea, #preForm select, #preForm btn-group {
+#preForm textarea, #preForm select, #preForm .btn-group {
     font-size: 16px;
     height: auto;
     margin-bottom: 0;
