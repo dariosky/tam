@@ -234,28 +234,21 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler'
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': 'main_formatter',
         },
         'production_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': os.path.join(PROJECT_PATH, 'logs', 'main.log'),
-            'maxBytes': 1024 * 1024 * 3,  # x MB
+            'when': 'midnight',
+            'utc': True,
+            'delay': True,
             'backupCount': 7,
             'formatter': 'main_formatter',
             'filters': ['require_debug_false'],
-        },
-        'debug_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(PROJECT_PATH, 'logs', 'main_debug.log'),
-            'maxBytes': 1024 * 1024 * 3,  # x MB
-            'backupCount': 7,
-            'formatter': 'main_formatter',
-            'filters': ['require_debug_true'],
         },
         'null': {
             "class": 'logging.NullHandler',
@@ -275,7 +268,7 @@ LOGGING = {
             'propagate': False,
         },
         '': {
-            'handlers': ['console', 'production_file', 'debug_file'],
+            'handlers': ['console', 'production_file'],
             'level': "DEBUG",
         },
     }

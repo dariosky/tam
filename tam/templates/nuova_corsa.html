@@ -50,7 +50,9 @@
 			</div>
 
 		{% else %}
+            <p>
 			{% if prezzolistino %}
+
 				Prezzo da listino {{prezzolistino.listino}}
 				{% if viaggio.esclusivo %}
 					<i class="sprite icon-t"></i>
@@ -62,6 +64,7 @@
 			{% endif %}
 			{% if fatturazione_forzata == 'S' %}<i title='Fatturazione forzata da listino' class="sprite icon-fat_on"></i>{% endif %}
 			{% if fatturazione_forzata == 'N' %}<i title='Fatturazione disattivata da listino' class="sprite icon-fat_off"></i>{% endif %}
+            </p>
 			<table style='text-align:left; margin:auto;'>
 				{{ form }}
 				{% if viaggio.passeggero %}
