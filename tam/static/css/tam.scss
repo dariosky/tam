@@ -200,6 +200,11 @@ a img {
 
 form input {
   margin: 5px;
+
+  &[type=checkbox], &[type=radio] {
+    zoom: 1.5;
+    vertical-align: middle;
+  }
 }
 
 form {
@@ -428,9 +433,12 @@ td img {
 }
 
 .viaggioId {
-  /* i checkbox per selezionare i viaggi nella lista corse */
-  display: block;
-  margin: 0 auto;
+  cursor: pointer;
+  input {
+    /* i checkbox per selezionare i viaggi nella lista corse */
+    display: block;
+    margin: 0 auto;
+  }
 }
 
 .accordhead {

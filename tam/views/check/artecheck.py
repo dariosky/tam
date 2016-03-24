@@ -49,7 +49,7 @@ def arrivo_singolo_o_due_arrivi():
             abano = Luogo.objects.get(nome=".Abano Montegrotto")
             venezia = Luogo.objects.get(nome=".VENEZIA  AEROPORTO")
             arrivo_singolo = Viaggio(
-                data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 12)),
+                data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 10)),
                 da=venezia,
                 a=abano,
                 prezzo=Decimal("60"),
@@ -58,14 +58,14 @@ def arrivo_singolo_o_due_arrivi():
                 luogoDiRiferimento=abano,
             )
             arrivo_singolo.costo_autostrada = arrivo_singolo.costo_autostrada_default()
-            arrivo_singolo.abbuono_fisso = settings.ABBUONO_AEROPORTI
+            # arrivo_singolo.abbuono_fisso = settings.ABBUONO_AEROPORTI
             arrivo_singolo.updatePrecomp(force_save=True)
 
             classifica_assertion(arrivo_singolo.classifiche(),
-                                 {'prezzoVenezia': Decimal("27.94")})
+                                 {'prezzoVenezia': Decimal("37.94")})
 
             arrivo_v1 = Viaggio(
-                data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 12)),
+                data=tz_italy.localize(datetime.datetime(2020, 6, 27, 12, 11)),
                 da=venezia,
                 a=abano,
                 prezzo=Decimal("30"),
@@ -158,17 +158,20 @@ def partenza_singola_o_due_partenze():
             partenza_v2.updatePrecomp(force_save=True)
 
             associate(assoType='link', viaggiIds=[partenza_v1.id, partenza_v2.id])
-
             # I have to retake the objects from the db
             partenza_v1.refresh_from_db()
             partenza_v2.refresh_from_db()
-            assert partenza_v1.classifiche()['prezzoVenezia'] == Decimal(56)
-
             classifica_assertion(
                 partenza_v1.classifiche(),
                 {'prezzoVenezia': partenza_singolo.prezzoVenezia},
                 "Due singoli in arrivo dovrebbe avere le stesse caratteristiche di arrivo singolo"
             )
+            # classifica_assertion(
+            #     partenza_v1.classifiche(),
+            #     {'prezzoVenezia': 0},
+            #     "Due singoli in arrivo dovrebbe avere le stesse caratteristiche di arrivo singolo"
+            # )
+
             raise EndOfTestExeption
     except EndOfTestExeption:
         logger.info("Ok.")
@@ -225,7 +228,11 @@ def check_associata():
 
 
 if __name__ == '__main__':
-    for test_name in (arrivo_singolo_o_due_arrivi, partenza_singola_o_due_partenze, check_associata):
+    for test_name in (
+        arrivo_singolo_o_due_arrivi,
+        partenza_singola_o_due_partenze,
+        check_associata,
+    ):
         try:
             logger.info("Testing %s", test_name.__name__)
             test_name()

@@ -193,18 +193,15 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
     }
 
 
-def get_value(viaggio, forzaSingolo=False):
+def get_value(viaggio, **kwargs):
     """ Return the value of this trip on the scoreboard """
     importoViaggio = viaggio.prezzo  # lordo
-    forzaSingolo = False  # TMP
+    forzaSingolo = False
     singolo = forzaSingolo or (not viaggio.is_abbinata)
-    if forzaSingolo:
-        pass
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
 
     if viaggio.cartaDiCredito:
-        importoViaggio *= Decimal(
-            0.98)  # tolgo il 2% al lordo per i pagamenti con carta di credito
+        importoViaggio *= Decimal(0.98)  # tolgo il 2% al lordo per i pagamenti con carta di credito
 
     if viaggio.commissione:  # tolgo la commissione dal lordo
         if viaggio.tipo_commissione == "P":
