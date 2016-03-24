@@ -1,3 +1,6 @@
+$back-color: #FBFFBA;
+$back-hilight: #FE9;
+
 .supplementari {
   text-align: center;
   margin: 3px;
@@ -22,28 +25,29 @@
   width: 100%;
   font-size: 8pt;
   text-align: left;
-}
 
-.tablesorter th {
-  background-color: #fed587;
-  border: 1px solid #FFF;
-  padding: 4px;
-}
+  th {
+    background-color: $back-hilight;
+    padding: 4px;
+  }
 
-.tablesorter td {
-  color: #3D3D3D;
-  padding: 4px;
-  background-color: #ffffff;
+  td {
+    color: #3D3D3D;
+    padding: 4px;
+    background-color: #ffffff;
+  }
 }
 
 .notePasseggero {
   background-color: lightyellow;
+  border-radius: 5px;
+  margin-top: 3px;
 }
 
 body {
   color: #3d3d3d;
   text-align: center;
-  background-color: #FBFFBA;
+  background-color: $back-color;
 }
 
 a, a:visited {
@@ -106,6 +110,12 @@ a:hover {
   font-family: sans-serif;
   /*border-top: 1px solid black;*/
   padding-top: 5px;
+
+  &:after {
+    display: block;
+    content: '';
+    clear: both;
+  }
 }
 
 .navBar .menuGroup:not(:first-child) {
@@ -141,7 +151,8 @@ h2 {
 .credits {
   /* il link ai credits nel footer */
   float: right;
-  margin: 0
+  margin: 0;
+
 }
 
 .credits a {
@@ -224,8 +235,6 @@ form {
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
   background-color: #fcf8e3;
   border: 2px solid #fbeed5;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
@@ -731,7 +740,7 @@ select, input {
 }
 
 .prenotazione {
-  background-color: #FE9 !important;
+  background-color: $back-hilight !important;
 }
 
 .annullato td {
