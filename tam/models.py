@@ -387,6 +387,7 @@ class Viaggio(models.Model):
             puntiAbbinata=self.punti_abbinata,
             puntiDiurni=self.punti_diurni,
             puntiNotturni=self.punti_notturni,
+            prezzoPunti=self.prezzoPunti,
         )
 
     def updatePrecomp(self, doitOnFather=True, force_save=False,

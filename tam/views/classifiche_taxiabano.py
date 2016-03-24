@@ -56,7 +56,6 @@ def process_classifiche(viaggio, force_numDoppi=None):
 
     if viaggio.padre_id is not None:
         return
-    if viaggio.id is None: return
     da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
 
     valoreTotale = viaggio.get_valuetot()
@@ -85,24 +84,24 @@ def process_classifiche(viaggio, force_numDoppi=None):
             else:
                 viaggio.prezzoVenezia = valoreTotale
 
-            #		if da["puntiAbbinamento"] > 0:
-            #			viaggio.punti_abbinata = da["puntiAbbinamento"]
-            #			viaggio.prezzoPunti = da["valorePunti"]
-            #			viaggio.prezzoVenezia = da["rimanenteInLunghe"]
-            #		else:	# le corse abbinate senza punti si comportano come le singole
-            #			if da["pricy"]:
-            #				viaggio.prezzoDoppioPadova = da["rimanenteInLunghe"]
-            #			else:
-            #				prezzoNetto = da["rimanenteInLunghe"]
-            #				if da["kmTotali"] >= 50:
-            #					viaggio.prezzoVenezia = prezzoNetto
-            #				elif 25 <= da["kmTotali"] < 50:
-            #					viaggio.prezzoPadova = prezzoNetto
-            #	elif viaggio.padre is None:	# corse non abbinate, o abbinate che non fanno alcun punto
-            #		if viaggio.is_long():
-            #			viaggio.prezzoVenezia = viaggio.prezzo_finale
-            #
-            #		# i figli non prendono nulla
+                #		if da["puntiAbbinamento"] > 0:
+                #			viaggio.punti_abbinata = da["puntiAbbinamento"]
+                #			viaggio.prezzoPunti = da["valorePunti"]
+                #			viaggio.prezzoVenezia = da["rimanenteInLunghe"]
+                #		else:	# le corse abbinate senza punti si comportano come le singole
+                #			if da["pricy"]:
+                #				viaggio.prezzoDoppioPadova = da["rimanenteInLunghe"]
+                #			else:
+                #				prezzoNetto = da["rimanenteInLunghe"]
+                #				if da["kmTotali"] >= 50:
+                #					viaggio.prezzoVenezia = prezzoNetto
+                #				elif 25 <= da["kmTotali"] < 50:
+                #					viaggio.prezzoPadova = prezzoNetto
+                #	elif viaggio.padre is None:	# corse non abbinate, o abbinate che non fanno alcun punto
+                #		if viaggio.is_long():
+                #			viaggio.prezzoVenezia = viaggio.prezzo_finale
+                #
+                #		# i figli non prendono nulla
 
     if viaggio.padre is None and valoreTotale > 0:
         # padri e singoli possono avere i supplementi
@@ -218,7 +217,7 @@ def get_value(viaggio, forzaSingolo=False):
 
     #   Taxiabano non hanno abbuono per pagamento differito o fatturato
     if (
-                viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:  # tolgo gli abbuoni (per differito o altro)
+            viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:  # tolgo gli abbuoni (per differito o altro)
         importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
 
     ABBUONO_SOLO_SE_IMPORTO = getattr(settings, 'ABBUONO_SOLO_SE_IMPORTO', False)
