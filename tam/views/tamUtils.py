@@ -59,12 +59,12 @@ def getDefault(viaggio):
 
 
 def conta_bacini_partenza(viaggi):
-    bacini_di_partenza = []
+    bacini_di_partenza = set()
     for cursore in viaggi:
         bacino = cursore.da
         if cursore.da.bacino:
             bacino = cursore.da.bacino
         if bacino not in bacini_di_partenza:
-            bacini_di_partenza.append(bacino)
+            bacini_di_partenza.add(bacino)
             # logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
     return bacini_di_partenza

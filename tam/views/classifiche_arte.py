@@ -63,22 +63,32 @@ kmPuntoAbbinate = Decimal(120)
 
 
 def process_classifiche(viaggio, force_numDoppi=None):
-    if viaggio.is_abbinata and viaggio.padre is None:  # per i padri abbinati
+    KM_PER_LUNGHE = getattr(settings, 'KM_PER_LUNGHE', 50)
+    if viaggio.is_abbinata and viaggio.padre is None:
         da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
-        # print("Sono il padre di un abbinata da %s chilometri. Pricy: %s.\n%s"%(da["kmTotali"], da["pricy"], da) )
-        if da["puntiAbbinamento"] > 0:
-            viaggio.punti_abbinata = da["puntiAbbinamento"]
-            viaggio.prezzoPunti = da["valorePunti"]
-            viaggio.prezzoVenezia = da["rimanenteInLunghe"]
-        else:  # le corse abbinate senza punti si comportano come le singole
-            if da["pricy"]:
-                viaggio.prezzoDoppioPadova = da["rimanenteInLunghe"]
-            else:
-                prezzoNetto = da["rimanenteInLunghe"]
-                if da["kmTotali"] >= getattr(settings, 'KM_PER_LUNGHE', 50):
-                    viaggio.prezzoVenezia = prezzoNetto
-                elif 25 <= da["kmTotali"] < getattr(settings, 'KM_PER_LUNGHE', 50):
-                    viaggio.prezzoPadova = prezzoNetto
+        if viaggio.is_abbinata == 'P':
+            # le abbinate in partenza si comportano come delle corse normali (ma usando i valori globali del gruppo)
+            prezzoNetto = da["valoreTotale"]
+            if da["kmTotali"] >= KM_PER_LUNGHE:
+                viaggio.prezzoVenezia = prezzoNetto
+            elif 25 <= da["kmTotali"] < KM_PER_LUNGHE:
+                viaggio.prezzoPadova = prezzoNetto
+        else:
+            # per i padri abbinati, ma vere e proprie abbinate, non collettivi in partenza
+            # print("Sono il padre di un abbinata da %s chilometri. Pricy: %s.\n%s"%(da["kmTotali"], da["pricy"], da) )
+            if da["puntiAbbinamento"] > 0:
+                viaggio.punti_abbinata = da["puntiAbbinamento"]
+                viaggio.prezzoPunti = da["valorePunti"]
+                viaggio.prezzoVenezia = da["rimanenteInLunghe"]
+            else:  # le corse abbinate senza punti si comportano come le singole
+                if da["pricy"]:
+                    viaggio.prezzoDoppioPadova = da["rimanenteInLunghe"]
+                else:
+                    prezzoNetto = da["rimanenteInLunghe"]
+                    if da["kmTotali"] >= KM_PER_LUNGHE:
+                        viaggio.prezzoVenezia = prezzoNetto
+                    elif 25 <= da["kmTotali"] < KM_PER_LUNGHE:
+                        viaggio.prezzoPadova = prezzoNetto
     elif viaggio.padre_id is None:  # corse non abbinate, o abbinate che non fanno alcun punto
         if viaggio.is_long():
             viaggio.prezzoVenezia = viaggio.prezzo_finale
@@ -118,8 +128,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         return locals()
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
-
     forzaSingolo = (force_numDoppi is 0)
+    viaggi_raggruppati = 1 + len(viaggio.viaggio_set.all())
     valoreTotale = viaggio.get_valuetot(forzaSingolo=forzaSingolo)
 
     # kmNonConguagliati= kmTotali - viaggio.km_conguagliati
@@ -143,16 +153,15 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
     kmRimanenti = kmTotali - (puntiAbbinamento * kmPuntoAbbinate)
 
     if puntiAbbinamento:
-        rimanenteInLunghe = kmRimanenti * Decimal(
-            "0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
+        rimanenteInLunghe = kmRimanenti * Decimal("0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
         # logging.debug("Dei %skm totali, %s sono fuori abbinta a 0.65 vengono %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
         valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
         # valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
         valoreAbbinate = puntiAbbinamento * valorePunti
         pricy = False
     else:
-        rimanenteInLunghe = Decimal(
-            str(int(valoreTotale - valoreAbbinate)))  # vecchio modo: il rimanente è il rimanente
+        # vecchio modo: il rimanente è il rimanente
+        rimanenteInLunghe = Decimal(str(int(valoreTotale - valoreAbbinate)))
         valorePunti = 0
 
         if kmRimanenti:
@@ -172,66 +181,120 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         # logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
         #               viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
         puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
-    return {
-        "kmTotali": kmTotali,
-        "puntiAbbinamento": puntiAbbinamento,
-        "valorePunti": valorePunti,
-        "rimanenteInLunghe": rimanenteInLunghe,
-        "pricy": pricy,
-    }
+    return dict(kmTotali=kmTotali,
+                puntiAbbinamento=puntiAbbinamento,
+                valorePunti=valorePunti,
+                rimanenteInLunghe=rimanenteInLunghe,
+                pricy=pricy,
+                valoreTotale=valoreTotale,
+                )
 
 
 def get_value(viaggio, forzaSingolo=False):
     """ Return the value of this trip on the scoreboard """
-    importoViaggio = viaggio.prezzo  # lordo
-    forzaSingolo = False  # TMP
     singolo = forzaSingolo or (not viaggio.is_abbinata)
-    if forzaSingolo:
-        pass
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
+    if viaggio.is_abbinata and viaggio.padre is not None:
+        padre = viaggio.padre
+        if padre.is_abbinata == "P":
+            # i figli degli abbinati in partenza sono nulli
+            return 0
+    if viaggio.is_abbinata == "P":
+        viaggi = [viaggio] + list(viaggio.viaggio_set.all())
+        importiViaggio = []  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
+        multiplier = 1
+        for i, v in enumerate(viaggi):
+            importo_riga = v.prezzo
+            if v.commissione:  # tolgo la commissione dal lordo
+                if v.tipo_commissione == "P":
+                    # commissione in percentuale
+                    importo_riga = importo_riga * (Decimal(1) - v.commissione / Decimal(100))
+                else:
+                    importo_riga = importo_riga - v.commissione
 
-    if viaggio.commissione:  # tolgo la commissione dal lordo
-        if viaggio.tipo_commissione == "P":
-            importoViaggio = importoViaggio * (
-                Decimal(1) - viaggio.commissione / Decimal(
-                    100))  # commissione in percentuale
-        else:
-            importoViaggio = importoViaggio - viaggio.commissione
+            importo_riga = importo_riga - v.costo_autostrada
+            importiViaggio.append(importo_riga)
 
-    importoViaggio = importoViaggio - viaggio.costo_autostrada
-
-    # per le corse singole
-    if singolo:
-        chilometriTotali = viaggio.get_kmtot()
-        if chilometriTotali:
-            renditaChilometrica = importoViaggio / chilometriTotali
+        km = viaggio.get_kmtot()
+        if km:
+            renditaChilometrica = sum(importiViaggio) / km
         else:
             renditaChilometrica = 0
-        if viaggio.is_long():
+
+        if km >= getattr(settings, 'KM_PER_LUNGHE', 50):
             if renditaChilometrica < Decimal("0.65"):
-                importoViaggio *= renditaChilometrica / Decimal("0.65")
+                multiplier = renditaChilometrica / Decimal("0.65")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
-        elif viaggio.is_medium():
+        elif 25 <= km < getattr(settings, 'KM_PER_LUNGHE', 50) or (km < 25 and sum(importiViaggio) > 16):
             if renditaChilometrica < Decimal("0.8"):
-                importoViaggio *= renditaChilometrica / Decimal("0.8")
+                multiplier = renditaChilometrica / Decimal("0.8")
                 # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
 
-    if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:
-        # tolgo gli abbuoni (per differito o altro)
-        importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
-    if viaggio.abbuono_fisso:
-        importoViaggio -= viaggio.abbuono_fisso
-    if viaggio.abbuono_percentuale:
-        # abbuono in percentuale
-        importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))
-    importoViaggio = importoViaggio - viaggio.costo_sosta
+        for i, v in enumerate(viaggi):
+            importoViaggio = importiViaggio[i]
+            if (v.pagamento_differito or v.fatturazione) and settings.SCONTO_FATTURATE:
+                # tolgo gli abbuoni (per differito o altro)
+                importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+            if v.abbuono_fisso:
+                importoViaggio -= v.abbuono_fisso
+            if v.abbuono_percentuale:
+                # abbuono in percentuale
+                importoViaggio = importoViaggio * (Decimal(1) - v.abbuono_percentuale / Decimal(100))
 
-    if settings.SCONTO_SOSTA:
-        # aggiungo il prezzo della sosta scontato del 25%
-        importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
-                                                  )
+            importoViaggio = importoViaggio - v.costo_sosta
+
+            if settings.SCONTO_SOSTA:
+                # aggiungo il prezzo della sosta scontato del 25%
+                importoViaggio += v.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+            else:
+                importoViaggio += v.prezzo_sosta  # prezzo sosta intero
+
+        importoViaggio = sum(importiViaggio) * multiplier
+
     else:
-        importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
+        # Viaggi singoli
+        importoViaggio = viaggio.prezzo  # lordo
+        if viaggio.commissione:  # tolgo la commissione dal lordo
+            if viaggio.tipo_commissione == "P":
+                # commissione in percentuale
+                importoViaggio = importoViaggio * (Decimal(1) - viaggio.commissione / Decimal(100))
+            else:
+                importoViaggio = importoViaggio - viaggio.commissione
+
+        importoViaggio = importoViaggio - viaggio.costo_autostrada
+
+        km = viaggio.get_kmtot()
+        # per le corse singole
+        if singolo:
+            chilometriTotali = km
+            if chilometriTotali:
+                renditaChilometrica = importoViaggio / chilometriTotali
+            else:
+                renditaChilometrica = 0
+            if viaggio.is_long():
+                if renditaChilometrica < Decimal("0.65"):
+                    importoViaggio *= renditaChilometrica / Decimal("0.65")
+                    # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
+            elif viaggio.is_medium():
+                if renditaChilometrica < Decimal("0.8"):
+                    importoViaggio *= renditaChilometrica / Decimal("0.8")
+                    # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
+
+        if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:
+            # tolgo gli abbuoni (per differito o altro)
+            importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+        if viaggio.abbuono_fisso:
+            importoViaggio -= viaggio.abbuono_fisso
+        if viaggio.abbuono_percentuale:
+            # abbuono in percentuale
+            importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))
+        importoViaggio = importoViaggio - viaggio.costo_sosta
+
+        if settings.SCONTO_SOSTA:
+            # aggiungo il prezzo della sosta scontato del 25%
+            importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+        else:
+            importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
     return importoViaggio.quantize(Decimal('.01'))
 
 

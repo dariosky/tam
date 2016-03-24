@@ -16,7 +16,7 @@
 
 #coda > div, #codacomandi .place, #codacomandi #dequeue, #codacomandi #refresh {
 	float: left;
-	width: 80px;
+	width: 74px;
 	min-height: 35px;
 	border: 2px solid black;
 	padding: 25px;

@@ -857,16 +857,17 @@ class Viaggio(models.Model):
         """	Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
             Assieme si andrà  ad una destinazione comune
         """
-        #		logging.debug("Is collettivo in partenza %s" %self.id)
+        # logging.debug("Is collettivo in partenza %s" %self.id)
         nextbro = self.nextfratello()
-        if nextbro and nextbro.da == self.a:  # se il successivo parte da dove arrivo è sicuramente un collettivo in successione
+        if nextbro and nextbro.da == self.a:
+            # se il successivo parte da dove arrivo è sicuramente un collettivo in successione
             return False
         if nextbro and nextbro.data < \
                 self.data + datetime.timedelta(
                 minutes=get_tratta(self.da, self.a).minuti + (
                     30 if self.da.speciale == "A" else 0)):
             # tengo conto che questa corsa dura 30 minuti in più se parte da un aereoporto
-            #			logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
+            # logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
             return True
         else:
             return False
@@ -895,8 +896,7 @@ class Viaggio(models.Model):
 
     def is_medium(self):
         """ Ritorna vero se la tratta è media """
-        return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-            self.km < 25 and self.prezzo > 16)
+        return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (self.km < 25 and self.prezzo > 16)
 
     def _is_valid(self):
         """Controlla che il viaggio abbia tutte le tratte definite"""
@@ -931,9 +931,9 @@ class Viaggio(models.Model):
         return process_value(self, forzaSingolo=forzaSingolo)
 
     def get_valuetot(self, forzaSingolo=False):
-        result = self.get_value()
+        result = self.get_value(forzaSingolo=forzaSingolo)
         for figlio in self.viaggio_set.all():
-            result += figlio.get_value()
+            result += figlio.get_value(forzaSingolo=forzaSingolo)
         return result
 
     def lordo(self):
