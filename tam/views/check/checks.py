@@ -42,6 +42,7 @@ def arrivo_singolo_o_due_arrivi(
     expected_single1=None,
     expected_single2=None,
     expected_double=None,
+    check_equality=False,  # if True, don't check sigle1+single2=double
 ):
     """
         Test congruenza mail Rob. Lup. 26/6/2015
@@ -110,11 +111,15 @@ def arrivo_singolo_o_due_arrivi(
             singolo_v1.refresh_from_db()
             singolo_v2.refresh_from_db()
 
-            classifica_assertion(
-                singolo_v1.classifiche(),
-                doppio.classifiche(),
-                "Due singoli in arrivo dovrebbe avere le stesse caratteristiche di arrivo singolo"
-            )
+            for k, v in singolo_v2.classifiche().items():
+                assert v == 0, "La 2nda corsa deve avere tutto a zero"
+
+            if check_equality:
+                classifica_assertion(
+                    singolo_v1.classifiche(),
+                    doppio.classifiche(),
+                    "Due singoli in arrivo dovrebbe avere le stesse caratteristiche di arrivo singolo"
+                )
             raise EndOfTestExeption
     except EndOfTestExeption:
         logger.info("Ok.")
