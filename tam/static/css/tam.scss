@@ -433,12 +433,9 @@ td img {
 }
 
 .viaggioId {
+  /* i checkbox per selezionare i viaggi nella lista corse */
   cursor: pointer;
-  input {
-    /* i checkbox per selezionare i viaggi nella lista corse */
-    display: block;
-    margin: 0 auto;
-  }
+  display: block;
 }
 
 .accordhead {
