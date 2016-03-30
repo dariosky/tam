@@ -17,9 +17,13 @@ verranno aggiungi in visualizzazione:
              'min', 'max': con i valori chiave massimi e minimi
 
 """
+import datetime
 from django.utils.safestring import mark_safe
 import pytz
+from decimal import Decimal
 
+tz_italy = pytz.timezone('Europe/Rome')
+DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI = tz_italy.localize(datetime.datetime(2016, 4, 1, 0, 0))
 CLASSIFICHE = [
     {"nome": "Venezia",
      "descrizione": ">=60km",
@@ -57,8 +61,6 @@ CLASSIFICHE = [
 ]
 NOMI_CAMPI_CONDUCENTE = {}  # tutto dai modelli
 
-from decimal import Decimal
-
 kmPuntoAbbinate = Decimal(120)
 
 
@@ -66,7 +68,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
     KM_PER_LUNGHE = getattr(settings, 'KM_PER_LUNGHE', 50)
     if viaggio.is_abbinata and viaggio.padre is None:
         da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
-        if viaggio.is_abbinata == 'P':
+        if viaggio.is_abbinata == 'P' and viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI:
             # le abbinate in partenza si comportano come delle corse normali (ma usando i valori globali del gruppo)
             prezzoNetto = da["valoreTotale"]
             if da["kmTotali"] >= KM_PER_LUNGHE:
@@ -129,7 +131,6 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
     forzaSingolo = (force_numDoppi is 0)
-    viaggi_raggruppati = 1 + len(viaggio.viaggio_set.all())
     valoreTotale = viaggio.get_valuetot(forzaSingolo=forzaSingolo)
 
     # kmNonConguagliati= kmTotali - viaggio.km_conguagliati
@@ -196,10 +197,10 @@ def get_value(viaggio, forzaSingolo=False):
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
     if viaggio.is_abbinata and viaggio.padre is not None:
         padre = viaggio.padre
-        if padre.is_abbinata == "P":
+        if padre.is_abbinata == "P" and viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI:
             # i figli degli abbinati in partenza sono nulli
             return 0
-    if viaggio.is_abbinata == "P":
+    if viaggio.is_abbinata == "P" and viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI:
         viaggi = [viaggio] + list(viaggio.viaggio_set.all())
         importiViaggio = []  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
         multiplier = 1
@@ -301,8 +302,6 @@ def get_value(viaggio, forzaSingolo=False):
 GET_VALUE_FUNCTION = get_value
 PROCESS_CLASSIFICHE_FUNCTION = process_classifiche
 KM_PUNTO_ABBINATE = kmPuntoAbbinate
-
-tz_italy = pytz.timezone('Europe/Rome')
 
 
 def gettoneDoppioSeFeriale(calendar):
