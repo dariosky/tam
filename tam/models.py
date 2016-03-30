@@ -379,7 +379,6 @@ class Viaggio(models.Model):
         @return: dict(str:Decimal)
         """
         return dict(
-            finale=self.prezzo_finale,
             sosta=self.prezzo_sosta,
             prezzoVenezia=self.prezzoVenezia,
             prezzoPadova=self.prezzoPadova,
