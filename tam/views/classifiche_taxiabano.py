@@ -84,25 +84,6 @@ def process_classifiche(viaggio, force_numDoppi=None):
             else:
                 viaggio.prezzoVenezia = valoreTotale
 
-                #		if da["puntiAbbinamento"] > 0:
-                #			viaggio.punti_abbinata = da["puntiAbbinamento"]
-                #			viaggio.prezzoPunti = da["valorePunti"]
-                #			viaggio.prezzoVenezia = da["rimanenteInLunghe"]
-                #		else:	# le corse abbinate senza punti si comportano come le singole
-                #			if da["pricy"]:
-                #				viaggio.prezzoDoppioPadova = da["rimanenteInLunghe"]
-                #			else:
-                #				prezzoNetto = da["rimanenteInLunghe"]
-                #				if da["kmTotali"] >= 50:
-                #					viaggio.prezzoVenezia = prezzoNetto
-                #				elif 25 <= da["kmTotali"] < 50:
-                #					viaggio.prezzoPadova = prezzoNetto
-                #	elif viaggio.padre is None:	# corse non abbinate, o abbinate che non fanno alcun punto
-                #		if viaggio.is_long():
-                #			viaggio.prezzoVenezia = viaggio.prezzo_finale
-                #
-                #		# i figli non prendono nulla
-
     if viaggio.padre is None and valoreTotale > 0:
         # padri e singoli possono avere i supplementi
         # 27/1/2014 le corse al di sotto dei 27euro non generano supplementari. 13/3/2014 Abbasso i 27 a 0 euro
@@ -146,45 +127,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         total_pax += cursore.numero_passeggeri
     # logging.debug("Bacini di partenza: %d"%len(baciniDiPartenza))
     num_bacini = len(baciniDiPartenza)
-    #	if len(baciniDiPartenza) > 1:	# se partono tutti dalla stessa zona, non la considero un'abbinata
-    #		partiAbbinamento = kmTotali / kmPuntoAbbinate	# è un Decimal
-    #		puntiAbbinamento = int(partiAbbinamento)
-    #		#logging.debug("Casette abbinamento %d, sarebbero %s" % (puntiAbbinamento, partiAbbinamento))
-    #
-    #	if (force_numDoppi is not None) and (force_numDoppi != puntiAbbinamento):
-    #		#logging.debug("Forzo il numero di doppi a %d." % force_numDoppi)
-    #		puntiAbbinamento = min(force_numDoppi, puntiAbbinamento) # forzo di punti doppio, max quello calcolato
-    #
-    #	kmRimanenti = kmTotali - (puntiAbbinamento * kmPuntoAbbinate)	# il resto della divisione per 120
-    #
-    #	if puntiAbbinamento:
-    #		rimanenteInLunghe = kmRimanenti * Decimal("0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
-    #		#logging.debug("Dei %skm totali, %s sono fuori abbinta a 0.65 vengono %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
-    #		valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
-    #		#valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
-    #		valoreAbbinate = puntiAbbinamento * valorePunti
-    #		pricy = False
-    #	else:
-    #		rimanenteInLunghe = Decimal(str(int(valoreTotale - valoreAbbinate))) # vecchio modo: il rimanente è il rimanente
-    #		valorePunti = 0
-    #
-    #		if kmRimanenti:
-    #			#lordoRimanente=viaggio.get_lordotot()* (kmNonConguagliati) / kmTotali
-    #			lordoRimanente = viaggio.get_lordotot()
-    #			#logging.debug("Mi rimangono euro %s in %s chilometri"%(lordoRimanente, kmTotali))
-    #			euroAlKm = lordoRimanente / kmTotali
-    #			#logging.debug("I rimanenti %.2fs km sono a %.2f euro/km" % (kmRimanenti, euroAlKm))
-    #			pricy = euroAlKm > Decimal("1.25")
-    #			#if pricy:
-    #			#	logging.debug("Metto nei doppi Padova: %s" %rimanenteInLunghe)
-    #			#else:
-    #			#	logging.debug("Metto nei Venezia: %s" %rimanenteInLunghe)
-    #
-    #	if viaggio.km_conguagliati:
-    #		# Ho già conguagliato dei KM, converto i KM in punti (il valore è definito sopra) quei punti li tolgo ai puntiAbbinamento
-    #		#logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
-    #		#				viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
-    #		puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
+
     return {
         "kmTotali": kmTotali,
         "num_bacini": num_bacini,
@@ -213,8 +156,8 @@ def get_value(viaggio, **kwargs):
     importoViaggio = importoViaggio - viaggio.costo_autostrada
 
     #   Taxiabano non hanno abbuono per pagamento differito o fatturato
-    if (
-            viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:  # tolgo gli abbuoni (per differito o altro)
+    if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:
+        # tolgo gli abbuoni (per differito o altro)
         importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
 
     ABBUONO_SOLO_SE_IMPORTO = getattr(settings, 'ABBUONO_SOLO_SE_IMPORTO', False)
@@ -228,9 +171,8 @@ def get_value(viaggio, **kwargs):
     importoViaggio = importoViaggio - viaggio.costo_sosta
 
     if settings.SCONTO_SOSTA:
-        importoViaggio += viaggio.prezzo_sosta * (
-            Decimal(1) - settings.SCONTO_SOSTA / Decimal(
-                100))  # aggiungo il prezzo della sosta scontato del 25%
+        # aggiungo il prezzo della sosta scontato del SCONTO_SOSTA%
+        importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
     else:
         importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
     return importoViaggio.quantize(Decimal('.01'))
