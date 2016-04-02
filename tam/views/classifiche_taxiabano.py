@@ -101,13 +101,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
     """
     kmTotali = viaggio.get_kmtot()
-    valoreTotale = viaggio.get_valuetot()
-
     # logging.debug("Km totali di %s: %s"%(viaggio.pk, kmTotali))
-    # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
-    # kmNonConguagliati= kmTotali - viaggio.km_conguagliati
-    # valoreDaConguagliare = viaggio.get_valuetot(forzaSingolo=forzaSingolo) * (kmNonConguagliati) / kmTotali
-    # logging.debug("Valore da conguagliare %s"% valoreDaConguagliare)
 
     baciniDiPartenza = []
     VEorTV = False
@@ -121,7 +115,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         if VEorTV is False and (specialPlace(cursore.da) or specialPlace(cursore.a)):
             VEorTV = True
         bacino = cursore.da
-        if cursore.da.bacino: bacino = cursore.da.bacino  # prendo il luogo o il bacino
+        if cursore.da.bacino:
+            bacino = cursore.da.bacino  # prendo il luogo o il bacino
         if not bacino in baciniDiPartenza:
             baciniDiPartenza.append(bacino)
         total_pax += cursore.numero_passeggeri

@@ -42,7 +42,7 @@ def arrivo_singolo_o_due_arrivi(
     expected_single1=None,
     expected_single2=None,
     expected_double=None,
-    check_equality=False,  # if True, don't check sigle1+single2=double
+    check_equality=True,  # if False, don't check sigle1+single2=double
 ):
     """
         Test congruenza mail Rob. Lup. 26/6/2015
