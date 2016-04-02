@@ -193,6 +193,85 @@ def check_associata(da, a, riferimento, prezzo,
         logger.info("Ok.")
 
 
+def bus_1go_3back(abano, venezia, riferimento, expected, data=None):
+    if data is None:
+        data = datetime.datetime(2020, 6, 27, 12, 0)
+    try:
+        with transaction.atomic():
+            andata = Viaggio(
+                data=tz_italy.localize(data),
+                da=abano,
+                a=venezia,
+                prezzo=32,
+                numero_passeggeri=1,
+                esclusivo=False,
+                pagamento_differito=True,
+                luogoDiRiferimento=riferimento,
+            )
+            andata.costo_autostrada = andata.costo_autostrada_default()
+            andata.updatePrecomp(force_save=True)
+
+            ritorno1 = Viaggio(
+                data=tz_italy.localize(data + datetime.timedelta(hours=0, minutes=25)),
+                da=venezia,  # the way back
+                a=abano,
+                prezzo=66,
+                numero_passeggeri=2,
+                esclusivo=False,
+                luogoDiRiferimento=riferimento,
+            )
+            ritorno1.commissione = 10
+            ritorno1.costo_autostrada = ritorno1.costo_autostrada_default()
+            ritorno1.abbuono_fisso = 0
+            ritorno1.updatePrecomp(force_save=True)
+
+            ritorno2 = Viaggio(
+                data=tz_italy.localize(data + datetime.timedelta(hours=0, minutes=30)),
+                da=venezia,  # the way back
+                a=abano,
+                prezzo=29,
+                numero_passeggeri=2,
+                esclusivo=False,
+                luogoDiRiferimento=riferimento,
+            )
+            ritorno2.costo_autostrada = ritorno1.costo_autostrada_default()
+            ritorno2.abbuono_fisso = 0
+            ritorno2.updatePrecomp(force_save=True)
+
+            ritorno3 = Viaggio(
+                data=tz_italy.localize(data + datetime.timedelta(hours=0, minutes=55)),
+                da=venezia,  # the way back
+                a=abano,
+                prezzo=58,
+                numero_passeggeri=2,
+                esclusivo=False,
+                luogoDiRiferimento=riferimento,
+            )
+            ritorno3.costo_autostrada = ritorno1.costo_autostrada_default()
+            ritorno3.abbuono_fisso = settings.ABBUONO_AEROPORTI
+            ritorno3.updatePrecomp(force_save=True)
+
+            associate(assoType='link', viaggiIds=[andata.id, ritorno1.id
+                , ritorno2.id, ritorno3.id])
+            ritorno2.abbuono_fisso = 0
+
+            # I have to retake the objects from the db
+            andata.refresh_from_db()
+            ritorno1.refresh_from_db()
+            ritorno2.refresh_from_db()
+            ritorno3.refresh_from_db()
+
+            if expected:
+                classifica_assertion(
+                    andata.classifiche(),
+                    expected,
+                    "Associata"
+                )
+            raise EndOfTestExeption
+    except EndOfTestExeption:
+        logger.info("Ok.")
+
+
 def run_tests(tests):
     for test in tests:
         try:
