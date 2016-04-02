@@ -21,9 +21,11 @@ import datetime
 from django.utils.safestring import mark_safe
 import pytz
 from decimal import Decimal
+import logging
 
 tz_italy = pytz.timezone('Europe/Rome')
 DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI = tz_italy.localize(datetime.datetime(2016, 4, 1, 0, 0))
+
 CLASSIFICHE = [
     {"nome": "Venezia",
      "descrizione": ">=60km",
@@ -68,7 +70,8 @@ def process_classifiche(viaggio, force_numDoppi=None):
     KM_PER_LUNGHE = getattr(settings, 'KM_PER_LUNGHE', 50)
     if viaggio.is_abbinata and viaggio.padre is None:
         da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
-        if viaggio.is_abbinata == 'P' and viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI:
+
+        if viaggio.is_abbinata == 'P' and da['scoreVersion'] >= '2016-04-01':
             # le abbinate in partenza si comportano come delle corse normali (ma usando i valori globali del gruppo)
             prezzoNetto = da["valoreTotale"]
             if da["kmTotali"] >= KM_PER_LUNGHE:
@@ -131,13 +134,17 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
     forzaSingolo = (force_numDoppi is 0)
-    valoreTotale = viaggio.get_valuetot(forzaSingolo=forzaSingolo)
+    baciniDiPartenza = conta_bacini_partenza([viaggio] + list(viaggio.viaggio_set.all()))
+
+    scoreVersion = None # We keep a progressive date 'yyyy-mm-dd-vv' to track version changes
+    if viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI and len(baciniDiPartenza) == 1:
+        scoreVersion = '2016-04-01'
+
+    valoreTotale = viaggio.get_valuetot(forzaSingolo=forzaSingolo, scoreVersion=scoreVersion)
 
     # kmNonConguagliati= kmTotali - viaggio.km_conguagliati
     # valoreDaConguagliare = viaggio.get_valuetot(forzaSingolo=forzaSingolo) * (kmNonConguagliati) / kmTotali
     # logging.debug("Valore da conguagliare %s"% valoreDaConguagliare)
-
-    baciniDiPartenza = conta_bacini_partenza([viaggio] + list(viaggio.viaggio_set.all()))
 
     # se partono tutti dalla stessa zona, non la considero un'abbinata
     if len(baciniDiPartenza) > 1:
@@ -155,7 +162,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
     if puntiAbbinamento:
         rimanenteInLunghe = kmRimanenti * Decimal("0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
-        # logging.debug("Dei %skm totali, %s sono fuori abbinta a 0.65 vengono %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
+        # logging.debug("Dei %skm totali: %s fuori abbinta a 0.65 a %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
         valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
         # valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
         valoreAbbinate = puntiAbbinamento * valorePunti
@@ -178,7 +185,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
             #   logging.debug("Metto nei Venezia: %s" %rimanenteInLunghe)
 
     if viaggio.km_conguagliati:
-        # Ho già conguagliato dei KM, converto i KM in punti (il valore è definito sopra) quei punti li tolgo ai puntiAbbinamento
+        # Ho già conguagliato dei KM, converto i KM in punti (il valore è definito sopra)
+        #  quei punti li tolgo ai puntiAbbinamento
         # logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
         #               viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
         puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
@@ -188,19 +196,21 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
                 rimanenteInLunghe=rimanenteInLunghe,
                 pricy=pricy,
                 valoreTotale=valoreTotale,
+                scoreVersion=scoreVersion,
                 )
 
 
-def get_value(viaggio, forzaSingolo=False):
+def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
     """ Return the value of this trip on the scoreboard """
     singolo = forzaSingolo or (not viaggio.is_abbinata)
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
     if viaggio.is_abbinata and viaggio.padre is not None:
         padre = viaggio.padre
-        if padre.is_abbinata == "P" and viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI:
+        if padre.is_abbinata == "P" and scoreVersion >= '2016-04-01':
             # i figli degli abbinati in partenza sono nulli
             return 0
-    if viaggio.is_abbinata == "P" and viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI:
+    # logging.info("Using scoreVersion: %s" % scoreVersion)
+    if viaggio.is_abbinata == "P" and scoreVersion >= '2016-04-01':
         viaggi = [viaggio] + list(viaggio.viaggio_set.all())
         importiViaggio = []  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
         multiplier = 1

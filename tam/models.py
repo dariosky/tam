@@ -926,14 +926,14 @@ class Viaggio(models.Model):
             else:
                 return self.commissione
 
-    def get_value(self, forzaSingolo=False):
+    def get_value(self, **kwargs):
         """ Return the value of this trip on the scoreboard """
-        return process_value(self, forzaSingolo=forzaSingolo)
+        return process_value(self, **kwargs)
 
-    def get_valuetot(self, forzaSingolo=False):
-        result = self.get_value(forzaSingolo=forzaSingolo)
+    def get_valuetot(self, **kwargs):
+        result = self.get_value(**kwargs)
         for figlio in self.viaggio_set.all():
-            result += figlio.get_value(forzaSingolo=forzaSingolo)
+            result += figlio.get_value(**kwargs)
         return result
 
     def lordo(self):
@@ -946,9 +946,9 @@ class Viaggio(models.Model):
     def get_lordotot(self):
         """ Restituisce il lordo, tolto di autostrada e commissione """
         result = self.prezzo - self.costo_autostrada - self.prezzo_commissione()
-        #		logging.debug("Corsa padre: %s" % result )
+        # logging.debug("Corsa padre: %s" % result )
         for figlio in self.viaggio_set.all():
-            #			logging.debug("	 figlio: %s" % (figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()) )
+            # logging.debug("	 figlio: %s" % (figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()))
             result += figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()
         return result
 
@@ -1247,8 +1247,7 @@ class PrezzoListino(models.Model):
 
 class ProfiloUtente(models.Model):
     user = models.OneToOneField(User, unique=True, editable=False)
-    luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza",
-                              null=True, blank=True)
+    luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza", null=True, blank=True)
 
     class Meta:
         permissions = (('can_backup', 'Richiede un backup'),

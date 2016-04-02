@@ -23,7 +23,7 @@ if __name__ == '__main__':
                 prezzo_singolo=31,
                 expected_double={'prezzoVenezia': Decimal("40.78")},
                 data=datetime.datetime(2016, 3, 31, 10, 0),
-                check_equality=False,  # il vecchio sistema, l'equality-check fallisce
+                check_equality=False,  # il vecchio sistema, l'equality-check deve fallire
                 ),
         partial(arrivo_singolo_o_due_arrivi,
                 da=venezia, a=abano, riferimento=abano,

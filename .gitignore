@@ -1,7 +1,7 @@
 # Git Repository per TAM
 
 # Escludo i file DB e estensioni di supporto
-*.pyc
+*.py[co]
 *.db3
 *.bak
 Desktop.ini
