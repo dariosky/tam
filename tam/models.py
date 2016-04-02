@@ -448,6 +448,11 @@ class Viaggio(models.Model):
         self.punti_diurni = self.punti_notturni = Decimal(0)
         self.prezzoPadova = self.prezzoVenezia = self.prezzoDoppioPadova = 0
         self.punti_abbinata = self.prezzoPunti = 0
+
+        if self.id:  # itero sui figli
+            for figlio in self.viaggio_set.all():
+                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave)
+
         process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
         self.html_tragitto = self.get_html_tragitto()
@@ -459,10 +464,6 @@ class Viaggio(models.Model):
 
         if (changed and self.id and not forceDontSave) or force_save:
             self.save()
-
-        if self.id:  # itero sui figli
-            for figlio in self.viaggio_set.all():
-                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave)
 
     def get_classifica(self, classifiche=None, conducentiPerCapienza=None):
         # le tre liste con (conducente, stato)
