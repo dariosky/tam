@@ -272,6 +272,71 @@ def bus_1go_3back(abano, venezia, riferimento, expected, data=None):
         logger.info("Ok.")
 
 
+def abbinata_con_abbuoni(abano, venezia, riferimento, expected, data=None):
+    if data is None:
+        data = datetime.datetime(2020, 6, 27, 12, 0)
+    try:
+        with transaction.atomic():
+            ritorno1 = Viaggio(
+                data=tz_italy.localize(data + datetime.timedelta(hours=0, minutes=0)),
+                da=venezia,  # the way back
+                a=abano,
+                prezzo=35,
+                numero_passeggeri=1,
+                esclusivo=False,
+                luogoDiRiferimento=riferimento,
+            )
+            ritorno1.costo_autostrada = ritorno1.costo_autostrada_default()
+            ritorno1.updatePrecomp(force_save=True)
+
+            ritorno2 = Viaggio(
+                data=tz_italy.localize(data + datetime.timedelta(hours=0, minutes=10)),
+                da=venezia,  # the way back
+                a=abano,
+                prezzo=35,
+                numero_passeggeri=1,
+                esclusivo=False,
+                luogoDiRiferimento=riferimento,
+            )
+            ritorno2.costo_autostrada = ritorno1.costo_autostrada_default()
+            ritorno2.abbuono_fisso = 0
+            ritorno2.updatePrecomp(force_save=True)
+
+            ritorno3 = Viaggio(
+                data=tz_italy.localize(data + datetime.timedelta(hours=0, minutes=15)),
+                da=venezia,  # the way back
+                a=abano,
+                prezzo=35,
+                numero_passeggeri=1,
+                esclusivo=False,
+                luogoDiRiferimento=riferimento,
+            )
+            ritorno3.costo_autostrada = ritorno1.costo_autostrada_default()
+            ritorno3.updatePrecomp(force_save=True)
+
+            associate(assoType='link', viaggiIds=[ritorno1.id, ritorno2.id, ritorno3.id])
+
+            ritorno1.refresh_from_db()
+            ritorno2.refresh_from_db()
+            ritorno3.refresh_from_db()
+
+            ritorno1.abbuono_fisso = 5
+            ritorno1.updatePrecomp(force_save=True)
+            ritorno3.abbuono_fisso = 25
+            ritorno3.updatePrecomp(force_save=True)
+            ritorno1.refresh_from_db()
+
+            if expected:
+                classifica_assertion(
+                    ritorno1.classifiche(),
+                    expected,
+                    "Associata"
+                )
+            raise EndOfTestExeption
+    except EndOfTestExeption:
+        logger.info("Ok.")
+
+
 def run_tests(tests):
     for test in tests:
         try:

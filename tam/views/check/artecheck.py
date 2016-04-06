@@ -10,7 +10,8 @@ if __name__ == '__main__':
     os.environ['TAM_SETTINGS'] = "settings_arte"
     django.setup()
 
-from tam.views.check.checks import arrivo_singolo_o_due_arrivi, run_tests, check_associata, bus_1go_3back
+from tam.views.check.checks import arrivo_singolo_o_due_arrivi, run_tests, check_associata, bus_1go_3back, \
+    abbinata_con_abbuoni
 from decimal import Decimal
 from tam.models import Luogo
 
@@ -49,6 +50,10 @@ if __name__ == '__main__':
                 abano, venezia, riferimento=abano,
                 expected={'puntiAbbinata': 1, 'prezzoPunti': Decimal("149.02")},
                 data=datetime.datetime(2020, 4, 1, 12, 0),
+                ),
+        partial(abbinata_con_abbuoni,
+                abano, venezia, riferimento=abano,
+                expected=dict(prezzoVenezia=Decimal('66.40')),
                 ),
     ]
 
