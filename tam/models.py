@@ -401,6 +401,8 @@ class Viaggio(models.Model):
         # print "updateprecomp:", self.id
         if doitOnFather and self.padre_id:
             # logging.debug("Ricorro al padre di %s: %s" % (self.pk, self.padre.pk))
+            if force_save:
+                self.save()
             self.padre.updatePrecomp(
                 forceDontSave=forceDontSave)  # run update on father instead
             return
