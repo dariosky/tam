@@ -259,6 +259,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                 importoViaggio += v.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
             else:
                 importoViaggio += v.prezzo_sosta  # prezzo sosta intero
+            importiViaggio[i] = importoViaggio
 
         importoViaggio = sum(importiViaggio) * multiplier
 
