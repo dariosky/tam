@@ -68,7 +68,8 @@ class CalendarManage(AjaxableResponseMixin):
         context['day'] = day
         context['selected_day'] = day.strftime('%d/%m/%Y')
         calendars = copy.copy(settings.CALENDAR_DESC)
-        # I don't use the date-interval cross detection anymore... let's see only the event's starting in the day
+        # I don't use the date-interval cross detection anymore...
+        #  let's see only the event's starting in the day
         calendars_in_the_day = Calendar.objects.filter(
             date_start__range=(day, nextday),
         )
@@ -84,7 +85,8 @@ class CalendarManage(AjaxableResponseMixin):
         context['form'] = CalendarForm(self.request.POST if self.request.method == 'POST' else None)
         context['dontHilightFirst'] = True
         is_old_day = day < ita_today()
-        context['can_edit'] = not is_old_day or self.request.user.has_perm('calendariopresenze.change_oldcalendar')
+        context['can_edit'] = not is_old_day or self.request.user.has_perm(
+            'calendariopresenze.change_oldcalendar')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -177,7 +179,8 @@ class CalendarManage(AjaxableResponseMixin):
                     element=calendar,
                     calDesc=settings.CALENDAR_DESC[calendar.type]
                 ))
-                return HttpResponse(row_template.render(RequestContext(request, context)), status=201)
+                return HttpResponse(row_template.render(RequestContext(request, context)),
+                                    status=201)
             else:
                 return HttpResponseRedirect(
                     reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
@@ -225,7 +228,7 @@ class CalendarManage(AjaxableResponseMixin):
                          redirect_url='calendariopresenze-manage')
                 )
             caldesc = settings.CALENDAR_DESC[calendar.type]
-            if not 'toggle' in caldesc:
+            if 'toggle' not in caldesc:
                 return self.render_to_response(
                     dict(message=u"Valore del calendario non modificabile.",
                          status=400,
@@ -252,7 +255,8 @@ class CalendarManage(AjaxableResponseMixin):
                     element=calendar,
                     calDesc=settings.CALENDAR_DESC[calendar.type]
                 ))
-                return HttpResponse(row_template.render(RequestContext(request, context)), status=201)
+                return HttpResponse(row_template.render(RequestContext(request, context)),
+                                    status=201)
             else:
                 return HttpResponseRedirect(
                     reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
@@ -273,7 +277,8 @@ class CalendarRank(TemplateView):
         # redirect to current year as default
         year = kwargs.pop('year', None)
         if year is None:
-            return HttpResponseRedirect(reverse('calendariopresenze-rank', kwargs={'year': timezone.now().year}))
+            return HttpResponseRedirect(
+                reverse('calendariopresenze-rank', kwargs={'year': timezone.now().year}))
         return super(CalendarRank, self).dispatch(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -289,28 +294,35 @@ class CalendarRank(TemplateView):
                 del calendars[key]
                 continue
             ranks = []
-            calendar_filter_query = Q(attivo=True, presenze__type=key)  # calendar do not reset by default
+            calendar_filter_query = Q(attivo=True,
+                                      presenze__type=key)  # calendar do not reset by default
             if caldesc.get('rank_start'):
                 month, day = caldesc['rank_start']
-                calendar_reset_date = tamdates.date_enforce(datetime.datetime(year=year, month=month, day=day))
+                calendar_reset_date = tamdates.date_enforce(
+                    datetime.datetime(year=year, month=month, day=day))
                 if now < calendar_reset_date:
                     # we have to reach the reset date, show the previous Y
                     calendar_reset_date = calendar_reset_date.replace(year=year - 1)
                 caldesc['calendar_reset_date'] = calendar_reset_date
-                caldesc['calendar_reset_date_end'] = calendar_reset_date.replace(year=calendar_reset_date.year + 1)
-                calendar_filter_query = calendar_filter_query & Q(presenze__date_start__gte=calendar_reset_date,
-                                                                  presenze__date_start__lt=caldesc[
-                                                                      'calendar_reset_date_end'], )
+                caldesc['calendar_reset_date_end'] = calendar_reset_date.replace(
+                    year=calendar_reset_date.year + 1)
+                calendar_filter_query = calendar_filter_query & Q(
+                    presenze__date_start__gte=calendar_reset_date,
+                    presenze__date_start__lt=caldesc[
+                        'calendar_reset_date_end'], )
             conducenti_da_annotare = Conducente.objects.filter(calendar_filter_query)
             context["conducenti_da_annotare"] = conducenti_da_annotare
-            for conducente in conducenti_da_annotare.annotate(tot=Sum('presenze__value')).order_by('-tot'):
+            for conducente in conducenti_da_annotare.annotate(
+                tot=Sum('presenze__value')
+            ).order_by('-tot'):
                 if 'display' in caldesc:
                     value = conducente.tot
                     if 'rank_display' in caldesc:
                         value = caldesc['rank_display'](value)
                 else:
                     value = pretty_duration(conducente.tot)
-                ranks.append({'name': conducente.nome, 'conducente_id': conducente.id, 'value': value})
+                ranks.append(
+                    {'name': conducente.nome, 'conducente_id': conducente.id, 'value': value})
             caldesc['rank'] = ranks
         context['calendars'] = calendars
         context.update(dict(year=year, previous_year=previous_year, next_year=next_year))
