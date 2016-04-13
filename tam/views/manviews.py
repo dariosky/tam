@@ -28,7 +28,7 @@ def pingview(request):
     error = False
     results = ['{{host}}', "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
 
-    response = Template('\n'.join(results)).render(request)
+    response = Template('\n'.join(results)).render(RequestContext(request))
     return HttpResponse(response, status=200 if not error else 500, content_type='text/plain')
 
 
@@ -42,5 +42,5 @@ def email_test(request):
         body="This is the body of the message",
 
     )
-    response = Template('\n'.join(results)).render(request)
+    response = Template('\n'.join(results)).render(RequestContext(request))
     return HttpResponse(response, status=200, content_type='text/plain')
