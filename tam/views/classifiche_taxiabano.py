@@ -49,17 +49,17 @@ kmPuntoAbbinate = Decimal(120)
 
 
 def process_classifiche(viaggio, force_numDoppi=None):
-    #	print "%d *****" % viaggio.id
+    #    print "%d *****" % viaggio.id
     #
-    #	for k in da:
-    #		print "%15s: %s" % (k, da[k])
+    #    for k in da:
+    #        print "%15s: %s" % (k, da[k])
 
     if viaggio.padre_id is not None:
         return
     da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
 
     valoreTotale = viaggio.get_valuetot()
-    #	print "Valore totale:", valoreTotale
+    #    print "Valore totale:", valoreTotale
     if da["VEorTV"]:
         # i VE/TV singoli con valore >=75€ vanno nelle lunghe
         if da["num_bacini"] == 1 and viaggio.lordo() >= 75:
