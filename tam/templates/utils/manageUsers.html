@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load i18n %}
 
 {% block title %}Impostazione dei permessi &raquo; {{ block.super }}{% endblock %}
 
@@ -12,7 +12,8 @@
 				{% for iterUser in users %}
 					<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %}
 															   value="{{ iterUser.username }}">
-						{{ iterUser.username }}{% if iterUser.prenotazioni %} - prenotazioni{% endif %}
+						{{ iterUser.username }}{% if iterUser.prenotazioni %} -
+							prenotazioni{% endif %}
 					</option>
 				{% endfor %}
 			</select>
@@ -35,17 +36,36 @@
 				<label for="selectedGroup">Gruppo di appartenenza:</label>
 				<select name="selectedGroup" id='selectedGroup' multiple="multiple">
 					{% for iterGroup in groups %}
-						<option{% if iterGroup.selected %} selected="selected"{% endif %}>{{ iterGroup.name }}</option>
+						<option{% if iterGroup.selected %}
+							selected="selected"{% endif %}>{{ iterGroup.name }}</option>
 					{% endfor %}
 				</select>
 			</p>
-			<p><a href="{% url "delUser" username=selectedUser.username %}">Cancellazione utente</a></p>
+			<p>
+				<a href="{% url "delUser" username=selectedUser.username %}">
+					Cancellazione utente
+				</a>
+			</p>
 
 			{% if manage_prenotazioni %}
 				{% include "utils/manageUsers-prenotazioni.inc.html" %}
 			{% endif %}
 
 			<p><input type="submit" name="change" value="Applica" class='bigButton'/></p>
+
+
+
+			{% if perms.tam.reset_sessions and sessions %}
+				<h2>{% trans "Open sessions" %}</h2>
+				<ul>
+					{% for session in sessions %}
+						<li>{{ session.decoded.userAgent }}</li>
+					{% endfor %}
+				</ul>
+				<p><input type="submit" name="resetSessions"
+						  value="{% trans 'Disconnetti utente' %}"
+						  class='bigButton'/></p>
+			{% endif %}
 		</form>
 	{% endif %}
 

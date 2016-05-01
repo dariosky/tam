@@ -3,43 +3,66 @@
 
 {% block superNavBar %}
 	<div class="mainlogo">
-		<img src="{{ MEDIA_URL }}{{ logo_consorzio }}" alt="{{ nome_consorzio }}" />
+		<img src="{{ MEDIA_URL }}{{ logo_consorzio }}" alt="{{ nome_consorzio }}"/>
 	</div>
 {% endblock superNavBar %}
 
 {% block content %}
-<div style="text-align:center; margin:0 auto">
-	<p>{% trans "Benvenuto nel sistema automatizzato per la gestione dei Taxi di Abano e Montegrotto (TaM)." %}</p>
-	<p>{% trans "Inserisci i tuoi dati per poter accedere." %}</p>
+	<div style="text-align:center; margin:0 auto">
+		<p>{% trans "Benvenuto nel sistema automatizzato per la gestione dei Taxi di Abano e Montegrotto (TaM)." %}</p>
+		<p>{% trans "Inserisci i tuoi dati per poter accedere." %}</p>
 
-	{% if form.errors %}
-		<p class="errorlist">{% blocktrans %}Nome utente o password non validi.{% endblocktrans %}</p>
-	{% endif %}
+		{% if form.non_field_errors %}
+			<div class="errorlist">
+				{% for error in form.non_field_errors %}
+					<p class="errornote">
+						{{ error }}
+					</p>
+				{% endfor %}
+			</div>
+		{% endif %}
 
-	<form method="post" action=".">
-		{% csrf_token %}
-		<table style="margin:0 auto;">
-			<tr>
-				<td>
-					{% if form.username.errors %}<p class="errorlist">{{form.username.errors}}</p>{% endif %}
-					<label for="id_username">{% trans "Nome utente:" %}</label></td><td>{{ form.username }}
-				</td>
-			</tr>
-			<tr>
-				<td>
-					{% if form.password.errors %}<p class="errorlist">{{form.password.errors}}</p>{% endif %}
-					<label for="id_password">{% trans "Password:" %}</label></td><td>{{ form.password }}
-				</td>
-			</tr>
-			<tr>
-				<td colspan="2">
-					<input type="submit" value="{% trans "Accedi" %}" style="width:100%" />
-					<input type="hidden" name="next" value="{{ next }}" />
-				</td>
-			</tr>
-		</table>
-	</form>
-</div>
+		<form method="post" action=".">
+			{% csrf_token %}
+			<table style="margin:0 auto;">
+
+				<tr{% if form.username.errors %} class="errorlist"{% endif %}>
+					<td>
+						<label for="id_username">{% trans "Nome utente:" %}</label>
+					<td>
+						{{ form.username }}
+					</td>
+				</tr>
+
+				{% if form.username.errors %}
+					<tr class="errorlist">
+						<td colspan="2"> {{ form.username.errors }}</td>
+					</tr>
+				{% endif %}
+
+
+				<tr{% if form.password.errors %} class="errorlist"{% endif %}>
+					<td>
+						<label for="id_password">{% trans "Password:" %}</label></td>
+					<td>{{ form.password }}
+					</td>
+				</tr>
+
+				{% if form.password.errors %}
+					<tr class="errorlist">
+						<td colspan="2"> {{ form.password.errors }}</td>
+					</tr>
+				{% endif %}
+
+				<tr>
+					<td colspan="2">
+						<input type="submit" value="{% trans "Accedi" %}" style="width:100%"/>
+						<input type="hidden" name="next" value="{{ next }}"/>
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
 {% endblock %}
 
 {% block authblock %}

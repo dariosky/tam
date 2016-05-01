@@ -13,7 +13,7 @@ from django.shortcuts import render
 from codapresenze.models import CodaPresenze
 from modellog.actions import logAction
 from tam.tamdates import tz_italy
-from tam.views.tamviews import get_userkeys
+from tam.views.users import get_userkeys
 
 
 def coda(request, template_name='codapresenze/coda.html'):

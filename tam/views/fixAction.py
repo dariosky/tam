@@ -56,8 +56,9 @@ def fixAction(request, template_name="utils/fixAction.html"):
     if "Aggiorno i prezzi di Padova e Venezia delle corse degli ultimi 2 mesi" == False:
         corseCambiate = corse = 0
 
-        corseDaSistemare = Viaggio.objects.filter(data__gt=datetime.date.today() - datetime.timedelta(days=60),
-                                                  padre__isnull=True)
+        corseDaSistemare = Viaggio.objects.filter(
+            data__gt=datetime.date.today() - datetime.timedelta(days=60),
+            padre__isnull=True)
         #	corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
         for corsa in corseDaSistemare:
             oldDPadova = corsa.prezzoDoppioPadova
@@ -110,21 +111,24 @@ def fixAction(request, template_name="utils/fixAction.html"):
     if request.POST.get('fixDisturbi'):
         # Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi
         print "Refixo"
-        viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'), date_start__gt=datetime.datetime(2012, 3, 1),
+        viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'),
+                                        date_start__gt=datetime.datetime(2012, 3, 1),
                                         padre=None)
         sistemati = 0
         for viaggio in viaggi:
             ultimaCorsa = viaggio.lastfratello()
             if ultimaCorsa.da.speciale == 'A':
 
-                disturbiGiusti = trovaDisturbi(viaggio.date_start, viaggio.get_date_end(recurse=True),
+                disturbiGiusti = trovaDisturbi(viaggio.date_start,
+                                               viaggio.get_date_end(recurse=True),
                                                metodo=fasce_semilineari)
                 notturniGiusti = disturbiGiusti.get('night', 0)
                 diurniGiusti = disturbiGiusti.get('morning', 0)
                 if diurniGiusti <> viaggio.punti_diurni or notturniGiusti <> viaggio.punti_notturni:
                     messageLines.append(viaggio)
                     messageLines.append(ultimaCorsa)
-                    messageLines.append("prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni))
+                    messageLines.append(
+                        "prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni))
                     messageLines.append("dopo %s/%s" % (diurniGiusti, notturniGiusti))
                     messageLines.append(" ")
                     viaggio.punti_diurni = diurniGiusti
@@ -211,7 +215,8 @@ def fixAction(request, template_name="utils/fixAction.html"):
         cursor = connection.cursor()
         cursor.execute(query_asset_sub)
         connection.commit()
-        prossimiviaggi = Viaggio.objects.filter(data__gt=tamdates.ita_today() - datetime.timedelta(days=15))
+        prossimiviaggi = Viaggio.objects.filter(
+            data__gt=tamdates.ita_today() - datetime.timedelta(days=15))
         messageLines.append("Ricalcolo completamente i prossimi viaggi: %s." % len(prossimiviaggi))
         for viaggio in prossimiviaggi:
             viaggio.html_tragitto = viaggio.get_html_tragitto()
@@ -234,6 +239,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
         can_see_stats, created = Permission.objects.get_or_create(
             name='can see stats', content_type=stats_non_model,
             codename='can_see_stats')
-        messageLines.append("Stats permissions where already there" if not created else "Stats permissions created")
+        messageLines.append(
+            "Stats permissions where already there" if not created else "Stats permissions created")
 
     return render(request, template_name, {"messageLines": messageLines, "error": error})

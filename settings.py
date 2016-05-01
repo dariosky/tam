@@ -440,6 +440,8 @@ TAM = dict(
     )
 )
 
+FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions
+
 # END OF DEFAULTS **************************************************************
 
 settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')

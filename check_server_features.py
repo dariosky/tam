@@ -4,19 +4,21 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 
+
 def check_db():
-	User.objects.get(id=1)
+    User.objects.get(id=1)
+
 
 # CACHE
 def check_cache():
-	print "%s" % settings.CACHES['default']['BACKEND'],
-	from django.core.cache import cache
-	cache.set("Test", True)
-	result = cache.get("Test")
-	assert result == True
+    print "%s" % settings.CACHES['default']['BACKEND'],
+    from django.core.cache import cache
+    cache.set("Test", True)
+    result = cache.get("Test")
+    assert result == True
 
 
-#def check_celery():
+# def check_celery():
 #	from time import sleep
 #	from tam.tasks import test_task
 #	result = test_task.delay("Task delayed") #@UndefinedVariable
@@ -29,14 +31,14 @@ def check_cache():
 
 
 if __name__ == '__main__':
-	l = globals()
-	for k, fu in l.items():
-		if callable(fu) and k.startswith('check_'):
-			print "Checking %s" % k[6:],
-			try:
-				fu()
-			except Exception, e:
-				print "FAIL [%s]" % e
-			else:
-				print "OK"
-	print "fine."
+    l = globals()
+    for k, fu in l.items():
+        if callable(fu) and k.startswith('check_'):
+            print "Checking %s" % k[6:],
+            try:
+                fu()
+            except Exception, e:
+                print "FAIL [%s]" % e
+            else:
+                print "OK"
+    print "fine."
