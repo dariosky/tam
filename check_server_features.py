@@ -1,7 +1,10 @@
 # coding: utf-8
 
 """ Controlla che le funzionalità richieste dal server siano rispettate """
+import django
 from django.conf import settings
+
+django.setup()
 from django.contrib.auth.models import User
 
 

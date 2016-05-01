@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# coding=utf-8
 
 import xmlrpclib
 import pip
@@ -9,7 +10,7 @@ for dist in pip.get_installed_distributions():
     if not available:
         # Try to capitalize pkg name
         available = pypi.package_releases(dist.project_name.capitalize())
-        
+
     if not available:
         msg = 'no releases at pypi'
     elif available[0] != dist.version:

@@ -56,7 +56,7 @@
 
 
 			{% if perms.tam.reset_sessions and sessions %}
-				<h2>{% trans "Open sessions" %}</h2>
+				<h2>{% trans "Sessioni aperte" %}</h2>
 				<ul>
 					{% for session in sessions %}
 						<li>{{ session.decoded.userAgent }}</li>
