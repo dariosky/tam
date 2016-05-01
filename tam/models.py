@@ -453,7 +453,8 @@ class Viaggio(models.Model):
 
         if self.id:  # itero sui figli
             for figlio in self.viaggio_set.all():
-                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave)
+                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi,
+                                     forceDontSave=forceDontSave)
 
         process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
@@ -488,7 +489,8 @@ class Viaggio(models.Model):
         else:
             # Metto in cache la lista dei clienti
             #  che possono portare almeno X persone
-            conducentiConCapienza = Conducente.objects.filter(max_persone__gte=self.numero_passeggeri)
+            conducentiConCapienza = Conducente.objects.filter(
+                max_persone__gte=self.numero_passeggeri)
             conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
         # ***************************************************
 
@@ -898,7 +900,8 @@ class Viaggio(models.Model):
 
     def is_medium(self):
         """ Ritorna vero se la tratta è media """
-        return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (self.km < 25 and self.prezzo > 16)
+        return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
+        self.km < 25 and self.prezzo > 16)
 
     def _is_valid(self):
         """Controlla che il viaggio abbia tutte le tratte definite"""
@@ -1253,7 +1256,9 @@ class ProfiloUtente(models.Model):
 
     class Meta:
         permissions = (('can_backup', 'Richiede un backup'),
-                       ('get_backup', 'Scarica un backup'))
+                       ('get_backup', 'Scarica un backup'),
+                       ('reset_sessions', _('Can reset session')),
+                       )
         verbose_name_plural = _("Profili utente")
 
     def __unicode__(self):

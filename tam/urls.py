@@ -8,8 +8,8 @@ from .views.changelog import changeLog
 from .views.classifiche import classificheconducenti
 from .views.tamviews import listaCorse, getList, corsa, corsaClear, corsaCopy, cliente, clienti
 from .views.tamviews import listino, listinoDelete, \
-    clonaListino, exportListino, luoghi, bacino, privati, passeggero, conducente, profilo, util, resetSessions, \
-    permissions, newUser, delUser, passwordChangeAndReset
+    clonaListino, exportListino, luoghi, bacino, privati, passeggero, conducente, profilo, util
+from .views.users import permissions, newUser, delUser, passwordChangeAndReset, resetSessions
 
 urlpatterns = [
     url(r'^$', listaCorse, name="tamCorse"),
@@ -116,8 +116,6 @@ urlpatterns += [
 ]
 
 urlpatterns += [
-    # url(r'^login/$', 'django.contrib.auth.views.login', {"template_name":"login.html"}, name="login"),
-    # url(r'^logout/$', 'django.contrib.auth.views.logout_then_login', {"login_url":"/"}, name="logout")
     url(r'^login/$', login.login, name="login"),
     url(r'^logout/$', login.logout, name="logout")
 ]
