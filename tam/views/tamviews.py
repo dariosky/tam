@@ -463,8 +463,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
         destination1 = reverse("tamNuovaCorsaId", kwargs={"id": id})
         destination2 = reverse("tamNuovaCorsa2Id", kwargs={"id": id})
-    if viaggio and viaggio.vecchioConfermato() and not user.has_perm(
-        'tam.change_oldviaggio'):
+    if viaggio and viaggio.vecchioConfermato() and not user.has_perm('tam.change_oldviaggio'):
         messages.error(request,
                        "Non puoi cambiare i vecchi viaggi confermati.")
         return HttpResponseRedirect("/")
@@ -503,8 +502,9 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
         if "back" in request.GET:  # back to step1
             return HttpResponseRedirect(destination1)
     else:
-        if viaggio and viaggio.conducente_confermato:  # per i viaggi confermati non posso cambiare nulla della prima schermata
-            #			return HttpResponseRedirect(destination2)
+        if viaggio and viaggio.conducente_confermato:
+            # per i viaggi confermati non posso cambiare nulla della prima schermata
+            #   return HttpResponseRedirect(destination2)
             pass
 
     from varieForm import ViaggioForm, ViaggioForm2
