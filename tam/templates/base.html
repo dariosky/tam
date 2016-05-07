@@ -93,6 +93,11 @@
 	{% endif %}
 	{% if form %}{{ form.media }}{% endif %}
 	{% block bottom %}{% endblock bottom %}
+	{% block realtime %}
+		{% if user.is_authenticated %}
+			<script type="text/javascript" src="{% static 'js/realtam.js' %}"></script>
+		{% endif %}
+	{% endblock realtime %}
 	{% if form and not dontHilightFirst %}
 		<script type="text/javascript">
 	      $(document).ready(function() {

@@ -365,6 +365,7 @@ INSTALLED_APPS = [
     'tamhooks',
 
     'django.contrib.admin',
+    'channels',
 ]
 
 LOGIN_URL = "/login/"
@@ -503,3 +504,13 @@ for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
 WSGI_APPLICATION = 'wsgi.application'
+
+CHANNEL_LAYERS = dict(
+    default=dict(
+        BACKEND="asgi_redis.RedisChannelLayer",
+        CONFIG={
+            'hosts': [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        },
+        ROUTING="tam.routing.channel_routing",
+    )
+)

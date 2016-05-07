@@ -1,0 +1,12 @@
+# telegram integration
+python-telegram-bot
+
+# django channels
+channels
+asgi_redis
+
+# secure ssl
+pyOpenSSL
+ndg-httpsclient
+pyasn
+certifi
