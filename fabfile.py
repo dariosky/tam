@@ -108,6 +108,7 @@ def initial_deploy():
     with cd(env.REPOSITORY_FOLDER):
         run('mkdir -p %s' % env.LOGDIR)  # create the log dir if missing
         run('chmod +x node_modules/.bin/yuglify')
+    send_brand()
     create_run_command()
 
 
@@ -160,6 +161,7 @@ def get_gunicorn_command(daemon=True):
         '--pid %s' % env.GUNICORN_PID_FILE,
         '--log-file %(log)s' % {'log': env.GUNICORN_LOGFILE},
         '-t %s' % env.GUNICORN_WORKERS_TIMEOUT,
+        '-n %s' % env.NAME,
         # timeout, upload processes can take some time (default is 30 seconds)
     ]
     if daemon:
@@ -250,7 +252,8 @@ def send_secrets(secret_files=None, ask=False):
 
 
 def run_command_content(daemon=True):
-    default_args = "--workers={GUNICORN_WORKERS} --log-level=warning -t {GUNICORN_WORKERS_TIMEOUT}"
+    default_args = "--workers={GUNICORN_WORKERS} --log-level=warning -t {GUNICORN_WORKERS_TIMEOUT}" \
+                   " -n {NAME}"
     if daemon:
         default_args += " --daemon"
     env.GUNICORN_ARGUMENTS = default_args.format(**env)
@@ -263,6 +266,7 @@ GUNICORN_ARGS="{GUNICORN_ARGUMENTS}"
 LOG_PATH={GUNICORN_LOGFILE}
 PID_PATH={GUNICORN_PID_FILE}
 PORT={GUNICORN_PORT}
+NAME={NAME}
 
 cd {REPOSITORY_FOLDER}
 sh {VENV_FOLDER}/bin/activate
@@ -344,7 +348,7 @@ def local_create_run_command():
 def local_create_run_command():
     gunicorn_command = get_gunicorn_command(daemon=False)
     puts("Creating run_server command to be run " + (
-    "with" if env.USE_SUPERVISOR else "without") + " supervisor.")
+        "with" if env.USE_SUPERVISOR else "without") + " supervisor.")
     with lcd(env.localfolder):
         with file('run_server', 'w') as runner:
             runner.write(run_command_content())
@@ -397,3 +401,14 @@ def send_file(mask='*.*', subfolder='files', mask_prefix=None):
             filename = os.path.basename(path)
             remote_path = posixpath.join(env.REPOSITORY_FOLDER, subfolder, filename)
             put(path, remote_path)
+
+
+@task
+def send_brand():
+    puts("Uploading brand files")
+    local_brand_path = os.path.join(env.localfolder, 'media', 'brand', env.BRAND_FOLDER)
+    remote_brand_path = posixpath.join(env.REPOSITORY_FOLDER, 'media', 'brand', env.BRAND_FOLDER)
+    brand_files = os.listdir(local_brand_path)
+    run('mkdir -p "%s"' % remote_brand_path)
+    for filename in brand_files:
+        put(os.path.join(local_brand_path, filename), os.path.join(remote_brand_path, filename))

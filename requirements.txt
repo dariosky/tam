@@ -23,7 +23,7 @@ psycopg2
 fabric
 gunicorn
 # setproctitle to set the process title, doesn't work on Windows
-# setproctitle
+setproctitle
 requests
 
 # mails
