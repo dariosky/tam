@@ -1,7 +1,7 @@
 $( function() {
 	function wrapPicker(e, options){
 		e.wrap("<div></div>");
-		var startDiv=e.parent()
+		var startDiv=e.parent();
 		$(startDiv).css("width","200px");
 		if (options==undefined) {
 			$(startDiv).datepicker(

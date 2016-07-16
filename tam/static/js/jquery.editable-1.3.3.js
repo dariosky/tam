@@ -20,7 +20,7 @@ $.fn.editable = function(options){
 		submitBy: 'blur', //blur,change,dblclick,click
 		editBy: 'click',
 		options: null
-	}
+	};
 	if(options=='disable')
 		return this.unbind(this.data('editable.options').editBy,this.data('editable.options').toEditable);
 	if(options=='enable')
@@ -65,7 +65,7 @@ $.fn.editable = function(options){
 										previous:$this.data('editable.previous')
 									}]
 								);
-	}
+	};
 	options.toNonEditable = function($this,change){
 		opts = $this.data('editable.options');
 		// Configure events,styles for changed content
@@ -93,10 +93,10 @@ $.fn.editable = function(options){
 							previous:$this.data('editable.previous')
 						}]
 					);
-	}
+	};
 	this.data('editable.options',options);
 	return  this.one(options.editBy,options.toEditable);
-}
+};
 $.editableFactory = {
 	'text': {
 		toEditable: function($this,options){
@@ -137,7 +137,7 @@ $.editableFactory = {
 									.html(value)
 									.attr('value',key);
 					}
-				   )
+				   );
 			$select.children().each(
 				function(){
 					var opt = $(this);
@@ -153,7 +153,7 @@ $.editableFactory = {
 					if($(this).attr('selected'))
 						return item = $(this).text();
 				}
-			)
+			);
 			return item;
 		}
 	}
