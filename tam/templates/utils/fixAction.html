@@ -14,13 +14,14 @@
 
     <form method='post' action=''>
         {% csrf_token %}
-        <input type='submit' name='spostaILog' value='Sposta i log in un DB separato (Asincrono)'/>
+{#        <input type='submit' name='spostaILog' value='Sposta i log in un DB separato (Asincrono)'/>#}
+		<input type='submit' name='consolidateLog' value='Consolidate log (move logs from sqlite to default)'/>
 
         <input type='submit' name='permessiStandard' value='Reset di tutti i permessi e dei gruppi allo standard'/>
 
-        <input type='submit' name='renewTragitto' value='Ricalcolo HTML del tragitto'/>
+{#        <input type='submit' name='renewTragitto' value='Ricalcolo HTML del tragitto'/>#}
 
-        <input type='submit' name='setEndDates' value='Imposta la data di fine corsa per (versione 6.0)'/>
+{#        <input type='submit' name='setEndDates' value='Imposta la data di fine corsa per (versione 6.0)'/>#}
 
         <input type='submit' class='askConfirm' name='deleteAllCorse' value='CANCELLA TUTTE LE CORSE!!!'/>
 

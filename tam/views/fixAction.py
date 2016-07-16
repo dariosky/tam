@@ -1,6 +1,9 @@
 # coding: utf-8
+from django import db
+from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Group, Permission
+from modellog.models import ActionLog
 from prenotazioni.models import Prenotazione
 from tam import tamdates
 from tam.models import Viaggio, Luogo
@@ -12,6 +15,7 @@ from tam.disturbi import trovaDisturbi, fasce_semilineari
 from django.contrib import messages
 
 
+@user_passes_test(lambda user: user.is_superuser)
 def fixAction(request, template_name="utils/fixAction.html"):
     if not request.user.is_superuser:
         messages.error(request, "Devi avere i superpoteri per eseguire le azioni correttive.")
@@ -160,56 +164,56 @@ def fixAction(request, template_name="utils/fixAction.html"):
         messageLines.append("Aggiorno il tragitto precalcolato, senza toccare nient'altro.")
         # passaggio da mediagenerator a django-pipeline... gli asset precalcolati li lascio senza timestamp
         query_asset_sub = r"""
-		-- night
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/static/img/(night[\d]*)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/static/img%' AND html_tragitto LIKE '%night%';
+        -- night
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/static/img/(night[\d]*)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/static/img%' AND html_tragitto LIKE '%night%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/media/(night[\d]*)\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/media/%' AND html_tragitto LIKE '%night%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/media/(night[\d]*)\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/media/%' AND html_tragitto LIKE '%night%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(night[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%night%';
-		-- morning
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/static/img/(morning[\d]*)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/static/img%' AND html_tragitto LIKE '%morning%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(night[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%night%';
+        -- morning
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/static/img/(morning[\d]*)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/static/img%' AND html_tragitto LIKE '%morning%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/media/(morning[\d]*)\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/media/%' AND html_tragitto LIKE '%morning%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/media/(morning[\d]*)\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/media/%' AND html_tragitto LIKE '%morning%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(morning[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%morning%';
-		--arrow
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/static/img/(arrow_right)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/static/img%' AND html_tragitto LIKE '%arrow_right%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(morning[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%morning%';
+        --arrow
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/static/img/(arrow_right)\.[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/static/img%' AND html_tragitto LIKE '%arrow_right%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/media/(arrow_right[\d]*)\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/media/%' AND html_tragitto LIKE '%arrow_right%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/media/(arrow_right[\d]*)\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/media/%' AND html_tragitto LIKE '%arrow_right%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right[\d]*)\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%arrow_right%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right[\d]*)\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%arrow_right%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%arrow_right%';
-		--airport
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/static/(flag/luogo-airport)\.[a-z0-9]*\.png', '/static/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/static/%' AND html_tragitto LIKE '%flag/luogo-airport%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(arrow_right[\d]*)-[a-z0-9]*\.png', '/static/img/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/mediaprod/%' AND html_tragitto LIKE '%arrow_right%';
+        --airport
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/static/(flag/luogo-airport)\.[a-z0-9]*\.png', '/static/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/static/%' AND html_tragitto LIKE '%flag/luogo-airport%';
 
-							UPDATE tam_viaggio
-							SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport[\d]*)-[a-z0-9]*\.png', '/static/\1.png', 'g')
-							WHERE html_tragitto LIKE '%/mediaprod/flag/%' AND html_tragitto LIKE '%luogo-airport%';
+                            UPDATE tam_viaggio
+                            SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport[\d]*)-[a-z0-9]*\.png', '/static/\1.png', 'g')
+                            WHERE html_tragitto LIKE '%/mediaprod/flag/%' AND html_tragitto LIKE '%luogo-airport%';
 
-						  """.replace("%", "%%")
+                          """.replace("%", "%%")
         from django.db import connection
 
         cursor = connection.cursor()
@@ -241,5 +245,25 @@ def fixAction(request, template_name="utils/fixAction.html"):
             codename='can_see_stats')
         messageLines.append(
             "Stats permissions where already there" if not created else "Stats permissions created")
+
+    if request.POST.get('consolidateLog'):
+        messageLines.append("Starting moving log files from SQLITE to the default connection")
+        sourceLogs = ActionLog.objects.using('modellog').all()
+        if len(sourceLogs) > 0:
+            existing = ActionLog.objects.all()
+            messageLines.append("Deleting the existing logs form the default: %d" % len(existing))
+            existing.delete()
+            messageLines.append("%d log records to move" % len(sourceLogs))
+            ActionLog.objects.bulk_create(sourceLogs, batch_size=1000)
+            sourceLogs.delete()
+        else:
+            messageLines.append("No records to move in SQLITE")
+        cursor = db.connection.cursor()
+        messageLines.append("Resetting log sequence")
+        cursor.execute("""
+        BEGIN;
+          SELECT setval(pg_get_serial_sequence('"modellog_actionlog"','id'), coalesce(max("id"), 1), max("id") IS NOT NULL) FROM "modellog_actionlog";
+        COMMIT;
+        """)
 
     return render(request, template_name, {"messageLines": messageLines, "error": error})

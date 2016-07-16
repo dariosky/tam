@@ -39,7 +39,10 @@ def logAndCleanExpiredSessions():
 
 def actionLog(request, template_name="actionLog.html"):
     logAndCleanExpiredSessions()
-    utenti = User.objects.all().order_by('username')  # .exclude(is_superuser=True)
+    from_a_superuser = request.user.is_superuser
+    utenti = User.objects.all().order_by('username')
+    if not from_a_superuser:
+        utenti = utenti.exclude(is_superuser=True)  # normal users don't see superusers
     filterUtente = request.GET.get('user', '')
     filterType = request.GET.get('type', '')
     filterId = request.GET.get('id', '')
@@ -84,17 +87,12 @@ def actionLog(request, template_name="actionLog.html"):
         actions = actions.filter(modelName='viaggio')
         actions = actions.filter(action_type__in=('A', 'M'))
         actions = actions.filter(hilight=True)
-    # select tam_actionlog.[data] as inserimento, tam_viaggio.[data] as corsa
-    #			from tam_actionlog, tam_viaggio
-    #			where content_type_id=13
-    #			and tam_viaggio.id=tam_actionlog.object_id
-    #			and tam_viaggio.[data]<tam_actionlog.[data]
-    #			and action_type='A'
+    if not from_a_superuser:
+        superuser_ids = User.objects.filter(is_superuser=True).values_list('id', flat=True)
+        actions = actions.exclude(user_id__in=superuser_ids)  # hide superactions to normal
 
-    # inserimento postumo se la data della corsa è precedente alla mezzanotte del giorno di inserimento
-    #		actions = actions.extra(where=['tam_viaggio.id=tam_actionlog.instance_id',
-    #									   'tam_viaggio.data<datetime(tam_actionlog.data,\'start of day\')'],
-    #								tables=['tam_viaggio'])
+    # inserimento postumo se la data della corsa è precedente alla mezzanotte del
+    # giorno di inserimento
 
     paginator = Paginator(actions, 60, orphans=3)  # pagine
     page = request.GET.get("page", 1)

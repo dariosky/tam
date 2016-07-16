@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.7"
+TAM_VERSION = "6.71"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
@@ -32,8 +32,10 @@ ADMINS = (
 MANAGERS = ADMINS
 DATABASES = {}  # set them in settings_local
 
-DATABASE_ROUTERS = ['db_routers.TamArchiveRouter',
-                    'modellog.db_routers.SeparateLogRouter']
+DATABASE_ROUTERS = [
+    'db_routers.TamArchiveRouter',
+#     'modellog.db_routers.SeparateLogRouter'
+]
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
