@@ -34,7 +34,7 @@ DATABASES = {}  # set them in settings_local
 
 DATABASE_ROUTERS = [
     'db_routers.TamArchiveRouter',
-#     'modellog.db_routers.SeparateLogRouter'
+    # 'modellog.db_routers.SeparateLogRouter'
 ]
 
 # Local time zone for this installation. Choices can be found here:
@@ -339,7 +339,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.humanize',
 
@@ -361,6 +360,7 @@ INSTALLED_APPS = [
     'modellog',
     'securestore',
     # 'license',
+    'django.contrib.admin',
 ]
 
 LOGIN_URL = "/login/"
