@@ -63,7 +63,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
         corseDaSistemare = Viaggio.objects.filter(
             data__gt=datetime.date.today() - datetime.timedelta(days=60),
             padre__isnull=True)
-        #	corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
+        # corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
         for corsa in corseDaSistemare:
             oldDPadova = corsa.prezzoDoppioPadova
             oldVenezia = corsa.prezzoVenezia
