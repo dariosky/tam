@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-15 22:23+0200\n"
-"PO-Revision-Date: 2016-05-15 22:24+0100\n"
+"POT-Creation-Date: 2016-07-17 13:22+0200\n"
+"PO-Revision-Date: 2016-07-17 13:24+0100\n"
 "Last-Translator: Dario Varotto <dariosky@gmail.com>\n"
 "Language-Team: Dariosky <dariosky@gmail.com>\n"
 "Language: en\n"
@@ -64,6 +64,14 @@ msgstr "User profiles"
 #: models.py:1276
 msgid "Conguagli"
 msgstr "Balances"
+
+#: templates/admin/base_site.html:3
+msgid "TaM admin"
+msgstr "TaM admin"
+
+#: templates/admin/base_site.html:7
+msgid "TaM administration"
+msgstr "TaM administration"
 
 #: templates/corse/cella_partenza_arrivo.inc.html:7
 msgid "ARRIVO"

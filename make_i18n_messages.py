@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding=utf-8
 import os
-
 import django
 from django.apps import apps
 from subprocess import call
 from django.conf import settings
 
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
 django.setup()
 
 configs = apps.get_app_configs()
