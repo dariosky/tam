@@ -10,7 +10,7 @@ def create_missing_permissions():
     from django.apps import apps
 
     for name, app in apps.app_configs.iteritems():
-        create_permissions(app)
+        create_permissions(app, verbosity=0)
 
 
 def create_missing_groups():
