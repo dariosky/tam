@@ -314,6 +314,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 "license.context_processors.license_details",
+                "tam.context_processors.common",
             ],
             'loaders': (
                 'django.template.loaders.filesystem.Loader',
@@ -439,8 +440,9 @@ MAX_XLS_ROWS = 15 * 1000
 TAM = dict(
     SPECIAL_FILTERS=dict(
         BUS=False,  # allow filter bus, for whatever driver name containing "bus"
-    )
+    ),
 )
+TAM_BACKGROUND_COLOR = '#FBFFBA',  # the default background
 
 FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions
 
