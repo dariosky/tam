@@ -1,10 +1,12 @@
 {% load i18n %}{% load staticfiles %}{% load pipeline %}<!DOCTYPE html>
 <html>
 <head>
-	<title>{{ license_owner }} - {% blocktrans %}Sistema di prenotazione online{% endblocktrans %}</title>
+	<title>{{ license_owner }} - {% blocktrans %}Sistema di prenotazione
+		online{% endblocktrans %}</title>
 	<meta name="description" content="{% trans "TaM - Sistema di prenotazione online" %}"/>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<link rel="shortcut icon" href="{% static 'prenotazioni/ico/favicon.ico' %}" type="image/x-icon"/>
+	<link rel="shortcut icon" href="{% static 'prenotazioni/ico/favicon.ico' %}"
+		  type="image/x-icon"/>
 	<link rel="apple-touch-icon-precomposed" sizes="144x144"
 		  href="{{ STATIC_URL }}prenotazioni/ico/apple-touch-icon-144-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="114x114"
@@ -20,12 +22,17 @@
 	<link href="{% static 'bootstrap-datepicker/css/datepicker.css' %}" rel="stylesheet">
 	<link href="{% static 'chosen/chosen.css' %}" rel="stylesheet"/>
 	<link rel="stylesheet" type="text/css" href="{% static 'tam_sprites.css' %}"/>
-
 	{% stylesheet 'prenotazioni' %}
 	{% if tam_stealth %}{% stylesheet 'tam-stealth' %}{% endif %}
 
 	<script src="{% static 'js/jquery.min.js' %}"></script>
-
+	{% block styles %}
+		<style>
+			body {
+				background-color: {{ TAM_BACKGROUND }}
+			}
+		</style>
+	{% endblock styles %}
 </head>
 <body>
 <div id='header'>
@@ -58,7 +65,8 @@
 
 	<div id='footer'>
 		{% block footer %}
-			{% blocktrans %}Accesso effettuato con nome utente:{% endblocktrans %} {{ request.user }} -
+			{% blocktrans %}Accesso effettuato con nome utente:{% endblocktrans %}
+			{{ request.user }} -
 			<a href='{% url 'logout' %}?next=/prenotazioni'>{% trans "disconnettiti" %}</a>
 		{% endblock footer %}
 	</div>
