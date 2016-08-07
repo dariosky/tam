@@ -1,13 +1,17 @@
 # coding=utf-8
+import sys
+import logging
+
 import django
 from django.conf import settings
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render
-import sys
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.template import Template, RequestContext
 
 from prenotazioni.views.tam_email import ADMIN_MAIL, notifyByMail
+
+logger = logging.getLogger(__name__)
 
 
 def errors500(request, template_name='500.html'):
@@ -21,7 +25,9 @@ def errors400(request, template_name='404.html'):
 
 def errorview(request):
     # mail_admins(subject='Message admins', message='Bla bla bla')
-    raise Exception("Eccezione di test.")
+    if request.user.is_superuser:
+        logger.error("There was an error on TaM. Normally should be reported via mail")
+        raise Exception("Eccezione di test.")
 
 
 def pingview(request):
