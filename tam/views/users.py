@@ -60,7 +60,9 @@ def permissions(request, username=None,
 
     manage_prenotazioni = request.user.has_perm(
         'prenotazioni.manage_permissions') and "prenotazioni" in settings.PLUGGABLE_APPS
-    users = User.objects.exclude(is_superuser=True).exclude(id=user.id)
+    users = User.objects.exclude(is_superuser=True) \
+        .exclude(id=user.id) \
+        .exclude(is_active=False)
     users = sorted(users, key=get_userkeys)
 
     getUsername = request.GET.get("selectedUser", None)
@@ -152,9 +154,9 @@ def permissions(request, username=None,
                 for session in sessions:
                     session.delete()
                 messages.success(request,
-                               "L'utente {username} è stato disconnesso da ogni device".format(
-                                   username=username
-                               ))
+                                 "L'utente {username} è stato disconnesso da ogni device".format(
+                                     username=username
+                                 ))
 
     return render(request, template_name, locals())
 
