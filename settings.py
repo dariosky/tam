@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.71"
+TAM_VERSION = "6.72"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
@@ -361,6 +361,8 @@ INSTALLED_APPS = [
     'modellog',
     'securestore',
     # 'license',
+    'tamhooks',
+
     'django.contrib.admin',
 ]
 

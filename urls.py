@@ -19,6 +19,8 @@ urlpatterns = [
     # ( r'', include( 'license.urls' ) ),
     url(r'^fatture/', include('fatturazione.urls')),
     url(secure_url_regex, include('securestore.urls')),
+
+    url(r'^webhooks/', include('tamhooks.urls')),
 ]
 
 # add pluggable apps URL
