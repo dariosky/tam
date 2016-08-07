@@ -1,12 +1,14 @@
-'''
+# coding=utf-8
+"""
 Created on 11/set/2011
 
 @author: Dario Varotto
-'''
-from django.conf.urls import url, patterns
+"""
+from django.conf.urls import url
 
-from fatturazione.views import view_fatture, fattura, exportmultifattura, exportfattura, nuova_fattura, genera_fatture
-from fatturazione.views.generazione import DEFINIZIONE_FATTURE, lista_fatture_generabili  # @UnresolvedImport
+from fatturazione.views import view_fatture, fattura, exportmultifattura, exportfattura, \
+    nuova_fattura, genera_fatture
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE, lista_fatture_generabili
 
 urlpatterns = [
     url(r'^$', lista_fatture_generabili, name="tamGenerazioneFatture"),
