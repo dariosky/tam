@@ -6,7 +6,7 @@ from django.views import static
 from django.contrib import admin
 import tam
 
-from tam.views.manviews import pingview, email_test
+from tam.views.mainviews import pingview, email_test, errorview
 
 secure_url_regex = settings.SECURE_URL
 if secure_url_regex[0] == '/':
@@ -43,10 +43,11 @@ if settings.DEBUG:
 #                          {'document_root': os.path.join(os.path.dirname(__file__), "static")}),
 # )
 
-handler500 = tam.views.manviews.errors500
-handler404 = tam.views.manviews.errors400
+handler500 = tam.views.mainviews.errors500
+handler404 = tam.views.mainviews.errors400
 
 urlpatterns += [
+    url('^except/', errorview, name='exception-test'),
     url('^500/', handler500, name='error-test'),
     url('^ping/', pingview, name='ping-test'),
     url('^emailtest/', email_test, name='email-test'),

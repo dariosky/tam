@@ -1,29 +1,31 @@
 # coding: utf-8
-from collections import OrderedDict
-from django.shortcuts import render
-from markViews import prenotazioni
-from django import forms
-from prenotazioni.models import Prenotazione
-from tam.tamdates import parse_datestring, MONTH_NAMES
-from tam.widgets import MySplitDateTimeField, MySplitDateWidget
-from django.utils.translation import ugettext as _
-from django.forms.widgets import Input
-import datetime
-from prenotazioni.util import preavviso_ore, prenotaCorsa
-from django.db import transaction
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
-from django.contrib import messages
-from django.forms.fields import TypedChoiceField
-from prenotazioni.views.tam_email import notifyByMail
-from django.conf import settings
-from email.mime.base import MIMEBase
-from email import Encoders
 import os
-from tam.models import Viaggio, Cliente
+from collections import OrderedDict
+from email import Encoders
+from email.mime.base import MIMEBase
+import datetime
+
+from django import forms
+from django.conf import settings
+from django.contrib import messages
 from django.core.paginator import Paginator
-from tam.views.tamviews import SmartPager
+from django.core.urlresolvers import reverse
+from django.db import transaction
+from django.forms.fields import TypedChoiceField
+from django.forms.widgets import Input
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.utils.translation import ugettext as _
+
+from markViews import prenotazioni
+from prenotazioni.models import Prenotazione
+from prenotazioni.util import preavviso_ore, prenotaCorsa
+from prenotazioni.views.tam_email import notifyByMail
 from tam import tamdates
+from tam.models import Viaggio, Cliente
+from tam.tamdates import parse_datestring, MONTH_NAMES
+from tam.views.tamviews import SmartPager
+from tam.widgets import MySplitDateTimeField, MySplitDateWidget
 
 
 class NumberInput(Input):
