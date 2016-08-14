@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-17 13:22+0200\n"
+"POT-Creation-Date: 2016-08-14 17:03+0200\n"
 "PO-Revision-Date: 2016-07-17 13:24+0100\n"
 "Last-Translator: Dario Varotto <dariosky@gmail.com>\n"
 "Language-Team: Dariosky <dariosky@gmail.com>\n"
@@ -82,12 +82,8 @@ msgid "PARTENZA"
 msgstr "DEPARTURE"
 
 #: templates/login.html:12
-msgid ""
-"Benvenuto nel sistema automatizzato per la gestione dei Taxi di Abano e "
-"Montegrotto (TaM)."
-msgstr ""
-"Welcome to TaM the software for the management of Abano and Montegrotto "
-"Taxis."
+msgid "Benvenuto nel sistema automatizzato per la gestione dei Taxi di Abano e Montegrotto (TaM)."
+msgstr "Welcome to TaM the software for the management of Abano and Montegrotto Taxis."
 
 #: templates/login.html:13
 msgid "Inserisci i tuoi dati per poter accedere."
@@ -114,12 +110,8 @@ msgid "Disconnetti utente"
 msgstr "Disconnect user"
 
 #: views/login.py:21
-msgid ""
-"Più dispositivi sono connessi con le stesse credenziali. Devi disconnetterti "
-"per collegarti qua."
-msgstr ""
-"Multiple devices connected with the same credentials. You should disconnect "
-"from other devices to connect from here."
+msgid "Più dispositivi sono connessi con le stesse credenziali. Devi disconnetterti per collegarti qua."
+msgstr "Multiple devices connected with the same credentials. You should disconnect from other devices to connect from here."
 
 #: views/tamviews.py:1439 views/tamviews.py:1441 views/varieForm.py:120
 msgid "%d/%m/%Y"
@@ -130,8 +122,5 @@ msgid "%H:%M"
 msgstr "%H:%M"
 
 #: views/varieForm.py:169
-msgid ""
-"Sono felice per te, ma per ora il prezzo massimo concesso da TaM è di 9.999 "
-"euro"
-msgstr ""
-"I'm happy for you, but right now the maximum price in TaM is 9.999 euros"
+msgid "Sono felice per te, ma per ora il prezzo massimo concesso da TaM è di 9.999 euro"
+msgstr "I'm happy for you, but right now the maximum price in TaM is 9.999 euros"

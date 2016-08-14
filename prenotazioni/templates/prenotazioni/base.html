@@ -90,7 +90,8 @@
 			$('#id_data_corsa_1').focus().select();
 		});
 
-		$("#id_luogo").chosen();
+		{# Chosen hide the required input, so un-require it #}
+		$("#id_luogo").prop('required', false).chosen();
 	});
 </script>
 </body>

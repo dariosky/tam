@@ -7,114 +7,112 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM - prenotazioni\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-17 13:22+0200\n"
-"PO-Revision-Date: 2016-07-17 13:30+0100\n"
+"POT-Creation-Date: 2016-08-14 17:03+0200\n"
+"PO-Revision-Date: 2016-08-14 17:05+0200\n"
 "Last-Translator: Dario Varotto <dariosky@gmail.com>\n"
 "Language-Team: English <dariosky@gmail.com>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.8.7.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: models.py:16
+#: models.py:20
 msgid "Diretto"
 msgstr "Direct"
 
-#: models.py:17
+#: models.py:21
 msgid "Hotel"
 msgstr "Hotel"
 
-#: models.py:18
+#: models.py:22
 msgid "Fattura"
 msgstr "Invoice"
 
-#: models.py:53
+#: models.py:57
 msgid "Data e ora"
 msgstr "Date and time"
 
-#: models.py:54
-msgid ""
-"Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora "
-"al luogo specificato."
-msgstr ""
-"On departures this is the time of the hotel pickup. On arrivals this is the "
-"time at the specified location."
-
 #: models.py:59
+msgid "Nelle partenze indica l'ora della presa in hotel. Negli arrivi indica l'ora al luogo specificato."
+msgstr "On departures this is the time of the hotel pickup. On arrivals this is the time at the specified location."
+
+#: models.py:64
 msgid "Individuale o collettivo?"
 msgstr "Individual or collective?"
 
-#: models.py:60
+#: models.py:65
 msgid "Individuale"
 msgstr "Individual"
 
-#: models.py:60
+#: models.py:65
 msgid "Collettivo"
 msgstr "Collective"
 
-#: models.py:64
+#: models.py:69
 msgid "Arrivo o partenza?"
 msgstr "Arrival or departure"
 
-#: models.py:65
+#: models.py:71
 msgid "Arrivo da..."
 msgstr "Arrival from..."
 
-#: models.py:65
+#: models.py:71
 msgid "Partenza per..."
 msgstr "Departure to..."
 
-#: models.py:68
+#: models.py:74
 msgid "Luogo"
 msgstr "Where"
 
-#: models.py:70
+#: models.py:76
 msgid "Pagamento"
 msgstr "Payment mode"
 
-#: models.py:74
+#: models.py:80
 msgid "Numero di camera"
 msgstr "Room number"
 
-#: models.py:75
+#: models.py:81
 msgid "Nome del cliente"
 msgstr "Client name"
 
-#: models.py:76
+#: models.py:82
 msgid "Note"
 msgstr "Notes"
 
-#: models.py:84
+#: models.py:91
 msgid "Allegato"
 msgstr "Attachment"
 
-#: models.py:88
+#: models.py:95
 msgid "Allega un file alla richiesta (facoltativo)."
 msgstr "Attach a file (not required)"
 
 #: templates/prenotazioni/base.html:4
-msgid "Sistema di prenotazione online"
+msgid ""
+"Sistema di prenotazione\n"
+"\t\tonline"
 msgstr "Online booking"
 
-#: templates/prenotazioni/base.html:5
+#: templates/prenotazioni/base.html:6
 msgid "TaM - Sistema di prenotazione online"
 msgstr "TaM - Online booking"
 
-#: templates/prenotazioni/base.html:40
+#: templates/prenotazioni/base.html:47
 msgid "Servizio prenotazioni"
 msgstr "Booking service"
 
-#: templates/prenotazioni/base.html:61
+#: templates/prenotazioni/base.html:68
 msgid "Accesso effettuato con nome utente:"
 msgstr "Logged as:"
 
-#: templates/prenotazioni/base.html:62
+#: templates/prenotazioni/base.html:70
 msgid "disconnettiti"
 msgstr "logout"
 
-#: templates/prenotazioni/cronologia.html:12
-#: templates/prenotazioni/main.html:8
+#: templates/prenotazioni/cronologia.html:12 templates/prenotazioni/main.html:8
 msgid "per"
 msgstr "for"
 
@@ -214,75 +212,77 @@ msgstr "cancel booking"
 msgid "vai alla cronologia delle prenotazioni effettuate"
 msgstr "go to the booking history"
 
-#: views/main.py:76
+#: views/main.py:80
 msgid "Sicuro del numero di persone?"
 msgstr "Are you sure about the number of people?"
 
-#: views/main.py:82
+#: views/main.py:87
 msgid "Devi specificare se la corsa è un arrivo o una partenza."
 msgstr "You should specify if the run is an arrival or a departure."
 
-#: views/main.py:88
+#: views/main.py:93
 msgid "Questo campo è obbligatorio."
 msgstr "This field is required."
 
-#: views/main.py:98
-#, python-format
-msgid "Devi prenotare almeno %d ore prima. "
-msgstr "You have to book at least %d hours before the time of the run."
+#: views/main.py:109
+#, python-brace-format
+msgid "Il preavviso minimo per questa corsa è di un'ora"
+msgid_plural "Il preavviso minimo per questa corsa è di {hours} ore"
+msgstr[0] "Minimum notice for this booking is one hour"
+msgstr[1] "Minimum notice for this booking is {hours} hours"
 
-#: views/main.py:120
+#: views/main.py:134
 msgid "%d/%m/%Y"
 msgstr "%d/%m/%Y"
 
-#: views/main.py:121
+#: views/main.py:135
 msgid "%H:%M"
 msgstr "%H:%M"
 
-#: views/main.py:157
+#: views/main.py:171
 msgid "La prenotazione non esiste."
 msgstr "The booking does not exists."
 
-#: views/main.py:163
+#: views/main.py:177
 msgid "La prenotazione non è stata fatta da te, non puoi accedervi."
 msgstr "This booking has not be made by you, you cannot access it."
 
-#: views/main.py:170
+#: views/main.py:184
 msgid "La prenotazione non è più modificabile."
 msgstr "The booking is not editable anymore."
 
-#: views/main.py:187
+#: views/main.py:201
 msgid "Non hai alcun cliente abilitato."
 msgstr "You don't have any client enabled."
 
-#: views/main.py:211
+#: views/main.py:225
 #, python-format
 msgid "Prenotazione n°%d annullata."
 msgstr "Booking n°%d cancelled."
 
-#: views/main.py:253
+#: views/main.py:268
 #, python-format
 msgid "Prenotazione n° %d effettuata, a breve riceverai una mail di conferma."
 msgstr "Booking n° %d sent. You will receive a confirmation email soon."
 
-#: views/main.py:296
+#: views/main.py:312
 msgid "Modifica eseguita."
 msgstr "Changes applied."
 
-#: views/main.py:333
+#: views/main.py:349
 msgid "Non sei abilitato a vedere questo cliente."
 msgstr "You are not allowed to see this client."
 
-#: views/main.py:338
+#: views/main.py:354
 msgid "Il cliente non esiste."
 msgstr "Client does not exist."
 
-#: views/main.py:370
+#: views/main.py:389
 #, python-brace-format
 msgid "Errore nel processare l'intervallo di date {start}-{end}."
 msgstr "Error processing date range {start}-{end}."
 
-#: views/main.py:399
+#: views/main.py:418
 #, python-format
 msgid "La pagina %d è vuota."
 msgstr "Page %d is empty."
