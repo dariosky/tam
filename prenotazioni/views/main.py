@@ -1,4 +1,6 @@
 # coding: utf-8
+from __future__ import unicode_literals
+
 import os
 from collections import OrderedDict
 from email import Encoders
@@ -15,11 +17,11 @@ from django.forms.fields import TypedChoiceField
 from django.forms.widgets import Input
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ungettext
 
 from markViews import prenotazioni
 from prenotazioni.models import Prenotazione
-from prenotazioni.util import preavviso_ore, prenotaCorsa
+from prenotazioni.util import prenotaCorsa
 from prenotazioni.views.tam_email import notifyByMail
 from tam import tamdates
 from tam.models import Viaggio, Cliente
@@ -36,16 +38,16 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
     if not attachments:
         attachments = []
     if azione == "create":
-        subject = u"Conferma prenotazione TaM n° %d" % prenotazione.id
-        prenotazione_suffix = u"effettuata"
+        subject = "Conferma prenotazione TaM n° %d" % prenotazione.id
+        prenotazione_suffix = "effettuata"
     elif azione == "update":
-        subject = u"Modifica prenotazione TaM n° %d" % prenotazione.id
-        prenotazione_suffix = u"modificata"
+        subject = "Modifica prenotazione TaM n° %d" % prenotazione.id
+        prenotazione_suffix = "modificata"
     elif azione == "delete":
-        subject = u"Annullamento prenotazione TaM n° %d" % prenotazione.id
-        prenotazione_suffix = u"cancellata"
+        subject = "Annullamento prenotazione TaM n° %d" % prenotazione.id
+        prenotazione_suffix = "cancellata"
     else:
-        raise Exception(u"Azione mail non valida %s" % azione)
+        raise Exception("Azione mail non valida %s" % azione)
 
     azione = ""
     context = {"prenotazione": prenotazione,
@@ -75,19 +77,20 @@ class FormPrenotazioni(forms.ModelForm):
         """ Pulizia numero di pax """
         value = self.cleaned_data['pax']
         if value > 50:
-            raise forms.ValidationError(_(u"Sicuro del numero di persone?"))
+            raise forms.ValidationError(_("Sicuro del numero di persone?"))
         return value
 
     def clean_is_arrivo(self):
         value = self.cleaned_data['is_arrivo']
         if value not in (True, False):
-            raise forms.ValidationError(_(u"Devi specificare se la corsa è un arrivo o una partenza."))
+            raise forms.ValidationError(
+                _("Devi specificare se la corsa è un arrivo o una partenza."))
         return value
 
     def clean_is_collettivo(self):
         value = self.cleaned_data['is_collettivo']
         if value not in (True, False):
-            raise forms.ValidationError(_(u"Questo campo è obbligatorio."))
+            raise forms.ValidationError(_("Questo campo è obbligatorio."))
         return value
 
     def clean(self):
@@ -95,18 +98,27 @@ class FormPrenotazioni(forms.ModelForm):
         cleaned_data = self.cleaned_data
         ora = tamdates.ita_now()
 
-        oraMinima = ora + datetime.timedelta(hours=preavviso_ore)  # bisogna prenotare 48 ore prima
-        if 'data_corsa' in cleaned_data and cleaned_data['data_corsa'] < oraMinima:
-            raise forms.ValidationError(_(u"Devi prenotare almeno %d ore prima. ") % preavviso_ore)
-
-        return cleaned_data
+        notice_func = getattr(settings, 'PRENOTAZIONI_PREAVVISO_NEEDED_FUNC', None)
+        if notice_func:
+            rdate = cleaned_data['data_corsa']
+            notice_max = notice_func(rdate)
+            if ora > notice_max:
+                hours = (rdate - notice_max).seconds / 60 / 60
+                raise forms.ValidationError(
+                    ungettext(
+                        "Il preavviso minimo per questa corsa è di un'ora",
+                        "Il preavviso minimo per questa corsa è di {hours} ore",
+                        hours).format(
+                        hours=hours
+                    )
+                )
 
     def __init__(self, *args, **kwargs):
         super(FormPrenotazioni, self).__init__(*args, **kwargs)
         # self.fields['attachment'] = forms.FileField(
         # label=_("Allegato"),
         # required=False,
-        # help_text=_(u"Allega un file alla richiesta (facoltativo).")
+        # help_text=_("Allega un file alla richiesta (facoltativo).")
         # )
 
         for field_name in self.fields:
@@ -156,20 +168,20 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
         except Prenotazione.DoesNotExist:
             messages.error(
                 request,
-                _(u"La prenotazione non esiste.")
+                _("La prenotazione non esiste.")
             )
             return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
         if prenotazione.owner <> utentePrenotazioni:
             messages.error(
                 request,
-                _(u"La prenotazione non è stata fatta da te, non puoi accedervi.")
+                _("La prenotazione non è stata fatta da te, non puoi accedervi.")
             )
             return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
         editable = prenotazione.is_editable()
         if not editable:
             messages.warning(
                 request,
-                _(u"La prenotazione non è più modificabile.")
+                _("La prenotazione non è più modificabile.")
             )
             # return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
     else:
@@ -186,7 +198,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
     if clienti_attivi.count() == 0:
         messages.error(
             request,
-            _(u"Non hai alcun cliente abilitato.")
+            _("Non hai alcun cliente abilitato.")
         )
         return HttpResponseRedirect(reverse('login'))
 
@@ -210,7 +222,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
             inviaMailPrenotazione(prenotazione, "delete")
             id_prenotazione = prenotazione.id  # salvo per il messaggio finale
             prenotazione.delete()
-            messages.success(request, _(u"Prenotazione n°%d annullata.") % id_prenotazione)
+            messages.success(request, _("Prenotazione n°%d annullata.") % id_prenotazione)
             return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
     if form.is_valid() and editable:
@@ -252,7 +264,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                                   )
             messages.success(
                 request,
-                _(u"Prenotazione n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
+                _(
+                    "Prenotazione n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
             )
             return HttpResponseRedirect(reverse('tamPrenotazioni'))
         else:  # salvo la modifica
@@ -283,7 +296,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                 stringhe_cambiamenti = []
                 for key in changes:
                     (label, oldValue, newValue) = changes[key]
-                    stringhe_cambiamenti.append(u"Cambiato %s da %s a %s" % (label, oldValue, newValue))
+                    stringhe_cambiamenti.append(
+                        "Cambiato %s da %s a %s" % (label, oldValue, newValue))
 
                 cambiamenti = "\n".join(stringhe_cambiamenti)
                 inviaMailPrenotazione(prenotazione,
@@ -295,7 +309,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                 if request_attachment and not prenotazione.had_attachment:
                     prenotazione.had_attachment = True  # aggiunto l'allegato
                 prenotazione.save()
-                messages.success(request, _(u"Modifica eseguita."))
+                messages.success(request, _("Modifica eseguita."))
             return HttpResponseRedirect(
                 reverse('tamPrenotazioni-edit',
                         kwargs={"id_prenotazione": prenotazione.id}
@@ -332,12 +346,12 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
                 codice_cliente = int(filtroCliente)
                 cliente_selezionato = Cliente.objects.get(id=codice_cliente)
                 if cliente_selezionato not in clienti_attivi:
-                    messages.error(request, _(u'Non sei abilitato a vedere questo cliente.'))
+                    messages.error(request, _('Non sei abilitato a vedere questo cliente.'))
                     return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
             except ValueError:
                 filtroCliente = None
             except Cliente.DoesNotExist:
-                messages.error(request, _(u'Il cliente non esiste.'))
+                messages.error(request, _('Il cliente non esiste.'))
                 return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
 
     adesso = tamdates.ita_now().replace(second=0, microsecond=0)
@@ -351,7 +365,8 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
             data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0, minute=0, day=1)
         elif filtroData == 'prev':  # mese precedente
             data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
-            data_inizio = (data_fine - datetime.timedelta(days=1)).replace(day=1)  # vado a inizio del mese precedente
+            data_inizio = (data_fine - datetime.timedelta(days=1)).replace(
+                day=1)  # vado a inizio del mese precedente
         elif filtroData == 'day':  # tutta oggi
             data_inizio = adesso.replace(hour=0, minute=0)  # da mezzanotte...
             data_fine = adesso.replace(hour=23, minute=59)  # fino a fine giornata
@@ -366,10 +381,12 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
             end_string = request.GET.get('dend')
             try:
                 data_inizio = tamdates.parse_datestring(start_string).replace(hour=0, minute=0)
-                data_fine = tamdates.parse_datestring(end_string).replace(hour=23, minute=59)  # fino a fine giornata
+                data_fine = tamdates.parse_datestring(end_string).replace(hour=23,
+                                                                          minute=59)  # fino a fine giornata
             except AttributeError:
                 messages.warning(request,
-                                 _(u"Errore nel processare l'intervallo di date {start}-{end}.").format(
+                                 _(
+                                     "Errore nel processare l'intervallo di date {start}-{end}.").format(
                                      start=start_string, end=end_string)
                                  )
                 return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
@@ -398,7 +415,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
         thisPage = paginator.page(page)
         viaggi = thisPage.object_list
     except:
-        messages.warning(request, _(u"La pagina %d è vuota.") % page)
+        messages.warning(request, _("La pagina %d è vuota.") % page)
         thisPage = None
         viaggi = []
     # ----------------------
@@ -436,12 +453,14 @@ def attachments_list(request):
     if get_mese:
         if get_mese == "cur":
             data_start = oggi.replace(day=1)
-            data_end = (data_start + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
+            data_end = (data_start + datetime.timedelta(days=32)).replace(
+                day=1) - datetime.timedelta(days=1)
         elif get_mese == 'prev':
             data_end = oggi.replace(day=1) - datetime.timedelta(days=1)  # vado a fine mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio del mese precedente
         elif get_mese == 'prevprev':  # due mesi fa
-            data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(day=1) - datetime.timedelta(
+            data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
+                day=1) - datetime.timedelta(
                 days=1)  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:

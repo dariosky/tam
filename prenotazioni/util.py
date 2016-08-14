@@ -1,9 +1,6 @@
 # coding:utf-8
 from tam.models import Viaggio, ProfiloUtente
 from tam.views.tamUtils import getDefault
-from django.conf import settings
-
-preavviso_ore = getattr(settings, "PRENOTAZIONI_PREAVVISO_ORE", 24)
 
 
 def prenotaCorsa(prenotazione, dontsave=False):
