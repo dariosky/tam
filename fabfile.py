@@ -21,7 +21,7 @@ from StringIO import StringIO
 import glob
 import os
 from fabric.api import run, abort, env, put, task, cd
-from fabric.context_managers import prefix, lcd
+from fabric.context_managers import prefix, lcd, settings
 from fabric.contrib.files import exists
 import posixpath
 from fabric.contrib.console import confirm
@@ -33,7 +33,7 @@ import sys
 
 env.localfolder = os.path.realpath(os.path.dirname(__file__))
 env.port = 22
-if not env.get('NAME'):
+if not env.get('NAME') and __name__ != '__main__':
     print "Please call fab specifying a host config file."
     print "Example: fab -c host.ini"
     sys.exit(1)
@@ -57,7 +57,7 @@ def perform_env_substitutions():
                     break
                 old_value = value
             env[key] = value
-    if env.USE_SUPERVISOR == 'False':
+    if getattr(env, 'USE_SUPERVISOR', 'False') == 'False':
         env.USE_SUPERVISOR = False
 
 
@@ -70,10 +70,12 @@ def secrets_file_paths():
 
 
 @_contextmanager
-def virtualenv(venv_path=env.VENV_FOLDER):
+def virtualenv(venv_path=None):
     """
     Put fabric commands in a virtualenv
     """
+    if venv_path is None:
+        venv_path = env.VENV_FOLDER
     with prefix("source %s" % posixpath.join(venv_path, "bin/activate")):
         yield
 
@@ -412,3 +414,31 @@ def send_brand():
     run('mkdir -p "%s"' % remote_brand_path)
     for filename in brand_files:
         put(os.path.join(local_brand_path, filename), os.path.join(remote_brand_path, filename))
+
+
+@task
+def get_remote_files():
+    """ Go to the server and save locally the changeavle files on the server """
+    to_be_saved = [
+        ('media_secured/', 'media_secured/'),  # the secured files
+        ('*.db3', '.')
+    ]
+    puts("Get remote files")
+    for remotepath, localpath in to_be_saved:
+        with settings(warn_only=True):
+            cmd = "rsync -azv {host}:{root}/{rpath} {lpath}".format(
+                host=env.hosts, root=env.REPOSITORY_FOLDER,
+                rpath=remotepath, lpath=localpath,
+            )
+            print cmd
+            local(cmd)
+
+
+if __name__ == '__main__':
+    # to debug the fabfile, we can specify the command here
+    import sys
+    from fabric.main import main
+
+    sys.argv[1:] = ["-c", "arte.ini", "get_remote_files"]
+    print sys.argv
+    main()
