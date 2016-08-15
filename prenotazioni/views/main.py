@@ -99,8 +99,8 @@ class FormPrenotazioni(forms.ModelForm):
         ora = tamdates.ita_now()
 
         notice_func = getattr(settings, 'PRENOTAZIONI_PREAVVISO_NEEDED_FUNC', None)
-        if notice_func:
-            rdate = cleaned_data['data_corsa']
+        rdate = cleaned_data.get('data_corsa')
+        if notice_func and rdate:
             notice_max = notice_func(rdate)
             if ora > notice_max:
                 hours = (rdate - notice_max).seconds / 60 / 60
