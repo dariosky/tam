@@ -20,6 +20,8 @@ Deploy will consist of:
 from StringIO import StringIO
 import glob
 import os
+
+import requests
 from fabric.api import run, abort, env, put, task, cd
 from fabric.context_managers import prefix, lcd, settings
 from fabric.contrib.files import exists
@@ -30,6 +32,8 @@ from fabric.operations import local
 from fabric.utils import puts
 from contextlib import contextmanager as _contextmanager
 import sys
+
+from requests.auth import HTTPBasicAuth
 
 env.localfolder = os.path.realpath(os.path.dirname(__file__))
 env.port = 22
@@ -112,6 +116,7 @@ def initial_deploy():
         run('chmod +x node_modules/.bin/yuglify')
     send_brand()
     create_run_command()
+    set_mailgun_webhooks()
 
 
 @serial
@@ -391,7 +396,6 @@ def discard_remote_git():
         run('git reset --hard HEAD')
 
 
-@task
 def send_file(mask='*.*', subfolder='files', mask_prefix=None):
     if mask_prefix:
         mask = mask_prefix + mask
@@ -407,6 +411,7 @@ def send_file(mask='*.*', subfolder='files', mask_prefix=None):
 
 @task
 def send_brand():
+    """ Upload brand files to the server """
     puts("Uploading brand files")
     local_brand_path = os.path.join(env.localfolder, 'media', 'brand', env.BRAND_FOLDER)
     remote_brand_path = posixpath.join(env.REPOSITORY_FOLDER, 'media', 'brand', env.BRAND_FOLDER)
@@ -434,11 +439,33 @@ def get_remote_files():
             local(cmd)
 
 
+@task
+def set_mailgun_webhooks():
+    """ Set webhooks to receive bounced mail from Mailgun """
+    os.environ['TAM_SETTINGS'] = env.TAM_SETTINGS
+    from django.conf import settings
+    webhost = getattr(env, 'WEBHOST', None)
+    if not webhost:
+        raise EnvironmentError("Please define WEBHOST to set MailGun webhooks")
+    API_BASE_URL = 'https://api.mailgun.net/v3'
+    domain = settings.MAILGUN_SERVER_NAME
+    auth = HTTPBasicAuth('api', settings.MAILGUN_ACCESS_KEY)
+    response = requests.post("{base}/domains/{domain}/webhooks".format(
+        base=API_BASE_URL, domain=domain
+    ), auth=auth,
+        data=dict(id='drop', url='http://{webhost}/webhooks/email/'.format(webhost=webhost)))
+
+    if response.status_code == 200:
+        puts("MailGun webhooks created")
+    else:
+        puts(response.text)
+
+
 if __name__ == '__main__':
     # to debug the fabfile, we can specify the command here
     import sys
     from fabric.main import main
 
-    sys.argv[1:] = ["-c", "arte.ini", "get_remote_files"]
+    sys.argv[1:] = ["-c", "taxi2.ini", "set_mailgun_webhooks"]
     print sys.argv
     main()
