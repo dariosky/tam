@@ -1,21 +1,24 @@
 # coding: utf-8
-from django.core.files.storage import FileSystemStorage
-from django.db import models
-from django.db import connections
-from django.utils.translation import ugettext_lazy as _
-from django.core.urlresolvers import reverse  # to resolve named urls
-from django.template.loader import render_to_string
-from django.contrib.auth.models import User
-import tam.tamdates as tamdates
 import datetime
-from decimal import Decimal
-import logging
 import itertools
-from django.core.cache import cache
-from django.conf import settings
+import logging
 import re
-from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
+from decimal import Decimal
+from future.utils import python_2_unicode_compatible
+
+from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.cache import cache
+from django.core.files.storage import FileSystemStorage
+from django.core.urlresolvers import reverse  # to resolve named urls
+from django.db import connections
+from django.db import models
 from django.db.models.deletion import SET_NULL, PROTECT
+from django.template.loader import render_to_string
+from django.utils.translation import ugettext_lazy as _
+
+import tam.tamdates as tamdates
+from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 
 Calendar = None
 if 'calendariopresenze' in settings.INSTALLED_APPS:
@@ -72,6 +75,7 @@ def reallySpaceless(s):
     return s
 
 
+@python_2_unicode_compatible
 class Luogo(models.Model):
     """ Indica un luogo, una destinazione conosciuta.
         Ogni luogo appartiene ad un bacino all'interno del quale
@@ -92,7 +96,7 @@ class Luogo(models.Model):
         verbose_name_plural = _("Luoghi")
         ordering = ["nome"]
 
-    def __unicode__(self):
+    def __str__(self):
         if self.nome[0] == ".":
             return self.nome[1:]
         return self.nome
@@ -124,6 +128,7 @@ class Luogo(models.Model):
             viaggio.updatePrecomp()
 
 
+@python_2_unicode_compatible
 class Bacino(models.Model):
     """ I bacini sono dei gruppi di luoghi da cercare
         di accorpare nelle corse abbinate """
@@ -133,13 +138,13 @@ class Bacino(models.Model):
         verbose_name_plural = _("Bacini")
         ordering = ["nome"]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nome
 
     def delete_url(self):
         return reverse("tamBacinoIdDel", kwargs={"id": self.id})
 
-
+@python_2_unicode_compatible
 class Tratta(models.Model):
     """ Indica un tragitto, con indicati i default
         di tempo, spazio e spese di autostrada """
@@ -156,7 +161,7 @@ class Tratta(models.Model):
         unique_together = (("da", "a"),)
         ordering = ["da", "a"]
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%s - %s: %dm., %dkm" % (self.da, self.a, self.minuti, self.km)
 
     def is_valid(self):
@@ -212,6 +217,7 @@ def get_tratta(da, a):
     return result
 
 
+@python_2_unicode_compatible
 class Viaggio(models.Model):
     """ Questa è una corsa, vecchia o nuova che sia.
         Tabella chiave di tutto. """
@@ -354,7 +360,7 @@ class Viaggio(models.Model):
     def url(self):
         return reverse("tamNuovaCorsaId", kwargs={"id": self.id})
 
-    def __unicode__(self):
+    def __str__(self):
         result = u"%s da %s a %s." % (
             self.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y %H:%M"),
             self.da, self.a)
@@ -498,7 +504,7 @@ class Viaggio(models.Model):
         c_byid = {}
         if 'calendariopresenze' in settings.INSTALLED_APPS:
             if self.date_end is None:
-                print "date_end non dovrebbe essere mai null per il calcolo delle classifiche"
+                print("date_end non dovrebbe essere mai null per il calcolo delle classifiche")
             else:
                 calendarizzati = Calendar.objects.filter(
                     date_start__lt=self.date_end,
@@ -901,7 +907,7 @@ class Viaggio(models.Model):
     def is_medium(self):
         """ Ritorna vero se la tratta è media """
         return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-        self.km < 25 and self.prezzo > 16)
+            self.km < 25 and self.prezzo > 16)
 
     def _is_valid(self):
         """Controlla che il viaggio abbia tutte le tratte definite"""
@@ -1021,6 +1027,7 @@ class Viaggio(models.Model):
             return self.prezzo * 100 / (100 + iva)
 
 
+@python_2_unicode_compatible
 class Conducente(models.Model):
     """ I conducuenti, ogni conducente avrà la propria classifica, ed una propria vettura.
         Ogni conducente può essere in servizio o meno.
@@ -1073,14 +1080,14 @@ class Conducente(models.Model):
         cache.delete('conducentiPerPersona')
         super(Conducente, self).save(*args, **kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         if self.nick:
             return self.nick
         else:
             return self.nome
 
     def __repr__(self):
-        return self.__unicode__()
+        return self.__str__()
 
     def delete_url(self):
         return reverse("tamConducenteIdDel", kwargs={"id": self.id})
@@ -1096,6 +1103,7 @@ class Conducente(models.Model):
         return ricevute.distinct()
 
 
+@python_2_unicode_compatible
 class Cliente(models.Model):
     """ Ogni cliente ha le sue caratteristiche, ed eventualmente un suo listino """
     nome = models.CharField("Nome cliente", max_length=40, unique=True)
@@ -1120,7 +1128,7 @@ class Cliente(models.Model):
         verbose_name_plural = _("Clienti")
         ordering = ["nome"]
 
-    def __unicode__(self):
+    def __str__(self):
         if self.nome.strip():
             result = self.nome
         else:
@@ -1139,6 +1147,7 @@ class Cliente(models.Model):
         super(Cliente, self).save(*args, **kwargs)
 
 
+@python_2_unicode_compatible
 class Passeggero(models.Model):
     """ I passeggeri sono clienti particolari con meno caratteristiche """
     nome = models.CharField(max_length=40, unique=True)
@@ -1150,7 +1159,7 @@ class Passeggero(models.Model):
         permissions = (
             ('fastinsert_passenger', 'Inserimento passeggero veloce'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nome
 
     def delete_url(self):
@@ -1160,6 +1169,7 @@ class Passeggero(models.Model):
         return reverse("tamPrivatoId", kwargs={"id": self.id})
 
 
+@python_2_unicode_compatible
 class Listino(models.Model):
     """ Ogni listino ha un suo nome ed una serie di tratte collegate.
         È indipendente dal cliente.
@@ -1170,7 +1180,7 @@ class Listino(models.Model):
         verbose_name_plural = _("Listini")
         ordering = ["nome"]
 
-    def __unicode__(self):
+    def __str__(self):
         return self.nome
 
     def get_prezzo(self, da, a, tipo_servizio="T", pax=3, tryReverse=True):
@@ -1191,6 +1201,7 @@ class Listino(models.Model):
                                    tryReverse=False)  # provo a tornare il prezzo inverso
 
 
+@python_2_unicode_compatible
 class PrezzoListino(models.Model):
     """ Ogni tratta del listino ha due prezzi, una per la fascia diurna e una per la fascia notturna """
     listino = models.ForeignKey(Listino)
@@ -1237,7 +1248,7 @@ class PrezzoListino(models.Model):
         else:
             return "taxi fino a %d pax" % self.max_pax
 
-    def __unicode__(self):
+    def __str__(self):
         result = u"%s. Da %s a %s. %s [%s] " % (
             self.listino, self.tratta.da, self.tratta.a, self.prezzo_diurno,
             self.prezzo_notturno)
@@ -1250,6 +1261,7 @@ class PrezzoListino(models.Model):
         return result
 
 
+@python_2_unicode_compatible
 class ProfiloUtente(models.Model):
     user = models.OneToOneField(User, unique=True, editable=False)
     luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza", null=True, blank=True)
@@ -1261,10 +1273,11 @@ class ProfiloUtente(models.Model):
                        )
         verbose_name_plural = _("Profili utente")
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s" % self.user
 
 
+@python_2_unicode_compatible
 class Conguaglio(models.Model):
     """ Memorizza tutti i conguagli effettuati tra i conducenti """
     data = models.DateTimeField(auto_now=True)
@@ -1275,7 +1288,7 @@ class Conguaglio(models.Model):
     class Meta:
         verbose_name_plural = _("Conguagli")
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s, %s: %s" % (self.data, self.conducente, self.dare)
 
 

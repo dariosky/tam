@@ -19,7 +19,7 @@ class RequireLoginMiddleware(object):
         public_view = getattr(view_func, 'public', False)
 
         # public view or named "serve" <= (django.views.static.serve)
-        if public_view or view_func.func_name == "serve":
+        if public_view or view_func.__name__ == "serve":
             return None
         else:
             # not a public view, if not authenticaded ask for login

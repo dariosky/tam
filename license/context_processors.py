@@ -4,7 +4,7 @@ from django.utils.http import urlquote
 __author__ = "Dario Varotto"
 __date__ = "$30-dic-2010 17.04.59$"
 
-from license_functions import get_license_detail
+from .license_functions import get_license_detail
 from django.conf import settings
 
 

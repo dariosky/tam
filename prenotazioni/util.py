@@ -74,4 +74,4 @@ if __name__ == '__main__':
     viaggi.delete()
 
     Prenotazione.objects.all().delete()
-    print "Cancellato tutto"
+    print("Cancellato tutto")

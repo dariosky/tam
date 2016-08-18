@@ -68,7 +68,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
             oldDPadova = corsa.prezzoDoppioPadova
             oldVenezia = corsa.prezzoVenezia
             corsa.updatePrecomp(forceDontSave=True)
-            if oldDPadova <> corsa.prezzoDoppioPadova or oldVenezia <> corsa.prezzoVenezia:
+            if oldDPadova != corsa.prezzoDoppioPadova or oldVenezia != corsa.prezzoVenezia:
                 messageLines.append("%s\n   DPD: %d->%d VE: %d->%d" % (
                     corsa, oldDPadova, corsa.prezzoDoppioPadova, oldVenezia, corsa.prezzoVenezia))
                 corseCambiate += 1
@@ -114,7 +114,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
     if request.POST.get('fixDisturbi'):
         # Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi
-        print "Refixo"
+        print("Refixo")
         viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'),
                                         date_start__gt=datetime.datetime(2012, 3, 1),
                                         padre=None)
@@ -128,7 +128,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
                                                metodo=fasce_semilineari)
                 notturniGiusti = disturbiGiusti.get('night', 0)
                 diurniGiusti = disturbiGiusti.get('morning', 0)
-                if diurniGiusti <> viaggio.punti_diurni or notturniGiusti <> viaggio.punti_notturni:
+                if diurniGiusti != viaggio.punti_diurni or notturniGiusti != viaggio.punti_notturni:
                     messageLines.append(viaggio)
                     messageLines.append(ultimaCorsa)
                     messageLines.append(
@@ -162,7 +162,8 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
     if request.POST.get("renewTragitto"):
         messageLines.append("Aggiorno il tragitto precalcolato, senza toccare nient'altro.")
-        # passaggio da mediagenerator a django-pipeline... gli asset precalcolati li lascio senza timestamp
+        # passaggio da mediagenerator a django-pipeline...
+        #  gli asset precalcolati li lascio senza timestamp
         query_asset_sub = r"""
         -- night
                             UPDATE tam_viaggio

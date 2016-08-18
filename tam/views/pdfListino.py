@@ -1,18 +1,19 @@
 # coding: utf-8
-from fatturazione.views.money_util import moneyfmt, NumberedCanvas
-from reportlab.lib.pagesizes import A4, portrait  # , landscape
-from django import http
-from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
-from reportlab.lib.units import cm
-from django.conf import settings
-from reportlab.platypus import Frame, Paragraph, Table, TableStyle
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 import copy
 import os
+
+from django import http
+from django.conf import settings
 from reportlab.lib import colors
-from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.enums import TA_JUSTIFY, TA_LEFT, TA_RIGHT
+from reportlab.lib.pagesizes import A4, portrait  # , landscape
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import Frame, Paragraph, Table, TableStyle
+from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.flowables import Spacer, KeepTogether
-from tam.models import Listino, Luogo
+
+from fatturazione.views.money_util import moneyfmt, NumberedCanvas
 from tam import tamdates
 
 test = settings.DEBUG
@@ -95,7 +96,7 @@ def getTabellaListino(doc, righe_prezzo, tipo_servizio, luogoDiRiferimento):
     )
 
     for prezzo in prezzi:
-        if prezzo.tipo_servizio <> tipo_servizio: continue  # skip collettivi
+        if prezzo.tipo_servizio != tipo_servizio: continue  # skip collettivi
         da, a = prezzo.tratta.da, prezzo.tratta.a
         if da == luogoDiRiferimento:
             tratta = a

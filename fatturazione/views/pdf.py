@@ -162,7 +162,7 @@ def onPage(canvas, doc, da=None, a=None):
 
 def onPageNormal(canvas, doc):
     # print "Current template:", doc.pageTemplate.id, "coming from", doc.lastTemplateID
-    if doc.pageTemplate.id <> doc.lastTemplateID:
+    if doc.pageTemplate.id != doc.lastTemplateID:
         doc.lastTemplateID = doc.pageTemplate.id
         canvas.apply_page_numbers()
         if hasattr(doc, "fattura_corrente"):
@@ -173,7 +173,7 @@ def onPageNormal(canvas, doc):
 def onPageConducenteConsorzio(canvas, doc):
     templateID = "ConducenteConsorzio"
     currentTemplate = getattr(doc, 'lastTemplateID', doc.pageTemplates[0].id)
-    if currentTemplate <> templateID:
+    if currentTemplate != templateID:
         # print "Cambio da %s a %s" % (getattr(doc, 'lastTemplateID', None), templateID)
         doc.lastTemplateID = templateID
 
@@ -187,7 +187,7 @@ def onPageConducenteConsorzio(canvas, doc):
 def onPageConsorzioConducente(canvas, doc):
     templateID = "ConsorzioConducente"
     currentTemplate = getattr(doc, 'lastTemplateID', doc.pageTemplates[0].id)
-    if currentTemplate <> templateID:
+    if currentTemplate != templateID:
         # print "Cambio da %s a %s" % (getattr(doc, 'lastTemplateID', None), templateID)
         canvas.apply_page_numbers()
         doc.lastTemplateID = templateID
@@ -374,7 +374,9 @@ if __name__ == '__main__':
                                      data__lte=datetime.date(2012, 10, 22),
                                      tipo='1',
                                      )[:4]
-    print "Esporto %d fatture" % len(fatture)
+    print
+    "Esporto %d fatture" % len(fatture)
     response = render_to_reportlab(context={"fatture": fatture})
 
-    print "end"
+    print
+    "end"

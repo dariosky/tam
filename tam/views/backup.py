@@ -83,7 +83,7 @@ def getbackup(request, backupdate):
             logAction('G', description='Backup del %s scaricato' % backupdate, user=request.user)
             backup_filename = backup["filename"]
             backupPath = os.path.join(backupInfo["backupdir"], backup_filename)
-            responseFile = file(backupPath, 'rb')
+            responseFile = open(backupPath, 'rb')
             response = HttpResponse(responseFile.read(),
                                     content_type='application/octet-stream')  # 'application/gzip'
             response['Content-Disposition'] = 'attachment; filename="%s"' % os.path.basename(
@@ -97,7 +97,7 @@ def getbackup(request, backupdate):
 def doBackupSqlite(targetFile, sourceFile):
     if not os.path.isfile(sourceFile):
         raise Exception("Impossibile trovare il DB %s." % sourceFile)
-    f_in = file(sourceFile, "rb")
+    f_in = open(sourceFile, "rb")
     real_out = open(targetFile, 'wb')
 
     dbname = os.path.split(sourceFile)[1]
@@ -133,10 +133,10 @@ def doBackupPostgre(targetFile, dbName,
     if dbName:
         args.append(dbName)
     command = "\"%s%s\" %s" % (pg_dump_prefix, pgdump_command, " ".join(args))
-    print "Starting process"
-    print command
-    print subprocess.check_output(command, shell=True)
-    print "End of the process"
+    print("Starting process")
+    print(command)
+    print(subprocess.check_output(command, shell=True))
+    print("End of the process")
 
 
 def doBackup(user):

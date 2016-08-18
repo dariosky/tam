@@ -265,6 +265,9 @@ LOGGING = {
         'django': {
             'handlers': ['null', ],
         },
+        'django.server': {
+            'level': 'WARNING'
+        },
         'django.db': {
             'handlers': ['null', ],
             'propagate': False,
@@ -406,7 +409,7 @@ if use_debug_toolbar:
 
 if DEBUG:
     MIDDLEWARE_CLASSES += (
-        'tam.middleware.profiler.ProfileMiddleware',
+        # 'tam.middleware.profiler.ProfileMiddleware',
         # 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
     )
 # ===============================================================================
@@ -454,7 +457,7 @@ settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
 try:
     # Dynamically import settings from the specified sys envoronment var
     # from settings_local import *
-    print "TAM using {}".format(settings_file)
+    print("TAM using {}".format(settings_file))
     localsets = __import__(settings_file, globals(), locals(), ['*'])
     for k in dir(localsets):
         locals()[k] = getattr(localsets, k)

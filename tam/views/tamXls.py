@@ -1,13 +1,15 @@
 # coding:utf-8
-from django.conf import settings
-from modellog.actions import logAction
-import xlsUtil
-import xlwt
-from django.http import HttpResponse, HttpResponseRedirect
 import logging
-import StringIO
 from collections import OrderedDict
+from io import BytesIO
+
+import xlwt
+from django.conf import settings
 from django.contrib import messages
+from django.http import HttpResponse, HttpResponseRedirect
+
+from modellog.actions import logAction
+from tam.views import xlsUtil
 
 corseField = OrderedDict()
 corseField['data'] = 'Data'
@@ -86,7 +88,7 @@ def xlsResponse(request, querySet):
     generatore.enumerateTables = tamEnumerateTables
     generatore.run()
     if generatore.sheetCount:
-        output = StringIO.StringIO()
+        output = BytesIO()
 
         doc.save(output)  # save the excel
         output.seek(0)

@@ -77,9 +77,9 @@
 		    </td>
 		    <td>
 				{% ifequal prezzo.tipo_servizio "C" %}
-				    <img width="12px" height="12px" src="{% static 'img/c.ico' %}" alt="collettivo" />
+					<i title="collettivo" class="sprite icon-c"></i>
 				{% else %}
-				    <img width="12px" height="12px" src="{% static 'img/t.ico' %}" alt="taxi" />
+					<i title="taxi" class="sprite icon-t"></i>
 				{% endifequal %}
 				{{ prezzo.max_pax }}pax
 				{% if prezzo.flag_fatturazione == 'S' %}<img src='{% static 'flag/fat_on.png' %}' title='Fatturazione forzata da listino' />{% endif %}

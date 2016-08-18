@@ -176,19 +176,3 @@ def get_value(viaggio, **kwargs):
 GET_VALUE_FUNCTION = get_value
 PROCESS_CLASSIFICHE_FUNCTION = process_classifiche
 KM_PUNTO_ABBINATE = kmPuntoAbbinate
-
-if __name__ == '__main__':
-    import os
-
-    os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
-    from tam.models import Viaggio
-
-    viaggio = Viaggio.objects.get(id=13)
-    print viaggio
-    viaggio.km_conguagliati = 0
-    viaggio.save()
-    process_classifiche(viaggio)
-    print "VETV punti:", viaggio.punti_abbinata, "valore:", viaggio.prezzoPunti, "conguagliato?", viaggio.km_conguagliati
-    print "Doppi Padova:", viaggio.prezzoDoppioPadova
-    print "Corte:", viaggio.prezzoPadova
-    print "Lunghe", viaggio.prezzoVenezia

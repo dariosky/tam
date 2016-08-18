@@ -1,8 +1,9 @@
 # coding=utf-8
 import copy
 import datetime
-from django.conf import settings
+
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
@@ -12,6 +13,7 @@ from django.template import RequestContext
 from django.template.loader import get_template
 from django.utils import timezone
 from django.views.generic.base import TemplateView
+
 from calendariopresenze.models import Calendar, pretty_duration
 from modellog.actions import logAction
 from tam import tamdates
@@ -348,18 +350,3 @@ class CalendarByConducente(CalendarRank):
 
         context['calendars'] = Calendar.objects.filter(calendar_query)
         return context
-
-
-if __name__ == '__main__':
-    today = datetime.date.today()
-    # testing conversions
-    print "3:30", appendTimeToDate(today, "3:30")
-    print "3h30m", appendTimeFromRegex(today, "3h30m")
-    assert appendTimeToDate(today, "3:30") == appendTimeFromRegex(today, "3h30m")
-    print "1d3h30m", appendTimeFromRegex(today, "1d3h30m")
-    print "1d", appendTimeFromRegex(today, "1d")
-
-    print "\nNow try with timezone-aware dates"
-    print ita_today()
-    print "3:30", appendTimeToDate(ita_today(), "3:30")
-    print "3h30m", appendTimeFromRegex(ita_today(), "3h30m")
