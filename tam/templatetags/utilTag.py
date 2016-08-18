@@ -1,6 +1,9 @@
+# coding=utf-8
 from django.template import Library, Node, TemplateSyntaxError, Variable
 
 register = Library()
+
+
 class RangeNode(Node):
     def __init__(self, num, context_name):
         self.num = Variable(num)
@@ -9,6 +12,7 @@ class RangeNode(Node):
     def render(self, context):
         context[self.context_name] = range(int(self.num.resolve(context)))
         return ""
+
 
 @register.tag
 def num_range(parser, token):
@@ -33,9 +37,9 @@ def num_range(parser, token):
     try:
         fnctn, num, trash, context_name = token.split_contents()
     except ValueError:
-        raise TemplateSyntaxError, "%s takes the syntax %s number_to_iterate\
-            as context_variable" % (fnctn, fnctn)
+        raise TemplateSyntaxError("%s takes the syntax %s number_to_iterate\
+            as context_variable" % (fnctn, fnctn))
     if not trash == 'as':
-        raise TemplateSyntaxError, "%s takes the syntax %s number_to_iterate\
-            as context_variable" % (fnctn, fnctn)
+        raise TemplateSyntaxError("%s takes the syntax %s number_to_iterate\
+            as context_variable" % (fnctn, fnctn))
     return RangeNode(num, context_name)

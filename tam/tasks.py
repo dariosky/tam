@@ -27,7 +27,7 @@ def print_timing(func):
         t1 = time.time()
         res = func(*arg, **kwargs)
         t2 = time.time()
-        print '%s took %s' % (func.func_name, humanizeTime(t2 - t1))
+        print('%s took %s' % (func.func_name, humanizeTime(t2 - t1)))
         return res
 
     return wrapper
@@ -49,7 +49,7 @@ def single_instance_task(timeout=60 * 60 * 2):  # 2 hour of default timeout
                 finally:
                     release_lock()
             else:
-                print "stop concurrency"
+                print("stop concurrency")
 
         return wrapper
 
@@ -67,18 +67,20 @@ def moveLogs(name='movelogs.job'):
     from django.db import connections
     from modellog.actions import logAction
 
-    print "Cominciamo a spostare"
+    print("Cominciamo a spostare")
     con = connections['default']
     cursor = con.cursor()
     try:
         cursor.execute(
             "SELECT count(*) FROM tam_actionlog WHERE data>='2012-01-01'")  # sposto solo dal 2012
     except:
-        print "no table actionlog"
+        print
+        "no table actionlog"
         con.set_clean()
         return
     totalcount = cursor.fetchone()[0]
-    print "Total logs:", totalcount
+    print
+    "Total logs:", totalcount
     count = 0
     chunksize = 500
     oldPercent = None
@@ -122,19 +124,19 @@ def moveLogs(name='movelogs.job'):
             con.commit()
         # transaction.commit(using="modellog")
         if oldPercent is None or percent >= oldPercent + 5:
-            print "%s%%" % percent,
+            print("%s%%" % percent, end=' ')
             oldPercent = percent
             # break
             # fine del chunk
 
-    print
-    print "Delete table"
+    print()
+    print("Delete table")
     cursor.execute("DROP TABLE tam_actionlog")
     from tamArchive.tasks import vacuum_db
 
     vacuum_db()
     con.commit()
-    print "Fine"
+    print("Fine")
 
 
 if __name__ == '__main__':

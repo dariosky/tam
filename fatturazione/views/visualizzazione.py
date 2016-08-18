@@ -2,22 +2,23 @@
 
 import datetime
 from decimal import Decimal
-from django.shortcuts import render
-from django.contrib.auth.decorators import permission_required
-from django.http import HttpResponse, HttpResponseRedirect
-from django.db.models.aggregates import Max
+
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.core.urlresolvers import reverse
 from django.db import transaction
-from django.contrib import messages
+from django.db.models.aggregates import Max
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
 
-from fatturazione.models import Fattura, RigaFattura
-from tam.tamdates import parse_datestring, MONTH_NAMES
-from fatturazione.views.util import ultimoProgressivoFattura
-from fatturazione.views.pdf import render_to_reportlab
-from modellog.actions import logAction
-from fatturazione.views.generazione import DEFINIZIONE_FATTURE, FATTURE_PER_TIPO
 import tam.tamdates as tamdates
+from fatturazione.models import Fattura, RigaFattura
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE, FATTURE_PER_TIPO
+from fatturazione.views.pdf import render_to_reportlab
+from fatturazione.views.util import ultimoProgressivoFattura
+from modellog.actions import logAction
+from tam.tamdates import parse_datestring, MONTH_NAMES
 
 
 @permission_required('fatturazione.view', '/')
@@ -142,7 +143,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
                 logAction('C', instance=fattura, description="Riga eliminata.", user=request.user)
                 riga.delete()
                 return HttpResponse('Riga eliminata.', status=200)
-            except Exception, e:
+            except Exception as e:
                 return HttpResponse('Impossibile trovare la riga.\n%s' % e, status=500)
 
         if action == 'append-row':
@@ -254,7 +255,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
                                     else:  # converto in int
                                         # print "Converto in int:", object_value
                                         object_value = int(object_value)
-                                except Exception, e:
+                                except Exception as e:
                                     # print e
                                     return HttpResponse('Ho bisogno di un valore numerico.',
                                                         status=500)

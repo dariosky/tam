@@ -18,12 +18,12 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, get_object_or_404, render
 from django.utils.translation import ugettext as _
 
-import pdfListino
-from genericUtils import *
 from tam import tamdates
 from tam.models import Luogo, get_classifiche, Cliente, \
     PrezzoListino, Bacino, Tratta, Conducente, Listino, \
     ProfiloUtente, Viaggio, Passeggero
+from tam.views.genericUtils import getActionName, copy_model_instance
+from . import pdfListino
 
 
 class Step1Data():
@@ -251,7 +251,7 @@ def listaCorse(request, template_name="corse/lista.html"):
     filtroWhenAvanzato = False
     if filterWhen == "advanced":
         filtroWhenAvanzato = True
-        if request.GET.has_key('dstart'):
+        if "dstart" in request.GET:
             try:
                 data_inizio = tamdates.parse_datestring(
                     request.GET.get('dstart'))
@@ -261,7 +261,7 @@ def listaCorse(request, template_name="corse/lista.html"):
         elif "dstart" in request.session:
             data_inizio = tamdates.parse_datestring(request.session["dstart"])
 
-        if request.GET.has_key('dend'):
+        if "dend" in request.GET:
             try:
                 data_fine = tamdates.parse_datestring(request.GET.get('dend'))
                 request.session["dend"] = data_fine.strftime('%d/%m/%Y')
@@ -404,7 +404,7 @@ def listaCorse(request, template_name="corse/lista.html"):
             #		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
     if outputFormat == 'xls':
-        from tamXls import xlsResponse
+        from .tamXls import xlsResponse
 
         tuttiViaggi = tuttiViaggi.exclude(annullato=True)
         return xlsResponse(request, tuttiViaggi)
@@ -507,7 +507,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
             #   return HttpResponseRedirect(destination2)
             pass
 
-    from varieForm import ViaggioForm, ViaggioForm2
+    from .varieForm import ViaggioForm, ViaggioForm2
 
     formClasses = (ViaggioForm, ViaggioForm2)  # choose the right FormClass
     FormClass = formClasses[step - 1]
@@ -577,7 +577,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                         if form.initial[field]: form.initial[field] = \
                             form.initial[field].pk
                     except:
-                        print "Initial should be the PK"
+                        print("Initial should be the PK")
                         pass
         elif step == 2:
             # "Sono in creazione, provo a popolare step2 con i default del cliente %s" % cliente

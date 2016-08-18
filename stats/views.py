@@ -1,8 +1,8 @@
 # coding=utf-8
-import django
-from pprint import pprint
 import datetime
+from pprint import pprint
 
+import django
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
 
@@ -103,7 +103,8 @@ class StatsView(MonthDatesMixin):
             context[key] = self.request.session.get('{}{}'.format(self.session_prefix, key), [])
 
         key = 'qtype'
-        context[key] = self.request.GET.get(key) or self.request.session.get('{}{}'.format(self.session_prefix, key))
+        context[key] = self.request.GET.get(key) or self.request.session.get(
+            '{}{}'.format(self.session_prefix, key))
         if context[key] is None:
             context[key] = 'corse'
 
@@ -143,7 +144,8 @@ class StatsView(MonthDatesMixin):
         fields = dict(tot=Sum('prezzo'),
                       commissione=Sum(
                           Case(When(tipo_commissione='F', then=F('commissione')),
-                               When(tipo_commissione='P', then=F('commissione') * F('prezzo') / Value(100)),
+                               When(tipo_commissione='P',
+                                    then=F('commissione') * F('prezzo') / Value(100)),
                                ),
                           output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
 
@@ -211,7 +213,7 @@ class StatsView(MonthDatesMixin):
                            [r.get('tot'), r.get('commissione')]
                            )
                 rows.append(row)
-                print row
+                print(row)
 
         data['rows'] = rows
         return data
@@ -230,7 +232,8 @@ def testing_annotations():
           .annotate(tot=Sum('prezzo'),
                     commissione=Sum(
                         Case(When(tipo_commissione='F', then=F('commissione')),
-                             When(tipo_commissione='P', then=F('commissione') * F('prezzo') / Value(100)),
+                             When(tipo_commissione='P',
+                                  then=F('commissione') * F('prezzo') / Value(100)),
                              ),
                         output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
 
@@ -238,8 +241,8 @@ def testing_annotations():
                     conducente__nome=F('conducente__nome')
                     ).order_by('conducente__nome')
           )
-    print len(qs)
-    print qs.query
+    print(len(qs))
+    print(qs.query)
     pprint(list(qs))
 
 

@@ -4,7 +4,7 @@ if __name__ == '__main__':
 
     django.setup()
 
-from StringIO import StringIO
+from io import StringIO  # for handling unicode strings
 from email.mime.base import MIMEBase
 import requests
 from django.conf import settings
@@ -95,7 +95,7 @@ def notifyByMail(to=None, subject="",
     with open(logo_filename, 'rb') as f:
         files = [('inline', f)]
         for attachment in attachments:
-            if isinstance(attachment, basestring):
+            if isinstance(attachment, str):
                 # attachment is a filename
                 files.append(
                     ('attachment', open(attachment))
@@ -129,4 +129,4 @@ if __name__ == "__main__":
         messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
 
     )
-    print "Fine."
+    print("Fine.")

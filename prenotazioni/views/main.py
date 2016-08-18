@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 import os
 from collections import OrderedDict
-from email import Encoders
+from email.encoders import encode_base64
 from email.mime.base import MIMEBase
 import datetime
 
@@ -58,7 +58,7 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
 
     from_email = getattr(settings, 'PRENOTAZIONI_FROM_EMAIL', None)
     if settings.DEBUG and False:
-        print "Sono in test. non invio la mail da {from_email}".format(from_email=from_email)
+        print("Sono in test. non invio la mail da {from_email}".format(from_email=from_email))
     else:
         notifyByMail(
             to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
@@ -171,7 +171,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                 _("La prenotazione non esiste.")
             )
             return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
-        if prenotazione.owner <> utentePrenotazioni:
+        if prenotazione.owner != utentePrenotazioni:
             messages.error(
                 request,
                 _("La prenotazione non è stata fatta da te, non puoi accedervi.")
@@ -235,7 +235,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
             attachment = MIMEBase('application', "octet-stream")
             # print "Write to %s" % destination.name
             attachment.set_payload(request_attachment.read())
-            Encoders.encode_base64(attachment)
+            encode_base64(attachment)
             attachment.add_header(
                 'Content-Disposition',
                 'attachment; filename="%s"' % os.path.basename(request_attachment.name)
@@ -284,7 +284,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                     oldValue = humanValue(oldValue, field.choices)
                     newValue = humanValue(newValue, field.choices)
 
-                if newValue <> oldValue:
+                if newValue != oldValue:
                     changes[key] = (field.label, oldValue, newValue)
                     # messages.success(
                     # request,

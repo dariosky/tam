@@ -28,7 +28,7 @@ MONTH_TRANSLATIONS = OrderedDict(
      ("novembre", "november"),
      ("dicembre", "december")]
 )
-MONTH_NAMES = map(str.capitalize, MONTH_TRANSLATIONS.keys())
+MONTH_NAMES = list(map(str.capitalize, MONTH_TRANSLATIONS.keys()))
 
 
 def normalizeTimeString(time_string):

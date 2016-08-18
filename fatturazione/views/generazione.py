@@ -5,19 +5,21 @@ Created on 11/set/2011
 @author: Dario
 '''
 import datetime
-from django.db.models import Max
-from tam.models import Viaggio, ProfiloUtente
-from modellog.actions import logAction
-from django.http import HttpResponseRedirect
+from decimal import Decimal
+
+from django.contrib import messages
+from django.contrib.auth.decorators import permission_required
 from django.core.urlresolvers import reverse
+from django.db import transaction
+from django.db.models import Max
+from django.http import HttpResponseRedirect
+
 from fatturazione.models import Fattura, RigaFattura, nomi_fatture, \
     nomi_plurale
-from django.db import transaction
-from django.contrib.auth.decorators import permission_required
-from decimal import Decimal
-from django.contrib import messages
-import tipi_fatturazione
 from fatturazione.views.util import ultimoProgressivoFattura
+from modellog.actions import logAction
+from tam.models import Viaggio, ProfiloUtente
+from . import tipi_fatturazione
 
 """
 Generazione fatture:
@@ -224,7 +226,7 @@ def genera_fatture(request, fatturazione):
             elemento.anno_fattura = anno
 
     if request.method == "POST":
-        if request.POST.has_key("generate"):
+        if "generate" in request.POST:
             lastKey = None
             fattura = None
             fatture_generate = 0

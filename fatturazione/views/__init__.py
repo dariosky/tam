@@ -1,4 +1,4 @@
 #encoding: utf-8
 
-from generazione import *
-from visualizzazione import *
+from .generazione import *
+from .visualizzazione import *
