@@ -106,7 +106,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
                             # classifiche.append(classifica)
 
     for classifica_definita in classifiche_definite:  # ordino i dati
-        classifica_definita['dati'].sort()
+        # classifica_definita['dati'].sort()
         if classifica_definita['dati']:
             classifica_definita['min'] = classifica_definita["dati"][0][0]  # prendo la chiave del primo valore
             classifica_definita['max'] = classifica_definita["dati"][-1][0]  # prendo la chiave del'ultimo valore

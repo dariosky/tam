@@ -144,6 +144,7 @@ class Bacino(models.Model):
     def delete_url(self):
         return reverse("tamBacinoIdDel", kwargs={"id": self.id})
 
+
 @python_2_unicode_compatible
 class Tratta(models.Model):
     """ Indica un tragitto, con indicati i default
@@ -1088,6 +1089,12 @@ class Conducente(models.Model):
 
     def __repr__(self):
         return self.__str__()
+
+    def __lt__(self, other):
+        if self.nick and other.nick:
+            return self.nick < other.nick
+        else:
+            return self.nome < other.nome
 
     def delete_url(self):
         return reverse("tamConducenteIdDel", kwargs={"id": self.id})
