@@ -71,7 +71,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
     if viaggio.is_abbinata and viaggio.padre is None:
         da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
 
-        if viaggio.is_abbinata == 'P' and da['scoreVersion'] >= '2016-04-01':
+        if viaggio.is_abbinata == 'P' and da['scoreVersion'] and da['scoreVersion'] >= '2016-04-01':
             # le abbinate in partenza si comportano come delle corse normali (ma usando i valori globali del gruppo)
             prezzoNetto = da["valoreTotale"]
             if da["kmTotali"] >= KM_PER_LUNGHE:
@@ -136,7 +136,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
     forzaSingolo = (force_numDoppi is 0)
     baciniDiPartenza = conta_bacini_partenza([viaggio] + list(viaggio.viaggio_set.all()))
 
-    scoreVersion = None # We keep a progressive date 'yyyy-mm-dd-vv' to track version changes
+    scoreVersion = None  # We keep a progressive date 'yyyy-mm-dd-vv' to track version changes
     if viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI and len(baciniDiPartenza) == 1:
         scoreVersion = '2016-04-01'
 
@@ -161,7 +161,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
     kmRimanenti = kmTotali - (puntiAbbinamento * kmPuntoAbbinate)
 
     if puntiAbbinamento:
-        rimanenteInLunghe = kmRimanenti * Decimal("0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
+        rimanenteInLunghe = kmRimanenti * Decimal(
+            "0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
         # logging.debug("Dei %skm totali: %s fuori abbinta a 0.65 a %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
         valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
         # valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
@@ -206,11 +207,11 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
     if viaggio.is_abbinata and viaggio.padre is not None:
         padre = viaggio.padre
-        if padre.is_abbinata == "P" and scoreVersion >= '2016-04-01':
+        if padre.is_abbinata == "P" and scoreVersion and scoreVersion >= '2016-04-01':
             # i figli degli abbinati in partenza sono nulli
             return 0
     # logging.info("Using scoreVersion: %s" % scoreVersion)
-    if viaggio.is_abbinata == "P" and scoreVersion >= '2016-04-01':
+    if viaggio.is_abbinata == "P" and scoreVersion and scoreVersion >= '2016-04-01':
         viaggi = [viaggio] + list(viaggio.viaggio_set.all())
         importiViaggio = []  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
         multiplier = 1
@@ -236,7 +237,8 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             if renditaChilometrica < Decimal("0.65"):
                 multiplier = renditaChilometrica / Decimal("0.65")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
-        elif 25 <= km < getattr(settings, 'KM_PER_LUNGHE', 50) or (km < 25 and sum(importiViaggio) > 16):
+        elif 25 <= km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
+                    km < 25 and sum(importiViaggio) > 16):
             if renditaChilometrica < Decimal("0.8"):
                 multiplier = renditaChilometrica / Decimal("0.8")
                 # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
@@ -250,13 +252,15 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                 importoViaggio -= v.abbuono_fisso
             if v.abbuono_percentuale:
                 # abbuono in percentuale
-                importoViaggio = importoViaggio * (Decimal(1) - v.abbuono_percentuale / Decimal(100))
+                importoViaggio = importoViaggio * (
+                    Decimal(1) - v.abbuono_percentuale / Decimal(100))
 
             importoViaggio = importoViaggio - v.costo_sosta
 
             if settings.SCONTO_SOSTA:
                 # aggiungo il prezzo della sosta scontato del 25%
-                importoViaggio += v.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+                importoViaggio += v.prezzo_sosta * (
+                    Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
             else:
                 importoViaggio += v.prezzo_sosta  # prezzo sosta intero
             importiViaggio[i] = importoViaggio
@@ -299,12 +303,14 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             importoViaggio -= viaggio.abbuono_fisso
         if viaggio.abbuono_percentuale:
             # abbuono in percentuale
-            importoViaggio = importoViaggio * (Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))
+            importoViaggio = importoViaggio * (
+                Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))
         importoViaggio = importoViaggio - viaggio.costo_sosta
 
         if settings.SCONTO_SOSTA:
             # aggiungo il prezzo della sosta scontato del 25%
-            importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+            importoViaggio += viaggio.prezzo_sosta * (
+                Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
         else:
             importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
     return importoViaggio.quantize(Decimal('.01'))

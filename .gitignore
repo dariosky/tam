@@ -27,6 +27,7 @@ media/fatture/unused
 
 # instance secret files
 settings_*.py
+!settings_test.py
 /*.ini
 
 win_settings.bat
