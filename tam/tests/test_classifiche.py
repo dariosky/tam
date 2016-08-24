@@ -2,7 +2,7 @@
 import pytest
 from django.conf import settings
 
-from tam.models import get_classifiche, Viaggio
+from tam.models import get_classifiche, Viaggio, Luogo
 
 
 @pytest.fixture(scope='session')
@@ -18,3 +18,5 @@ def test_classifiche():
     classifiche = get_classifiche()
     assert classifiche == [], "No run, no classifiche"
     # viaggio = Viaggio()
+    print (Viaggio.objects.all())
+    print (Luogo.objects.all())

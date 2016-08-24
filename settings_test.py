@@ -9,4 +9,10 @@ DATABASES = {
     }
 }
 
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+)
+
+EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
+
 from tam.views.classifiche_taxiabano import *
