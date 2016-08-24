@@ -1,43 +1,44 @@
-# Django related
+# Django related ***
 django<1.11
 south
 django-debug-toolbar
 django-debug-toolbar-template-timings
 
-# static files
+# static files ***
 django-pipeline < 1.6
+jinja2
 
-# exports
+# exports ***
 xlrd
 xlwt
 reportlab
 
-# date things
+# date things ***
 pytz
 python-dateutil
 
-# DB
+# DB ***
 psycopg2
 
-# deployment
-fabric
+# deployment ***
+fabric3
 gunicorn
 # setproctitle to set the process title, doesn't work on Windows
 setproctitle
 requests
 
-# mails
+# mails ***
 # djrill was for Mandrill, but their free tier has been suspended
 # djrill
 django-mailgun
 
-#tests
+#tests ***
 pytest-django
 
-# template required for pipeline
-jinja2
-
-# proper ssl connections
+# proper ssl connections ***
 pyopenssl
 ndg-httpsclient
 pyasn1
+
+# python3 compatibility ***
+future

@@ -40,8 +40,7 @@ def pingview(request):
 
 @user_passes_test(lambda user: user.is_superuser)
 def email_test(request):
-    results = ["Email sent to admins: %s" % ADMIN_MAIL]
-    results.append("backend: %s" % settings.EMAIL_BACKEND)
+    results = ["Email sent to admins: %s" % ADMIN_MAIL, "backend: %s" % settings.EMAIL_BACKEND]
     notifyByMail(
         to=[ADMIN_MAIL],
         subject="Test email with %s" % settings.EMAIL_BACKEND,

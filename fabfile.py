@@ -17,29 +17,29 @@ Deploy will consist of:
 # Graceful restart gunicorn with a HUP signal
 # 	so instead of use supervisor, do a graceful restart with
 # kill -s HUP $(cat gunicorn.pid)
-from StringIO import StringIO
 import glob
 import os
+import posixpath
+import sys
+from contextlib import contextmanager as _contextmanager
+from io import StringIO
 
 import requests
 from fabric.api import run, abort, env, put, task, cd
 from fabric.context_managers import prefix, lcd, settings
-from fabric.contrib.files import exists
-import posixpath
 from fabric.contrib.console import confirm
+from fabric.contrib.files import exists
 from fabric.decorators import serial
 from fabric.operations import local
 from fabric.utils import puts
-from contextlib import contextmanager as _contextmanager
-import sys
-
+from past.builtins import basestring
 from requests.auth import HTTPBasicAuth
 
 env.localfolder = os.path.realpath(os.path.dirname(__file__))
 env.port = 22
 if not env.get('NAME') and __name__ != '__main__':
-    print "Please call fab specifying a host config file."
-    print "Example: fab -c host.ini"
+    print("Please call fab specifying a host config file.")
+    print("Example: fab -c host.ini")
     sys.exit(1)
 
 if os.path.exists(os.path.expanduser("~/.ssh/config")):
@@ -213,7 +213,7 @@ def start_local():
         try:
             process = local(gunicorn_command)
         except Exception as e:
-            print "EXCEPTION: %s" % e
+            print("EXCEPTION: %s" % e)
             if process is not None:
                 import signal
 
@@ -347,7 +347,7 @@ def create_run_command():
 def local_create_run_command():
     puts("Creating run_server command to be run with supervisor.")
     with lcd(env.localfolder):
-        with file('run_server', 'w') as runner:
+        with open('run_server', 'w') as runner:
             runner.write(run_command_content())
 
 
@@ -357,7 +357,7 @@ def local_create_run_command():
     puts("Creating run_server command to be run " + (
         "with" if env.USE_SUPERVISOR else "without") + " supervisor.")
     with lcd(env.localfolder):
-        with file('run_server', 'w') as runner:
+        with open('run_server', 'w') as runner:
             runner.write(run_command_content())
 
 
@@ -435,7 +435,7 @@ def get_remote_files():
                 host=env.hosts, root=env.REPOSITORY_FOLDER,
                 rpath=remotepath, lpath=localpath,
             )
-            print cmd
+            print(cmd)
             local(cmd)
 
 
@@ -467,5 +467,5 @@ if __name__ == '__main__':
     from fabric.main import main
 
     sys.argv[1:] = ["-c", "taxi2.ini", "set_mailgun_webhooks"]
-    print sys.argv
+    print(sys.argv)
     main()

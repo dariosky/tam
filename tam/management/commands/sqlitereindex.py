@@ -19,11 +19,11 @@ class Command(AppCommand):
                 all_suggested_indexes.append(index_creation_string)
 
         get_existing_indexes_query = """
-			select sql 
-			from sqlite_master where type = 'index'
-			       and (
-			                          (name like 'tam%%')
-			                          or name like 'fatturazione%%' 
+			SELECT sql
+			FROM sqlite_master WHERE type = 'index'
+			       AND (
+			                          (name LIKE 'tam%%')
+			                          OR name LIKE 'fatturazione%%'
 			           );
 		"""
         cursor = connection.cursor()  # @UndefinedVariable
@@ -36,7 +36,7 @@ class Command(AppCommand):
                 self.stdout.write(" %s\n" % index)
                 missing_indexes.append(index)
         if missing_indexes:
-            create_input = raw_input(
+            create_input = input(
                 "Create all missing suggested indexes in %s [y,N]? " % app.__name__)
             if create_input.strip().lower() == "y":
                 self.stdout.write("Creating missing indexes... ")

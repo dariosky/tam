@@ -14,7 +14,7 @@ def check_db():
 
 # CACHE
 def check_cache():
-    print "%s" % settings.CACHES['default']['BACKEND'],
+    print("%s" % settings.CACHES['default']['BACKEND'], end=' ')
     from django.core.cache import cache
     cache.set("Test", True)
     result = cache.get("Test")
@@ -37,11 +37,11 @@ if __name__ == '__main__':
     l = globals()
     for k, fu in l.items():
         if callable(fu) and k.startswith('check_'):
-            print "Checking %s" % k[6:],
+            print("Checking %s" % k[6:], end=' ')
             try:
                 fu()
-            except Exception, e:
-                print "FAIL [%s]" % e
+            except Exception as e:
+                print("FAIL [%s]" % e)
             else:
-                print "OK"
-    print "fine."
+                print("OK")
+    print("fine.")
