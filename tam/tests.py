@@ -8,6 +8,7 @@ import os
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
 import django
+
 django.setup()
 
 import unittest
@@ -45,7 +46,7 @@ class TestLineari(unittest.TestCase):
 
     def test2MezzoraBassaEAdiacenti(self):
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 00)), {'night': 0.25})
-        self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 01)),
+        self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 1)),
                          {'night': 0.50})  # primo scatto serale
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 22, 30)), {'night': 1.00})
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 22, 31)), {'night': 1.25})
@@ -116,7 +117,7 @@ class TestUnaDue(unittest.TestCase):
 
     def test2MezzoraBassaEAdiacenti(self):
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 00)), {'night': 1})
-        self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 01)),
+        self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 1)),
                          {'night': 1})  # primo scatto serale
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 22, 30)), {'night': 1})
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 22, 31)), {'night': 2})
@@ -186,7 +187,7 @@ class TestSemiLineare(unittest.TestCase):
     def test2MezzoraBassaEAdiacenti(self):
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 20, 59)), {'night': 0.25})
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 00)), {'night': 0.5})
-        self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 01)),
+        self.assertEqual(self.disturbi(*self.intervalli(20, 0, 21, 1)),
                          {'night': 0.5})  # primo scatto serale
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 22, 30)), {'night': 1.25})
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 22, 31)), {'night': 1.25})
@@ -243,14 +244,14 @@ if __name__ == '__main__':
 			vorrei      ottimizzare un po' la cosa
 	"""
     s = reallySpaceless(s)
-    print s
+    print(s)
     assert (s == "Questa è una prova fatta da molti spazi vorrei ottimizzare un po' la cosa")
 
     # data_inizio = datetime.datetime(2011, 2, 22, 5, 00)
     # data_fine = datetime.datetime(2011, 2, 22, 7, 45)
 
     corsa = Viaggio.objects.get(id=76235)
-    print "vecchio metodo: ", corsa.disturbi()
+    print("vecchio metodo: ", corsa.disturbi())
 
-    print "\nnuovo metodo*****************"
+    print("\nnuovo metodo*****************")
     trovaDisturbi(corsa.date_start, corsa.get_date_end(recurse=True), metodo=fasce_semilineari)

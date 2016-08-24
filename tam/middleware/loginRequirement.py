@@ -58,7 +58,7 @@ def csrf_failure_view(request, reason=''):
         del post_data['password']
     if 'HTTP_REFERER' in request.environ:
         message_tokens.append("from: %s" % request.environ['HTTP_REFERER'])
-    message_tokens.append("POST:\n" + unicode(post_data))
+    message_tokens.append("POST:\n" + post_data)
     if False:  # ok, let's disable notifications of 403, if not settings.DEBUG
         mail_admins(
             "403 alert",

@@ -52,7 +52,7 @@ def get_classifiche():
         FROM tam_conducente c
             LEFT JOIN tam_viaggio v ON c.id=v.conducente_id AND v.conducente_confermato
         WHERE c.attivo --and c.nick='2'
-            AND NOT coalesce(v.annullato, 0)
+            AND CASE WHEN NOT v.annullato OR v.annullato IS NULL THEN 0 END = 0
         GROUP BY c.id, c.nick
         ORDER BY conducente_nick
     """

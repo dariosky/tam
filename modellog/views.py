@@ -1,25 +1,27 @@
 # coding:utf-8
 
+import logging
+
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sessions.models import Session
 from django.core.paginator import Paginator
 from django.shortcuts import render
+from django.utils import timezone
+
 from modellog.actions import logAction
 from modellog.models import ActionLog
-from tam.views.tamviews import SmartPager
-import logging
-from django.contrib.sessions.models import Session
-from django.contrib import messages
-from django.utils import timezone
 from tam import tamdates
+from tam.views.tamviews import SmartPager
 
 
 def getTrace():
     """ Return current traceback as a string """
     import traceback
-    import StringIO
+    from io import StringIO
 
-    fp = StringIO.StringIO()
+    fp = StringIO()
     traceback.print_exc(file=fp)
     return fp.getvalue()
 

@@ -381,12 +381,13 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
             end_string = request.GET.get('dend')
             try:
                 data_inizio = tamdates.parse_datestring(start_string).replace(hour=0, minute=0)
-                data_fine = tamdates.parse_datestring(end_string).replace(hour=23,
-                                                                          minute=59)  # fino a fine giornata
+                data_fine = tamdates.parse_datestring(end_string).replace(
+                    hour=23, minute=59)  # fino a fine giornata
             except AttributeError:
                 messages.warning(request,
                                  _(
-                                     "Errore nel processare l'intervallo di date {start}-{end}.").format(
+                                     "Errore nel processare l'intervallo di date {start}-{end}."
+                                 ).format(
                                      start=start_string, end=end_string)
                                  )
                 return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
@@ -397,7 +398,8 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
         viaggi = viaggi.filter(cliente=cliente_selezionato)
 
     viaggi = viaggi.filter(data__gte=data_inizio)
-    if data_fine: viaggi = viaggi.filter(data__lte=data_fine)
+    if data_fine:
+        viaggi = viaggi.filter(data__lte=data_fine)
     viaggi = viaggi.order_by("-data")
 
     # print "Ho %d viaggi da mostrare" % viaggi.count()

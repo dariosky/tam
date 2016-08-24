@@ -18,4 +18,4 @@ for dist in pip.get_installed_distributions():
     else:
         msg = 'up to date'
     pkg_info = '{dist.project_name} {dist.version}'.format(dist=dist)
-    print '{pkg_info:40} {msg}'.format(pkg_info=pkg_info, msg=msg)
+    print('{pkg_info:40} {msg}'.format(pkg_info=pkg_info, msg=msg))

@@ -154,7 +154,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
             riga = RigaFattura(descrizione="riga inserita manualmente",
                                qta=1,
                                prezzo=0,
-                               iva=10 if not fattura.tipo in ('3', '4', '5') else 0,
+                               iva=10 if fattura.tipo not in ('3', '4', '5') else 0,
                                # tipi esenti IVA
                                riga=ultimaRiga + 10)
             riga.fattura = fattura
@@ -195,11 +195,13 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
                       description=u"%s modificato in %s." % (object_id, object_value),
                       user=request.user)
             if object_id in header_ids:
-                # print("cambio il valore di testata da %s a %s" % ( getattr(fattura, header_ids[object_id]),
+                # print("cambio il valore di testata da %s a %s" %
+                # ( getattr(fattura, header_ids[object_id]),
                 # object_value)
                 # )
                 if object_id in header_numerici:
-                    if object_value.strip() == '':  # converto, nei valori numerici, le stringhe vuote in None
+                    if object_value.strip() == '':  # converto nei valori numerici,
+                        # le stringhe vuote in None
                         object_value = None
                     else:
                         try:

@@ -1,8 +1,8 @@
 # coding: utf-8
-from django.core.cache import cache
-from django.contrib.auth.models import User
-from django.db import models
 import time
+
+from django.contrib.auth.models import User
+from django.core.cache import cache
 
 
 # ===============================================================================
@@ -79,8 +79,7 @@ def moveLogs(name='movelogs.job'):
         con.set_clean()
         return
     totalcount = cursor.fetchone()[0]
-    print
-    "Total logs:", totalcount
+    print("Total logs:", totalcount)
     count = 0
     chunksize = 500
     oldPercent = None
