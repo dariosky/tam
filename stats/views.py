@@ -3,11 +3,12 @@ import datetime
 
 import django
 from django.contrib.auth.decorators import permission_required
+from django.db.models.functions import Extract
 from django.utils.decorators import method_decorator
 
 django.setup()
 from decimal import Decimal
-from django.db.models import Case, When, F, DecimalField, Value, Func
+from django.db.models import Case, When, F, DecimalField, Value
 from django.db.models.aggregates import Sum
 from django.views.generic import TemplateView
 
@@ -15,38 +16,6 @@ from fatturazione.models import Fattura
 from tam import tamdates
 from tam.models import Viaggio
 from tam.tamdates import MONTH_NAMES, parse_datestring
-
-
-class Extract(Func):
-    """
-    source: http://stackoverflow.com/questions/32897891/django-getting-month-from-date-for-aggregation
-    Performs extraction of `what_to_extract` from `*expressions`.
-
-    Arguments:
-        *expressions (string): Only single value is supported, should be field name to
-                               extract from.
-        what_to_extract (string): Extraction specificator.
-
-    Returns:
-        class: Func() expression class, representing 'EXTRACT(`what_to_extract` FROM `*expressions`)'.
-    """
-
-    function = 'EXTRACT'
-    template = '%(function)s(%(what_to_extract)s FROM %(expressions)s  at TIME ZONE \'CET\')'
-
-    def as_sqlite(self, compiler, connection):
-        what = self.extra.get('what_to_extract')
-        self.template = "strftime('%%%(date_part)s', %(expressions)s)"
-        if what == 'year':
-            self.extra['date_part'] = '%Y'
-        elif what == 'month':
-            self.extra['date_part'] = '%m'
-        else:
-            raise NotImplemented("Extract in SQLITE for %s is not supported yet" % what)
-        return super().as_sqlite(compiler, connection)
-
-    def convert_value(self, value, expression, connection, context):
-        return super().convert_value(value, expression, connection, context)
 
 
 class MonthDatesMixin(TemplateView):
@@ -193,8 +162,8 @@ class StatsView(MonthDatesMixin):
                 # we do an intermediate annotation, before grouping
                 qs = (qs
                     .annotate(
-                    year=Extract('data', what_to_extract='year'),
-                    month=Extract('data', what_to_extract='month'))
+                    year=Extract('data', lookup_name='year'),
+                    month=Extract('data', lookup_name='month'))
                 )
             qs = (qs
                   .values(*grouper_fields)  # group by
