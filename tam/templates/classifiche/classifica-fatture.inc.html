@@ -1,0 +1,30 @@
+{% load humanize staticfiles %}
+<div>
+	<h2><a href="#">Classifica Fatture</a></h2>
+	<div>
+		<table class="tablesorter">
+			<thead>
+			<tr>
+				<th></th>
+				<th>Nome</th>
+				<th>Numero fatture</th>
+				<th>Valore fatture</th>
+			</tr>
+			</thead>
+
+			<tbody>
+			{% for c in classifica_fatture %}
+				<tr {% if not c.attivo %} class="inattivo"{% endif %}>
+					<td style="width:130px;">
+						<img alt="" class="hbar" src="{% static 'img/hbar.png' %}"
+							 width="{% widthratio c.invoice_val classifica_fatture.max_val 130 %}"/>
+					</td>
+					<td>{{ c }}</td>
+					<td>{{ c.invoice_count }}</td>
+					<td>{{ c.invoice_val|floatformat:"-2" }}€</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+	</div>
+</div>

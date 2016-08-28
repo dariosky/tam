@@ -88,30 +88,30 @@ def listaCorse(request, template_name="corse/lista.html"):
     profilo, created = ProfiloUtente.objects.get_or_create(user=user)
     dontHilightFirst = True
     TAM = settings.TAM
-    #	messages.debug(request, "Messaggio di debug.")
-    #	messages.info(request, "Messaggio di info.")
-    #	messages.success(request, "Messaggio di success.")
-    #	messages.warning(request, "Messaggio di warning.")
-    #	messages.error(request, "Messaggio di error.")
+    #  messages.debug(request, "Messaggio di debug.")
+    #  messages.info(request, "Messaggio di info.")
+    #  messages.success(request, "Messaggio di success.")
+    #  messages.warning(request, "Messaggio di warning.")
+    #  messages.error(request, "Messaggio di error.")
 
     outputFormat = request.GET.get('format', None)
 
-    #	precalcolati=0
-    #	for viaggio in Viaggio.objects.all(): #filter(html_tragitto=""):
-    #			if viaggio.padre is None: viaggio.updatePrecomp(force_save=True)
-    #			precalcolati+=1
-    #	if precalcolati: logging.debug("Ho precalcolato %d viaggi." % precalcolati)
+    #  precalcolati=0
+    #  for viaggio in Viaggio.objects.all(): #filter(html_tragitto=""):
+    #      if viaggio.padre is None: viaggio.updatePrecomp(force_save=True)
+    #      precalcolati+=1
+    #  if precalcolati: logging.debug("Ho precalcolato %d viaggi." % precalcolati)
 
-    #	if "togliAbbuoni" in request.GET:
-    #		viaggi_con_abbuoni= Viaggio.objects.filter(abbuono__gt=0)
-    #		for viaggio in viaggi_con_abbuoni:
-    #			if viaggio.tipo_abbuono=="F":
-    #				viaggio.abbuono_fisso+=viaggio.abbuono
-    #			else:
-    #				viaggio.abbuono_percentuale+=viaggio.abbuono
-    #			viaggio.abbuono=0
-    #			viaggio.save()
-    #		logging.debug("Rimossi gli abbuoni variabili da %d viaggi"%viaggi_con_abbuoni.count())
+    #  if "togliAbbuoni" in request.GET:
+    #    viaggi_con_abbuoni= Viaggio.objects.filter(abbuono__gt=0)
+    #    for viaggio in viaggi_con_abbuoni:
+    #      if viaggio.tipo_abbuono=="F":
+    #        viaggio.abbuono_fisso+=viaggio.abbuono
+    #      else:
+    #        viaggio.abbuono_percentuale+=viaggio.abbuono
+    #      viaggio.abbuono=0
+    #      viaggio.save()
+    #    logging.debug("Rimossi gli abbuoni variabili da %d viaggi"%viaggi_con_abbuoni.count())
 
     if request.method == "POST":
         if not user.has_perm('tam.change_viaggio'):
@@ -149,7 +149,7 @@ def listaCorse(request, template_name="corse/lista.html"):
             messages.warning(request,
                              "Non hai ancora definito un luogo preferito.")
 
-            #	logging.debug("Comincio a caricare la lista corse")
+            #  logging.debug("Comincio a caricare la lista corse")
     conducenti = Conducente.objects.all()  # list of all conducenti (even inactive ones) to filter
     clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
     today = tamdates.ita_today().date()  # today to compare with viaggio.date (on template)
@@ -220,7 +220,7 @@ def listaCorse(request, template_name="corse/lista.html"):
             filterFlag != "Tutti i flag") or outputFormat:  # non raggruppo
         distinct = True
 
-    # viaggi=Viaggio.objects.filter(pk=5266)	#TMP
+    # viaggi=Viaggio.objects.filter(pk=5266)  #TMP
     if filterConducente:
         if filterConducente == "Non confermate":
             viaggi = viaggi.filter(conducente__isnull=True)
@@ -289,7 +289,7 @@ def listaCorse(request, template_name="corse/lista.html"):
 
     data_inizio = tamdates.date_enforce(data_inizio)
     data_fine = tamdates.date_enforce(data_fine)
-    # -----------------------------	filtro	------------------------------------
+    # -----------------------------  filtro  ------------------------------------
     if filterFlag != "Tutti i  flag":
         if filterFlag == u"Fatturate":
             viaggi = viaggi.filter(fatturazione=True)
@@ -350,7 +350,7 @@ def listaCorse(request, template_name="corse/lista.html"):
         viaggi = viaggi.filter(punti_abbinata__gt=0) | viaggi.filter(
             padre__punti_abbinata__gt=0)
     # viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
-    #		viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
+    #    viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
     elif filterType == "Prenotazioni":
         viaggi = viaggi.filter(is_prenotazione=True)
 
@@ -378,7 +378,7 @@ def listaCorse(request, template_name="corse/lista.html"):
         viaggi = []
 
     num_viaggi = len(viaggi)
-    #	logging.debug("Ho caricato %d viaggi." % num_viaggi)
+    #  logging.debug("Ho caricato %d viaggi." % num_viaggi)
     classifiche = None  # ottengo le classifiche globali
     conducentiPerCapienza = {}
 
@@ -388,20 +388,20 @@ def listaCorse(request, template_name="corse/lista.html"):
             if classifiche is None:
                 classifiche = get_classifiche()
             # for classi in classifiche[:2]:
-            #					logging.debug("%(conducente_nick)s %(priceMedium)s %(priceLong)s %(pricyLong)s %(abbinate)s %(num_disturbi_diurni)s %(num_disturbi_notturni)s"%classi)
+            #          logging.debug("%(conducente_nick)s %(priceMedium)s %(priceLong)s %(pricyLong)s %(abbinate)s %(num_disturbi_diurni)s %(num_disturbi_notturni)s"%classi)
             viaggio.classifica = viaggio.get_classifica(
                 classifiche=classifiche,
                 conducentiPerCapienza=conducentiPerCapienza)  # ottengo la classifica di conducenti per questo viaggio
 
 
-            #	if settings.DEBUG:
-            #		q = [ q["sql"] for q in connections['default'].queries ]
-            #	#	q.sort()
-            #		qfile = file("querylog.sql", "w")
-            #		for query in q:
-            #			qfile.write("%s\n" % query)
-            #		qfile.close()
-            #		logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
+            #  if settings.DEBUG:
+            #    q = [ q["sql"] for q in connections['default'].queries ]
+            #  #  q.sort()
+            #    qfile = file("querylog.sql", "w")
+            #    for query in q:
+            #      qfile.write("%s\n" % query)
+            #    qfile.close()
+            #    logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
     if outputFormat == 'xls':
         from .tamXls import xlsResponse
@@ -531,9 +531,9 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
         cliente = viaggio.cliente
         form.initial["privato"] = (viaggio.cliente is None)
         # if viaggio.esclusivo:
-        # 	form.initial["esclusivo"] = "t"
+        #   form.initial["esclusivo"] = "t"
         # else:
-        # 	form.initial["esclusivo"] = "c"
+        #   form.initial["esclusivo"] = "c"
 
         if step == 1:
             form.initial["data"] = viaggio.data.astimezone(tamdates.tz_italy)
@@ -563,7 +563,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
     else:  # new form
         cliente = step1.get("cliente", None)
-        #		form.initial["data"]=datetime.datetime.now()	# 5/10/2009 tolgo il default per la data
+        #    form.initial["data"]=datetime.datetime.now()  # 5/10/2009 tolgo il default per la data
         if step == 1:
             # print "privato",form.initial['privato']
             if not step1:
@@ -647,12 +647,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
             removefields = ["commissione", "tipo_commissione",
                             # solo con i clienti
                             "numero_pratica",  # per le agenzie
-                            #							"incassato_albergo", # per gli alberghi	# tolto il 14/2
-                            #							"fatturazione", "pagamento_differito"
+                            #              "incassato_albergo", # per gli alberghi  # tolto il 14/2
+                            #              "fatturazione", "pagamento_differito"
                             ]
         else:
-            #			if cliente.tipo!="H":
-            #				removefields.append("incassato_albergo")
+            #      if cliente.tipo!="H":
+            #        removefields.append("incassato_albergo")
             if cliente.tipo != "A":  # le agenzie hanno il numero di pratica
                 removefields.append("numero_pratica")
         if not id:
@@ -676,7 +676,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                 label="Numero di doppi forzato",
                 help_text="max %d" % maxDoppi)  # aggiungo i doppi forza a Nulla
             form.initial["numDoppi"] = viaggio.punti_abbinata
-            #			form.fields.append("ciao")
+            #      form.fields.append("ciao")
 
     # ****************  VALIDAZIONE E CREAZIONE ********************
     if form.is_valid():
@@ -708,22 +708,22 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                 fields = step1.copy()
                 fields.update(form.cleaned_data)
 
-                #				if not isinstance( fields["da"], Luogo ):
-                #					da, created = Luogo.objects.get_or_create( nome=fields["da"] )
-                #					fields["da"]=da
+                #        if not isinstance( fields["da"], Luogo ):
+                #          da, created = Luogo.objects.get_or_create( nome=fields["da"] )
+                #          fields["da"]=da
                 #
-                #				if not isinstance( fields["a"], Luogo ):
-                #					a, created = Luogo.objects.get_or_create( nome=fields["a"] )
-                #					fields["a"]=a
+                #        if not isinstance( fields["a"], Luogo ):
+                #          a, created = Luogo.objects.get_or_create( nome=fields["a"] )
+                #          fields["a"]=a
 
-                #				if ( not fields["privato"] ):
-                #					if  not isinstance( fields["cliente"], Cliente ):	# cliente
-                #						cliente, created = Cliente.objects.get_or_create( nome=fields["cliente"] )
-                #						fields["cliente"]=cliente
-                #				else:	# privato
-                #					if fields["passeggero"]:
-                #						passeggero, created = Passeggero.objects.get_or_create( nome=fields["passeggero"] )
-                #						fields["passeggero"]=passeggero
+                #        if ( not fields["privato"] ):
+                #          if  not isinstance( fields["cliente"], Cliente ):  # cliente
+                #            cliente, created = Cliente.objects.get_or_create( nome=fields["cliente"] )
+                #            fields["cliente"]=cliente
+                #        else:  # privato
+                #          if fields["passeggero"]:
+                #            passeggero, created = Passeggero.objects.get_or_create( nome=fields["passeggero"] )
+                #            fields["passeggero"]=passeggero
 
                 nuovaCorsa = Viaggio(**fields)
                 nuovaCorsa.luogoDiRiferimento = profilo.luogo
@@ -824,7 +824,7 @@ def cliente(request, template_name="cliente.html", nomeCliente=None,
                 nome=nomeCliente)  # modifying an existing Client
         # ClientForm=forms.form_for_instance(cliente)
         except Cliente.DoesNotExist:
-            #			ClientForm = forms.form_for_model(Cliente)
+            #      ClientForm = forms.form_for_model(Cliente)
             ClientForm.base_fields[
                 "nome"].initial = nomeCliente  # creating a new client with name
 
@@ -870,7 +870,7 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
         listino = Listino.objects.get(id=id)  # modifying an existing Client
 
     # else:
-    #		ListinoForm = forms.form_for_model(Listino)
+    #    ListinoForm = forms.form_for_model(Listino)
 
     class ListinoForm(forms.ModelForm):
         class Meta:
@@ -981,23 +981,23 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
             return HttpResponseRedirect(
                 reverse("tamListinoId", kwargs={"id": listino.id}))
 
-            #	# tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
-            #	if listino:
-            #		prezziset = listino.prezzolistino_set.select_related().all()
-            #		dictDa = {}
-            #		for prezzo in prezziset:
-            #			listDa = dictDa.get("%s" % prezzo.tratta.da.nome, [])
-            #			listDa.append((prezzo.tratta.a.nome, prezzo.max_pax, prezzo))
-            #			dictDa[prezzo.tratta.da.nome] = listDa
-            #		prezzi = []
-            #		keys = dictDa.keys()[:]
-            #		keys.sort()			# ordino per destinazione e per max_pax
-            #		for da in keys:
-            #			dictDa[da].sort()
-            #			for a, maxpax, prezzo in dictDa[da]:
-            #				prezzi.append(prezzo)
-            #	else:
-            #		prezzi = None
+            #  # tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
+            #  if listino:
+            #    prezziset = listino.prezzolistino_set.select_related().all()
+            #    dictDa = {}
+            #    for prezzo in prezziset:
+            #      listDa = dictDa.get("%s" % prezzo.tratta.da.nome, [])
+            #      listDa.append((prezzo.tratta.a.nome, prezzo.max_pax, prezzo))
+            #      dictDa[prezzo.tratta.da.nome] = listDa
+            #    prezzi = []
+            #    keys = dictDa.keys()[:]
+            #    keys.sort()      # ordino per destinazione e per max_pax
+            #    for da in keys:
+            #      dictDa[da].sort()
+            #      for a, maxpax, prezzo in dictDa[da]:
+            #        prezzi.append(prezzo)
+            #  else:
+            #    prezzi = None
     if listino:
         prezzi = listino.prezzolistino_set.select_related().order_by(
             "tipo_servizio", "tratta__da", "tratta__a",
@@ -1044,7 +1044,7 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
            unique=(("nome",),),
            note="", excludedFields=None, fields_descriptions=None):
     """
-        @param extra_dict:	Addictional var to give to response
+        @param extra_dict:  Addictional var to give to response
     """
     if "next" in request.GET:
         redirectOk = request.GET["next"]
@@ -1279,9 +1279,9 @@ def listinoDelete(request, id, template_name="listino-delete.html"):
     listino = get_object_or_404(Listino, pk=id)
     if request.method == "POST":
         listino.cliente_set.clear()  # se cancello un listino mantengo i clienti che lo usavano
-        #		for cliente in Cliente.objects.filter(listino=listino):
-        #			cliente.listino=None
-        #			cliente.save()
+        #    for cliente in Cliente.objects.filter(listino=listino):
+        #      cliente.listino=None
+        #      cliente.save()
 
         listino.delete()
         return HttpResponseRedirect(reverse("tamListini"))

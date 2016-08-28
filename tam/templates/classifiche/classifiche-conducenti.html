@@ -15,6 +15,9 @@
                 {% include "classifiche/classifica-prezzo.inc.html" %}
             {% endif %}
         {% endfor %}
+		{% if classifica_fatture %}
+			{% include "classifiche/classifica-fatture.inc.html" %}
+		{% endif %}
         {% if not confirmConguaglio %}
             {% include "elenco-conducenti.inc.html" %}
         {% endif %}
