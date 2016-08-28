@@ -184,7 +184,8 @@ def changeLog(request, template_name='static/changelog.html'):
          "Controllo sessioni singole") if settings.FORCE_SINGLE_DEVICE_SESSION else "",
         ('6.72', '5/8/2016', "Webhooks per essere notificati degli errori di consegna delle email"),
         ('6.72', '14/8/2016', "Preavviso per prenotazioni regolabile in base all'orario"),
-        ('6.75', '18/8/2016', "Updates for Python3"),
+        ('6.8', '16/8/2016', "Updates for Python3"),
+        ('6.81', '18/8/2016', "Statistiche fatture"),
 
     ]
     # ('', '', mark_safe('''''')),

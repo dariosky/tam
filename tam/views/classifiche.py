@@ -1,14 +1,17 @@
 # coding: utf-8
 import copy
-from tam.models import get_classifiche, Conducente, Conguaglio, ProfiloUtente
-from django.shortcuts import render
-from decimal import Decimal
-from django.contrib import messages
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
 import logging
-from django.utils.safestring import mark_safe
+from decimal import Decimal
+
 from django.conf import settings
+from django.contrib import messages
+from django.core.urlresolvers import reverse
+from django.db.models.aggregates import Count, Sum
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from django.utils.safestring import mark_safe
+
+from tam.models import get_classifiche, Conducente, Conguaglio, ProfiloUtente
 
 
 def conguaglia(classifica_definita):
@@ -20,9 +23,11 @@ def conguaglia(classifica_definita):
         puntiDaTogliere = classifica_definita['min']
         if conducente.classifica_iniziale_puntiDoppiVenezia:  # il conducente ha punti iniziali tolgo quelli
             prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
-            puntiInizialiTolti = min(puntiDaTogliere, conducente.classifica_iniziale_puntiDoppiVenezia)
+            puntiInizialiTolti = min(puntiDaTogliere,
+                                     conducente.classifica_iniziale_puntiDoppiVenezia)
             logging.debug(
-                "Tolgo %s punti iniziali da %s a %s." % (puntiInizialiTolti, prezzoPuntiIniziali, conducente.nick))
+                "Tolgo %s punti iniziali da %s a %s." % (
+                    puntiInizialiTolti, prezzoPuntiIniziali, conducente.nick))
             conducente.classifica_iniziale_puntiDoppiVenezia -= puntiInizialiTolti
             conducente.classifica_iniziale_prezzoDoppiVenezia -= prezzoPuntiIniziali
             puntiDaTogliere -= puntiInizialiTolti
@@ -32,12 +37,12 @@ def conguaglia(classifica_definita):
             for viaggio in classifica["abbinate"]:
                 puntiDaTogliereAlViaggio = min(puntiDaTogliere, viaggio.punti_abbinata)
                 if puntiDaTogliereAlViaggio == 0: continue
-                #				logging.debug("Tolgo %d punti al viaggio %s"%(puntiDaTogliereAlViaggio, viaggio.id))
+                # logging.debug("Tolgo %d punti al viaggio %s"%(puntiDaTogliereAlViaggio, viaggio.id))
 
                 puntiDaTogliere -= puntiDaTogliereAlViaggio
-                #				print "Non salvo %s,%s - %d" % (conducente, viaggio.id, puntiDaTogliereAlViaggio)
-                #				viaggiSalvati += 1
-                #				continue
+                # print "Non salvo %s,%s - %d" % (conducente, viaggio.id, puntiDaTogliereAlViaggio)
+                # viaggiSalvati += 1
+                # continue
                 viaggio.km_conguagliati += kmPuntoAbbinate * puntiDaTogliereAlViaggio
                 viaggio.save()
                 viaggio.updatePrecomp()  # salvo perché mi toglierà i punti
@@ -49,7 +54,8 @@ def conguaglia(classifica_definita):
 # print 'avrei modificato %d viaggi' % viaggiSalvati
 
 
-def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html", confirmConguaglio=False):
+def classificheconducenti(request, template_name="classifiche/classifiche-conducenti.html",
+                          confirmConguaglio=False):
     user = request.user
     profilo, created = ProfiloUtente.objects.get_or_create(user=user)  # @UnusedVariable
     mediabundleJS = ('tamUI',)
@@ -65,8 +71,8 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 
     classificheViaggi = get_classifiche()
     # alle classifiche estratte da SQL, aggiungo:
-    #	il conducente
-    #	la lista di punti-valore abbinate
+    #  il conducente
+    #  la lista di punti-valore abbinate
 
     conducenti = Conducente.objects.filter(attivo=True)
     conducente_byId = {}  # dizionario id->conducente
@@ -92,30 +98,37 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
                     'prezzoPadova', 'prezzoVenezia', 'prezzoDoppioPadova'):
             # se ho una classifica con questa chiave le aggiungo i dati
             if key in classifiche_definite_byId:
-                classifiche_definite_byId[key]['dati'].append((classifica[key], conducente.nick, classifica))
+                classifiche_definite_byId[key]['dati'].append(
+                    (classifica[key], conducente.nick, classifica))
                 if key == 'punti_abbinata':
-                    classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0, annullato=False)
+                    classifica["abbinate"] = conducente.viaggio_set.filter(punti_abbinata__gt=0,
+                                                                           annullato=False)
                     classifica["celle_abbinate"] = []
                     if conducente.classifica_iniziale_puntiDoppiVenezia:  # aggiungo i punti iniziali
                         prezzoPuntiIniziali = conducente.classifica_iniziale_prezzoDoppiVenezia / conducente.classifica_iniziale_puntiDoppiVenezia
                         for punto in range(conducente.classifica_iniziale_puntiDoppiVenezia):
-                            classifica["celle_abbinate"].append({"valore": prezzoPuntiIniziali, "data": None})
+                            classifica["celle_abbinate"].append(
+                                {"valore": prezzoPuntiIniziali, "data": None})
                     for viaggio in classifica["abbinate"]:  # per ogni viaggio
                         for punto in range(viaggio.punti_abbinata):  # per ogni punto
-                            classifica["celle_abbinate"].append({"valore": viaggio.prezzoPunti, "data": viaggio.data})
+                            classifica["celle_abbinate"].append(
+                                {"valore": viaggio.prezzoPunti, "data": viaggio.data})
                             # classifiche.append(classifica)
 
     for classifica_definita in classifiche_definite:  # ordino i dati
         # classifica_definita['dati'].sort()
         if classifica_definita['dati']:
-            classifica_definita['min'] = classifica_definita["dati"][0][0]  # prendo la chiave del primo valore
-            classifica_definita['max'] = classifica_definita["dati"][-1][0]  # prendo la chiave del'ultimo valore
+            classifica_definita['min'] = classifica_definita["dati"][0][
+                0]  # prendo la chiave del primo valore
+            classifica_definita['max'] = classifica_definita["dati"][-1][
+                0]  # prendo la chiave del'ultimo valore
         else:
             classifica_definita['min'] = 0
             classifica_definita['max'] = 1
         if classifica_definita.get("type") == "punti" and classifica_definita[
             'min']:  # abbiamo un minimo da conguagliare
-            punti_assocMin = classifica_definita['min']  # punti comuni a tutti gli attivi da conguagliare
+            punti_assocMin = classifica_definita[
+                'min']  # punti comuni a tutti gli attivi da conguagliare
             totaleConguaglioAbbinate = 0
             for key, nick, classifica in classifica_definita['dati']:
                 totaleConguaglioAbbinate += sum(
@@ -123,7 +136,8 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
             mediaAbbinate = round(totaleConguaglioAbbinate / len(classifica_definita['dati']), 2)
             for key, nick, classifica in classifica_definita['dati']:
                 classifica["debitoAbbinate"] = sum(
-                    [punto['valore'] for punto in classifica["celle_abbinate"][:punti_assocMin]]) - Decimal(
+                    [punto['valore'] for punto in
+                     classifica["celle_abbinate"][:punti_assocMin]]) - Decimal(
                     str(mediaAbbinate))
                 classifica["deveDare"] = (classifica["debitoAbbinate"] > 0)
                 if classifica["deveDare"]:
@@ -137,13 +151,33 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
                 messages.success(request, "Conguaglio memorizzato.")
                 return HttpResponseRedirect(reverse("tamConducenti"))
 
+    if settings.TAM_SHOW_CLASSIFICA_FATTURE:
+        classifica_fatture = Conducente.objects.filter(
+            attivo=True,
+            viaggio__annullato=False,
+            viaggio__fatturazione=True
+        ).annotate(
+            invoice_count=Count('viaggio'),
+            invoice_val=Sum('viaggio__prezzo'),
+        ).order_by("-invoice_val", "-invoice_count")
+        if classifica_fatture.count():
+            max_val = classifica_fatture[0].invoice_val
+        else:
+            max_val = 0
+        for c in classifica_fatture:
+            if c.invoice_val > max_val:
+                max_val = c.invoice_val
+        classifica_fatture.max_val = max_val  # put the maxval in the queryser
+    else:
+        classifica_fatture = []
+
     tuttiConducenti = Conducente.objects.all()
     return render(request, template_name,
                   {
                       'tuttiConducenti': tuttiConducenti,
                       'mediabundleJS': mediabundleJS, 'mediabundleCSS': mediabundleCSS,
                       'classifiche_definite': classifiche_definite,
-
+                      'classifica_fatture': classifica_fatture,
                       'confirmConguaglio': confirmConguaglio,
                   },
                   )
@@ -160,7 +194,8 @@ def descrizioneDivisioneClassifiche(viaggio):
             valore = getattr(viaggio, field, None)
             if field and valore:
                 result += "%(valore)s %(prefix)s %(nome)s. " % {"valore": valore,
-                                                                "prefix": classifica.get("prefix", "nei"),
+                                                                "prefix": classifica.get("prefix",
+                                                                                         "nei"),
                                                                 "nome": classifica['nome']}
         elif tipo_classifica == 'punti':
             field = classifica.get('mapping_field')
@@ -171,7 +206,8 @@ def descrizioneDivisioneClassifiche(viaggio):
                 result += '<br/>'
                 result += "%(punti)d x %(valore)s nei %(nome)s.<br/>" % {"punti": punti,
                                                                          "valore": viaggio.prezzoPunti,
-                                                                         "prefix": classifica.get("prefix", "nei"),
+                                                                         "prefix": classifica.get(
+                                                                             "prefix", "nei"),
                                                                          "nome": classifica["nome"]}
 
     result = mark_safe(result)

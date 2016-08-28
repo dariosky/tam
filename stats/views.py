@@ -1,6 +1,5 @@
 # coding=utf-8
 import datetime
-from pprint import pprint
 
 import django
 from django.contrib.auth.decorators import permission_required
@@ -15,7 +14,7 @@ from django.views.generic import TemplateView
 from fatturazione.models import Fattura
 from tam import tamdates
 from tam.models import Viaggio
-from tam.tamdates import MONTH_NAMES, parse_datestring, date_enforce
+from tam.tamdates import MONTH_NAMES, parse_datestring
 
 
 class Extract(Func):
@@ -34,6 +33,20 @@ class Extract(Func):
 
     function = 'EXTRACT'
     template = '%(function)s(%(what_to_extract)s FROM %(expressions)s  at TIME ZONE \'CET\')'
+
+    def as_sqlite(self, compiler, connection):
+        what = self.extra.get('what_to_extract')
+        self.template = "strftime('%%%(date_part)s', %(expressions)s)"
+        if what == 'year':
+            self.extra['date_part'] = '%Y'
+        elif what == 'month':
+            self.extra['date_part'] = '%m'
+        else:
+            raise NotImplemented("Extract in SQLITE for %s is not supported yet" % what)
+        return super().as_sqlite(compiler, connection)
+
+    def convert_value(self, value, expression, connection, context):
+        return super().convert_value(value, expression, connection, context)
 
 
 class MonthDatesMixin(TemplateView):
@@ -179,9 +192,10 @@ class StatsView(MonthDatesMixin):
             if 'mese' in qgrouper:
                 # we do an intermediate annotation, before grouping
                 qs = (qs
-                      .annotate(year=Extract('data', what_to_extract='year'),
-                                month=Extract('data', what_to_extract='month'))
-                      )
+                    .annotate(
+                    year=Extract('data', what_to_extract='year'),
+                    month=Extract('data', what_to_extract='month'))
+                )
             qs = (qs
                   .values(*grouper_fields)  # group by
                   .annotate(**fields)
@@ -217,34 +231,3 @@ class StatsView(MonthDatesMixin):
 
         data['rows'] = rows
         return data
-
-
-def testing_annotations():
-    # Testing the query
-    qs = Viaggio.objects.filter(annullato=False,
-                                data__gte=date_enforce(datetime.date(2016, 1, 11)),
-                                data__lt=date_enforce(datetime.date(2016, 2, 14)))
-    qs = (qs
-          .order_by()
-          .annotate(year=Extract('data', what_to_extract='year'),
-                    month=Extract('data', what_to_extract='month'))
-          .values('year', 'month')
-          .annotate(tot=Sum('prezzo'),
-                    commissione=Sum(
-                        Case(When(tipo_commissione='F', then=F('commissione')),
-                             When(tipo_commissione='P',
-                                  then=F('commissione') * F('prezzo') / Value(100)),
-                             ),
-                        output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
-
-                    ),
-                    conducente__nome=F('conducente__nome')
-                    ).order_by('conducente__nome')
-          )
-    print(len(qs))
-    print(qs.query)
-    pprint(list(qs))
-
-
-if __name__ == '__main__':
-    testing_annotations()

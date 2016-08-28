@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.73"
+TAM_VERSION = "6.81"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
 if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
@@ -448,6 +448,7 @@ TAM = dict(
     ),
 )
 TAM_BACKGROUND_COLOR = '#FBFFBA',  # the default background
+TAM_SHOW_CLASSIFICA_FATTURE = False
 
 FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions
 
