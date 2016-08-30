@@ -7,34 +7,48 @@
 
 	{{ utentePrenotazioni.nome_operatore }} {% trans "per" %}
 	{% if cliente_unico %}{{ cliente_unico }}{% endif %}
+
 	<form action='' method="post" enctype="multipart/form-data" id='preForm'>
 		{% csrf_token %}
+		{% if quickbook %}
+
+			<div class="quickbook">
+				<div class="book btn btn-large">Chiamata diretta <br> Locale</div>
+				<div class="book btn btn-large">Chiamata diretta <br> Padova</div>
+				<div class="book btn btn-large">Chiamata diretta <br> Venezia</div>
+			</div>
+		{% endif %}
+		<hr>
 		{{ form.as_p }}
 
 		{% if editable %}
 			<input type='submit'
 				   name='prenota'
 				   class='btn'
-				   value='{% if prenotazione %}{% trans "Modifica" %}{%else%}{% trans "Invia" %}{%endif%}{% trans " prenotazione" %}'
+				   value='
+
+
+
+						   {% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'
 			/>
 			{% if prenotazione %}
 				<input type='submit'
-				   name='delete'
-				   class='btn'
-				   value='{% trans "Cancella prenotazione" %}'
-			/>
+					   name='delete'
+					   class='btn'
+					   value='{% trans "Cancella prenotazione" %}'
+				/>
 			{% endif %}
 		{% else %}
 			<script type="text/javascript">
-				$("form input,form textarea, form select").attr("disabled",true);
+				$("form input,form textarea, form select").attr("disabled", true);
 			</script>
 		{% endif %}
 	</form>
 
 	<a href='{% url 'tamCronoPrenotazioni' %}'>
 
-	<div style='text-align:center'>
-		{% blocktrans %}vai alla cronologia delle prenotazioni effettuate{% endblocktrans %}
-	</div>
+		<div style='text-align:center'>
+			{% blocktrans %}vai alla cronologia delle prenotazioni effettuate{% endblocktrans %}
+		</div>
 	</a>
 {% endblock content %}

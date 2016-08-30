@@ -325,6 +325,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                       "prenotazione": prenotazione,
                       "cliente_unico": cliente_unico,
                       "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+                      "quickbook": getattr(settings, 'PRENOTAZIONI_QUICK', False)
                   },
                   )
 
