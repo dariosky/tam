@@ -1,0 +1,9 @@
+-r requirements.txt
+
+django-debug-toolbar
+django-debug-toolbar-template-timings
+
+fabric3
+
+#tests ***
+pytest-django
