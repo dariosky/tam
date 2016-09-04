@@ -1,6 +1,6 @@
 # coding=utf-8
-import sys
 import logging
+import sys
 
 import django
 from django.conf import settings

@@ -27,6 +27,7 @@ class UtentePrenotazioni(models.Model):
     luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
     nome_operatore = models.CharField(max_length=40, null=True)
     email = models.EmailField(null=True)
+    quick_book = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = "Utenti prenotazioni"
@@ -109,7 +110,7 @@ class Prenotazione(models.Model):
         return result
 
     def is_editable(self):
-        " True se la corsa è ancora modificabile "
+        """ True se la corsa è ancora modificabile """
         ora = tamdates.ita_now()
         notice_func = settings.PRENOTAZIONI_PREAVVISO_NEEDED_FUNC
         notice_max = notice_func(self.data_corsa)
