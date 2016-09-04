@@ -35,6 +35,7 @@
 	{% endblock styles %}
 </head>
 <body>
+{% include "google_analytics.inc.html" %}
 <div id='header'>
 	{% block header %}
 		<img id='taxilogo' src="{{ MEDIA_URL }}{{ logo_consorzio }}"/>
