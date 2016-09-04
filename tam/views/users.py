@@ -53,6 +53,7 @@ def get_userkeys(user):
 def permissions(request, username=None,
                 template_name="utils/manageUsers.html"):
     user = request.user
+    quick_book = getattr(settings, 'PRENOTAZIONI_QUICK', False)
     if not user.has_perm('auth.change_user'):
         messages.error(request,
                        "Non hai l'autorizzazione a modificare i permessi.")
@@ -207,7 +208,6 @@ def delUser(request, username, template_name="utils/delUser.html"):
 
 
 def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
-    #	from django.contrib.auth.views import password_change
     from django.contrib.auth.forms import PasswordChangeForm
 
     form = PasswordChangeForm(request.user, request.POST or None)

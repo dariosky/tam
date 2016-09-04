@@ -8,17 +8,22 @@
 	{{ utentePrenotazioni.nome_operatore }} {% trans "per" %}
 	{% if cliente_unico %}{{ cliente_unico }}{% endif %}
 
-	<form action='' method="post" enctype="multipart/form-data" id='preForm'>
-		{% csrf_token %}
-		{% if quickbook %}
 
+	{% if quick_book and utentePrenotazioni.quick_book %}
+		<form action='' method="post" id='quickform'>
 			<div class="quickbook">
-				<div class="book btn btn-large">Chiamata diretta <br> Locale</div>
+				<button type="submit" class="book btn btn-large">Chiamata diretta <br> Locale
+				</button>
 				<div class="book btn btn-large">Chiamata diretta <br> Padova</div>
 				<div class="book btn btn-large">Chiamata diretta <br> Venezia</div>
 			</div>
-		{% endif %}
-		<hr>
+		</form>
+	{% endif %}
+
+	<hr>
+
+	<form action='' method="post" enctype="multipart/form-data" id='preForm'>
+		{% csrf_token %}
 		{{ form.as_p }}
 
 		{% if editable %}
@@ -28,9 +33,7 @@
 				   value='
 
 
-
-						   {% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'
-			/>
+						   {% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'/>
 			{% if prenotazione %}
 				<input type='submit'
 					   name='delete'
