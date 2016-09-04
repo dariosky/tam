@@ -1412,7 +1412,7 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
         Riceve assoType con indicato cosa va fatto e una lista di viaggioId
         Azioni: link, unlink e bus
     """
-    viaggiIds = map(int, viaggiIds)
+    viaggiIds = list(map(int, viaggiIds))
     user = request.user
     if not user.has_perm('tam.change_viaggio'):
         messages.error(request, "Non hai il permesso di modificare i viaggi.")

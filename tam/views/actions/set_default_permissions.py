@@ -1,7 +1,6 @@
 # coding=utf-8
 # Creo gli eventuali permessi mancanti
 import django
-from django.core.exceptions import MultipleObjectsReturned
 from django.db import transaction
 
 
@@ -18,7 +17,7 @@ def create_missing_groups():
     needed_groups = ['Normale', 'Potente']
     for name in needed_groups:
         if not Group.objects.filter(name=name).exists():
-            print "Creo il gruppo %s" % name
+            print("Creo il gruppo %s" % name)
             group = Group(name=name)
             group.save()
 
@@ -41,13 +40,13 @@ def pretty_print_permissions():
 
 
 @transaction.atomic
-def setPermissions(groupName, permission_pretty):
+def set_permissions(groupName, permission_pretty):
     from django.contrib.auth.models import Permission, Group
     group = Group.objects.get(name=groupName)
     permissions_codenames = filter(lambda s: s != '',
                                    map(lambda s: s.strip(),
                                        permission_pretty.split("\n")))
-    print "Avevo %d permessi per il gruppo %s." % (group.permissions.count(), group)
+    print("Avevo %d permessi per il gruppo %s." % (group.permissions.count(), group))
     group.permissions.clear()
     for full_code_name in permissions_codenames:
         app_label, model, codename = full_code_name.split("|")
@@ -57,11 +56,11 @@ def setPermissions(groupName, permission_pretty):
         )
         group.permissions.add(permission)
 
-    print "Ora ne ho %d." % (group.permissions.count())
+    print("Ora ne ho %d." % (group.permissions.count()))
 
 
-def setDefaultPermissions():
-    setPermissions('Potente', """
+def set_default_permissions():
+    set_permissions('Potente', """
   auth|user|add_user
   auth|user|change_user
   board|boardmessage|view
@@ -108,7 +107,7 @@ def setDefaultPermissions():
   tamArchive|viaggioarchive|archive
   tamArchive|viaggioarchive|flat
 """)
-    setPermissions('Normale', """
+    set_permissions('Normale', """
   board|boardmessage|view
   codapresenze|codapresenze|editall
   codapresenze|codapresenze|view
@@ -135,4 +134,4 @@ if __name__ == '__main__':
     # create_missing_permissions()
     # create_missing_groups()
     # setDefaultPermissions()
-    print "\n".join(pretty_print_permissions())
+    print("\n".join(pretty_print_permissions()))
