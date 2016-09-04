@@ -32,7 +32,7 @@
 
 	<p>
 		<label for="prenotazioni_luogo">Luogo in cui si trova il cliente:</label>
-		<select id='prenotazioni_luogo'>
+		<select id='prenotazioni_luogo' name="prenotazioni_luogo">
 			{% for luogo in luoghi %}
 				<option value='{{ luogo.id }}'
 						{% if utentePrenotazioni.luogo == luogo %}selected="selected"{% endif %}>

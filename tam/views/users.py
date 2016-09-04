@@ -127,8 +127,7 @@ def permissions(request, username=None,
                         utentePrenotazioni.clienti.clear()
                     utentePrenotazioni.user = selectedUser
                     # attuale_prenotazione.cliente_id = request.POST.getlist('prenotazioni_clienti')
-                    utentePrenotazioni.luogo_id = request.POST.get(
-                        'prenotazioni_luogo')
+                    utentePrenotazioni.luogo_id = request.POST.get('prenotazioni_luogo')
                     utentePrenotazioni.nome_operatore = request.POST.get(
                         'operatore')
                     utentePrenotazioni.email = request.POST.get('email')

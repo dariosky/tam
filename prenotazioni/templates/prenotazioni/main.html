@@ -30,10 +30,7 @@
 			<input type='submit'
 				   name='prenota'
 				   class='btn'
-				   value='
-
-
-						   {% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'/>
+				   value='{% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'/>
 			{% if prenotazione %}
 				<input type='submit'
 					   name='delete'
