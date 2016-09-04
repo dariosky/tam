@@ -153,7 +153,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
         setperm.delete_all_permissions()
         setperm.create_missing_permissions()
         setperm.create_missing_groups()
-        setperm.setDefaultPermissions()
+        setperm.set_default_permissions()
 
     if request.POST.get("deleteAllCorse"):
         messageLines.append("CANCELLO TUTTE LE PRENOTAZIONI e le CORSE")
