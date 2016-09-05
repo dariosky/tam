@@ -759,7 +759,7 @@ def getList(request, model=Luogo.objects, field="nome", format="txt",
     querySet = model.filter(**fieldApiString)
 
     if format == "txt":
-        results = "\n".join([record.__unicode__() for record in querySet])
+        results = "\n".join([str(record) for record in querySet])
         return HttpResponse(results, content_type="text/plain")
     if format == "json" and fields:
         records = querySet.values(*fields)

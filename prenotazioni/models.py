@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from future.utils import python_2_unicode_compatible
 
 from board.models import fs, get_secure_attachment_subfolder
 from prenotazioni.util import prenotaCorsa
@@ -21,6 +22,7 @@ TIPI_PAGAMENTO = (
 )
 
 
+@python_2_unicode_compatible
 class UtentePrenotazioni(models.Model):
     user = models.OneToOneField(User, related_name='prenotazioni')
     clienti = models.ManyToManyField(Cliente)
@@ -34,7 +36,7 @@ class UtentePrenotazioni(models.Model):
         ordering = ("user",)
         permissions = (('manage_permissions', 'Gestisci utenti prenotazioni'),)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"%(user)s - %(clienti)s da '%(luogo)s' - %(email)s" % {
             "user": self.user.username,
             "clienti": ", ".join([c.nome for c in self.clienti.all()]),
@@ -101,7 +103,7 @@ class Prenotazione(models.Model):
         verbose_name_plural = "Prenotazioni"
         ordering = ("-data_registrazione", "cliente", "owner")
 
-    def __unicode__(self):
+    def __str__(self):
         result = u"%s - %s" % (self.cliente, self.owner.user.username)
         result += u" - " + (u"arrivo" if self.is_arrivo else u"partenza")
         result += u" %s" % self.luogo
