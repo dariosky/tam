@@ -2,9 +2,10 @@
 from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
-# from tam.models import Conducente
-from tam.tamdates import tz_italy
 from django.utils.translation import ungettext
+from future.utils import python_2_unicode_compatible
+
+from tam.tamdates import tz_italy
 
 
 def pretty_duration(minutes):
@@ -26,6 +27,7 @@ def pretty_duration(minutes):
     return " ".join(results)
 
 
+@python_2_unicode_compatible
 class Calendar(models.Model):
     conducente = models.ForeignKey('tam.Conducente', on_delete=CASCADE, related_name='presenze')
     date_start = models.DateTimeField(db_index=True)
@@ -67,7 +69,7 @@ class Calendar(models.Model):
         else:
             return self.pretty_duration()
 
-    def __unicode__(self):
+    def __str__(self):
         caldesc = settings.CALENDAR_DESC[self.type]
         result = u"{conducente}. {cal_name} {date_start} ".format(
             conducente=self.conducente,

@@ -1,8 +1,10 @@
 # coding=utf-8
 from django.db import models
 from django.contrib.auth.models import User
+from future.utils import python_2_unicode_compatible
 
 
+@python_2_unicode_compatible
 class CodaPresenze(models.Model):
     data_accodamento = models.DateTimeField(auto_now_add=True, editable=True)
     utente = models.ForeignKey(User)
@@ -16,7 +18,7 @@ class CodaPresenze(models.Model):
             ('editall', 'Coda di tutti'),
         )
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s %s a %s" % (
         self.data_accodamento.strftime("%d/%m/%Y %H:%M"), self.utente, self.luogo)
 

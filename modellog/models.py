@@ -1,8 +1,9 @@
 # coding=utf-8
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.storage import staticfiles_storage
+from django.db import models
+from django.utils.translation import ugettext_lazy as _
+from future.utils import python_2_unicode_compatible
 
 LOG_ACTION_TYPE = [
     ("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
@@ -12,6 +13,7 @@ LOG_ACTION_TYPE = [
 ]
 
 
+@python_2_unicode_compatible
 class ActionLog(models.Model):
     data = models.DateTimeField(db_index=True)
     user_id = models.IntegerField(null=True, blank=True, default=None)
@@ -34,7 +36,7 @@ class ActionLog(models.Model):
         verbose_name_plural = _("Azioni")
         ordering = ["-data"]
 
-    def __unicode__(self):
+    def __str__(self):
         longName = {"A": "Creazione", "M": "Modifica", "D": "Cancellazione"}[
             self.action_type]
         return "%s di un %s - %s.\n  %s" % (

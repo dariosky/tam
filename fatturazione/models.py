@@ -1,10 +1,13 @@
 # coding: utf-8
-from django.db import models
-from tam.models import Viaggio, Conducente, Cliente, Passeggero
 from decimal import Decimal, ROUND_HALF_UP
-from django.utils.safestring import mark_safe
-from django.core.urlresolvers import reverse
+
 from django.conf import settings
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.utils.safestring import mark_safe
+from future.utils import python_2_unicode_compatible
+
+from tam.models import Viaggio, Conducente, Cliente, Passeggero
 
 nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricevuta taxi",
                 '4': "Fattura consorzio esente IVA", '5': "Fattura conducente esente IVA"}
@@ -15,6 +18,7 @@ DATA_RICEVUTE_SDOPPIATE = getattr(settings, 'DATA_RICEVUTE_SDOPPIATE', None)
 INVOICES_FOOTERS = getattr(settings, "INVOICES_FOOTERS", {})
 
 
+@python_2_unicode_compatible
 class Fattura(models.Model):
     emessa_da = models.TextField()  # anagrafica emittente
     emessa_a = models.TextField()  # anagrafica cliente
@@ -43,15 +47,15 @@ class Fattura(models.Model):
                        ('smalledit', 'Smalledit: alle fat.conducente'),
                        ('view', 'Visualizzazione fatture'))
 
-    def __unicode__(self):
+    def __str__(self):
         anno = self.anno or "-"
         progressivo = self.progressivo or "-"
         if not self.data: return "fattura-senza-data"
         return u"%s %s/%s del %s emessa a %s. %d righe" % (
-        nomi_fatture[self.tipo], anno, progressivo,
-        self.data.strftime("%d/%m/%Y %H:%M"),
-        self.destinatario(),
-        self.righe.count()
+            nomi_fatture[self.tipo], anno, progressivo,
+            self.data.strftime("%d/%m/%Y %H:%M"),
+            self.destinatario(),
+            self.righe.count()
         )
 
     def mittente(self):
@@ -93,7 +97,7 @@ class Fattura(models.Model):
 
     def is_ricevuta_sdoppiata(self):
         return (self.tipo == "3") and DATA_RICEVUTE_SDOPPIATE and (
-        self.data >= DATA_RICEVUTE_SDOPPIATE)
+            self.data >= DATA_RICEVUTE_SDOPPIATE)
 
     def note_fisse(self):
         if self.tipo == '3':
@@ -112,6 +116,7 @@ class Fattura(models.Model):
         return mark_safe(reverse('actionLog') + "?type=fattura&amp;id=%d" % self.id)
 
 
+@python_2_unicode_compatible
 class RigaFattura(models.Model):
     fattura = models.ForeignKey(Fattura, related_name="righe")
     riga = models.IntegerField()
@@ -149,5 +154,5 @@ class RigaFattura(models.Model):
         # referenziate (che hanno tipo minore di quelle che referenziano)
         ordering = ("fattura__tipo", "fattura", "riga")
 
-    def __unicode__(self):
+    def __sts__(self):
         return u"Fattura %d. Riga %d. %.2f." % (self.fattura.id, self.riga, self.prezzo or 0)
