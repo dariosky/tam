@@ -9,11 +9,18 @@ $(function () {
 	$('#statsform').submit(
 		function () {
 			var $this = $(this);
-			if ($('input[name="qfilter"]:checked').length == 0) {
-				$this.append(
-					$("<input name='qfilter' type='hidden'/>").val("none")
-				);
-			}
+			/* specify that checkbox are intentionally unchecked when needed
+			 to allow sessions as default */
+			$(['qfilter', 'detailed']).each(function (index, value) {
+				console.log("value:", value);
+				if ($('input[name="' + value + '"]:checked').length == 0) {
+					console.log(value, "has no checkboxes");
+					$this.append(
+						$("<input name='" + value + "' type='hidden'/>").val("none")
+					);
+				}
+			});
+
 			var groupers = [];
 			$("#enabled").find('div').each(function () {
 				groupers.push($(this).text().toLowerCase())
