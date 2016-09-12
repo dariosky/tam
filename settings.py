@@ -454,7 +454,6 @@ FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple 
 
 GOOGLE_ANALYTICS_ID = None
 
-
 # END OF DEFAULTS **************************************************************
 
 settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')

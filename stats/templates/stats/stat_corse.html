@@ -2,101 +2,108 @@
 {% load staticfiles %}
 
 {% block header %}
-    <link rel="stylesheet" type="text/css" href="{% static "js/dragula/dragula.min.css" %}"/>
+	<link rel="stylesheet" type="text/css" href="{% static "js/dragula/dragula.min.css" %}"/>
 {% endblock %}
 {% block title %}Report corse &raquo; {{ block.super }}{% endblock %}
 
 {% block content %}
-    <h1>Report corse</h1>
+	<h1>Report corse</h1>
 
-    <form action="" method="get" id='statsform'>
-        <fieldset class="formset">
-            <legend>Tipo</legend>
-            <label>Corse
-                <input type="radio" name="qtype" value="corse"{% if qtype == 'corse' %} checked{% endif %}/>
-            </label>
-            <label>Fatture
-                <input disabled type="radio" name="qtype" value="fatture"{% if qtype == 'fatture' %} checked{% endif %}/>
-            </label>
-        </fieldset>
+	<form action="" method="get" id='statsform'>
+		<fieldset class="formset">
+			<legend>Tipo</legend>
+			<label>Corse
+				<input type="radio" name="qtype" value="corse"{% if qtype == 'corse' %}
+					   checked{% endif %}/>
+			</label>
+			<label>Fatture
+				<input disabled type="radio" name="qtype" value="fatture"{% if qtype == 'fatture' %}
+					   checked{% endif %}/>
+			</label>
+			<br>
+			<label>Dettaglio
+				<input type="checkbox" name="detailed" id="detailed"
+					   {% if detailed %}checked{% endif %}
+				>
+			</label>
+		</fieldset>
 
-        <fieldset class="formset">
-            <legend>Date</legend>
-            <label>da <input type='text' name='data_start' id='data_start' class="daterange"
-                             value='{{ data_start|date:"d/m/Y" }}'></label>
-            <label>a <input type='text' name='data_end' id='data_end' class="daterange"
-                            value='{{ data_end|date:"d/m/Y" }}'></label>
+		<fieldset class="formset">
+			<legend>Date</legend>
+			<label>da <input type='text' name='data_start' id='data_start' class="daterange"
+							 value='{{ data_start|date:"d/m/Y" }}'></label>
+			<label>a <input type='text' name='data_end' id='data_end' class="daterange"
+							value='{{ data_end|date:"d/m/Y" }}'></label>
 
-            <a href="#" onclick="setDateRange(0)">{{ quick_month_names.0 }}</a>
-            <a href="#" onclick="setDateRange(-1)">{{ quick_month_names.1 }}</a>
-            <a href="#" onclick="setDateRange(-2)">{{ quick_month_names.2 }}</a>
-        </fieldset>
-        <fieldset class="formset">
-            <legend>Filtro</legend>
-            <label><input type="checkbox" name="qfilter" value="fatture"
-                          {% if 'fatture' in qfilter %}checked{% endif %}>
-                Fatture</label>
-            <label><input type="checkbox" name="qfilter" value="carte"
-                          {% if 'carte' in qfilter %}checked{% endif %}>
-                Carta</label>
-            <label><input type="checkbox" name="qfilter" value="finemese"
-                          {% if 'finemese' in qfilter %}checked{% endif %}>
-                Fine mese</label>
-        </fieldset>
-        <fieldset class="formset">
-            <legend>Raggruppamento (trascina a destra)</legend>
-            <div class="dragcontainer">
-                <div id="available" class="box">
-                    {% if "cliente" not in qgrouper %}
-                        <div class="draggable">Cliente</div>{% endif %}
-                    {% if "socio" not in qgrouper %}
-                        <div class="draggable">Socio</div>{% endif %}
-                    {% if "taxi/collettivo" not in qgrouper %}
-                        <div class="draggable">Taxi/Collettivo</div>{% endif %}
-                    {% if "mese" not in qgrouper %}
-                        <div class="draggable">Mese</div>{% endif %}
-                </div>
-                <div id="enabled" class="box">
-                    {% for g in qgrouper %}
-                        {% if "cliente" == g %}
-                            <div class="draggable">Cliente</div>
-                        {% elif "socio"  == g %}
-                            <div class="draggable">Socio</div>
-                        {% elif "taxi/collettivo"  == g %}
-                            <div class="draggable">Taxi/Collettivo</div>
-                        {% elif "mese"  == g %}
-                            <div class="draggable">Mese</div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </fieldset>
+			<a href="#" onclick="setDateRange(0)">{{ quick_month_names.0 }}</a>
+			<a href="#" onclick="setDateRange(-1)">{{ quick_month_names.1 }}</a>
+			<a href="#" onclick="setDateRange(-2)">{{ quick_month_names.2 }}</a>
+		</fieldset>
+		<fieldset class="formset">
+			<legend>Filtro</legend>
+			<label><input type="checkbox" name="qfilter" value="fatture"
+						  {% if 'fatture' in qfilter %}checked{% endif %}>
+				Fatture</label>
+			<label><input type="checkbox" name="qfilter" value="carte"
+						  {% if 'carte' in qfilter %}checked{% endif %}>
+				Carta</label>
+			<label><input type="checkbox" name="qfilter" value="finemese"
+						  {% if 'finemese' in qfilter %}checked{% endif %}>
+				Fine mese</label>
+		</fieldset>
+		<fieldset class="formset">
+			<legend>Raggruppamento (trascina a destra)</legend>
+			<div class="dragcontainer">
+				<div id="available" class="box">
+					{% if "cliente" not in qgrouper %}
+						<div class="draggable">Cliente</div>{% endif %}
+					{% if "socio" not in qgrouper %}
+						<div class="draggable">Socio</div>{% endif %}
+					{% if "taxi/collettivo" not in qgrouper %}
+						<div class="draggable">Taxi/Collettivo</div>{% endif %}
+					{% if "mese" not in qgrouper %}
+						<div class="draggable">Mese</div>{% endif %}
+				</div>
+				<div id="enabled" class="box">
+					{% for g in qgrouper %}
+						{% if "cliente" == g %}
+							<div class="draggable">Cliente</div>
+						{% elif "socio"  == g %}
+							<div class="draggable">Socio</div>
+						{% elif "taxi/collettivo"  == g %}
+							<div class="draggable">Taxi/Collettivo</div>
+						{% elif "mese"  == g %}
+							<div class="draggable">Mese</div>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+		</fieldset>
 
-        <input class="asblock" type="submit" value="Aggiorna"/>
-    </form>
-    <h2>Report {{ reportname }}</h2>
-    <div id="data">
-        <table class="tablesorter">
-            <tr>
-                {% for h in data.rows|first %}
-                    <th>{{ h }}</th>
-                {% endfor %}
+		<input class="asblock" type="submit" value="Aggiorna"/>
+	</form>
+	<h2>Report {{ reportname }}</h2>
+	<div id="data">
+		<table class="tablesorter">
+			<tr>
+				{% for h in data.rows|first %}
+					<th>{{ h }}</th>
+				{% endfor %}
+			</tr>
+			{% for row in data.rows|slice:"1:" %}
+				<tr class="row">
+					{% for cell in row %}
+						<td>{{ cell }}</td>
+					{% endfor %}
+				</tr>
+			{% endfor %}
+		</table>
 
-            </tr>
-            {% for row in data.rows|slice:"1:" %}
-                <tr class="row">
-                    {% for cell in row %}
-                        <td>{{ cell }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </table>
-
-        <div class="countblock">{{ data.tot }} corse</div>
-    </div>
+		<div class="countblock">{{ data.tot }} corse</div>
+	</div>
 {% endblock %}
 
 {% block bottom %}
-    <script type="text/javascript" src="{% static "js/dragula/dragula.min.js" %}"></script>
-    <script type="text/javascript" src="{% static 'js/stats.js' %}"></script>
+	<script type="text/javascript" src="{% static "js/dragula/dragula.min.js" %}"></script>
+	<script type="text/javascript" src="{% static 'js/stats.js' %}"></script>
 {% endblock bottom %}

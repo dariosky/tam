@@ -96,8 +96,14 @@ class StatsView(MonthDatesMixin):
         else:
             context[key] = self.request.session.get('{}{}'.format(self.session_prefix, key), [])
 
+        key = 'detailed'
+        if key in self.request.GET:
+            context[key] = self.request.GET.get(key, 'none') != 'none'
+        else:
+            context[key] = self.request.session.get('{}{}'.format(self.session_prefix, key), False)
+
         # save the property in the session
-        for key in ['qtype', 'qgrouper', 'qfilter']:
+        for key in ['qtype', 'qgrouper', 'qfilter', 'detailed']:
             session_key = '{}{}'.format(self.session_prefix, key)
             if self.request.session.get(session_key) != context[key]:
                 self.request.session[session_key] = context[key]
@@ -108,6 +114,10 @@ class StatsView(MonthDatesMixin):
         return context
 
     def get_data(self, data_start, data_end, qtype, qfilter, qgrouper, **kwargs):
+        def add_details(rows, qs):
+            for detail in qs:
+                print(detail)
+
         data_end = data_end + datetime.timedelta(days=1)
         qs = Viaggio if qtype == 'corse' else Fattura
         qs = qs.objects.all()
@@ -141,9 +151,12 @@ class StatsView(MonthDatesMixin):
             qgrouper.remove('none')
         if not qgrouper:
             num_rows = qs.count()
-            qs = qs.aggregate(**fields)
+
             headers = ["Totale", "Prezzo", "Commissione"]
             rows.append(headers)
+            qs = qs.select_related("da", "a", "cliente", "conducente")
+            add_details(rows, qs)
+            qs = qs.aggregate(**fields)
             rows.append(("{num} {tipo}".format(num=num_rows, tipo=qtype),
                          qs['tot'],
                          qs['commissione'].quantize(Decimal("0.01"))))
@@ -196,7 +209,6 @@ class StatsView(MonthDatesMixin):
                            [r.get('tot'), r.get('commissione')]
                            )
                 rows.append(row)
-                print(row)
 
         data['rows'] = rows
         return data
