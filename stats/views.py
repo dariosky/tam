@@ -109,14 +109,25 @@ class StatsView(MonthDatesMixin):
                 self.request.session[session_key] = context[key]
 
         # build the data
-        keys = ('data_start', 'data_end', 'qtype', 'qfilter', 'qgrouper')
+        keys = ('data_start', 'data_end', 'qtype', 'qfilter', 'qgrouper', 'detailed')
         context['data'] = self.get_data(**{key: context[key] for key in keys})
         return context
 
-    def get_data(self, data_start, data_end, qtype, qfilter, qgrouper, **kwargs):
+    def get_data(self, data_start, data_end, qtype, qfilter, qgrouper, detailed):
         def add_details(rows, qs):
+            qs = qs.select_related("da", "a", "cliente", "conducente")
             for detail in qs:
-                print(detail)
+                detail_string = "{date} - {da}-{a} - {cliente} - {socio}".format(
+                    date=detail.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y %H:%M"),
+                    da=detail.da, a=detail.a,
+                    cliente=detail.cliente if detail.cliente else "Privato",
+                    socio=detail.conducente or "Non assegnato",
+                )
+                rows.append(
+                    dict(type='detail',
+                         data=[detail_string, detail.prezzo, detail.prezzo_commissione()]
+                         )
+                )
 
         data_end = data_end + datetime.timedelta(days=1)
         qs = Viaggio if qtype == 'corse' else Fattura
@@ -153,13 +164,16 @@ class StatsView(MonthDatesMixin):
             num_rows = qs.count()
 
             headers = ["Totale", "Prezzo", "Commissione"]
-            rows.append(headers)
-            qs = qs.select_related("da", "a", "cliente", "conducente")
-            add_details(rows, qs)
+            rows.append(dict(type="headers", data=headers))
+            if detailed:
+                add_details(rows, qs)
             qs = qs.aggregate(**fields)
-            rows.append(("{num} {tipo}".format(num=num_rows, tipo=qtype),
-                         qs['tot'],
-                         qs['commissione'].quantize(Decimal("0.01"))))
+            rows.append(
+                dict(type="row", data=("{num} {tipo}".format(num=num_rows, tipo=qtype),
+                                       qs['tot'],
+                                       qs['commissione'].quantize(Decimal("0.01")))
+                     )
+            )
         else:
             fields_name = dict(socio='conducente',
                                mese='year,month')  # the field name in the model
@@ -168,9 +182,11 @@ class StatsView(MonthDatesMixin):
             for c in qgrouper:
                 # the fields in the group by clause
                 grouper_fields += fields_name.get(c, c).split(",")
-            qs = (qs
-                  .order_by()  # remove existing order, or they'll be used as grouper
-                  )
+            rows.append(
+                dict(type="header", data=qgrouper + ["Prezzo", "Quota Cons."])
+            )
+            all_details = qs
+            qs = qs.order_by()  # remove existing order, or they'll be used as grouper
             if 'mese' in qgrouper:
                 # we do an intermediate annotation, before grouping
                 qs = (qs
@@ -183,32 +199,38 @@ class StatsView(MonthDatesMixin):
                   .annotate(**fields)
                   .order_by(*grouper_fields)
                   )  # and annotate
-            rows.append(qgrouper + ["Prezzo", "Quota Cons."])
 
             for r in qs:
                 row = []
+                details = all_details.all()
                 for field in qgrouper:
                     value = r.get(field)
                     if field == 'socio':
+                        details = details.filter(conducente=r.get('conducente'))
                         if r.get('conducente'):
                             value = r.get('conducente_nome')
                         else:
                             value = "*non assegnato*"
                     elif field == 'cliente':
+                        details = details.filter(cliente=r.get('cliente'))
                         if value is None:
                             value = "*nessun cliente*"
                         else:
                             value = r.get('cliente_nome')
                     elif field == 'taxi/collettivo':
+                        details = details.filter(esclusivo=r.get('esclusivo'))
                         value = r.get("esclusivo") and 'taxi' or 'collettivo'
                     elif field == 'mese':
+                        details = details.filter(data__month=r.get('month'))
                         month = MONTH_NAMES[int(r.get('month')) - 1]
                         value = "%s %s" % (month, int(r.get('year')))
                     row.append(value)
                 row += map(lambda x: x.quantize(Decimal("0.01")),
                            [r.get('tot'), r.get('commissione')]
                            )
-                rows.append(row)
+                if detailed:
+                    add_details(rows, details)
+                rows.append(dict(type="row", data=row))
 
         data['rows'] = rows
         return data

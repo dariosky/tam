@@ -44,3 +44,14 @@
   .enabled {
   }
 }
+
+.row {
+  td {
+    font-weight: bolder;
+  }
+  &.detail td {
+    font-weight: normal;
+    text-align: right;
+    padding-left: 5em;
+  }
+}

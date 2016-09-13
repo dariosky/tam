@@ -86,16 +86,30 @@
 	<div id="data">
 		<table class="tablesorter">
 			<tr>
-				{% for h in data.rows|first %}
-					<th>{{ h }}</th>
-				{% endfor %}
+				{% with  data.rows|first as headers %}
+					{% for h in headers.data %}
+						<th>{{ h }}</th>
+					{% endfor %}
+				{% endwith %}
 			</tr>
 			{% for row in data.rows|slice:"1:" %}
-				<tr class="row">
-					{% for cell in row %}
-						<td>{{ cell }}</td>
-					{% endfor %}
-				</tr>
+				{% if row.type == "detail" %}
+					<tr class="row detail">
+						<td colspan="{{ qgrouper|length }}">{{ row.data|first }}</td>
+						{% for cell in row.data|slice:"1:" %}
+							<td>{{ cell }}</td>
+						{% endfor %}
+
+					</tr>
+				{% else %}
+					<tr class="row">
+						{% for cell in row.data %}
+							<td>{{ cell }}</td>
+						{% endfor %}
+					</tr>
+				{% endif %}
+
+
 			{% endfor %}
 		</table>
 
