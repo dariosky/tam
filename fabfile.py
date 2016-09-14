@@ -45,7 +45,7 @@ if not env.get('NAME') and __name__ != '__main__':
 if os.path.exists(os.path.expanduser("~/.ssh/config")):
     env.use_ssh_config = True
 
-DO_REQUIREMENTS = False
+DO_REQUIREMENTS = True
 
 
 def perform_env_substitutions():
@@ -95,7 +95,7 @@ def get_repository():
 
 def create_virtualenv():
     if run("test -d %s" % env.VENV_FOLDER, quiet=True).failed:
-        run('virtualenv %s' % env.VENV_FOLDER)
+        run('python3 -m venv %s' % env.VENV_FOLDER)
 
 
 def update_distribute():
@@ -442,6 +442,7 @@ def get_remote_files():
 @task
 def set_mailgun_webhooks():
     """ Set webhooks to receive bounced mail from Mailgun """
+    os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
     os.environ['TAM_SETTINGS'] = env.TAM_SETTINGS
     from django.conf import settings
     webhost = getattr(env, 'WEBHOST', None)
