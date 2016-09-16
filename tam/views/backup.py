@@ -1,4 +1,5 @@
 # coding: utf-8
+from operator import itemgetter
 from threading import Thread
 
 from django.conf import settings
@@ -62,13 +63,13 @@ def getBackupInfo(doCleanup=False):
                    "size": humanizeSize(os.path.getsize(filename)),
                    "username": extractBackupUser(filename),
                } for filename in backupFiles]
-    backups.sort()
+    backups.sort(key=itemgetter("date", "filename"))
 
     if doCleanup and len(backups) > backcount:
         for backup in backups[:-backcount + 1]:
             logging.debug("Cancello il backup: %s" % os.path.basename(backup["filename"]))
             os.unlink(backup["filename"])
-    return {"dbname": dbname, "backupdir": backupdir, "backups": backups,}
+    return {"dbname": dbname, "backupdir": backupdir, "backups": backups, }
 
 
 def getbackup(request, backupdate):
