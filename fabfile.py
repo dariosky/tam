@@ -451,15 +451,16 @@ def set_mailgun_webhooks():
     API_BASE_URL = 'https://api.mailgun.net/v3'
     domain = settings.MAILGUN_SERVER_NAME
     auth = HTTPBasicAuth('api', settings.MAILGUN_ACCESS_KEY)
-    response = requests.post("{base}/domains/{domain}/webhooks".format(
-        base=API_BASE_URL, domain=domain
-    ), auth=auth,
-        data=dict(id='drop', url='http://{webhost}/webhooks/email/'.format(webhost=webhost)))
+    for hook in ['drop', 'spam']:
+        response = requests.post("{base}/domains/{domain}/webhooks".format(
+            base=API_BASE_URL, domain=domain
+        ), auth=auth,
+            data=dict(id=hook, url='http://{webhost}/webhooks/email/'.format(webhost=webhost)))
 
-    if response.status_code == 200:
-        puts("MailGun webhooks created")
-    else:
-        puts(response.text)
+        if response.status_code == 200:
+            puts("MailGun webhooks '%s' created" % hook)
+        else:
+            puts("%s: %s" % (hook, response.text))
 
 
 if __name__ == '__main__':
