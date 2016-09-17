@@ -1,5 +1,0 @@
-# run server
-*/5  * * * * ~/projects/tam/run_server start >> ~/projects/tam/logs/cron_run.log 2>&1
-
-# run the tasks
-*/30 * * * * ~/environments/tam/bin/python ~/projects/tam/manage.py taskd --settings settings start >> ~/projects/tam/logs/cron_bk.log 2>&1
