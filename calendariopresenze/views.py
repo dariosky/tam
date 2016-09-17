@@ -176,13 +176,11 @@ class CalendarManage(AjaxableResponseMixin):
             if request.is_ajax():
                 row_template = get_template('calendar/cal_row.html')
 
-                # I use the context view, adding the things to rendere the row
-                context.update(dict(
-                    element=calendar,
-                    calDesc=settings.CALENDAR_DESC[calendar.type]
-                ))
-                return HttpResponse(row_template.render(RequestContext(request, context)),
-                                    status=201)
+                # I use the context view, adding the things to render the row
+                context.update(dict(element=calendar,
+                                    calDesc=settings.CALENDAR_DESC[calendar.type],
+                                    ))
+                return HttpResponse(row_template.render(context, request), status=201)
             else:
                 return HttpResponseRedirect(
                     reverse('calendariopresenze-manage') + '?day=' + context['selected_day']
@@ -257,7 +255,7 @@ class CalendarManage(AjaxableResponseMixin):
                     element=calendar,
                     calDesc=settings.CALENDAR_DESC[calendar.type]
                 ))
-                return HttpResponse(row_template.render(RequestContext(request, context)),
+                return HttpResponse(row_template.render(context, request),
                                     status=201)
             else:
                 return HttpResponseRedirect(
