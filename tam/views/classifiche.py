@@ -116,7 +116,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
                             # classifiche.append(classifica)
 
     for classifica_definita in classifiche_definite:  # ordino i dati
-        # classifica_definita['dati'].sort()
+        classifica_definita['dati'].sort()
         if classifica_definita['dati']:
             classifica_definita['min'] = classifica_definita["dati"][0][
                 0]  # prendo la chiave del primo valore
@@ -184,7 +184,8 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 
 
 def descrizioneDivisioneClassifiche(viaggio):
-    """ A seconda dei punti nei campi del viaggio riporto la descrizione di come è stato suddiviso nelle classifiche """
+    """ A seconda dei punti nei campi del viaggio riporto la descrizione
+     di come è stato suddiviso nelle classifiche """
     classifiche_definite = settings.CLASSIFICHE
     result = ""
     for classifica in classifiche_definite:
@@ -204,11 +205,12 @@ def descrizioneDivisioneClassifiche(viaggio):
                 #
                 result += '<i class="sprite icon-casina"></i>' * punti
                 result += '<br/>'
-                result += "%(punti)d x %(valore)s nei %(nome)s.<br/>" % {"punti": punti,
-                                                                         "valore": viaggio.prezzoPunti,
-                                                                         "prefix": classifica.get(
-                                                                             "prefix", "nei"),
-                                                                         "nome": classifica["nome"]}
+                result += "%(punti)d x %(valore)s nei %(nome)s.<br/>" % {
+                    "punti": punti,
+                    "valore": viaggio.prezzoPunti,
+                    "prefix": classifica.get("prefix", "nei"),
+                    "nome": classifica["nome"]
+                }
 
     result = mark_safe(result)
     return result
