@@ -8,8 +8,8 @@ host = gethostname().lower()
 TAM_VERSION = "6.81"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 
-if host in ("dariosky", "acido", "dario", "dico", "accio", "acciox"):
-    DEBUG = True  # siamo in Test
+if 'TAM_DEBUG' in os.environ:
+    DEBUG = True
 else:
     DEBUG = False
 
