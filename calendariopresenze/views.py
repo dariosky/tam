@@ -291,10 +291,12 @@ class CalendarRank(TemplateView):
         previous_year = year - 1
         next_year = year + 1 if year < now.year else None
         calendars = copy.copy(settings.CALENDAR_DESC)
-        for key, caldesc in calendars.items():
-            if "hide_rank" in caldesc:
-                del calendars[key]
-                continue
+        # let's remove the one with hide_rank
+        for key in list(filter(lambda key: "hide_rank" in calendars[key], calendars)):
+            del calendars[key]
+
+        for key in calendars:
+            caldesc = calendars[key]
             ranks = []
             calendar_filter_query = Q(attivo=True,
                                       presenze__type=key)  # calendar do not reset by default
