@@ -277,7 +277,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             else:
                 importoViaggio = importoViaggio - viaggio.commissione
 
-        importoViaggio = importoViaggio - viaggio.costo_autostrada
+        importoViaggio = Decimal(importoViaggio - viaggio.costo_autostrada)
 
         km = viaggio.get_kmtot()
         # per le corse singole
