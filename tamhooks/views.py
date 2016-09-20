@@ -1,14 +1,15 @@
 # coding=utf-8
+import hashlib
+import hmac
+import logging
+
 from django.conf import settings
 from django.http import HttpResponse
-
 from django.views.decorators.csrf import csrf_exempt
 
 from markViews import public
-import logging
-import hashlib, hmac
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("tam.webhooks")
 
 
 def verify(api_key, token, timestamp, signature):
