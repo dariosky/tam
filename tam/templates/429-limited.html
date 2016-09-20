@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% load i18n staticfiles %}
+{% block title %}{% trans "Troppi richieste" %} &raquo; {{ block.super }}{% endblock %}
+{% block content %}
+	<div class="centered-message">
+		<h1>Troppe richieste</h1>
+		<img src='{% static "img/err-too-many.jpg" %}' alt=''/>
+		<p>Hai effettuato troppe richieste in troppo poco tempo.</p>
+		<p>Non esagerare, sii zen e sorridi... ed eventualmente riprova tra poco.</p>
+	</div>
+{% endblock %}
+{% block superNavBar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block bodyClasses %}full-message{% endblock %}

@@ -6,10 +6,13 @@ from django.contrib.auth.views import logout_then_login as django_logout
 from django.conf import settings
 from django.forms import forms
 from django.http import HttpResponseServerError
+from django.shortcuts import render_to_response
+
 from markViews import public
 from modellog.actions import logAction
 from tam.middleware.prevent_multisession import get_concurrent_sessions
 from django.utils.translation import ugettext_lazy as _
+from brake.decorators import ratelimit
 
 logger = logging.getLogger('tam.login')
 
@@ -47,7 +50,12 @@ class AuthenticationFormWrapped(AuthenticationForm):
 
 
 @public
+@ratelimit()
 def login(request):
+    if getattr(request, 'limited', False):
+        logger.error("Too many requests on {path}. Page forbidden.".format(path=request.path))
+        return render_to_response("429-limited.html", status=429)
+
     logged = request.user.is_authenticated() and request.user.username
     response = django_login(request,
                             template_name="login.html",

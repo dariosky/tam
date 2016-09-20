@@ -51,6 +51,7 @@ handler404 = tam.views.mainviews.errors400
 urlpatterns += [
     url('^except/', errorview, name='exception-test'),
     url('^500/', handler500, name='error-test'),
+    url('^404/', handler404, name='404-test'),
     url('^ping/', pingview, name='ping-test'),
     url('^emailtest/', email_test, name='email-test'),
 ]

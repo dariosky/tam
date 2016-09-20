@@ -468,6 +468,6 @@ if __name__ == '__main__':
     import sys
     from fabric.main import main
 
-    sys.argv[1:] = ["-c", "taxi2.ini", "set_mailgun_webhooks"]
+    sys.argv[1:] = ["-c", "arte.ini", "set_mailgun_webhooks"]
     print(sys.argv)
     main()
