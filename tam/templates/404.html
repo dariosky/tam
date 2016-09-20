@@ -1,9 +1,12 @@
-{% extends "base.html" %}
-{% block title %}Pagina non trovata &raquo; {{ block.super }}{% endblock %}
+{% extends "base.html" %}{% load i18n staticfiles %}
+{% block title %}{% trans "Pagina non trovata" %} &raquo; {{ block.super }}{% endblock %}
 {% block content %}
 	<h1>Pagina non trovata</h1>
+	<img src='{% static "img/err-404.jpg" %}' alt=''/>
 	<p>
 		La pagina che hai richiesto non esiste più, hai inserito un indirizzo sbagliato?<br/>
 	</p>
 {% endblock %}
 {% block superNavBar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block bodyClasses %}full-message{% endblock %}

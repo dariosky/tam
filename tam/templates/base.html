@@ -16,14 +16,14 @@
 	{% block css %}
 		{% if tam_stealth %}{% stylesheet 'tam-stealth' %}{% endif %}
 		<style>
-			body{background-color: {{ TAM_BACKGROUND }}}
+			body{background-color: {{ TAM_BACKGROUND }}
 		</style>
 	{% endblock %}
 
 	{% block header %}{% endblock header %}
  </head>
 
-<body>
+<body class="{% block bodyClasses %}{% endblock %}">
 {% include "google_analytics.inc.html" %}
 {% block titleContent %}{% endblock %}
 {% block superNavBar %}

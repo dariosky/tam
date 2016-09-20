@@ -7,11 +7,13 @@ host = gethostname().lower()
 
 TAM_VERSION = "6.81"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
+logger = logging.getLogger("tam.settings")
 
 if 'TAM_DEBUG' in os.environ:
     DEBUG = True
 else:
     DEBUG = False
+print("Running in %s MODE" %("PRODUCTION" if not DEBUG else "DEBUG"))
 
 # DEBUG = False
 
@@ -447,7 +449,7 @@ TAM = dict(
         BUS=False,  # allow filter bus, for whatever driver name containing "bus"
     ),
 )
-TAM_BACKGROUND_COLOR = '#FBFFBA',  # the default background
+TAM_BACKGROUND_COLOR = '#FBFFBA'  # the default background
 TAM_SHOW_CLASSIFICA_FATTURE = False
 
 FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions

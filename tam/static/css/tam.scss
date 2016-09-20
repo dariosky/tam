@@ -44,10 +44,17 @@ $back-hilight: #FE9;
   margin-top: 3px;
 }
 
+html {
+  height: 100%;
+}
+
 body {
+  min-height: 100%;
   color: #3d3d3d;
   text-align: center;
   background-color: $back-color;
+  margin: 0;
+  padding: 8px;
 }
 
 a, a:visited {
@@ -792,4 +799,6 @@ input[type="button"], input[type="submit"], input[type="reset"], input[type="fil
 .hasDatepicker, .time-widget {
   width: 65px;
 }
+
 @import "stats";
+@import "fullmessage";

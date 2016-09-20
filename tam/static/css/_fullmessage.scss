@@ -1,0 +1,15 @@
+body.full-message {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+
+  .content {
+    h1 {
+      margin-top: 0;
+    }
+
+    text-align: center;
+    margin: auto;
+    padding: 50px;
+  }
+}
