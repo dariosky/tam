@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from markViews import public
 
-logger = logging.getLogger("tam.webhooks")
+logger = logging.getLogger(__name__)
 
 
 def verify(api_key, token, timestamp, signature):
