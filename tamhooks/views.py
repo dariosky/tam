@@ -15,7 +15,7 @@ logger = logging.getLogger("tam.webhooks")
 def verify(api_key, token, timestamp, signature):
     return signature == hmac.new(
         key=api_key.encode('ascii'),
-        msg='{}{}'.format(timestamp, token),
+        msg='{}{}'.format(timestamp, token).encode("utf-8"),
         digestmod=hashlib.sha256).hexdigest()
 
 
