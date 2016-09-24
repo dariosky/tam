@@ -132,7 +132,7 @@ def update_requirements():
     """ Update all libraries in requirements file """
     with virtualenv():
         with cd(env.REPOSITORY_FOLDER):
-            run('pip install -U -r %s' % env.REQUIREMENT_PATH)  # update libraries
+            run('pip install -U -q -r %s' % env.REQUIREMENT_PATH)  # update libraries
 
 
 def update_instance(do_update_requirements=True, justPull=False):
@@ -155,7 +155,7 @@ def update_instance(do_update_requirements=True, justPull=False):
                 puts("Creating media subfolder for user uploaded assets.")
                 run("mkdir -p %s" % env.MEDIA_FOLDER)
 
-            run("python manage.py collectstatic --noinput")
+            run("python manage.py collectstatic --noinput -v0")
 
             update_database()
 
