@@ -1,6 +1,9 @@
 # Django related ***
 django<1.11
 
+# security
+argon2-cffi
+
 # static files ***
 django-pipeline < 1.6
 jinja2
@@ -36,4 +39,5 @@ pyasn1
 # python3 compatibility ***
 future
 
+# request throttling
 django-brake

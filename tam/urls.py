@@ -9,7 +9,7 @@ from .views.classifiche import classificheconducenti
 from .views.tamviews import listaCorse, getList, corsa, corsaClear, corsaCopy, cliente, clienti
 from .views.tamviews import listino, listinoDelete, \
     clonaListino, exportListino, luoghi, bacino, privati, passeggero, conducente, profilo, util
-from .views.users import permissions, newUser, delUser, passwordChangeAndReset, resetSessions
+from .views.users import permissions, newUser, delUser, passwordChangeAndReset, reset_sessions
 
 urlpatterns = [
     url(r'^$', listaCorse, name="tamCorse"),
@@ -97,7 +97,7 @@ urlpatterns = [
     url(r'^profilo/$', profilo, {"Model": ProfiloUtente, "unique": []}, name="tamUserserProfile"),
 
     url(r"^util/$", util, name="tamUtil"),
-    url(r"^resetSessions/$", resetSessions, name="tamResetSessions"),
+    url(r"^resetSessions/$", reset_sessions, name="tamResetSessions"),
     url(r"^permissions/$", permissions, name="tamManage"),
     url(r"^permissions/(?P<username>.*)/$", permissions, name="tamManage"),
     url(r"^newuser/$", newUser, name="newUser"),

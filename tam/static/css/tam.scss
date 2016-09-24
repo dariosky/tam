@@ -240,36 +240,36 @@ form {
   cursor: pointer;
   font-weight: bolder;
   z-index: 1000;
+
+  div {
+    padding: 3px;
+    margin: 2px;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    background-color: #fcf8e3;
+    border: 2px solid #fbeed5;
+    border-radius: 4px;
+  }
 }
 
-.messages div {
-  padding: 3px;
-  margin: 2px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-  background-color: #fcf8e3;
-  border: 2px solid #fbeed5;
-  border-radius: 4px;
-}
-
-.messages div.success {
+.success {
   background-color: #dff0d8;
   border-color: #d6e9c6;
   color: #468847;
 }
 
-.messages div.error {
+.error {
   background-color: #f2dede;
   border-color: #eed3d7;
   color: #b94a48;
 }
 
-.messages div.debug {
+.debug {
   background-color: #ccc;
   border-color: #aaa;
   color: #666;
 }
 
-.messages div.info {
+.info {
   background-color: #d9edf7;
   border-color: #bce8f1;
   color: #3a87ad;
