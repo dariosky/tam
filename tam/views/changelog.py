@@ -186,6 +186,8 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.72', '14/8/2016', "Preavviso per prenotazioni regolabile in base all'orario"),
         ('6.8', '16/8/2016', "Updates for Python3"),
         ('6.81', '18/8/2016', "Statistiche fatture. Google Analytics."),
+        ('6.91', '24/9/2016', "Nuove statistiche dettagliate. "
+                              "Rate-limiting login, new hash e verifica sicurezza delle password"),
 
     ]
     # ('', '', mark_safe('''''')),
