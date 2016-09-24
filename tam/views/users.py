@@ -1,42 +1,38 @@
 # coding=utf-8
 import logging
+from collections import defaultdict
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.sessions.models import Session
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import connections
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
+from django.utils.translation import ugettext_lazy as _
 
 from tam.middleware.prevent_multisession import get_concurrent_sessions
 from tam.models import Cliente, Luogo, ProfiloUtente
 
 
-def resetSessions(request, template_name="utils/resetSessions.html"):
+def reset_sessions(request, template_name="utils/resetSessions.html"):
     user = request.user
     if not user.is_superuser:
-        messages.error(request,
-                       "Devi essere il superuser per cancellare le sessioni.")
+        messages.error(request, "Devi essere il superuser per cancellare le sessioni.")
         return HttpResponseRedirect("/")
     if request.method == "POST":
         if "reset" in request.POST:
             logging.debug("reset delle sessioni")
-            from django.db import transaction
-
-            connection = connections['default']
-            cursor = connection.cursor()
-            query = "delete from django_session"
-            cursor.execute(query)
-            transaction.commit_unless_managed()
-
-            # connection.commit()
+            Session.objects.all().delete()
             return HttpResponseRedirect("/")
 
     return render(request, template_name, locals())
 
 
-def resetUserSession(selectedUser):
+def reset_user_session(selectedUser):
     from django.contrib.sessions.models import Session
 
     logging.debug("Cancello le sessioni dell'utente %s" % selectedUser.id)
@@ -50,8 +46,7 @@ def get_userkeys(user):
     return hasattr(user, "prenotazioni"), user.username.lower()
 
 
-def permissions(request, username=None,
-                template_name="utils/manageUsers.html"):
+def permissions(request, username=None, template_name="utils/manageUsers.html"):
     user = request.user
     quick_book = getattr(settings, 'PRENOTAZIONI_QUICK', False)
     if not user.has_perm('auth.change_user'):
@@ -86,14 +81,23 @@ def permissions(request, username=None,
 
         password = request.POST.get("password", None)
         passwordbis = request.POST.get("passwordbis", None)
+        errors = defaultdict(list)
         if "change" in request.POST:  # effetto la modifica all'utente
-            if password and password == passwordbis:
-                # @type selectedUser auth.User
-                selectedUser.set_password(password)
-                selectedUser.save()
-                messages.success(request,
-                                 "Modificata la password all'utente %s." % selectedUser.username)
-                resetUserSession(selectedUser)
+            if password:
+                if password != passwordbis:
+                    errors['password'].append(_("Le due password non coincidono"))
+                else:
+                    try:
+                        validate_password(password, user=selectedUser)
+                    except ValidationError as e:
+                        for message in e.messages:
+                            errors['password'].append(message)
+                    else:
+                        selectedUser.set_password(password)
+                        selectedUser.save()
+                        messages.success(request,
+                                         "Modificata la password all'utente %s." % selectedUser.username)
+                        reset_user_session(selectedUser)
 
             tipo_utente = request.POST.get('tipo_prenotazioni', 'c')
             if tipo_utente == 'c':  # utente conducente
@@ -108,7 +112,8 @@ def permissions(request, username=None,
                 if tipo_utente == 'c':  # utente conducente
                     if utentePrenotazioni:
                         messages.warning(request,
-                                         "Faccio diventare l\'utente '%s' un conducente. Attenzione se aveva accesso esterno." % selectedUser)
+                                         ("Faccio diventare l\'utente '%s' un conducente. "
+                                          "Attenzione se aveva accesso esterno.") % selectedUser)
                         # elimino l'utente prenotazioni
                         utentePrenotazioni.delete()
                 else:
@@ -119,7 +124,8 @@ def permissions(request, username=None,
                     selectedUser.groups.clear()
                     if not utentePrenotazioni:
                         messages.info(request,
-                                      "Faccio diventare il conducente '%s' un utente per le prenotazioni." % selectedUser)
+                                      "Faccio diventare il conducente"
+                                      " '%s' un utente per le prenotazioni." % selectedUser)
                         utentePrenotazioni = UtentePrenotazioni()
                     else:
                         # era già un utente prenotazioni
@@ -128,18 +134,16 @@ def permissions(request, username=None,
                     utentePrenotazioni.user = selectedUser
                     # attuale_prenotazione.cliente_id = request.POST.getlist('prenotazioni_clienti')
                     utentePrenotazioni.luogo_id = request.POST.get('prenotazioni_luogo')
-                    utentePrenotazioni.nome_operatore = request.POST.get(
-                        'operatore')
+                    utentePrenotazioni.nome_operatore = request.POST.get('operatore')
                     utentePrenotazioni.email = request.POST.get('email')
                     utentePrenotazioni.save()
                     logging.debug("Setting clients to user prenotazioni")
-                    for cliente_id in request.POST.getlist(
-                        'prenotazioni_clienti'):
+                    for cliente_id in request.POST.getlist('prenotazioni_clienti'):
                         cliente = Cliente.objects.get(id=cliente_id)
                         utentePrenotazioni.clienti.add(cliente)
                         logging.debug("adding %s" % cliente)
-            return HttpResponseRedirect(reverse("tamManage", kwargs={
-                "username": username}))
+            if not errors:
+                return HttpResponseRedirect(reverse("tamManage", kwargs={"username": username}))
         # fine delle azioni per il submit
 
         if manage_prenotazioni:
@@ -213,7 +217,7 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
     if form.is_valid():
         logging.debug("Cambio la password")
         form.save()
-        resetUserSession(request.user)  # reset delle sessioni
+        reset_user_session(request.user)  # reset delle sessioni
         return HttpResponseRedirect('/')
     # response=password_change(request, template_name=template_name, post_change_redirect='/')
     return render(request, template_name, {'form': form})

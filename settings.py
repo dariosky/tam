@@ -13,7 +13,7 @@ if 'TAM_DEBUG' in os.environ:
     DEBUG = True
 else:
     DEBUG = False
-print("Running in %s MODE" %("PRODUCTION" if not DEBUG else "DEBUG"))
+print("Running in %s MODE" % ("PRODUCTION" if not DEBUG else "DEBUG"))
 
 # DEBUG = False
 
@@ -451,6 +451,24 @@ TAM_SHOW_CLASSIFICA_FATTURE = False
 FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions
 
 GOOGLE_ANALYTICS_ID = None
+
+# set password hasher, we use Argon as default
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.BCryptPasswordHasher',
+]
+
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityVal8dator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+     'OPTIONS': {'min_length': 8}
+     },
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}
+]
 
 # END OF DEFAULTS **************************************************************
 

@@ -24,13 +24,13 @@
 	{% if selectedUser %}
 		<form method="post" action=".">
 			{% csrf_token %}
-			<p>
-				dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
+			dettagli dell'utente <strong>{{ selectedUser.username }}</strong>
 
-			<p>
+			<div {% if errors.password %} class="error"{% endif %}>
+				{% for error in errors.password %}<p>{{ error }}</p>{% endfor %}
 				<label>Nuova password:<input type="password" name="password"></label>
 				<label>riconferma: <input type="password" name="passwordbis"></label>
-			</p>
+			</div>
 
 			<p id='user_group' {% if utentePrenotazioni %}style="display:none"{% endif %}>
 				<label for="selectedGroup">Gruppo di appartenenza:</label>
