@@ -55,6 +55,7 @@ body {
   background-color: $back-color;
   margin: 0;
   padding: 8px;
+  box-sizing: border-box;
 }
 
 a, a:visited {
