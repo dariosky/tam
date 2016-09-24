@@ -1,10 +1,13 @@
-{% extends "base.html" %}
+{% extends "base.html" %}{% load i18n staticfiles %}
 {% block title %}Accesso negato &raquo; {{ block.super }}{% endblock %}
 {% block content %}
 	<h1>Accesso negato</h1>
+	<img src='{% static "img/err-403.jpg" %}' alt=''/>
 	<p>
-		Accesso a TAM negato, potrebbe essere che tu non abbia i cookies abilitati?<br/>
+		Potrebbe essere che tu non abbia i cookies abilitati?<br/>
 		In ogni caso, l'assistenza è stata allertata...
 	</p>
 {% endblock %}
 {% block superNavBar %}{% endblock %}
+{% block footer %}{% endblock %}
+{% block bodyClasses %}full-message{% endblock %}

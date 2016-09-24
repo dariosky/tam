@@ -1,12 +1,13 @@
 # coding=utf-8
 """ Each request needs an authenticathed user """
-from django.contrib.auth.decorators import login_required
-from django.core.mail import mail_admins
-from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
-from django.shortcuts import render
-from django.core.exceptions import ObjectDoesNotExist
 import logging
+
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.mail import mail_admins
+from django.core.urlresolvers import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
 
 logger = logging.getLogger('tam.general')
 
@@ -51,18 +52,18 @@ class RequireLoginMiddleware(object):
 def csrf_failure_view(request, reason=''):
     response = render(request, '403.html', {})
     response.status_code = 403
-    message_tokens = [u"%s got hit in the face with Forbidden shovel" % request.user]
-    message_tokens.append("in: %s" % request.path)
+    message_tokens = [u"%s got hit in the face with Forbidden shovel" % request.user,
+                      "in: %s" % request.path]
     post_data = request.POST.copy()
     if 'password' in post_data:
         del post_data['password']
     if 'HTTP_REFERER' in request.environ:
         message_tokens.append("from: %s" % request.environ['HTTP_REFERER'])
-    message_tokens.append("POST:\n" + post_data)
+    message_tokens.append("POST: %s\n" % post_data)
     if False:  # ok, let's disable notifications of 403, if not settings.DEBUG
         mail_admins(
             "403 alert",
             "\n".join(message_tokens)
         )
-    logger.debug("\n".join(message_tokens))
+    logger.warning("\n".join(message_tokens))
     return response
