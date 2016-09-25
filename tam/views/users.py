@@ -136,6 +136,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
                     utentePrenotazioni.luogo_id = request.POST.get('prenotazioni_luogo')
                     utentePrenotazioni.nome_operatore = request.POST.get('operatore')
                     utentePrenotazioni.email = request.POST.get('email')
+                    utentePrenotazioni.quick_book = request.POST.get('quickbook') and True or False
                     utentePrenotazioni.save()
                     logging.debug("Setting clients to user prenotazioni")
                     for cliente_id in request.POST.getlist('prenotazioni_clienti'):

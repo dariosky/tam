@@ -53,9 +53,10 @@
 	</p>
 	{% if quick_book %}
 		<p>
-			<label for="enable_quickbook">Prenotazioni rapide:</label>
-			<input type="checkbox" id="enable_quickbook"
-				   {% if utentePrenotazioni.quick_book %}checked{% endif %}"/>
+			<label>Prenotazioni rapide:
+			<input type="checkbox" name="quickbook" id=quickbook"
+				   {% if utentePrenotazioni.quick_book %}checked{% endif %} />
+			</label>
 		</p>
 	{% endif %}
 </div>

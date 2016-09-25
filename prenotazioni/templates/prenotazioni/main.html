@@ -9,13 +9,16 @@
 	{% if cliente_unico %}{{ cliente_unico }}{% endif %}
 
 
-	{% if quick_book and utentePrenotazioni.quick_book %}
+	{% if not prenotazione.id and quick_book and utentePrenotazioni.quick_book %}
 		<form action='' method="post" id='quickform'>
+			{% csrf_token %}
 			<div class="quickbook">
-				<button type="submit" class="book btn btn-large">Chiamata diretta <br> Locale
-				</button>
-				<div class="book btn btn-large">Chiamata diretta <br> Padova</div>
-				<div class="book btn btn-large">Chiamata diretta <br> Venezia</div>
+				{% for target in quick_book.choices %}
+					<button type="submit" name="quickbook" value="{{ target.name }}"
+							class="book btn btn-large">
+						Chiamata diretta <br> {{ target.name }}
+					</button>
+				{% endfor %}
 			</div>
 		</form>
 	{% endif %}
@@ -30,7 +33,12 @@
 			<input type='submit'
 				   name='prenota'
 				   class='btn'
-				   value='{% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'/>
+				   value='
+
+
+
+
+						   {% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'/>
 			{% if prenotazione %}
 				<input type='submit'
 					   name='delete'

@@ -470,6 +470,18 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+PRENOTAZIONI_QUICK = dict(
+    # choices=[dict(name="Locale"),  # no place_name means same place of client
+    #          dict(name="Padova", place_name='.Padova Città'),
+    #          dict(name="Venezia", place_name='.Venezia Marco Polo'),
+    #          ],
+    # defaults=dict(
+    #     numero_passeggeri=2,
+    #     note="Prenotazione rapida",
+    #     esclusivo=True,
+    # ),
+)
+
 # END OF DEFAULTS **************************************************************
 
 settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
