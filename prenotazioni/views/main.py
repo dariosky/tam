@@ -16,6 +16,7 @@ from django.db import transaction
 from django.forms.fields import TypedChoiceField
 from django.forms.widgets import Input
 from django.http import HttpResponseRedirect
+from django.http.response import Http404
 from django.shortcuts import render
 from django.utils.translation import ugettext as _, ungettext
 
@@ -49,7 +50,6 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
     else:
         raise Exception("Azione mail non valida %s" % azione)
 
-    azione = ""
     context = {"prenotazione": prenotazione,
                "azione": prenotazione_suffix,
                }
@@ -160,6 +160,7 @@ class FormPrenotazioni(forms.ModelForm):
 @transaction.atomic  # commit solo se tutto OK
 def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html'):
     utentePrenotazioni = request.user.prenotazioni
+    QUICK_BOOK = getattr(settings, 'PRENOTAZIONI_QUICK', False)
 
     previous_values = {}
     if id_prenotazione:
@@ -187,6 +188,14 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
     else:
         prenotazione = None
         editable = True
+
+    if not id_prenotazione and request.method == "POST" and QUICK_BOOK:
+        # TODO: quickbook
+        targets = filter(lambda target: target['name'] == request.POST.get('quickbook'),
+                         QUICK_BOOK['choices'])
+        if not targets:
+            return Http404()
+        pass
 
     form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
     if prenotazione:
@@ -325,7 +334,7 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                       "prenotazione": prenotazione,
                       "cliente_unico": cliente_unico,
                       "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
-                      "quick_book": getattr(settings, 'PRENOTAZIONI_QUICK', False)
+                      "quick_book": QUICK_BOOK,
                   },
                   )
 
@@ -410,7 +419,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
     page = request.GET.get("page", 1)
     try:
         page = int(page)
-    except:
+    except ValueError:
         page = 1
     s = SmartPager(page, paginator.num_pages)
     paginator.smart_page_range = s.results
