@@ -25,7 +25,7 @@ from prenotazioni.models import Prenotazione
 from prenotazioni.util import prenotaCorsa
 from prenotazioni.views.tam_email import notifyByMail
 from tam import tamdates
-from tam.models import Viaggio, Cliente
+from tam.models import Viaggio, Cliente, Luogo
 from tam.tamdates import parse_datestring, MONTH_NAMES
 from tam.views.tamviews import SmartPager
 from tam.widgets import MySplitDateTimeField, MySplitDateWidget
@@ -189,20 +189,12 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
         prenotazione = None
         editable = True
 
-    if not id_prenotazione and request.method == "POST" and QUICK_BOOK:
-        # TODO: quickbook
-        targets = filter(lambda target: target['name'] == request.POST.get('quickbook'),
-                         QUICK_BOOK['choices'])
-        if not targets:
-            return Http404()
-        pass
-
     form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
     if prenotazione:
         form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(
             tamdates.tz_italy)  # inizialmente forzo la corsa
 
-    # deciso se mostrare o meno la scelta dei clienti:
+    # decido se mostrare o meno la scelta dei clienti:
     clienti_attivi = utentePrenotazioni.clienti
     if clienti_attivi.count() == 0:
         messages.error(
@@ -220,6 +212,35 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
         # del forms.fields['cliente']
         del form.fields['cliente']
         cliente_unico = clienti_attivi.all()[0]
+
+    adesso = tamdates.ita_now().replace(second=0, microsecond=0)
+    if not id_prenotazione and QUICK_BOOK and 'quickbook' in request.POST:
+        chosen_target = request.POST.get('quickbook')
+        targets = filter(lambda target: target['name'] == chosen_target, QUICK_BOOK['choices'])
+        targets = list(targets)
+        if not targets:
+            raise Http404("Luogo non valido per la prenotazione rapida")
+
+        target_place_name = targets[0].get('place_name')
+        if target_place_name:
+            target_place = Luogo.objects.get(nome=target_place_name)
+        else:
+            target_place = utentePrenotazioni.luogo
+
+        # TODO: quickbook
+        if clienti_attivi.count() == 1:
+            cliente = cliente_unico
+        prenotazione = Prenotazione(
+            owner=utentePrenotazioni,
+            cliente=cliente_unico,
+            data_corsa=adesso,
+            # da=utentePrenotazioni.luogo,
+            luogo=target_place,
+            **QUICK_BOOK['defaults']
+        )
+        viaggio = prenotaCorsa(prenotazione)
+        prenotazione.viaggio = viaggio
+        return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
     if request.method == "POST" and prenotazione:
         # salvo i valori precedenti e consento la cancellazione

@@ -4,7 +4,7 @@ from tam.views.tamUtils import getDefault
 
 
 def prenotaCorsa(prenotazione, dontsave=False):
-    " Crea il viaggio e lo associa alla corsa "
+    """" Crea il viaggio e lo associa alla corsa """
 
     utentePrenotazioni = prenotazione.owner
     profilo, created = ProfiloUtente.objects.get_or_create(user=utentePrenotazioni.user)
