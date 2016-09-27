@@ -7,63 +7,71 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-14 17:03+0200\n"
-"PO-Revision-Date: 2016-07-17 13:24+0100\n"
+"POT-Creation-Date: 2016-09-27 23:56+0200\n"
+"PO-Revision-Date: 2016-09-28 00:02+0200\n"
 "Last-Translator: Dario Varotto <dariosky@gmail.com>\n"
 "Language-Team: Dariosky <dariosky@gmail.com>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.8.7.1\n"
 
-#: models.py:92
+#: models.py:96
 msgid "Luoghi"
 msgstr "Places"
 
-#: models.py:133
+#: models.py:138
 msgid "Bacini"
 msgstr "Areas"
 
-#: models.py:155
+#: models.py:161
 msgid "Tratte"
 msgstr "Paths"
 
-#: models.py:349
+#: models.py:356
 msgid "Viaggi"
 msgstr "Run"
 
-#: models.py:1065
+#: models.py:1073
 msgid "Conducenti"
 msgstr "Drivers"
 
-#: models.py:1120
+#: models.py:1135
 msgid "Clienti"
 msgstr "Clients"
 
-#: models.py:1148
+#: models.py:1164
 msgid "Passeggeri"
 msgstr "Passengers"
 
-#: models.py:1170
+#: models.py:1187
 msgid "Listini"
 msgstr "Prices"
 
-#: models.py:1228
+#: models.py:1246
 msgid "Prezzi Listino"
 msgstr "Price list"
 
-#: models.py:1260
+#: models.py:1279
 msgid "Can reset session"
 msgstr "Può resettare le sessioni"
 
-#: models.py:1262
+#: models.py:1281
 msgid "Profili utente"
 msgstr "User profiles"
 
-#: models.py:1276
+#: models.py:1296
 msgid "Conguagli"
 msgstr "Balances"
+
+#: templates/404.html:2
+msgid "Pagina non trovata"
+msgstr "Page not found"
+
+#: templates/429-limited.html:2
+msgid "Troppi richieste"
+msgstr "Too many requests"
 
 #: templates/admin/base_site.html:3
 msgid "TaM admin"
@@ -109,13 +117,17 @@ msgstr "Open sessions"
 msgid "Disconnetti utente"
 msgstr "Disconnect user"
 
-#: views/login.py:21
+#: views/login.py:24
 msgid "Più dispositivi sono connessi con le stesse credenziali. Devi disconnetterti per collegarti qua."
 msgstr "Multiple devices connected with the same credentials. You should disconnect from other devices to connect from here."
 
 #: views/tamviews.py:1439 views/tamviews.py:1441 views/varieForm.py:120
 msgid "%d/%m/%Y"
 msgstr "%d/%m/%Y"
+
+#: views/users.py:88
+msgid "Le due password non coincidono"
+msgstr "The two passwords do not match"
 
 #: views/varieForm.py:121
 msgid "%H:%M"
