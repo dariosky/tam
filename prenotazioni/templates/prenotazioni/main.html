@@ -1,5 +1,5 @@
 {% extends 'prenotazioni/base.html' %}
-{% load i18n %}{% load tz %}
+{% load i18n tz %}
 {% block content %}
 	{% if prenotazione %}
 		<h3>{% trans "Prenotazione" %} {{ prenotazione.id }}</h3>
@@ -16,7 +16,7 @@
 				{% for target in quick_book.choices %}
 					<button type="submit" name="quickbook" value="{{ target.name }}"
 							class="book btn btn-large">
-						Chiamata diretta <br> {{ target.name }}
+						{% trans "Chiamata diretta" %} <br> {{ target.name }}
 					</button>
 				{% endfor %}
 			</div>
@@ -30,19 +30,16 @@
 		{{ form.as_p }}
 
 		{% if editable %}
-			<input type='submit'
-				   name='prenota'
-				   class='btn'
-				   value='
-
-
-
-
-						   {% if prenotazione %}{% trans "Modifica" %}{% else %}{% trans "Invia" %}{% endif %}{% trans " prenotazione" %}'/>
 			{% if prenotazione %}
-				<input type='submit'
-					   name='delete'
-					   class='btn'
+				<input type='submit' name='prenota' class='btn'
+					   value='{% trans "Modifica prenotazione" %}'/>
+			{% else %}
+				<input type='submit' name='prenota' class='btn'
+					   value='{% trans "Invia prenotazione" %}'/>
+			{% endif %}
+
+			{% if prenotazione %}
+				<input type='submit' name='delete' class='btn'
 					   value='{% trans "Cancella prenotazione" %}'
 				/>
 			{% endif %}
