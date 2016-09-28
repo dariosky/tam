@@ -39,13 +39,13 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
     if not attachments:
         attachments = []
     if azione == "create":
-        subject = "Conferma prenotazione TaM n° %d" % prenotazione.id
+        subject = _("Conferma prenotazione TaM n° %d") % prenotazione.id
         prenotazione_suffix = "effettuata"
     elif azione == "update":
-        subject = "Modifica prenotazione TaM n° %d" % prenotazione.id
+        subject = _("Modifica prenotazione TaM n° %d") % prenotazione.id
         prenotazione_suffix = "modificata"
     elif azione == "delete":
-        subject = "Annullamento prenotazione TaM n° %d" % prenotazione.id
+        subject = _("Annullamento prenotazione TaM n° %d") % prenotazione.id
         prenotazione_suffix = "cancellata"
     else:
         raise Exception("Azione mail non valida %s" % azione)
@@ -234,12 +234,24 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
             owner=utentePrenotazioni,
             cliente=cliente_unico,
             data_corsa=adesso,
+            is_arrivo=False,
             # da=utentePrenotazioni.luogo,
             luogo=target_place,
             **QUICK_BOOK['defaults']
         )
         viaggio = prenotaCorsa(prenotazione)
         prenotazione.viaggio = viaggio
+        prenotazione.save()
+
+        inviaMailPrenotazione(prenotazione,
+                              "create",
+                              attachments=[]
+                              )
+        messages.success(
+            request,
+            _(
+                "Prenotazione rapida n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
+        )
         return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
     if request.method == "POST" and prenotazione:
