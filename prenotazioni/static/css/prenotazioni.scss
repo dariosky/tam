@@ -192,7 +192,7 @@ table.prenotazioni td {
   font-size: smaller;
 }
 
-.countblock a {
+a, a:hover {
   text-decoration: none;
 }
 
@@ -211,7 +211,6 @@ table.prenotazioni td {
 }
 
 #filtri, #filtri select {
-  font-size: smaller;
   margin-bottom: 0 !important;
 }
 
