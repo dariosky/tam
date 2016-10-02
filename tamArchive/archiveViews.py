@@ -1,24 +1,26 @@
 # coding: utf-8
 import datetime
+import logging
 import time
+from collections import OrderedDict
 from decimal import Decimal
+from functools import reduce
+
 from django import forms
 from django.conf import settings
+from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
-import logging
-from django.db import transaction
-from tam.models import Viaggio, ProfiloUtente, Conducente, get_classifiche
-from tamArchive.models import ViaggioArchive
-from tam.views.tamviews import SmartPager
 
-from collections import OrderedDict
-from django.contrib import messages
-from modellog.models import ActionLog
 from modellog.actions import logAction, stopLog, startLog
+from modellog.models import ActionLog
 from tam import tamdates
+from tam.models import Viaggio, ProfiloUtente, Conducente, get_classifiche
+from tam.views.tamviews import SmartPager
+from tamArchive.models import ViaggioArchive
 
 archiveNotBefore_days = getattr(settings, "ARCHIVE_NOT_BEFORE_DAYS", 365 * 2)
 
