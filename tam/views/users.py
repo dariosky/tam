@@ -4,12 +4,12 @@ from collections import defaultdict
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
-from django.db import connections
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
@@ -212,8 +212,6 @@ def delUser(request, username, template_name="utils/delUser.html"):
 
 
 def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
-    from django.contrib.auth.forms import PasswordChangeForm
-
     form = PasswordChangeForm(request.user, request.POST or None)
     if form.is_valid():
         logging.debug("Cambio la password")
