@@ -250,7 +250,8 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
         messages.success(
             request,
             _(
-                "Prenotazione rapida n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
+                "Prenotazione rapida n° %d effettuata, a breve riceverai una mail di conferma."
+            ) % prenotazione.id
         )
         return HttpResponseRedirect(reverse('tamPrenotazioni'))
 
