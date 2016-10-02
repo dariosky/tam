@@ -14,6 +14,8 @@ from tam.middleware.prevent_multisession import get_concurrent_sessions
 from django.utils.translation import ugettext_lazy as _
 from brake.decorators import ratelimit
 
+from tam.ratelimit import get_client_ip
+
 logger = logging.getLogger('tam.login')
 
 
@@ -54,7 +56,7 @@ class AuthenticationFormWrapped(AuthenticationForm):
 def login(request):
     if getattr(request, 'limited', False):
         messages = ["Too many requests on {path}. Page forbidden.".format(path=request.path),
-                    "From IP: %s" % request.META['REMOTE_ADDR']]
+                    "From IP: %s" % get_client_ip(request)]
         if request.method == "POST" and request.POST.get('username'):
             messages.append("Last try with username: %s" % request.POST.get('username'))
         logger.error("\n".join(messages))
