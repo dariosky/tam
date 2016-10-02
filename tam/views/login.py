@@ -53,7 +53,11 @@ class AuthenticationFormWrapped(AuthenticationForm):
 @ratelimit()
 def login(request):
     if getattr(request, 'limited', False):
-        logger.error("Too many requests on {path}. Page forbidden.".format(path=request.path))
+        messages = ["Too many requests on {path}. Page forbidden.".format(path=request.path),
+                    "From IP: %s" % request.META['REMOTE_ADDR']]
+        if request.method == "POST" and request.POST.get('username'):
+            messages.append("Last try with username: %s" % request.POST.get('username'))
+        logger.error("\n".join(messages))
         return render_to_response("429-limited.html", status=429)
 
     logged = request.user.is_authenticated() and request.user.username
