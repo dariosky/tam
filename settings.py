@@ -470,6 +470,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+RATELIMIT_CACHE_BACKEND = 'tam.ratelimit.RateCache'
+
 PRENOTAZIONI_QUICK = dict(
     # choices=[dict(name="Locale"),  # no place_name means same place of client
     #          dict(name="Padova", place_name='.Padova Città'),
