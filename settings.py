@@ -1,4 +1,5 @@
 # coding: utf-8
+import hashlib
 import os
 import logging
 from socket import gethostname
@@ -259,19 +260,17 @@ LOGGING = {
         }
     },
     'loggers': {
-        '': {
+        'root': {
             'handlers': ['mail_admins', 'console'],
+            'formatter': 'main_formatter',
             'level': 'ERROR',
             'propagate': True,
-        },
-        'django': {
-            'handlers': ['null', ],
         },
         'django.server': {
             'level': 'WARNING'
         },
         'django.db': {
-            'handlers': ['null', ],
+            'handlers': ['null'],
             'propagate': False,
         },
     }
@@ -485,6 +484,11 @@ PRENOTAZIONI_QUICK = dict(
     # ),
 )
 
+WEBFACTION_REDIS_APPNAME = 'redis_tam'
+REDIS_PORT = 6379
+# WARNING: set a new password here
+REDIS_PASSWORD = hashlib.sha256(b"Change-me!").hexdigest()
+
 # END OF DEFAULTS **************************************************************
 
 settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
@@ -509,7 +513,11 @@ CHANNEL_LAYERS = dict(
     default=dict(
         BACKEND="asgi_redis.RedisChannelLayer",
         CONFIG={
-            'hosts': [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+            'hosts': [os.environ.get('REDIS_URL',
+                                     'redis://{host}:{port}'.format(
+                                         host='localhost',
+                                         port=REDIS_PORT,
+                                     ))],
         },
         ROUTING="tam.routing.channel_routing",
     )
