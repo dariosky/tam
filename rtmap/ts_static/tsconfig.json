@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "outDir": "../static",
+    "allowJs": true,
+    "target": "es5",
+    //    "sourceMap": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "commonjs"
+  }
+}
