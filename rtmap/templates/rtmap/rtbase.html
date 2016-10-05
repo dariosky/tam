@@ -1,0 +1,28 @@
+{% extends "base.html" %}{% load i18n staticfiles %}
+{% block title %}TaM panoramica{% endblock title %}
+{% block css %}
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css"/>
+	<link rel="stylesheet" type="text/css" href="{% static "styles/rtmap.css" %}"/>
+{% endblock css %}
+
+{% block header %}
+	{{ block.super }}
+	<script type="text/javascript">
+		RTMAP_SETTINGS = {{ RTMAP_SETTINGS_JSON|safe }};
+	</script>
+{% endblock header %}
+
+{% block content %}
+
+{% endblock %}
+
+{% block bottom %}
+	<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+	{% block realtime %}
+		{% if user.is_authenticated %}
+{#			<script type="text/javascript" src="{% static 'realtam.js' %}"></script>#}
+			<script type="text/javascript" src="{% static 'real.js' %}"></script>
+		{% endif %}
+	{% endblock realtime %}
+{% endblock %}
+

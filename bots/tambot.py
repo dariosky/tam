@@ -1,29 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""
-This Bot uses the Updater class to handle the bot.
-
-First, a few handler functions are defined. Then, those functions are passed to
-the Dispatcher and registered at their respective places.
-Then, the bot is started and runs until we press Ctrl-C on the command line.
-
-Usage:
-Basic Echobot example, repeats messages.
-Press Ctrl-C on the command line or send a signal to the process to stop the
-bot.
-"""
-
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
+
 import django
 from django.conf import settings
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-# # Enable logging
-# logging.basicConfig(
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     level=logging.INFO)
-
+# Enable logging
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +26,12 @@ def help(bot, update):
     bot.sendMessage(update.message.chat_id, text='Help!')
 
 
-def echo(bot, update):
-    # bot.sendMessage(update.message.chat_id, text="".join([x for x in update.message.text][::-1]))
+def message_handler(bot, update):
+    bot.sendMessage(update.message.chat_id, text="".join([x for x in update.message.text][::-1]))
     text = update.message.text
     username = update.message.from_user.username
     chat_type = update.message.chat.type
-    logger.debug("message from {username} in the {chat_type} chat".format(
+    logger.info("message from {username} in the {chat_type} chat".format(
         username=username,
         chat_type=chat_type
     ))
@@ -66,7 +53,7 @@ def main():
     dp.add_handler(CommandHandler("help", help))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler([Filters.text], echo))
+    dp.add_handler(MessageHandler([Filters.text], message_handler))
 
     # log all errors
     dp.add_error_handler(error)
@@ -83,5 +70,5 @@ def main():
 if __name__ == '__main__':
     django.setup()
 
-    print 'TaM Telegram Bot is running ...'
+    print('TaM Telegram Bot is running ...')
     main()
