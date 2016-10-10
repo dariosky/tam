@@ -29,30 +29,27 @@ don't forget to set a password!
 
 
 """
+import logging
 import os
 import re
-import xmlrpc.client
-
 from fabric.api import run, env, cd
 from fabric.contrib.files import exists
 from fabric.api import settings as fab_settings
 import settings
+from utils.wfcli.wfcli import WebFactionAPI
+
+logger = logging.getLogger('__name__')
 
 
 def create_redis_app(app_name):
-    server = xmlrpc.client.ServerProxy('https://api.webfaction.com/')
-    username, password = os.environ['WEBFACTION_USER'], os.environ['WEBFACTION_PASS']
-    session_id, account = server.login(username, password)
     # print(account)
-    apps = server.list_apps(session_id)
+    api = WebFactionAPI()
+    apps = api.list_apps()
 
     redis_app = list(filter(lambda a: a['name'] == ('%s' % app_name), apps))
     if not redis_app:
         print("Creating Redis APP")
-        app = server.create_app(session_id,
-                                app_name,
-                                'custom_app_with_port',
-                                )
+        app = api.create_app(app_name, 'custom_app_with_port')
         redis_app = [app]
     else:
         print("Redis APP already exists")
@@ -113,14 +110,14 @@ def redis_to_crontab(app_name):
     start_redis_command = '*/1 * * * * {webapp_folder}/redis-server' \
                           ' {webapp_folder}/redis.conf' \
                           ' &>> {webapp_folder}/cron.log'.format(webapp_folder=webapp_folder)
-    with fab_settings(warn_only=True): # grep return errorcode when missing
+    with fab_settings(warn_only=True):  # grep return errorcode when missing
         crontab = run(
             'crontab -l| grep {webapp_folder}/redis-server'.format(webapp_folder=webapp_folder)
-        )
+            , quiet=True)
         if crontab.return_code != 0:
             run('( crontab -l | grep -v -F "{cmd}" ; echo "{cmd}" ) | crontab -'.format(
                 cmd=start_redis_command)
-            )
+                , quiet=True)
 
 
 if __name__ == '__main__':
@@ -129,8 +126,8 @@ if __name__ == '__main__':
     env.host_string = 'tam'
 
     app_name = settings.WEBFACTION_REDIS_APPNAME
-    # redis_port = create_redis_app(app_name)
-    # install_redis(app_name, redis_port)
-    # if redis_port != settings.REDIS_PORT:
-    #     print("WARNING: Remember to set your REDIS_PORT in settings to %s" % redis_port)
+    redis_port = create_redis_app(app_name)
+    install_redis(app_name, redis_port)
+    if redis_port != settings.REDIS_PORT:
+        print("WARNING: Remember to set your REDIS_PORT in settings to %s" % redis_port)
     redis_to_crontab(app_name)
