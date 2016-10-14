@@ -32,6 +32,8 @@ don't forget to set a password!
 import logging
 import os
 import re
+from urllib.parse import urlparse
+
 from fabric.api import run, env, cd
 from fabric.contrib.files import exists
 from fabric.api import settings as fab_settings
@@ -120,14 +122,52 @@ def redis_to_crontab(app_name):
                 , quiet=True)
 
 
+def webfaction_install_redis():
+    # we install REDIS as a custom app, then we add it to crontab
+    app_name = settings.WEBFACTION['APPS']['redis']
+    redis_port = create_redis_app(app_name)
+    install_redis(app_name, redis_port)
+    if redis_port != settings.WEBFACTION['REDIS_PORT']:
+        print("WARNING: Remember to set your REDIS_PORT in settings to %s" % redis_port)
+    redis_to_crontab(app_name)
+
+
+def create_all_domains():
+    urls = {settings.MEDIA_URL, settings.STATIC_URL}
+    results = set(settings.ALLOWED_HOSTS)
+    for u in urls:
+        o = urlparse(u)
+        if o.hostname:
+            results.add(o.hostname)
+    domains = {s.strip(".") for s in results}
+    group_subdomains = {}
+    for d in domains:
+        splitted = d.split(".")
+        domain = ".".join(splitted[-2:])
+        if domain not in group_subdomains:
+            group_subdomains[domain] = []
+
+        if len(splitted) > 2:
+            group_subdomains[domain].append(".".join(splitted[:-2]))
+    api = WebFactionAPI()
+    for domain, subdomains in group_subdomains.items():
+        print("Creating domain {domain} with subdomains {sub}".format(
+            domain=domain, sub=subdomains
+        ))
+        print(api.create_domain(domain, subdomains))
+
+    webfaction_apps = settings.WEBFACTION['APPS']
+    existing_apps = api.list_apps()
+    app = api.create_app(webfaction_apps['main'], app_type="custom_app_with_port")
+
+
 if __name__ == '__main__':
     if os.path.exists(os.path.expanduser("~/.ssh/config")):
         env.use_ssh_config = True
     env.host_string = 'tam'
 
-    app_name = settings.WEBFACTION_REDIS_APPNAME
-    redis_port = create_redis_app(app_name)
-    install_redis(app_name, redis_port)
-    if redis_port != settings.REDIS_PORT:
-        print("WARNING: Remember to set your REDIS_PORT in settings to %s" % redis_port)
-    redis_to_crontab(app_name)
+    # we start doing all REDIS
+    webfaction_install_redis()
+
+    # we then create all needed subdomains
+    create_all_domains()

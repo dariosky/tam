@@ -32,6 +32,8 @@ ADMINS = (
     ('Dario Varotto', 'dario.varotto@gmail.com'),
 )
 
+ALLOWED_HOSTS = ['localhost']
+
 MANAGERS = ADMINS
 DATABASES = {}  # set them in settings_local
 
@@ -484,8 +486,14 @@ PRENOTAZIONI_QUICK = dict(
     # ),
 )
 
-WEBFACTION_REDIS_APPNAME = 'redis_tam'
-REDIS_PORT = 6379
+WEBFACTION = {
+    "APPS": dict(main='tam2beta',
+                 redis='redis_tam',
+                 media="tam2beta_media",
+                 static="tam2beta_static"),
+    "REDIS_PORT": 6379,
+}
+
 # WARNING: set a new password here
 REDIS_PASSWORD = hashlib.sha256(b"Change-me!").hexdigest()
 
@@ -516,7 +524,7 @@ CHANNEL_LAYERS = dict(
             'hosts': [os.environ.get('REDIS_URL',
                                      'redis://{host}:{port}'.format(
                                          host='localhost',
-                                         port=REDIS_PORT,
+                                         port=WEBFACTION['REDIS_PORT'],
                                      ))],
         },
         ROUTING="tam.routing.channel_routing",

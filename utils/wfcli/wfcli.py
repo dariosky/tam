@@ -32,6 +32,17 @@ class WebFactionAPI():
                                      )
         return app
 
+    def create_domain(self, domain, subdomains=None):
+        self.connect()
+        if subdomains is None:
+            subdomains = []
+
+        domain = self.server.create_domain(self.session_id,
+                                           domain,
+                                           *subdomains,
+                                           )
+        return domain
+
 
 def get_cli_parser():
     VERSION = '0.1a'
