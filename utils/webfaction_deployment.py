@@ -47,16 +47,12 @@ def create_redis_app(app_name):
     # print(account)
     api = WebFactionAPI()
     apps = api.list_apps()
-
-    redis_app = list(filter(lambda a: a['name'] == ('%s' % app_name), apps))
-    if not redis_app:
+    if app_name not in apps:
         print("Creating Redis APP")
         app = api.create_app(app_name, 'custom_app_with_port')
         redis_app = [app]
-    else:
-        print("Redis APP already exists")
     # print(redis_app)
-    return redis_app[0]['port']
+    return apps[app_name]['port']
 
 
 def install_redis(app_name, redis_port):
@@ -150,15 +146,29 @@ def create_all_domains():
         if len(splitted) > 2:
             group_subdomains[domain].append(".".join(splitted[:-2]))
     api = WebFactionAPI()
+    existing_domains = api.list_domains()
     for domain, subdomains in group_subdomains.items():
-        print("Creating domain {domain} with subdomains {sub}".format(
-            domain=domain, sub=subdomains
-        ))
-        print(api.create_domain(domain, subdomains))
+        if domain not in existing_domains or \
+            not all([s in existing_domains[domain] for s in subdomains]):
+            print("Creating domain {domain} with subdomains {sub}".format(
+                domain=domain, sub=subdomains
+            ))
+            print(api.create_domain(domain, subdomains))
 
     webfaction_apps = settings.WEBFACTION['APPS']
     existing_apps = api.list_apps()
-    app = api.create_app(webfaction_apps['main'], app_type="custom_app_with_port")
+    main_app_name = webfaction_apps['main']
+    if not main_app_name in existing_apps:
+        print("Creating main app")
+        main_app = api.create_app(main_app_name, app_type="custom_app_with_port")
+    else:
+        main_app = existing_apps[main_app_name]['port']
+
+    if "media" in webfaction_apps:
+        media_app_name = webfaction_apps['media']
+        if not media_app_name in existing_apps:
+            print("Creating media app")
+            # media_app = api.create_app(media_app_name, app_type="symlink70")
 
 
 if __name__ == '__main__':

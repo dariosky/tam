@@ -22,7 +22,8 @@ class WebFactionAPI():
 
     def list_apps(self):
         self.connect()
-        return self.server.list_apps(self.session_id)
+        results = self.server.list_apps(self.session_id)
+        return {a['name']: a for a in results}  # return apps keyed by id
 
     def create_app(self, app_name, app_type):
         self.connect()
@@ -42,6 +43,11 @@ class WebFactionAPI():
                                            *subdomains,
                                            )
         return domain
+
+    def list_domains(self):
+        self.connect()
+        results = self.server.list_domains(self.session_id)
+        return {i['domain']: i['subdomains'] for i in results}
 
 
 def get_cli_parser():
