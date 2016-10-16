@@ -4,6 +4,8 @@ import os
 import logging
 from socket import gethostname
 
+from utils.env_subs import perform_dict_substitutions
+
 host = gethostname().lower()
 
 TAM_VERSION = "6.81"
@@ -31,8 +33,6 @@ if DEBUG:
 ADMINS = (
     ('Dario Varotto', 'dario.varotto@gmail.com'),
 )
-
-ALLOWED_HOSTS = ['localhost']
 
 MANAGERS = ADMINS
 DATABASES = {}  # set them in settings_local
@@ -493,6 +493,41 @@ WEBFACTION = {
                  static="tam2beta_static"),
     "REDIS_PORT": 6379,
 }
+# This are all settings for the deployment ***
+WEBHOST = "www.hostname.com"  # the main hostname serving the site
+ALLOWED_HOSTS = [WEBHOST]
+DEPLOYMENT = dict(  # defining parameters for the deployment
+    NAME="TaM",  # the name of the process
+    HOST="tam",  # the hostname, eventually you can use your .ssh/config
+    REMOTE_SSH_PORT=22,
+
+    USE_SUPERVISOR=False,
+    SUPERVISOR_JOBNAME='tam',
+
+    GIT_REPOSITORY="git@github.com:dariosky/tam.git",  # repository for clone
+    WEBHOST=WEBHOST,
+
+    FOLDERS=dict(
+        HOME='/home/user',
+        REPOSITORY_FOLDER="{HOME}/repo/tam",
+        VENV_FOLDER="{HOME}/.environments/tam",
+        REQUIREMENT_PATH="{REPOSITORY_FOLDER}/requirements/requirements.txt",
+        STATIC_FOLDER="{REPOSITORY_FOLDER}/static",  # static assets collected
+        MEDIA_FOLDER="{REPOSITORY_FOLDER}/media",  # This is for UGC
+        LOGDIR="{REPOSITORY_FOLDER}/logs",
+    ),
+
+    GUNICORN=dict(
+        RUN_GUNICORN_COMMAND="{REPOSITORY_FOLDER}/run_gunicorn",
+        PORT=8888,
+        PID_FILE="{LOGDIR}/gunicorn.pid",
+        LOG_FILE="{LOGDIR}/gunicorn.log",
+        WORKERS=2,
+        WORKERS_TIMEOUT=360,
+    ),
+    WSGI_APPLICATION="wsgi:application",
+    BRAND_FOLDER="brand",  # this is a subfolder, per deployment of static brand assets
+)
 
 # WARNING: set a new password here
 REDIS_PASSWORD = hashlib.sha256(b"Change-me!").hexdigest()
@@ -530,3 +565,5 @@ CHANNEL_LAYERS = dict(
         ROUTING="tam.routing.channel_routing",
     )
 )
+
+perform_dict_substitutions(DEPLOYMENT)  # change the deployment string to use a kind of templates

@@ -166,7 +166,7 @@ def create_all_domains():
 
     if "media" in webfaction_apps:
         media_app_name = webfaction_apps['media']
-        if not media_app_name in existing_apps:
+        if media_app_name not in existing_apps:
             print("Creating media app")
             # media_app = api.create_app(media_app_name, app_type="symlink70")
 
