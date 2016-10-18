@@ -25,11 +25,12 @@ class WebFactionAPI():
         results = self.server.list_apps(self.session_id)
         return {a['name']: a for a in results}  # return apps keyed by id
 
-    def create_app(self, app_name, app_type):
+    def create_app(self, app_name, app_type, autostart=False,
+                   extra_info="", open_port=False):
         self.connect()
         app = self.server.create_app(self.session_id,
-                                     app_name,
-                                     app_type,
+                                     app_name, app_type,
+                                     autostart, extra_info, open_port
                                      )
         return app
 

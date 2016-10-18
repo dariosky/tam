@@ -390,12 +390,22 @@ def set_mailgun_webhooks():
             puts("%s: %s" % (hook, response.text))
 
 
+@task
+def prepare_webfaction():
+    from utils.webfaction_deployment import webfaction_install_redis, create_all_domains
+    # we start doing all REDIS
+    webfaction_install_redis()
+
+    # we then create all needed subdomains
+    create_all_domains()
+
+
 if __name__ == '__main__':
     # to debug the fabfile, we can specify the command here
     import sys
     from fabric.main import main
 
     # sys.argv[1:] = ["s:arte", "set_mailgun_webhooks"]
-    sys.argv[1:] = ["s:arte", "deploy"]
+    sys.argv[1:] = ["s:taxi2beta", "deploy"]
     print(sys.argv)
     main()

@@ -88,7 +88,7 @@ def install_redis(app_name, redis_port):
             'port': redis_port,
             "daemonize": "yes",
             "pidfile": "{webapp_folder}/redis.pid".format(webapp_folder=webapp_folder),
-            "logfile": 'redis.log',
+            "logfile": "{webapp_folder}/redis.log".format(webapp_folder=webapp_folder),
             "requirepass": settings.REDIS_PASSWORD,
         }
         for key, expected_value in keys.items():
@@ -148,8 +148,8 @@ def create_all_domains():
     api = WebFactionAPI()
     existing_domains = api.list_domains()
     for domain, subdomains in group_subdomains.items():
-        if domain not in existing_domains or \
-            not all([s in existing_domains[domain] for s in subdomains]):
+        if domain not in existing_domains or not all(
+            [s in existing_domains[domain] for s in subdomains]):
             print("Creating domain {domain} with subdomains {sub}".format(
                 domain=domain, sub=subdomains
             ))
@@ -162,13 +162,31 @@ def create_all_domains():
         print("Creating main app")
         main_app = api.create_app(main_app_name, app_type="custom_app_with_port")
     else:
-        main_app = existing_apps[main_app_name]['port']
+        main_app = existing_apps[main_app_name]
+    if settings.DEPLOYMENT['GUNICORN']['PORT'] != main_app['port']:
+        print("WARNING: Remember to change Gunicorn PORT to %s" % main_app['port'])
 
     if "media" in webfaction_apps:
         media_app_name = webfaction_apps['media']
+        media_folder = settings.DEPLOYMENT['FOLDERS']['MEDIA_FOLDER']
         if media_app_name not in existing_apps:
-            print("Creating media app")
-            # media_app = api.create_app(media_app_name, app_type="symlink70")
+            print("Creating media app {appname}: {mediafolder}".format(
+                appname=media_app_name,
+                mediafolder=media_folder,
+            ))
+            app = api.create_app(media_app_name, app_type="symlink70",
+                                 extra_info=media_folder)
+
+    if "static" in webfaction_apps:
+        static_app_name = webfaction_apps['static']
+        static_folder = settings.DEPLOYMENT['FOLDERS']['STATIC_FOLDER']
+        if static_app_name not in existing_apps:
+            print("Creating staic app {appname}: {staticfolder}".format(
+                appname=static_app_name,
+                staticfolder=static_folder,
+            ))
+            app = api.create_app(static_app_name, app_type="symlink70",
+                                 extra_info=static_folder)
 
 
 if __name__ == '__main__':
@@ -177,7 +195,7 @@ if __name__ == '__main__':
     env.host_string = 'tam'
 
     # we start doing all REDIS
-    webfaction_install_redis()
+    # webfaction_install_redis()
 
     # we then create all needed subdomains
     create_all_domains()
