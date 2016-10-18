@@ -42,4 +42,4 @@ future
 # request throttling
 django-brake
 
--r requirements/req-realtime.txt
+-r req-realtime.txt
