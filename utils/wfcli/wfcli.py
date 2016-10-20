@@ -14,11 +14,11 @@ class WebFactionAPI():
         self.server = xmlrpc.client.ServerProxy('https://api.webfaction.com/')
         self.session_id = self.account = None
 
-    def connect(self):
+    def connect(self, machine_name=""):
         if not self.session_id:
             logger.debug("Connecting to API server")
             username, password = os.environ['WEBFACTION_USER'], os.environ['WEBFACTION_PASS']
-            self.session_id, self.account = self.server.login(username, password)
+            self.session_id, self.account = self.server.login(username, password, machine_name)
 
     def list_apps(self):
         self.connect()
@@ -67,7 +67,7 @@ class WebFactionAPI():
     def create_website(self, website_name, ip, enable_https, subdomains, certificate, apps):
         self.connect()
         self.server.create_website(self.session_id,
-                                   website_name, ip, enable_https, subdomains, certificate, apps)
+                                   website_name, ip, enable_https, subdomains, *apps)
 
 
 def get_cli_parser():

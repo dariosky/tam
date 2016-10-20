@@ -128,6 +128,15 @@ def webfaction_install_redis():
     redis_to_crontab(app_name)
 
 
+def get_site_hostnames():
+    results = {'main': settings.WEBHOST}
+    for name, url in (('media', settings.MEDIA_URL), ('static', settings.STATIC_URL)):
+        o = urlparse(url)
+        if o.hostname:
+            results[name] = o.hostname
+    return results
+
+
 def create_all_domains():
     urls = {settings.MEDIA_URL, settings.STATIC_URL}
     results = set(settings.ALLOWED_HOSTS)
@@ -206,18 +215,38 @@ def create_all_websites():
         # 'ip': '185.10.231.185', 'id': 652361,
         # 'subdomains': ['beta.taxiabanoemontegrotto.it'], 'name': 'taxi2beta'}
         # the main site have all needs
-        apps = [(main_app_name, "/")]
+        apps = [[main_app_name, "/"]]
         if "media" in webfaction_apps:
             apps.append((webfaction_apps['media'], '/media'))
         if "static" in webfaction_apps:
             apps.append((webfaction_apps['static'], '/static'))
         print("Creating main website. %s" % apps)
         api.create_website(
-            main_app_name, ip=websites_ip,
-            enable_https=False,
-            subdomains=[settings.WEBHOST],
-            certificate="",
-            apps=apps
+            main_app_name, websites_ip,
+            False,
+            [settings.WEBHOST],
+            "",
+            apps
+        )
+
+    hosts = get_site_hostnames()
+    if webfaction_apps['media'] not in existing_websites and hosts['media']:
+        print("Creating media website.")
+        api.create_website(
+            webfaction_apps['media'], websites_ip,
+            False,
+            [hosts['media']],
+            "",
+            [[webfaction_apps['media'], "/"]]
+        )
+    if webfaction_apps['static'] not in existing_websites and hosts['static']:
+        print("Creating static website.")
+        api.create_website(
+            webfaction_apps['static'], websites_ip,
+            False,
+            [hosts['static']],
+            "",
+            [[webfaction_apps['static'], "/"]]
         )
 
 
