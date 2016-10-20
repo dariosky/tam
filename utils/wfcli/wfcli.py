@@ -50,6 +50,25 @@ class WebFactionAPI():
         results = self.server.list_domains(self.session_id)
         return {i['domain']: i['subdomains'] for i in results}
 
+    def list_websites(self):
+        self.connect()
+        results = self.server.list_websites(self.session_id)
+
+        return {i['name']: i for i in results}
+
+    def list_ips(self):
+        self.connect()
+        return self.server.list_ips(self.session_id)
+
+    def main_ip(self):
+        ips = self.list_ips()
+        return list(filter(lambda x: x['is_main'], ips))[0]['ip']  # one should be main
+
+    def create_website(self, website_name, ip, enable_https, subdomains, certificate, apps):
+        self.connect()
+        self.server.create_website(self.session_id,
+                                   website_name, ip, enable_https, subdomains, certificate, apps)
+
 
 def get_cli_parser():
     VERSION = '0.1a'

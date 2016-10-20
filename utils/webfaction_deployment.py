@@ -155,10 +155,13 @@ def create_all_domains():
             ))
             print(api.create_domain(domain, subdomains))
 
+
+def create_all_apps():
+    api = WebFactionAPI()
     webfaction_apps = settings.WEBFACTION['APPS']
     existing_apps = api.list_apps()
     main_app_name = webfaction_apps['main']
-    if not main_app_name in existing_apps:
+    if main_app_name not in existing_apps:
         print("Creating main app")
         main_app = api.create_app(main_app_name, app_type="custom_app_with_port")
     else:
@@ -176,7 +179,6 @@ def create_all_domains():
             ))
             app = api.create_app(media_app_name, app_type="symlink70",
                                  extra_info=media_folder)
-
     if "static" in webfaction_apps:
         static_app_name = webfaction_apps['static']
         static_folder = settings.DEPLOYMENT['FOLDERS']['STATIC_FOLDER']
@@ -189,6 +191,36 @@ def create_all_domains():
                                  extra_info=static_folder)
 
 
+def create_all_websites():
+    api = WebFactionAPI()
+    existing_websites = api.list_websites()
+    print(existing_websites)
+
+    webfaction_apps = settings.WEBFACTION['APPS']
+    # the websites name will be the same of the apps
+    main_app_name = webfaction_apps['main']
+    websites_ip = api.main_ip()
+    if main_app_name not in existing_websites:
+        # {'https': False,
+        # 'website_apps': [['tam2beta', '/'], ['tam2beta_static', '/static'], ['tam2beta_media', '/media']],
+        # 'ip': '185.10.231.185', 'id': 652361,
+        # 'subdomains': ['beta.taxiabanoemontegrotto.it'], 'name': 'taxi2beta'}
+        # the main site have all needs
+        apps = [(main_app_name, "/")]
+        if "media" in webfaction_apps:
+            apps.append((webfaction_apps['media'], '/media'))
+        if "static" in webfaction_apps:
+            apps.append((webfaction_apps['static'], '/static'))
+        print("Creating main website. %s" % apps)
+        api.create_website(
+            main_app_name, ip=websites_ip,
+            enable_https=False,
+            subdomains=[settings.WEBHOST],
+            certificate="",
+            apps=apps
+        )
+
+
 if __name__ == '__main__':
     if os.path.exists(os.path.expanduser("~/.ssh/config")):
         env.use_ssh_config = True
@@ -198,4 +230,6 @@ if __name__ == '__main__':
     # webfaction_install_redis()
 
     # we then create all needed subdomains
-    create_all_domains()
+    # create_all_domains()
+    # create_all_apps()
+    create_all_websites()
