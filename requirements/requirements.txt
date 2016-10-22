@@ -42,4 +42,7 @@ future
 # request throttling
 django-brake
 
+# cache
+django-redis
+
 -r req-realtime.txt

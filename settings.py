@@ -531,6 +531,13 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
 
 # WARNING: set a new password here
 REDIS_PASSWORD = ""  # example: hashlib.sha256(b"a secure password").hexdigest()
+REDIS_DATABASE = 0
+REDIS_URL = 'redis://:{password}@{host}:{port}/{db}'.format(
+    password=REDIS_PASSWORD,
+    host='localhost',
+    port=WEBFACTION['REDIS_PORT'],
+    db=REDIS_DATABASE,
+)
 
 # END OF DEFAULTS **************************************************************
 
@@ -556,12 +563,7 @@ CHANNEL_LAYERS = dict(
     default=dict(
         BACKEND="asgi_redis.RedisChannelLayer",
         CONFIG={
-            'hosts': [os.environ.get('REDIS_URL',
-                                     'redis://:{password}@{host}:{port}'.format(
-                                         password=REDIS_PASSWORD,
-                                         host='localhost',
-                                         port=WEBFACTION['REDIS_PORT'],
-                                     ))],
+            'hosts': [os.environ.get('REDIS_URL', REDIS_URL)],
         },
         ROUTING="tam.routing.channel_routing",
     )
