@@ -50,7 +50,6 @@ def create_redis_app(app_name):
     if app_name not in apps:
         print("Creating Redis APP")
         app = api.create_app(app_name, 'custom_app_with_port')
-        redis_app = [app]
     # print(redis_app)
     return apps[app_name]['port']
 
@@ -172,11 +171,12 @@ def create_all_apps():
     main_app_name = webfaction_apps['main']
     if main_app_name not in existing_apps:
         print("Creating main app")
-        main_app = api.create_app(main_app_name, app_type="custom_app_with_port")
+        main_app = api.create_app(main_app_name, app_type="custom_websockets_app_with_port")
     else:
         main_app = existing_apps[main_app_name]
     if settings.DEPLOYMENT['GUNICORN']['PORT'] != main_app['port']:
-        print("WARNING: Remember to change Gunicorn PORT to %s" % main_app['port'])
+        print("WARNING: Remember to change the interface server PORT to %s" % main_app['port'])
+        print('Setting settings["DEPLOYMENT"]["GUNICORN"]["PORT"] = %s' % main_app['port'])
 
     if "media" in webfaction_apps:
         media_app_name = webfaction_apps['media']
@@ -203,7 +203,6 @@ def create_all_apps():
 def create_all_websites():
     api = WebFactionAPI()
     existing_websites = api.list_websites()
-    print(existing_websites)
 
     webfaction_apps = settings.WEBFACTION['APPS']
     # the websites name will be the same of the apps
@@ -259,6 +258,6 @@ if __name__ == '__main__':
     # webfaction_install_redis()
 
     # we then create all needed subdomains
-    # create_all_domains()
-    # create_all_apps()
+    create_all_domains()
+    create_all_apps()
     create_all_websites()
