@@ -3,17 +3,63 @@
 var map = L.map;
 var Realtime = (function () {
     function Realtime(url) {
+        var _this = this;
         this.url = url;
+        this.messageQueue = [];
+        this.connect = function () {
+            console.debug("ws connection");
+            _this.socket = new WebSocket(wsUrl);
+            _this.socket.onclose = _this.disconnected;
+            _this.socket.onopen = _this.connected;
+        };
+        this.resetReconnection = function () {
+            if (_this.reconnectTimer) {
+                clearTimeout(_this.reconnectTimer);
+            }
+            _this.reconnectTimer = 0;
+            // 1-2 sec befor first reconnection
+            _this.reconnectDelay = 1000;
+            _this.reconnectDelay += Math.floor(Math.random() * 1000);
+        };
+        this.connected = function () {
+            console.log("Connected");
+            _this.resetReconnection();
+            if (_this.messageQueue.length) {
+                var len = _this.messageQueue.length;
+                console.log("Sending " + len + " messages");
+                for (var _i = 0, _a = _this.messageQueue; _i < _a.length; _i++) {
+                    var message = _a[_i];
+                    _this.send(message);
+                }
+            }
+        };
+        this.disconnected = function () {
+            console.log("Disconnected. Reconnecting in", _this.reconnectDelay);
+            _this.reconnectTimer = setTimeout(_this.reconnect, _this.reconnectDelay);
+        };
+        this.reconnect = function () {
+            if (!_this.socket || _this.socket.readyState == _this.socket.CLOSED) {
+                console.debug("Attempt reconnection");
+                _this.reconnectDelay *= 2;
+                // this.reconnectDelay += Math.floor(Math.random() * 1000);
+                _this.reconnectDelay = Math.min(_this.reconnectDelay, Realtime.MAX_RECONNECT_DELAY);
+                _this.connect();
+            }
+        };
+        this.send = function (message) {
+            if (_this.socket.readyState == _this.socket.OPEN) {
+                console.debug("Sending", message);
+                _this.socket.send(message);
+            }
+            else {
+                console.info("Cannot send message, enqueuing waiting for connection");
+                _this.messageQueue.push(message);
+            }
+        };
+        this.resetReconnection();
         this.connect();
     }
-    Realtime.prototype.connect = function () {
-        console.debug("ws connection");
-        this.socket = new WebSocket(wsUrl);
-    };
-    Realtime.prototype.send = function (message) {
-        console.debug("Sending", message);
-        this.socket.send(message);
-    };
+    Realtime.MAX_RECONNECT_DELAY = 30000; // retry every 30sec max
     return Realtime;
 }());
 var Map = (function () {

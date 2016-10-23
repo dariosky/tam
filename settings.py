@@ -321,7 +321,7 @@ TEMPLATES = [
             'loaders': (
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-            ) if DEBUG  else (
+            ) if DEBUG else (
                 ('django.template.loaders.cached.Loader', (
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
@@ -565,7 +565,7 @@ CHANNEL_LAYERS = dict(
         CONFIG={
             'hosts': [os.environ.get('REDIS_URL', REDIS_URL)],
         },
-        ROUTING="tam.routing.channel_routing",
+        ROUTING="routing.channel_routing",
     )
 )
 

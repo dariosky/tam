@@ -12,19 +12,79 @@ declare var RTMAP_SETTINGS: Settings;
 class Realtime {
     socket: WebSocket;
 
+    /* socket.readyState
+     CONNECTING	0	The connection is not yet open.
+     OPEN       1	The connection is open and ready to communicate.
+     CLOSING	2	The connection is in the process of closing.
+     CLOSED     3	The connection is closed or couldn't be opened.
+     */
+
+    reconnectDelay: number;
+    private reconnectTimer: number;
+    private static MAX_RECONNECT_DELAY = 30000; // retry every 30sec max
+    messageQueue = [];
+
     constructor(public url: string) {
+        this.resetReconnection();
         this.connect()
     }
 
-    connect() {
+    connect = ()=> {
         console.debug("ws connection");
         this.socket = new WebSocket(wsUrl);
-    }
+        this.socket.onclose = this.disconnected;
+        this.socket.onopen = this.connected;
+    };
 
-    send(message) {
-        console.debug("Sending", message);
-        this.socket.send(message);
-    }
+    resetReconnection = ()=> {
+        if (this.reconnectTimer) {
+            clearTimeout(this.reconnectTimer);
+        }
+        this.reconnectTimer = 0;
+        // 1-2 sec befor first reconnection
+        this.reconnectDelay = 1000;
+        this.reconnectDelay+= Math.floor(Math.random() * 1000)
+    };
+
+    connected = ()=> {
+        console.log("Connected");
+        this.resetReconnection();
+        if (this.messageQueue.length) {
+            let len = this.messageQueue.length;
+            console.log(`Sending ${len} messages`);
+            for (var message of this.messageQueue) {
+                this.send(message);
+            }
+        }
+    };
+
+    disconnected = ()=> {
+        console.log("Disconnected. Reconnecting in", this.reconnectDelay);
+
+        this.reconnectTimer = setTimeout(this.reconnect, this.reconnectDelay)
+    };
+
+    reconnect = () => {
+        if (!this.socket || this.socket.readyState == this.socket.CLOSED) {
+            console.debug("Attempt reconnection");
+
+            this.reconnectDelay *= 2;
+            // this.reconnectDelay += Math.floor(Math.random() * 1000);
+            this.reconnectDelay = Math.min(this.reconnectDelay, Realtime.MAX_RECONNECT_DELAY);
+            this.connect();
+        }
+    };
+
+    send = (message)=> {
+        if (this.socket.readyState == this.socket.OPEN) {  // when connection is open
+            console.debug("Sending", message);
+            this.socket.send(message);
+        }
+        else {
+            console.info("Cannot send message, enqueuing waiting for connection");
+            this.messageQueue.push(message)
+        }
+    };
 }
 
 class Map {
