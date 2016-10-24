@@ -17,7 +17,7 @@ $(function () {
 	}
 
 	function errorPositionCallback() {
-		logger.error("Error getting current position")
+		console.error("Error getting current position")
 	}
 
 	function successPositionCallback(position) {
