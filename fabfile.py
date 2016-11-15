@@ -128,7 +128,8 @@ def update_requirements():
     with virtualenv():
         with cd(env.REPOSITORY_FOLDER):
             # update libraries
-            run('pip install -U -r %s' % settings.DEPLOYMENT['FOLDERS']['REQUIREMENT_PATH'])
+            run('pip install -U -r %s' % settings.DEPLOYMENT['FOLDERS']['REQUIREMENT_PATH'],
+                pty=False)
 
 
 def update_instance(do_update_requirements=True, justPull=False):
@@ -266,7 +267,7 @@ def run_command_content(daemon=True):
     return content % dict(
         VENV_FOLDER=settings.DEPLOYMENT['FOLDERS']['VENV_FOLDER'],
         GUNICORN_ARGUMENTS=get_gunicorn_command(daemon),
-        GUNICORN_PID_FILE=settings.DEPLOYMENT['GUNICORN']['PID_FILE'],
+        FRONT_PID_FILE=settings.DEPLOYMENT['GUNICORN']['PID_FILE'],
         REPOSITORY_FOLDER=env.REPOSITORY_FOLDER,
     )
 
@@ -274,22 +275,22 @@ def run_command_content(daemon=True):
 @task
 def create_run_command():
     """ Create the remote_run command to be executed """
-    puts("Creating run_server.")
+    puts("Creating run_server.sh")
     with lcd(localfolder):
         with cd(env.REPOSITORY_FOLDER):
             run_temp_file = StringIO(run_command_content())
-            run_temp_file.name = "run_server"  # to show it as fabric file representation
-            put(run_temp_file, posixpath.join(env.REPOSITORY_FOLDER, 'run_server'))
-            run('chmod +x run_server')
+            run_temp_file.name = "run_server.sh"  # to show it as fabric file representation
+            put(run_temp_file, posixpath.join(env.REPOSITORY_FOLDER, 'run_server.sh'))
+            run('chmod +x run_server.sh')
 
 
 @task
-def local_create_run_command():
-    puts("Creating run_server command to be run " + (
+def local_create_run_command(daemon=False):
+    puts("Creating run_server.sh command to be run " + (
         "with" if settings.DEPLOYMENT['USE_SUPERVISOR'] else "without") + " supervisor.")
     with lcd(localfolder):
-        with open('run_server', 'w') as runner:
-            runner.write(run_command_content())
+        with open('run_server.sh', 'w') as runner:
+            runner.write(run_command_content(daemon=daemon))
 
 
 @task
@@ -353,7 +354,7 @@ def send_brand():
 
 @task
 def get_remote_files():
-    """ Go to the server and save locally the changeavle files on the server """
+    """ Go to the server and save locally the changeable files on the server """
     to_be_saved = [
         ('media_secured/', 'media_secured/'),  # the secured files
         ('*.db3', '.')
@@ -392,12 +393,15 @@ def set_mailgun_webhooks():
 
 @task
 def prepare_webfaction():
-    from utils.webfaction_deployment import webfaction_install_redis, create_all_domains
+    from utils.webfaction_deployment import webfaction_install_redis, create_all_domains, \
+        create_all_apps, create_all_websites
     # we start doing all REDIS
     webfaction_install_redis()
 
-    # we then create all needed subdomains
+    # we then create all needed things in webfaction
     create_all_domains()
+    create_all_apps()
+    create_all_websites()
 
 
 if __name__ == '__main__':

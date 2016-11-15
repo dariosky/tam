@@ -520,11 +520,16 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
     GUNICORN=dict(
         RUN_GUNICORN_COMMAND="{REPOSITORY_FOLDER}/run_gunicorn",
         PORT=8888,
-        PID_FILE="{LOGDIR}/gunicorn.pid",
-        LOG_FILE="{LOGDIR}/gunicorn.log",
-        WORKERS=2,
-        WORKERS_TIMEOUT=360,
+        PID_FILE="{LOGDIR}/pids/gunicorn.pid",
+        LOG_FILE="{LOGDIR}/daphne.log",
     ),
+
+    WORKERS=dict(
+        THREADS=4,
+        PID_FILE="{LOGDIR}/pids/workers.pid",
+        LOG_FILE="{LOGDIR}/workers.log",
+    ),
+
     WSGI_APPLICATION="wsgi:application",
     BRAND_FOLDER="brand",  # this is a subfolder, per deployment of static brand assets
 )

@@ -30,7 +30,7 @@ settings_*.py
 /*.ini
 
 win_settings.bat
-run_server
+run_server.sh
 
 /static/*
 !/static/.htaccess

@@ -1,7 +1,6 @@
 #!/bin/bash
-GUNICORN_CMD="%(VENV_FOLDER)s/bin/gunicorn"
-GUNICORN_ARGS="%(GUNICORN_ARGUMENTS)s"
-PID_PATH="%(GUNICORN_PID_FILE)s"
+FRONT_CMD="%(VENV_FOLDER)s/bin/daphne"
+FRONT_PID_PATH="%(FRONT_PID_FILE)s"
 
 cd "%(REPOSITORY_FOLDER)s"
 sh "%(VENV_FOLDER)s/bin/activate"
@@ -23,8 +22,8 @@ start_server () {
 
 stop_server () {
   if [ -f ${PID_PATH} ] && [ "$(ps -p `cat ${PID_PATH}` | wc -l)" -gt 1 ]; then
-    echo "stopping server"
-    kill -9  `cat ${PID_PATH}`
+    echo "Stopping Frontend server"
+    kill `cat ${PID_PATH}`
     rm ${PID_PATH}
   else
     if [ -f ${PID_PATH} ]; then
