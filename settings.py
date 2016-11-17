@@ -520,7 +520,7 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
     GUNICORN=dict(
         RUN_GUNICORN_COMMAND="{REPOSITORY_FOLDER}/run_gunicorn",
         PORT=8888,
-        PID_FILE="{LOGDIR}/pids/gunicorn.pid",
+        PID_FILE="{LOGDIR}/pids/daphne.pid",
         LOG_FILE="{LOGDIR}/daphne.log",
     ),
 

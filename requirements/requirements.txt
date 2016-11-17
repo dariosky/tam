@@ -24,6 +24,7 @@ psycopg2
 gunicorn
 # setproctitle to set the process title, doesn't work on Windows
 setproctitle
+psutil
 requests
 
 # mails ***
