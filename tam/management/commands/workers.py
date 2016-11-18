@@ -26,7 +26,7 @@ def stop_process(pid):
 
 
 class Command(AppCommand):
-    help = 'Manage the daphne frontend server'
+    help = 'Manage the web workers'
 
     def add_arguments(self, parser):
         # Positional arguments
@@ -34,17 +34,21 @@ class Command(AppCommand):
                             help="start, restart, stop")
 
     def handle(self, *args, **options):
-        pid_file = settings.DEPLOYMENT['GUNICORN']['PID_FILE']
-        log_file = settings.DEPLOYMENT['GUNICORN']['LOG_FILE']
-        port = settings.DEPLOYMENT['GUNICORN']['PORT']
+        pid_file = settings.DEPLOYMENT['WORKERS']['PID_FILE']
+        log_file = settings.DEPLOYMENT['WORKERS']['LOG_FILE']
         venv = settings.DEPLOYMENT['FOLDERS']['VENV_FOLDER']
+        repo = settings.DEPLOYMENT['FOLDERS']['REPOSITORY_FOLDER']
+        threads = settings.DEPLOYMENT['WORKERS']['THREADS']
 
         if options['action'] == 'start':
-            logger.debug("Checking daphne status %s" % pid_file)
+            logger.debug("Checking workers status %s" % pid_file)
             running = is_ps_running(pid_file)
             if not running:
-                logger.info("Starting Daphne frontend server")
-                command = ['%s/bin/daphne' % venv, '-p %d' % port, 'asgi:channel_layer',
+                logger.info("Starting worker processes")
+                command = ['{venv}/bin/python {repo}/manage.py'.format(repo=repo,
+                                                                       venv=venv),
+                           'runworker',
+                           '--threads %d' % threads,
                            '>> %s' % log_file,
                            '2>&1'
                            ]
@@ -54,13 +58,13 @@ class Command(AppCommand):
                 with open(pid_file, 'w') as f:
                     f.write("%s\n" % proc.pid)
             else:
-                logger.info("Daphne was already running")
+                logger.info("Workers were already running")
 
         if options['action'] == 'stop':
             pid = is_ps_running(pid_file)
             if pid:
-                logger.info("Stopping Daphne")
+                logger.info("Stopping Workers processes")
                 stop_process(pid)
                 os.remove(pid_file)
             else:
-                logger.info("Daphne is not running")
+                logger.info("Workers are not running")
