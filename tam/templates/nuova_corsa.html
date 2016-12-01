@@ -35,7 +35,7 @@
 				{% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %}
 				{% endwith %}
 				<span id="bloccoCliente">
-				    {% with form.cliente as field %}{{ field.label_tag }} {{ field }} {{ field.initial }}
+				    {% with form.cliente as field %}{{ field.label_tag }} {{ field }}
 					{% if field.errors %}<br/> <span class="errorlist">{% for error in field.errors %}{{ error }}{% endfor %}</span> {% endif %} {% endwith %}
 				</span>
 				<span id="bloccoPasseggero">

@@ -27,13 +27,6 @@ tz_italy = pytz.timezone('Europe/Rome')
 DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI = tz_italy.localize(datetime.datetime(2016, 4, 1, 0, 0))
 
 CLASSIFICHE = [
-    {"nome": "Venezia",
-     "descrizione": ">=60km",
-     "mapping_field": "prezzoVenezia",
-     'viaggio_field': 'prezzoVenezia',
-     'ignore_if_field': 'punti_abbinata',
-     # ignoro questa classifica se ho dei punti abbinata
-     },
     {"nome": "Supplementari mattutini",
      "mapping_field": "puntiDiurni",
      'type': 'supplementari',
@@ -45,6 +38,13 @@ CLASSIFICHE = [
      'type': 'supplementari',
      'image': "night",
      'viaggio_field': 'punti_notturni',
+     },
+    {"nome": "Venezia",
+     "descrizione": ">=60km",
+     "mapping_field": "prezzoVenezia",
+     'viaggio_field': 'prezzoVenezia',
+     'ignore_if_field': 'punti_abbinata',
+     # ignoro questa classifica se ho dei punti abbinata
      },
     {"nome": "Doppi Venezia",
      'type': 'punti',
