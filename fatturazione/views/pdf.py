@@ -266,7 +266,9 @@ def render_to_reportlab(context):
             totale = sum([r.val_totale() for r in righe])
             conducente = righe[0].conducente if righe else None
             if "Imposta di bollo" not in [r.descrizione for r in righe]:
-                if not (totale < settings.MIN_PRICE_FOR_TAXSTAMP and conducente.emette_ricevute):
+                if not (totale < settings.MIN_PRICE_FOR_TAXSTAMP
+                        and (conducente is None or conducente.emette_ricevute)
+                        ):
                     raggruppa_barbatrucco = True
 
         if raggruppa_barbatrucco:
