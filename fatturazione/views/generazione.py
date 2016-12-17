@@ -329,6 +329,10 @@ def genera_fatture(request, fatturazione):
                         # us price of the run if we have it
                         riga_fattura.prezzo = viaggio.prezzo_netto(
                             riga_fattura.iva)
+                        if viaggio.prezzo_sosta > 0:
+                            # se ho una sosta, aggiungo il prezzo della sosta in fattura
+                            riga_fattura.prezzo += viaggio.prezzo_sosta
+
                         if viaggio.cliente:
                             riga_fattura.note = viaggio.cliente.nome
                         elif viaggio.passeggero:
