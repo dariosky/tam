@@ -22,7 +22,7 @@ from tam.tamdates import parse_datestring, MONTH_NAMES
 
 
 @permission_required('fatturazione.view', '/')
-def view_fatture(request, template_name="5_lista-fatture.djhtml"):
+def view_fatture(request, template_name="5_lista-fatture.html"):
     get_mese_fatture = request.GET.get('mese', None)
     oggi = tamdates.ita_today()
     quick_month_names = [MONTH_NAMES[(oggi.month - 3) % 12],
@@ -93,7 +93,7 @@ def view_fatture(request, template_name="5_lista-fatture.djhtml"):
 
 @permission_required('fatturazione.view', '/')
 def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
-            template_name="6.fattura.djhtml"):
+            template_name="6.fattura.html"):
     """ Vedo la fattura ed (eventualmente) ne consento la modifica """
     try:
         if id_fattura:
@@ -162,7 +162,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
             logAction('C', instance=fattura, description="Riga inserita manualmente.",
                       user=request.user)
             return render(request,
-                          '6.fattura-riga.inc.djhtml',
+                          '6.fattura-riga.inc.html',
                           {
                               "riga": riga,
                               'readonly': readonly,
@@ -334,7 +334,7 @@ def exportfattura(request, id_fattura, export_type='html'):
                'export_type': export_type,
                'logo_url': settings.OWNER_LOGO,
                }
-    template_name = 'fat_model/export_fattura_1.djhtml'
+    template_name = 'fat_model/export_fattura_1.html'
     # tamFatturaPdf(fattura, response)	# popola la response con il file
     # if export_type == "pisa":
     # 		return render_with_pisa(template_name, context)
@@ -376,5 +376,5 @@ def exportmultifattura(request, tipo, export_type='html'):
     if export_type == 'pdf':
         return render_to_reportlab(context)
     else:  # html output by default
-        template_name = 'fat_model/export_fattura_1.djhtml'
+        template_name = 'fat_model/export_fattura_1.html'
         return render(request, template_name, context)

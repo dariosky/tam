@@ -51,9 +51,9 @@ class FattureConsorzio(ModelloFattura):
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
     url_generazione = r'^genera/consorzio/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     ask_progressivo = True
-    template_scelta = "1.perCliente.djhtml"
-    template_generazione = "2.perCliente.djhtml"
-    template_visualizzazione = "5.perCliente.djhtml"
+    template_scelta = "1.perCliente.html"
+    template_generazione = "2.perCliente.html"
+    template_visualizzazione = "5.perCliente.html"
     codice_fattura = "FC"
     destinatario = "cliente"
     mittente = "consorzio"
@@ -87,9 +87,9 @@ class FattureNoIVA(ModelloFattura):
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
     url_generazione = r'^genera/esentiIVA/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     ask_progressivo = True
-    template_scelta = "1.perCliente.djhtml"
-    template_generazione = "2.perCliente.djhtml"
-    template_visualizzazione = "5.perCliente.djhtml"
+    template_scelta = "1.perCliente.html"
+    template_generazione = "2.perCliente.html"
+    template_visualizzazione = "5.perCliente.html"
     codice_fattura = "FE"
     destinatario = "cliente"
     mittente = "consorzio"
@@ -119,9 +119,9 @@ class FattureConducente(ModelloFattura):
     keys = ["conducente"]  # come dividere una fattura dall'altra
     order_by = ["conducente", "viaggio__data", "viaggio__cliente"]  # ordinamento
     url_generazione = r'^genera/conducente/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
-    template_scelta = "1.perConducente.djhtml"
-    template_generazione = "2.perConducente.djhtml"
-    template_visualizzazione = "5.perConducente.djhtml"
+    template_scelta = "1.perConducente.html"
+    template_generazione = "2.perConducente.html"
+    template_visualizzazione = "5.perConducente.html"
     destinatario = "consorzio"
     mittente = "conducente"
     esente_iva = False
@@ -140,9 +140,9 @@ class FattureConducenteNoIva(ModelloFattura):
     keys = ["conducente"]  # come dividere una fattura dall'altra
     order_by = ["conducente", "fattura__data", "viaggio__data", "viaggio__cliente"]  # ordinamento
     url_generazione = r'^genera/conducenteNoIVA/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
-    template_scelta = "1.perConducente.djhtml"
-    template_generazione = "2.perConducente.djhtml"
-    template_visualizzazione = "5.perConducente.djhtml"
+    template_scelta = "1.perConducente.html"
+    template_generazione = "2.perConducente.html"
+    template_visualizzazione = "5.perConducente.html"
     destinatario = "consorzio"
     mittente = "conducente"
 
@@ -168,7 +168,7 @@ class Ricevute(ModelloFattura):
     nome = "Ricevute"
     descrizione = """Ricevute per emodializzati, divise in 2 a livello di stampa."""
     codice = "3"
-    template_visualizzazione = "5.perConducenteCliente.djhtml"
+    template_visualizzazione = "5.perConducenteCliente.html"
 
     mittente = "conducente"
     destinatario = "cliente"
