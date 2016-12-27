@@ -1,4 +1,7 @@
 # TAM
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbb31881f6564fb2b47615472a8449b7)](https://www.codacy.com/app/dariosky/tam?utm_source=github.com&utm_medium=referral&utm_content=dariosky/tam&utm_campaign=badger)
+
 A service to manage activities of Taxi groups in Abano e Montegrotto
 
 Some of its features:
