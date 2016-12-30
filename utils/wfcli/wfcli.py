@@ -18,7 +18,9 @@ class WebFactionAPI():
         if not self.session_id:
             logger.debug("Connecting to API server")
             username, password = os.environ['WEBFACTION_USER'], os.environ['WEBFACTION_PASS']
-            self.session_id, self.account = self.server.login(username, password, machine_name)
+            api_version = 2
+            self.session_id, self.account = self.server.login(username, password, machine_name,
+                                                              api_version)
 
     def list_apps(self):
         self.connect()
@@ -46,13 +48,21 @@ class WebFactionAPI():
         return domain
 
     def list_domains(self):
+        """ Return all domains. Domain is a key, so group by them """
         self.connect()
         results = self.server.list_domains(self.session_id)
         return {i['domain']: i['subdomains'] for i in results}
 
     def list_websites(self):
+        """ Return all websites, name is not a key """
         self.connect()
         results = self.server.list_websites(self.session_id)
+
+        return results
+
+    def list_certificates(self):
+        self.connect()
+        results = self.server.list_certificates(self.session_id)
 
         return {i['name']: i for i in results}
 
@@ -64,10 +74,33 @@ class WebFactionAPI():
         ips = self.list_ips()
         return list(filter(lambda x: x['is_main'], ips))[0]['ip']  # one should be main
 
-    def create_website(self, website_name, ip, enable_https, subdomains, certificate, apps):
+    def create_website(self, website_name, ip, enable_https, subdomains, certificate="", apps=()):
         self.connect()
         self.server.create_website(self.session_id,
-                                   website_name, ip, enable_https, subdomains, *apps)
+                                   website_name, ip, enable_https, subdomains,
+                                   certificate,
+                                   *apps)
+
+    def website_exists(self, website, websites=None):
+        """ Look for websites matching the one passed """
+        if websites is None:
+            websites = self.list_websites()
+        if isinstance(website, str):
+            website = {"name": website}
+        ignored_fields = ('id',)  # changes in these fields are ignored
+
+        results = []
+        for other in websites:
+            different = False
+            for key in website:
+                if key in ignored_fields:
+                    continue
+                if other.get(key) != website.get(key):
+                    different = True
+                    break
+            if different is False:
+                results.append(other)
+        return results
 
 
 def get_cli_parser():

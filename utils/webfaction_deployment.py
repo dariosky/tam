@@ -34,11 +34,11 @@ import os
 import re
 from urllib.parse import urlparse
 
-from fabric.api import run, env, cd
+from fabric.api import run, env, cd, settings as fab_settings
 from fabric.contrib.files import exists
-from fabric.api import settings as fab_settings
+
 import settings
-from utils.wfcli.wfcli import WebFactionAPI
+from wfcli import WebFactionAPI
 
 logger = logging.getLogger('__name__')
 
@@ -208,11 +208,7 @@ def create_all_websites():
     # the websites name will be the same of the apps
     main_app_name = webfaction_apps['main']
     websites_ip = api.main_ip()
-    if main_app_name not in existing_websites:
-        # {'https': False,
-        # 'website_apps': [['tam2beta', '/'], ['tam2beta_static', '/static'], ['tam2beta_media', '/media']],
-        # 'ip': '185.10.231.185', 'id': 652361,
-        # 'subdomains': ['beta.taxiabanoemontegrotto.it'], 'name': 'taxi2beta'}
+    if not api.website_exists(main_app_name, existing_websites):
         # the main site have all needs
         apps = [[main_app_name, "/"]]
         if "media" in webfaction_apps:
@@ -229,7 +225,7 @@ def create_all_websites():
         )
 
     hosts = get_site_hostnames()
-    if webfaction_apps['media'] not in existing_websites and hosts['media']:
+    if not api.website_exists(webfaction_apps['media'], existing_websites) and hosts['media']:
         print("Creating media website.")
         api.create_website(
             webfaction_apps['media'], websites_ip,
@@ -238,7 +234,7 @@ def create_all_websites():
             "",
             [[webfaction_apps['media'], "/"]]
         )
-    if webfaction_apps['static'] not in existing_websites and hosts['static']:
+    if not api.website_exists(webfaction_apps['static'], existing_websites) and hosts['static']:
         print("Creating static website.")
         api.create_website(
             webfaction_apps['static'], websites_ip,
@@ -255,7 +251,7 @@ if __name__ == '__main__':
     env.host_string = 'tam'
 
     # we start doing all REDIS
-    # webfaction_install_redis()
+    webfaction_install_redis()
 
     # we then create all needed subdomains
     create_all_domains()
