@@ -81,6 +81,19 @@ class WebFactionAPI():
                                    certificate,
                                    *apps)
 
+    def update_website(self, website):
+        self.connect()
+        website = self.server.update_website(
+            self.session_id,
+            website['name'],
+            website['ip'],
+            website['https'],
+            website['subdomains'],
+            website['certificate'],
+            *website['website_apps'],
+        )
+        return website
+
     def website_exists(self, website, websites=None):
         """ Look for websites matching the one passed """
         if websites is None:

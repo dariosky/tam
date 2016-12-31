@@ -4,7 +4,7 @@ import os
 from io import BytesIO, StringIO
 from textwrap import dedent
 
-from fabric.api import put, get, env
+from fabric.api import put, get, env, settings as fab_settings
 from fabric.context_managers import hide
 from fabric.contrib.files import exists, is_link
 from fabric.operations import run
@@ -21,9 +21,10 @@ class WebfactionWebsiteToSsl():
     """
 
     def __init__(self,
-                 domain=None,
-                 website=None,
-                 webfaction_host=None):
+                 domain,
+                 webfaction_host=None,
+                 include_subdomains=True,
+                 ):
         self.REDIRECT_TEMPLATE = dedent("""
             RewriteEngine On
             RewriteCond %{HTTP:X-Forwarded-SSL} !on
@@ -33,11 +34,11 @@ class WebfactionWebsiteToSsl():
         if webfaction_host is None:
             raise RuntimeError("Please provide the Webfaction host, we will connect via SSH")
         self.webfaction_host = webfaction_host
-        if not any([domain, website]) or all([domain, website]):
-            logger.error("Please choose a domain OR a website")
-            exit(1)
-        self.domain = domain
 
+        self.domain = domain
+        self.include_subdomains = include_subdomains
+
+        # getting all the infos from Webfaction API
         self.api = api = WebFactionAPI()
         self._domains = api.list_domains()
         self._websites = api.list_websites()
@@ -46,26 +47,13 @@ class WebfactionWebsiteToSsl():
 
         # we will create the certificate with the requested name
         # we have 2 modes: a certificate per website, or a collective cert for domain
-        self.request_name = website or domain
-        self.request_type = "website" if website else "domain"
 
-        websites = []  # the websites the user choosed
-        if website:
-            for w in self._websites:
-                if w['name'] == website:
-                    websites.append(w)
-                self.domain = w['subdomains']
-            if not website:
-                logger.error("Cannot find website: %s" % website)
-                exit(1)
+        websites = list(filter(  # get all the affected websites
+            self.is_website_affected,
+            self._websites
+        ))
 
-        if domain:
-            websites = list(filter(
-                lambda w: domain in w['subdomains'],
-                self._websites
-            ))
-
-        print("Apply to websites: %s" % ", ".join([website['name'] for website in websites]))
+        logger.info("Websites affected: %s" % ", ".join([website['name'] for website in websites]))
         self.websites = websites
 
         self.REDIRECT_TO_SECURE_APP_NAME = 'redirect_to_secure'
@@ -76,8 +64,32 @@ class WebfactionWebsiteToSsl():
             env.use_ssh_config = True
         env.host_string = webfaction_host
 
-        # ask the APIs
-        self.api.list_websites()
+    def is_website_affected(self, website):
+        """ Tell if the website is affected by the domain change """
+        if not self.include_subdomains:
+            return self.domain in website['subdomains']
+        else:
+            dotted_domain = "." + self.domain
+            for subdomain in website['subdomains']:
+                if subdomain == website or subdomain.endswith(dotted_domain):
+                    return True
+            return False
+
+    def get_affected_domains(self):
+        """ Return a list of all affected domain and subdomains """
+        results = []
+        dotted_domain = "." + self.domain
+        for website in self.websites:
+            for subdomain in website['subdomains']:
+                if (
+                            subdomain == self.domain or
+                        (self.include_subdomains and subdomain.endswith(dotted_domain))
+                ):
+                    results.append(subdomain)
+
+        # sort them by lenght so the shortest domain is the first
+        results.sort(key=lambda item: len(item))
+        return results
 
     def redirect_to_secure(self):
         existing_apps = self._apps
@@ -109,11 +121,6 @@ class WebfactionWebsiteToSsl():
             put(StringIO(self.REDIRECT_TEMPLATE), remote_path=filepath)
 
     def run(self):
-        # install acme on the remote server -
-        # create an app to verify the LE certificate
-        # create Static/CGI/PHP-7.0 with the domain name _letsencrypt
-        # add the app on the (non http website) on the /.well-known path
-
         # here's an hack to make acme.sh run on the .well-known like it was the root
         # from the app path:
         # ln -s . .well-known
@@ -127,17 +134,30 @@ class WebfactionWebsiteToSsl():
         # RewriteEngine On
         # RewriteCond %{HTTP:X-Forwarded-SSL} !on
         # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
-        self.install_acme()
-
-        for website in self.websites:
-            if not website['https']:
-                continue
-            secured_website = self.website_exists_as_secure(website)
-            if not secured_website:
-                secured_website = self.clone_website_as_secure(website)
-            self.verify_certificate(secured_website)  # check the certificates are ok
 
         logger.info("Webfaction - http 2 https - %s" % self.domain)
+
+        # we will create a certificate for a bunch of subdomains
+        subdomains = self.get_affected_domains()
+        logger.info("Domains affected: %s" % subdomains)
+
+        # let's check what are the subdomains still unsecured
+        insecured = []
+        for subdomain in subdomains:
+            if not self.domain_exists_as_secured(subdomain):
+                insecured.append(subdomain)
+        logger.info("To be secured: %s" % insecured)
+
+        if insecured:
+            self.create_certificates(subdomains)
+        self.sync_certificates()
+        # for website in self.websites:
+        #     if website['https'] is True:
+        #         continue
+        #     secured_website = self.website_exists_as_secure(website)
+        #     if not secured_website:
+        #         secured_website = self.clone_website_as_secure(website)
+        #     self.verify_certificate(secured_website)  # check the certificates are ok
 
     def website_exists_as_secure(self, website):
         """" Return true if the website has an equivalent that is secure """
@@ -157,7 +177,14 @@ class WebfactionWebsiteToSsl():
                 return other
         return None
 
-    def install_acme(self):
+    def domain_exists_as_secured(self, subdomain):
+        for website in self.websites:
+            if website['https'] and website['certificate'] and subdomain in website['subdomain']:
+                return True
+        return False
+
+    @staticmethod
+    def install_acme():
         if not exists('~/.acme.sh/acme.sh'):
             logger.info("Installing acme.sh")
             run('curl https://get.acme.sh | sh')
@@ -177,13 +204,10 @@ class WebfactionWebsiteToSsl():
         return new
 
     def add_certificate(self, website):
-        logger.info("Creating a certificate for {type} {name}".format(
-            type=self.request_type, name=self.request_name)
-        )
+        logger.info("Creating a certificate for {}".format(website))
         self.create_le_verification_app()
 
-
-        certificate_name = self.request_name
+        certificate_name = self.domain
         return certificate_name
 
     def verify_certificate(self, website):
@@ -219,14 +243,57 @@ class WebfactionWebsiteToSsl():
             run('ln -s {app_root} {well_known_folder}'.format(**locals()))
         return verification_app
 
+    def create_certificates(self, subdomains):
+        self.install_acme()  # acme is a requirement for the certificates
+        self.create_le_verification_app()
+
+        for insecure_website in self.websites:
+            if insecure_website['https']:
+                continue
+            if not self.website_verificable(insecure_website):
+                insecure_website['website_apps'].append(
+                    [self.LETSENCRYPT_VERIFY_APP_NAME, '/.well-known']
+                )
+                logger.info("Make insecure site verificable %s" % insecure_website['name'])
+                self.api.update_website(insecure_website)
+
+        issue_command = [
+            ".acme.sh/acme.sh", "--issue"
+        ]
+        for subdomain in subdomains:
+            issue_command += ["-d", subdomain]
+        issue_command += ["-w", "~/webapps/%s" % self.LETSENCRYPT_VERIFY_APP_NAME]
+        with fab_settings(warn_only=True):
+            result = run(" ".join(issue_command))  # let's issue the certificates with acme
+            return_code = result.return_code
+            if return_code == 2:
+                logger.debug("No need to issue new certificates")
+            else:
+                logger.info("Something went wrong issuing the new certificates")
+
+    def website_verificable(self, website):
+        """ True if the website is LetsEncrypt verificable: it should have the verification app
+            on the /.well-known path """
+        required_app = [self.LETSENCRYPT_VERIFY_APP_NAME, '/.well-known']
+        for app in website['website_apps']:
+            if app == required_app:
+                return True
+        return False
+
+    def sync_certificates(self):
+        """ Check all certificates available in acme in the host
+            and sync them with the webfaction certificates
+        """
+        result = run(".acme.sh/acme.sh --list")
+        print(result)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
     w = WebfactionWebsiteToSsl(
-        domain='old.dariosky.it',
-        # website = 'dariosky_old',
-        webfaction_host='dariosky',
+        domain='domain.com',
+        webfaction_host='webxxx.webfaction.com'
     )
     w.run()
     # print(w.api.list_certificates())
