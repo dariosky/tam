@@ -14,16 +14,14 @@ from wfcli import WebFactionAPI
 logger = logging.getLogger('wfcli.redirect_to_secure')
 
 
-class WebfactionWebsiteToSsl():
+class WebfactionWebsiteToSsl:
     """ Do all is needed to move a domain to https
 
     This uses Lets Encrypt and the webfaction APIs
     """
 
     def __init__(self,
-                 domain,
                  webfaction_host=None,
-                 include_subdomains=True,
                  ):
         self.REDIRECT_TEMPLATE = dedent("""
             RewriteEngine On
@@ -35,8 +33,10 @@ class WebfactionWebsiteToSsl():
             raise RuntimeError("Please provide the Webfaction host, we will connect via SSH")
         self.webfaction_host = webfaction_host
 
-        self.domain = domain
-        self.include_subdomains = include_subdomains
+        self.domain = None
+        self.include_subdomains = False
+        self.websites = []
+        self.redirect_app_exists = None  # we remember if the redirect_app is ok
 
         # getting all the infos from Webfaction API
         self.api = api = WebFactionAPI()
@@ -44,17 +44,6 @@ class WebfactionWebsiteToSsl():
         self._websites = api.list_websites()
         self._certificates = api.list_certificates()
         self._apps = self.api.list_apps()
-
-        # we will create the certificate with the requested name
-        # we have 2 modes: a certificate per website, or a collective cert for domain
-
-        websites = list(filter(  # get all the affected websites
-            self.is_website_affected,
-            self._websites
-        ))
-
-        logger.info("Websites affected: %s" % ", ".join([website['name'] for website in websites]))
-        self.websites = websites
 
         self.REDIRECT_TO_SECURE_APP_NAME = 'redirect_to_secure'
         self.LETSENCRYPT_VERIFY_APP_NAME = '_letsencrypt'
@@ -91,10 +80,11 @@ class WebfactionWebsiteToSsl():
         results.sort(key=lambda item: len(item))
         return results
 
-    def redirect_to_secure(self):
-        existing_apps = self._apps
-        if self.REDIRECT_TO_SECURE_APP_NAME in existing_apps:
-            app = existing_apps[self.REDIRECT_TO_SECURE_APP_NAME]
+    def create_redirect_app(self):
+        if self.redirect_app_exists is True:
+            return
+        if self.REDIRECT_TO_SECURE_APP_NAME in self._apps:
+            app = self._apps[self.REDIRECT_TO_SECURE_APP_NAME]
         else:
             logger.info("Creating redirect app: %s" % self.REDIRECT_TO_SECURE_APP_NAME)
             app = self.api.create_app(
@@ -119,67 +109,74 @@ class WebfactionWebsiteToSsl():
             logger.info("Creating .htaccess")
         if update_redirection:
             put(StringIO(self.REDIRECT_TEMPLATE), remote_path=filepath)
+        self.redirect_app_exists = True
 
-    def run(self):
-        # here's an hack to make acme.sh run on the .well-known like it was the root
-        # from the app path:
-        # ln -s . .well-known
-        # acme.sh --issue -d {domain} -w .
-
-        # we should have the certs now
-        # create the certificate if it is missing using the cert, key and intermediate
-        # create the https website with the new certificate
-
-        # redirect all the http traffic to https (in .htaccess
-        # RewriteEngine On
-        # RewriteCond %{HTTP:X-Forwarded-SSL} !on
-        # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+    def secure(self,
+               domain,
+               include_subdomains=True
+               ):
+        self.domain = domain
+        self.include_subdomains = include_subdomains
+        self.websites = list(filter(  # get all the affected websites
+            self.is_website_affected,
+            self._websites
+        ))
+        logger.info(
+            "Websites affected: %s" % ", ".join([website['name'] for website in self.websites]))
 
         logger.info("Webfaction - http 2 https - %s" % self.domain)
 
         # we will create a certificate for a bunch of subdomains
         subdomains = self.get_affected_domains()
         logger.info("Domains affected: %s" % subdomains)
+        if not self.websites:
+            logger.info("No websites with the choosen domain")
+            return
 
         # let's check what are the subdomains still unsecured
         insecured = []
         for subdomain in subdomains:
             if not self.domain_exists_as_secured(subdomain):
                 insecured.append(subdomain)
-        logger.info("To be secured: %s" % insecured)
 
         if insecured:
-            self.create_certificates(subdomains)
-        self.sync_certificates()
-        # for website in self.websites:
-        #     if website['https'] is True:
-        #         continue
-        #     secured_website = self.website_exists_as_secure(website)
-        #     if not secured_website:
-        #         secured_website = self.clone_website_as_secure(website)
-        #     self.verify_certificate(secured_website)  # check the certificates are ok
+            logger.info("To be secured: %s" % insecured)
+            self.create_acme_certificates(subdomains)  # we create the acme certificates
+        self.sync_certificates(subdomains)  # we sync all the certificates
+
+        main_domain = subdomains[0]
+        certificate = self._certificates[self.slugify(main_domain)]
+
+        for website in self.websites:
+            if website['https'] is True:
+                continue
+            secured_website = self.website_exists_as_secure(website)
+            if not secured_website:
+                self.clone_website_as_secure(website, certificate)
+            else:
+                self.verify_certificate(secured_website, certificate)
+            # now the website is secured, the insecured can just redirect
+            self.convert_to_redirect(website)
 
     def website_exists_as_secure(self, website):
-        """" Return true if the website has an equivalent that is secure """
+        """" Return true if the website has an equivalent that is secure
+            we will have 2 websites with the same name, one insecure (that will contain just
+            the redirect and the identity-verification) and one secured
+        """
         if website['https']:
             logger.info("website %s is already secured, skip" % website['name'])
             return website
-        ignored_fields = ('https', 'name', 'id')  # changes in these fields are ignored
-        clean = {k: v for k, v in website.items() if k not in ignored_fields}
+        # changes in these fields are ignored
         for other in self._websites:
             if other['id'] == website['id']:
                 continue
-            other_clean = {k: v for k, v in other.items() if k not in ignored_fields}
-            if clean == other_clean:
-                logger.info("website {wname} is already secured as {wsname}, skip".format(
-                    wname=website['name'], wsname=other['name']
-                ))
+            if other['name'] == website['name'] and other['https']:
                 return other
         return None
 
     def domain_exists_as_secured(self, subdomain):
         for website in self.websites:
-            if website['https'] and website['certificate'] and subdomain in website['subdomain']:
+            if website['https'] and website['certificate'] and subdomain in website['subdomains']:
                 return True
         return False
 
@@ -189,33 +186,32 @@ class WebfactionWebsiteToSsl():
             logger.info("Installing acme.sh")
             run('curl https://get.acme.sh | sh')
 
-    def clone_website_as_secure(self, website):
-        logger.info("Creating a secure version of website: %s" % website['name'])
-        certificate = self.add_certificate(website)
+    def secured_apps_copy(self, apps):
+        """ Given the http app list of a website, return what should be in the secure version """
+        return [[app_name, path] for app_name, path in apps if
+                app_name not in (self.LETSENCRYPT_VERIFY_APP_NAME,)]
+
+    def clone_website_as_secure(self, website, certificate):
+        logger.info("Creating a secure version of the website: %s" % website['name'])
         old = website
-        print(old)
+        # create a copy of the insecure site
         new = self.api.create_website(
             old['name'],
             ip=old['ip'],
             enable_https=True,
             subdomains=old['subdomains'],
-            apps=old['website_apps'],
+            certificate=certificate['name'],
+            apps=self.secured_apps_copy(old['website_apps']),
         )
         return new
 
-    def add_certificate(self, website):
-        logger.info("Creating a certificate for {}".format(website))
-        self.create_le_verification_app()
-
-        certificate_name = self.domain
-        return certificate_name
-
-    def verify_certificate(self, website):
-        # do we have a certificate for the website?
-        # is it associated with the website?
-        certificate_name = website['name']
-        if certificate_name not in self._certificates:
-            certificate = self.add_certificate(website)
+    def verify_certificate(self, website, certificate):
+        # is the certificate associated with the website?
+        certificate_name = certificate['name']
+        if website['certificate'] != certificate_name:
+            website['certificate'] = certificate_name
+            logger.info("Adding certificate to the secured website %s" % website['name'])
+            self.api.update_website(website)
 
     def create_le_verification_app(self):
         """ Create the let's encrypt app to verify the ownership of the domain """
@@ -243,7 +239,7 @@ class WebfactionWebsiteToSsl():
             run('ln -s {app_root} {well_known_folder}'.format(**locals()))
         return verification_app
 
-    def create_certificates(self, subdomains):
+    def create_acme_certificates(self, subdomains):
         self.install_acme()  # acme is a requirement for the certificates
         self.create_le_verification_app()
 
@@ -265,6 +261,7 @@ class WebfactionWebsiteToSsl():
         issue_command += ["-w", "~/webapps/%s" % self.LETSENCRYPT_VERIFY_APP_NAME]
         with fab_settings(warn_only=True):
             # let's issue the certificates with acme
+            # TODO: Retry, if the verification app has just been added, it make take sometime
             result = run(" ".join(issue_command), quiet=True)
             return_code = result.return_code
             if return_code == 2:
@@ -282,14 +279,16 @@ class WebfactionWebsiteToSsl():
                 return True
         return False
 
-    def sync_certificates(self):
+    def sync_certificates(self, subdomains=None):
         """ Check all certificates available in acme in the host
             and sync them with the webfaction certificates
         """
         result = run(".acme.sh/acme.sh --list", quiet=True)
+        logger.info("Syncing Webfaction certificates")
         for acme_certificate_description in result.split('\n')[1:]:
             main_domain = acme_certificate_description.split()[0]
-            print(main_domain)
+            if subdomains and main_domain not in subdomains:
+                continue
             if exists(os.path.join("~/.acme.sh/", main_domain)):
                 certificate_cer = self.get_remote_content(
                     os.path.join("~/.acme.sh/", main_domain, main_domain + ".cer")
@@ -303,10 +302,10 @@ class WebfactionWebsiteToSsl():
                 certificate_name = self.slugify(main_domain)
 
                 certificate = self._certificates.get(certificate_name)
-                if certificate is None \
-                    or certificate['certificate'] != certificate_cer \
-                    or certificate['private_key'] != certificate_key \
-                    or certificate['intermediates'] != certificate_ca:
+                if (certificate is None
+                    or certificate['certificate'] != certificate_cer
+                    or certificate['private_key'] != certificate_key
+                    or certificate['intermediates'] != certificate_ca):
                     new_certificate = dict(
                         name=certificate_name,
                         certificate=certificate_cer,
@@ -319,27 +318,55 @@ class WebfactionWebsiteToSsl():
                     else:
                         logger.info("Updating certificate for %s" % main_domain)
                         self.api.update_certificate(new_certificate)
+                    self._certificates[certificate_name] = new_certificate
 
-    def get_remote_content(self, filepath):
+    @staticmethod
+    def get_remote_content(filepath):
+        """ A handy wrapper to get a remote file content """
         with hide('running'):
             temp = BytesIO()
             get(filepath, temp)
             content = temp.getvalue().decode('utf-8')
         return content.strip()
 
-    def slugify(self, domain):
+    @staticmethod
+    def slugify(domain):
         """ Slugify the domain to create a certificate name for Webfaction. Simple for now
         (should be alphanumerical)"""
         return domain.replace(".", "_")
 
+    def convert_to_redirect(self, website):
+        self.create_redirect_app()
+        if website['https']:
+            logger.error("Convert to redirect should be used only for insecure websites")
+            return
+
+        apps = [
+            [self.REDIRECT_TO_SECURE_APP_NAME, "/"],
+            [self.LETSENCRYPT_VERIFY_APP_NAME, '/.well-known'],
+        ]
+        if website['website_apps'] != apps:
+            logger.info("Convert the insecure website %s to a redirect" % website['name'])
+            website['website_apps'] = apps
+
+            # TODO: Wait that the https answer with the correct certificate
+
+            # confirm = input(
+            #     "This operation change the insecure site with a redirect, proceed [Y, n] ? ")
+            # if confirm.strip().lower() == 'n':
+            #     logger.warning("Redirection cancelled")
+            #     return
+            # for some unkwnon reason Webfaction gives errors updating the website just adding
+            # the redirect all leaving the VERIFY_ONE
+
+            self.api.update_website(website)
+
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    logging.getLogger('paramiko').setLevel(logging.WARNING)
 
     w = WebfactionWebsiteToSsl(
-        domain='domain.com',
-        webfaction_host='webxxx.webfaction.com'
+        webfaction_host='webxxx.webfaction.com',
     )
-    w.run()
-    # print(w.api.list_certificates())
-    # w.redirect_to_secure()
+    w.secure(domain='domain.com')
