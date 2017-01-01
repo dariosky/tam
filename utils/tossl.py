@@ -264,12 +264,14 @@ class WebfactionWebsiteToSsl():
             issue_command += ["-d", subdomain]
         issue_command += ["-w", "~/webapps/%s" % self.LETSENCRYPT_VERIFY_APP_NAME]
         with fab_settings(warn_only=True):
-            result = run(" ".join(issue_command))  # let's issue the certificates with acme
+            # let's issue the certificates with acme
+            result = run(" ".join(issue_command), quiet=True)
             return_code = result.return_code
             if return_code == 2:
                 logger.debug("No need to issue new certificates")
             else:
                 logger.info("Something went wrong issuing the new certificates")
+                logger.error(result)
 
     def website_verificable(self, website):
         """ True if the website is LetsEncrypt verificable: it should have the verification app
@@ -284,8 +286,51 @@ class WebfactionWebsiteToSsl():
         """ Check all certificates available in acme in the host
             and sync them with the webfaction certificates
         """
-        result = run(".acme.sh/acme.sh --list")
-        print(result)
+        result = run(".acme.sh/acme.sh --list", quiet=True)
+        for acme_certificate_description in result.split('\n')[1:]:
+            main_domain = acme_certificate_description.split()[0]
+            print(main_domain)
+            if exists(os.path.join("~/.acme.sh/", main_domain)):
+                certificate_cer = self.get_remote_content(
+                    os.path.join("~/.acme.sh/", main_domain, main_domain + ".cer")
+                )
+                certificate_key = self.get_remote_content(
+                    os.path.join("~/.acme.sh/", main_domain, main_domain + ".key")
+                )
+                certificate_ca = self.get_remote_content(
+                    os.path.join("~/.acme.sh/", main_domain, "ca.cer")
+                )
+                certificate_name = self.slugify(main_domain)
+
+                certificate = self._certificates.get(certificate_name)
+                if certificate is None \
+                    or certificate['certificate'] != certificate_cer \
+                    or certificate['private_key'] != certificate_key \
+                    or certificate['intermediates'] != certificate_ca:
+                    new_certificate = dict(
+                        name=certificate_name,
+                        certificate=certificate_cer,
+                        private_key=certificate_key,
+                        intermediates=certificate_ca,
+                    )
+                    if certificate is None:
+                        logger.info("Creating new certificate for %s" % main_domain)
+                        self.api.create_certificate(new_certificate)
+                    else:
+                        logger.info("Updating certificate for %s" % main_domain)
+                        self.api.update_certificate(new_certificate)
+
+    def get_remote_content(self, filepath):
+        with hide('running'):
+            temp = BytesIO()
+            get(filepath, temp)
+            content = temp.getvalue().decode('utf-8')
+        return content.strip()
+
+    def slugify(self, domain):
+        """ Slugify the domain to create a certificate name for Webfaction. Simple for now
+        (should be alphanumerical)"""
+        return domain.replace(".", "_")
 
 
 if __name__ == '__main__':

@@ -66,6 +66,28 @@ class WebFactionAPI():
 
         return {i['name']: i for i in results}
 
+    def create_certificate(self, certificate):
+        self.connect()
+        certificate = self.server.create_certificate(
+            self.session_id,
+            certificate['name'],
+            certificate['certificate'],
+            certificate['private_key'],
+            certificate['intermediates'],
+        )
+        return certificate
+
+    def update_certificate(self, certificate):
+        self.connect()
+        certificate = self.server.update_certificate(
+            self.session_id,
+            certificate['name'],
+            certificate['certificate'],
+            certificate['private_key'],
+            certificate['intermediates'],
+        )
+        return certificate
+
     def list_ips(self):
         self.connect()
         return self.server.list_ips(self.session_id)
