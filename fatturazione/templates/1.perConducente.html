@@ -21,7 +21,7 @@
 		<td><input type='checkbox' name='id' value='{{riga.id}}' ></td>
 		<td>{% if riga.viaggio %}
 			{% with viaggio=riga.viaggio %}
-				{% include "inc.cellaViaggio.djhtml" %}
+				{% include "inc.cellaViaggio.html" %}
 			{%endwith%}
 		{%endif%}</td>
 		<td>{{riga.descrizione}}</td>

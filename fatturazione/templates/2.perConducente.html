@@ -39,7 +39,7 @@
 					<input type='hidden' name='id' value='{{rigafattura.id}}' >
 					<div class='dati'>{{rigafattura.fattura.emessa_a}}</div>
 				</td>
-				<td>{%if viaggio%}{% include "inc.cellaViaggio.djhtml" %}{%endif%}</td>
+				<td>{%if viaggio%}{% include "inc.cellaViaggio.html" %}{%endif%}</td>
 				<td>{{rigafattura.descrizione}}</td>
 				<td>{{rigafattura.viaggio.prezzo|default:rigafattura.prezzo}}</td>
 			</tr>

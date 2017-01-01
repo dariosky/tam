@@ -52,7 +52,7 @@ class AuthenticationFormWrapped(AuthenticationForm):
 
 
 @public
-@ratelimit()
+@ratelimit(method='POST')
 def login(request):
     if getattr(request, 'limited', False):
         messages = ["Too many requests on {path}. Page forbidden.".format(path=request.path),

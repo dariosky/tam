@@ -19,6 +19,7 @@ from fatturazione.models import Fattura, RigaFattura, nomi_fatture, \
 from fatturazione.views.util import ultimoProgressivoFattura
 from modellog.actions import logAction
 from tam.models import Viaggio, ProfiloUtente
+from tam.tamdates import MONTH_NAMES
 from . import tipi_fatturazione
 
 """
@@ -61,18 +62,41 @@ for fatturazione in DEFINIZIONE_FATTURE:
 
 
 @permission_required('fatturazione.generate', '/')
-def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
-    data_start = parse_datestring(  # dal primo del mese scorso
-        request.GET.get("data_start"),
-        default=(tamdates.ita_today().replace(
-            day=1) - datetime.timedelta(
-            days=1)).replace(day=1)
-    )
-    data_end = parse_datestring(  # all'ultimo del mese scorso
-        request.GET.get("data_end"),
-        default=tamdates.ita_today().replace(
-            day=1) - datetime.timedelta(days=1)
-    )
+def lista_fatture_generabili(request, template_name="1_scelta_fatture.html"):
+    get_mese_fatture = request.GET.get('mese', None)
+    oggi = tamdates.ita_today()
+    quick_month_names = [MONTH_NAMES[(oggi.month - 3) % 12],
+                         MONTH_NAMES[(oggi.month - 2) % 12],
+                         MONTH_NAMES[(oggi.month - 1) % 12]]  # current month
+    quick_month_names.reverse()
+    if get_mese_fatture:
+        if get_mese_fatture == "cur":
+            data_start = oggi.replace(day=1)
+            data_end = (data_start + datetime.timedelta(days=32)).replace(
+                day=1) - datetime.timedelta(days=1)
+        elif get_mese_fatture == 'prev':
+            data_end = oggi.replace(day=1) - datetime.timedelta(days=1)  # vado a fine mese scorso
+            data_start = data_end.replace(day=1)  # vado a inizio del mese precedente
+        elif get_mese_fatture == 'prevprev':  # due mesi fa
+            data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
+                day=1) - datetime.timedelta(
+                days=1)  # vado a inizio mese scorso
+            data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
+        else:
+            raise Exception("Unexpected get mese fatture %s" % get_mese_fatture)
+    else:
+        data_start = parse_datestring(  # dal primo del mese scorso
+            request.GET.get("data_start"),
+            default=(tamdates.ita_today().replace(
+                day=1) - datetime.timedelta(
+                days=1)).replace(day=1)
+        )
+        data_end = parse_datestring(  # all'ultimo del mese scorso
+            request.GET.get("data_end"),
+            default=tamdates.ita_today().replace(
+                day=1) - datetime.timedelta(days=1)
+        )
+
     # prendo i viaggi da fatturare
     # dalla mezzanotte del primo giorno alla mezzanotte esclusa del giorno dopo l'ultimo
     gruppo_fatture = []
@@ -131,6 +155,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.djhtml"):
 
             "gruppo_fatture": gruppo_fatture,
             'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
+            "quick_month_names": quick_month_names,
         },
     )
 
@@ -301,15 +326,19 @@ def genera_fatture(request, fatturazione):
                         riga_fattura.iva = elemento.iva
 
                     if viaggio:
-                        # uso il prezzo del viaggio, non della fattura consorzio
+                        # us price of the run if we have it
                         riga_fattura.prezzo = viaggio.prezzo_netto(
                             riga_fattura.iva)
+                        if viaggio.prezzo_sosta > 0:
+                            # se ho una sosta, aggiungo il prezzo della sosta in fattura
+                            riga_fattura.prezzo += viaggio.prezzo_sosta
+
                         if viaggio.cliente:
                             riga_fattura.note = viaggio.cliente.nome
                         elif viaggio.passeggero:
                             riga_fattura.note = viaggio.passeggero.nome
                     else:
-                        riga_fattura.prezzo = elemento.prezzo  # ... a meno che il viaggio non manchi
+                        riga_fattura.prezzo = elemento.prezzo  # ... if or price of the item
                     riga_fattura.riga_fattura_consorzio = elemento
 
                 else:  # fattura da un viaggio
@@ -326,7 +355,8 @@ def genera_fatture(request, fatturazione):
                     riga_fattura.prezzo = viaggio.prezzo_netto(
                         riga_fattura.iva)
 
-                    if viaggio.prezzo_sosta > 0:  # se ho una sosta, aggiungo il prezzo della sosta in fattura
+                    if viaggio.prezzo_sosta > 0:
+                        # se ho una sosta, aggiungo il prezzo della sosta in fattura
                         riga_fattura.prezzo += viaggio.prezzo_sosta
                         riga_fattura.descrizione += " + sosta"
 

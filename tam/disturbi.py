@@ -143,7 +143,7 @@ def fasce_lineari(dayMarker, data_inizio, data_fine, results):
 def fasce_semilineari(dayMarker, data_inizio, data_fine, results):
     giornoPrima = dayMarker - datetime.timedelta(days=1)
     if giornoPrima.isoweekday() in (
-    6, 7):  # il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
+        6, 7):  # il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
         fascia_semilineari(dayMarker.replace(hour=0, minute=0),
                            dayMarker.replace(hour=3, minute=29),
                            data_inizio, data_fine,
@@ -173,7 +173,7 @@ def fasce_semilineari(dayMarker, data_inizio, data_fine, results):
     # restituisco però solo la fascia con il massimo
     if results:
         max_val = max(results.values())
-        for k in results.keys():
+        for k in list(results.keys()):
             if results[k] < max_val:
                 # print "cancello", k
                 del (results[k])
@@ -182,7 +182,7 @@ def fasce_semilineari(dayMarker, data_inizio, data_fine, results):
 def fasce_semilineari_notturne(dayMarker, data_inizio, data_fine, results):
     giornoPrima = dayMarker - datetime.timedelta(days=1)
     if giornoPrima.isoweekday() in (
-    6, 7):  # il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
+        6, 7):  # il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
         fascia_semilineari(dayMarker.replace(hour=0, minute=0),
                            dayMarker.replace(hour=3, minute=29),
                            data_inizio, data_fine,

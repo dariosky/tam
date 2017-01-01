@@ -24,7 +24,7 @@
 		</thead>
 		<tbody>
 			{% for riga in fattura.righe.all %}
-				{% include "6.fattura-riga.inc.djhtml" %}
+				{% include "6.fattura-riga.inc.html" %}
 			{% endfor %}
 			{% if perms.fatturazione.generate and not readonly %}
 			<tr class='noprint'><td style='border:0'>

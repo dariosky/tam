@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load staticfiles pipeline %}
-{% block title %}{{ fattura.nome_fattura }} {{ fattura.descrittore }} &raquo; {{ block.super }} {% endblock %}
+{% block title %}{{ fattura.nome_fattura }} {{ fattura.descrittore }} &raquo;
+	{{ block.super }} {% endblock %}
 
 {% block css %}
 	{{ block.super }}
@@ -19,9 +20,10 @@
 	<h1 class='noprint'>{{ fattura.nome_fattura }} {{ fattura.descrittore }}</h1>
 	{% csrf_token %}
 
-	{% include "fat_model/_fattura.djhtml" %}
+	{% include "fat_model/_fattura.html" %}
 
-	<a href='{% url "tamExportFattura" id_fattura=fattura.id export_type="pdf" %}' target='_blank' class='noprint'>
+	<a href='{% url "tamExportFattura" id_fattura=fattura.id export_type="pdf" %}' target='_blank'
+	   class='noprint'>
 		<div style="text-align: center">
 			<img src='{% static 'fatturazione/print_icon.png' %}' title='Versione stampabile'
 				 alt='Versione stampabile'/>

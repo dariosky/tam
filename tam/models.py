@@ -242,15 +242,29 @@ class Viaggio(models.Model):
                                  default=0)  # fino a 9999.99
     costo_autostrada = models.DecimalField(max_digits=9, decimal_places=2,
                                            default=0)  # fino a 9999.99
-    costo_sosta = models.DecimalField(max_digits=9, decimal_places=2,
-                                      default=0)  # fino a 9999.99
+
+    costo_sosta = models.DecimalField(
+        # This is the total price of the stop (when the driver should wait before another
+        # ride (with a constante rate per hour)
+        max_digits=9, decimal_places=2,
+        default=0)  # fino a 9999.99
 
     abbuono_fisso = models.DecimalField(max_digits=9, decimal_places=2,
                                         default=0)  # fino a 9999.99
     abbuono_percentuale = models.IntegerField(default=0)  # abbuono percentuale
 
-    prezzo_sosta = models.DecimalField(max_digits=9, decimal_places=2,
-                                       default=0)
+    prezzo_sosta = models.DecimalField(
+        # an additional fixed price that is added to the price (for the stop)
+        # there's some automatic-thing that add it on stations/airports
+        _('Prezzo sosta addizionale'),
+        max_digits=9, decimal_places=2,
+        default=0)
+    additional_stop = models.IntegerField(
+        # this will be manually added to tell that the ride will last something more
+        # ... no prices are involved (they should be added to prezzo_sosta)
+        _("Sosta addizionale (minuti)"),
+        default=0,
+    )
 
     # flag per indicare se la corsa è incassata dall'albergo
     #  (sarà utile per reportistica)
@@ -750,20 +764,28 @@ class Viaggio(models.Model):
             return get_tratta(da, a)
 
     def sostaFinale(self):
+        """ Return a timedelta with the time between the time of the end of the ride
+        and the beginning of the return or the next brother
+        """
+        result = datetime.timedelta()
         nextbro = self.nextfratello()
+        this_end = self.get_date_end()
+
+        # if self.additional_stop:
+        #     manual_stop = datetime.timedelta(minutes=self.additional_stop)
+        #     result += manual_stop
+        #     this_end += manual_stop
         if nextbro:
-            this_end = self.get_date_end()
-            if nextbro.data <= this_end:
-                return None
-            else:
-                return nextbro.data - this_end
+            if nextbro.data > this_end:
+                result += (nextbro.data - this_end)
+        return result
 
     def sostaFinaleMinuti(self):
         sosta = self.sostaFinale()
+        minutes = 0
         if sosta and sosta.seconds > 60:
-            return int(sosta.seconds / 60)
-        else:
-            return 0
+            minutes += int(sosta.seconds / 60)
+        return minutes
 
     def _date_start(self):
         """ Return the time to start to be there in time, looking Tratte
@@ -792,6 +814,7 @@ class Viaggio(models.Model):
         tratta = ultimaCorsa.tratta
         tratta_end = ultimaCorsa.tratta_end
         end_time = ultimaCorsa.data
+
         # logging.debug("Partiamo da %s"%end_time)
 
         # quando parto da un aeroporto la corsa dura 30 minuti di più
@@ -799,6 +822,9 @@ class Viaggio(models.Model):
         # in modo che i 30 minuti in più siano alla ripartenza
         if ultimaCorsa.da.speciale == 'A' and tratta:
             end_time += datetime.timedelta(minutes=30)
+
+        if self.additional_stop:
+            end_time += datetime.timedelta(minutes=self.additional_stop)
 
         if tratta and tratta.is_valid():  # add the runtime of this tratta
             # logging.debug("Aggiungo %s per la tratta %s" %(tratta.minuti, tratta))

@@ -10,6 +10,9 @@
 			<label>a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'></label>
 			<input type="submit" value="Trova corse fatturabili"/>
 		</form>
+		<a href="?mese=cur">{{ quick_month_names.0 }}</a>
+		<a href="?mese=prev">{{ quick_month_names.1 }}</a>
+		<a href="?mese=prevprev">{{ quick_month_names.2 }}</a>
 	</div>
 
 <div>
