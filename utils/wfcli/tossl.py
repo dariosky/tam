@@ -61,7 +61,7 @@ class WebfactionWebsiteToSsl:
         else:
             dotted_domain = "." + self.domain
             for subdomain in website['subdomains']:
-                if subdomain == website or subdomain.endswith(dotted_domain):
+                if subdomain == self.domain or subdomain.endswith(dotted_domain):
                     return True
             return False
 
@@ -264,7 +264,7 @@ class WebfactionWebsiteToSsl:
             # let's issue the certificates with acme
 
             attempt = 0  # Retry, if the verification app has just been added, it make take sometime
-            MAX_ATTEMPTS = 5
+            MAX_ATTEMPTS = 10
             while attempt < MAX_ATTEMPTS:
                 result = run(" ".join(issue_command), quiet=True)
                 return_code = result.return_code
@@ -274,7 +274,7 @@ class WebfactionWebsiteToSsl:
                     logger.debug("No need to issue new certificates")
                 else:
                     logger.info("Something went wrong issuing the new certificates")
-                    logger.info("This maybe normal, if the verification app has just been added.")
+                    logger.info("This may be normal, if the verification app has just been added.")
                     if attempt < MAX_ATTEMPTS:
                         attempt += 1
                         logger.info(
