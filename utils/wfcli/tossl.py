@@ -1,6 +1,7 @@
 # coding=utf-8
 import logging
 import os
+import time
 from io import BytesIO, StringIO
 from textwrap import dedent
 
@@ -9,7 +10,7 @@ from fabric.context_managers import hide
 from fabric.contrib.files import exists, is_link
 from fabric.operations import run
 
-from wfcli import WebFactionAPI
+from wfapi import WebFactionAPI
 
 logger = logging.getLogger('wfcli.redirect_to_secure')
 
@@ -66,7 +67,7 @@ class WebfactionWebsiteToSsl:
 
     def get_affected_domains(self):
         """ Return a list of all affected domain and subdomains """
-        results = []
+        results = set()
         dotted_domain = "." + self.domain
         for website in self.websites:
             for subdomain in website['subdomains']:
@@ -74,10 +75,10 @@ class WebfactionWebsiteToSsl:
                             subdomain == self.domain or
                         (self.include_subdomains and subdomain.endswith(dotted_domain))
                 ):
-                    results.append(subdomain)
+                    results.add(subdomain)
 
         # sort them by lenght so the shortest domain is the first
-        results.sort(key=lambda item: len(item))
+        results = sorted(list(results), key=lambda item: len(item))
         return results
 
     def create_redirect_app(self):
@@ -261,14 +262,31 @@ class WebfactionWebsiteToSsl:
         issue_command += ["-w", "~/webapps/%s" % self.LETSENCRYPT_VERIFY_APP_NAME]
         with fab_settings(warn_only=True):
             # let's issue the certificates with acme
-            # TODO: Retry, if the verification app has just been added, it make take sometime
-            result = run(" ".join(issue_command), quiet=True)
-            return_code = result.return_code
-            if return_code == 2:
-                logger.debug("No need to issue new certificates")
-            else:
-                logger.info("Something went wrong issuing the new certificates")
-                logger.error(result)
+
+            attempt = 0  # Retry, if the verification app has just been added, it make take sometime
+            MAX_ATTEMPTS = 5
+            while attempt < MAX_ATTEMPTS:
+                result = run(" ".join(issue_command), quiet=True)
+                return_code = result.return_code
+                if return_code == 0:
+                    logger.info("Certificate issued correctly")
+                elif return_code == 2:
+                    logger.debug("No need to issue new certificates")
+                else:
+                    logger.info("Something went wrong issuing the new certificates")
+                    logger.info("This maybe normal, if the verification app has just been added.")
+                    if attempt < MAX_ATTEMPTS:
+                        attempt += 1
+                        logger.info(
+                            "Trying again in 5 seconds. Attempt {attempt}/{MAX_ATTEMPTS}.".format(
+                                **locals())
+                        )
+                        time.sleep(5)
+                        continue
+                    else:
+                        logger.error(result)
+                        exit(1)
+                break
 
     def website_verificable(self, website):
         """ True if the website is LetsEncrypt verificable: it should have the verification app
@@ -347,7 +365,6 @@ class WebfactionWebsiteToSsl:
         ]
         if website['website_apps'] != apps:
             logger.info("Convert the insecure website %s to a redirect" % website['name'])
-            website['website_apps'] = apps
 
             # TODO: Wait that the https answer with the correct certificate
 
@@ -356,9 +373,17 @@ class WebfactionWebsiteToSsl:
             # if confirm.strip().lower() == 'n':
             #     logger.warning("Redirection cancelled")
             #     return
+
             # for some unkwnon reason Webfaction gives errors updating the website just adding
             # the redirect all leaving the VERIFY_ONE
 
+            # clearing the list of apps (this is bad)
+            # FIXME: This cleaning of apps is bad, I opened a ticket with Webfaction
+            website['website_apps'] = []
+            self.api.update_website(website)
+
+            # updating the apps with the new one, for real
+            website['website_apps'] = apps
             self.api.update_website(website)
 
 

@@ -1,1 +1,1 @@
-from .wfcli import WebFactionAPI
+from wfapi import WebFactionAPI

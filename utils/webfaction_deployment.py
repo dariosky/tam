@@ -38,7 +38,7 @@ from fabric.api import run, env, cd, settings as fab_settings
 from fabric.contrib.files import exists
 
 import settings
-from wfcli import WebFactionAPI
+from utils.wfcli import WebFactionAPI
 
 logger = logging.getLogger('__name__')
 
