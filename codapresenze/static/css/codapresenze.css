@@ -16,6 +16,9 @@
 
 #coda > div, #codacomandi .place, #codacomandi #dequeue, #codacomandi #refresh {
 	float: left;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 	width: 74px;
 	min-height: 35px;
 	border: 2px solid black;
