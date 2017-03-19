@@ -1,3 +1,4 @@
+# coding=utf-8
 __author__ = "Dario"
 __date__ = "$31-dic-2010 1.05.42$"
 
