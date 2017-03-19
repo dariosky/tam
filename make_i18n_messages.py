@@ -7,6 +7,7 @@ from subprocess import call
 from django.conf import settings
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+os.environ['PYTHONPATH'] = settings.PROJECT_PATH
 django.setup()
 
 configs = apps.get_app_configs()
