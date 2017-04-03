@@ -21,6 +21,7 @@ import glob
 import os
 import posixpath
 from contextlib import contextmanager as _contextmanager
+from functools import wraps
 from io import StringIO
 
 import requests
@@ -61,6 +62,20 @@ def s(name):
     env.hosts = settings.DEPLOYMENT['HOST']
 
 
+def require_settings(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not 'name' in env:
+            print("Define an environment with the *s* command before calling an action")
+            print("Available environments:")
+            for setting in glob.glob("settings_*.py"):
+                print("\t", setting[len('settings_'):-len(".py")])
+            exit(1)
+        f(*args, **kwargs)
+
+    return wrapper
+
+
 def secrets_file_paths():
     """ Return a list of secret files (to be sent) relative to REPOSITORY_FOLDER """
     return [env.settings_file + ".py"]
@@ -99,6 +114,7 @@ def update_distribute():
 
 
 @task
+@require_settings
 def initial_deploy():
     """
     Prepare the remote instance with git repository and virtualenv.
@@ -115,6 +131,7 @@ def initial_deploy():
 
 
 @serial
+@require_settings
 def update_database():
     with virtualenv():
         with cd(env.REPOSITORY_FOLDER):
@@ -123,6 +140,7 @@ def update_database():
 
 
 @task
+@require_settings
 def update_requirements():
     """ Update all libraries in requirements file """
     with virtualenv():
@@ -160,29 +178,6 @@ def update_instance(do_update_requirements=True, justPull=False):
             update_database()
 
 
-def get_gunicorn_command(daemon=True):
-    gunicoptions = settings.DEPLOYMENT['GUNICORN']
-    foldoptions = settings.DEPLOYMENT['FOLDERS']
-    options = [
-        '-w %s' % gunicoptions['WORKERS'],
-        # --user=$USER --group=$GROUP
-        '--log-level=debug',
-        '-b 127.0.0.1:%s' % gunicoptions['PORT'],
-        '--pid %s' % gunicoptions['PID_FILE'],
-        '--log-file %s' % gunicoptions['LOG_FILE'],
-        # timeout: upload processes can take some time (default is 30 seconds)
-        '-t %s' % gunicoptions['WORKERS_TIMEOUT'],
-        '-n %s' % settings.DEPLOYMENT['NAME'],
-    ]
-    if daemon:
-        options.append('--daemon')
-    return "{env_path}/bin/gunicorn {options_string} {wsgi_app}".format(
-        env_path=foldoptions['VENV_FOLDER'],
-        options_string=" ".join(options),
-        wsgi_app=settings.DEPLOYMENT['WSGI_APPLICATION'],
-    )
-
-
 def start(daemon=True):
     if settings.DEPLOYMENT['USE_SUPERVISOR']:
         # Supervisor should be set to use this fabfile too
@@ -191,11 +186,11 @@ def start(daemon=True):
     else:  # directly start remote Gunicorn
         with virtualenv():
             with cd(env.REPOSITORY_FOLDER):
-                gunicorn_command = get_gunicorn_command(daemon=daemon)
-                run(gunicorn_command)
+                run("manage.py daphne")
 
 
 @task
+@require_settings
 def stop():
     """ Stop the remote gunicorn instance (eventually using supervisor) """
     if settings.DEPLOYMENT['USE_SUPERVISOR']:
@@ -227,6 +222,7 @@ def start_local():
 
 
 @task
+@require_settings
 def restart():
     """ Start/Restart the remote gunicorn instance (eventually using supervisor) """
     if run("test -e %s" % settings.DEPLOYMENT['GUNICORN']['PID_FILE'], quiet=True).failed:
@@ -243,6 +239,7 @@ def restart():
 
 
 @task
+@require_settings
 def send_secrets(secret_files=None, ask=False):
     """ Send the secret settings file that is excluded from VCS """
     if ask and not confirm("Upload secret settings?"):
@@ -273,6 +270,7 @@ def run_command_content(daemon=True):
 
 
 @task
+@require_settings
 def create_run_command():
     """ Create the remote_run command to be executed """
     puts("Creating run_server.sh")
@@ -294,6 +292,7 @@ def local_create_run_command(daemon=False):
 
 
 @task
+@require_settings
 def deploy(justPull=False):
     """
     Update the remote instance.
@@ -320,6 +319,7 @@ def deploy(justPull=False):
 
 
 @task
+@require_settings
 def discard_remote_git():
     """Discard changes done on remote """
     with cd(env.REPOSITORY_FOLDER):
@@ -340,6 +340,7 @@ def send_file(mask='*.*', subfolder='files', mask_prefix=None):
 
 
 @task
+@require_settings
 def send_brand():
     """ Upload brand files to the server """
     puts("Uploading brand files")
@@ -353,6 +354,7 @@ def send_brand():
 
 
 @task
+@require_settings
 def get_remote_files():
     """ Go to the server and save locally the changeable files on the server """
     to_be_saved = [
@@ -371,6 +373,7 @@ def get_remote_files():
 
 
 @task
+@require_settings
 def set_mailgun_webhooks():
     """ Set webhooks to receive bounced mail from Mailgun """
     webhost = settings.WEBHOST
@@ -392,6 +395,7 @@ def set_mailgun_webhooks():
 
 
 @task
+@require_settings
 def prepare_webfaction():
     from utils.webfaction_deployment import webfaction_install_redis, create_all_domains, \
         create_all_apps, create_all_websites
@@ -410,6 +414,6 @@ if __name__ == '__main__':
     from fabric.main import main
 
     # sys.argv[1:] = ["s:arte", "set_mailgun_webhooks"]
-    sys.argv[1:] = ["s:taxi2beta", "deploy"]
+    sys.argv[1:] = ["s:taxi2beta", "create_run_command"]
     print(sys.argv)
     main()
