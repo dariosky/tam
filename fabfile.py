@@ -1,26 +1,18 @@
 # coding=utf-8
-"""
-Facilitate deployment to server
 
-Deploy will consist of:
-    push changes to GIT repository
-    update dependences (with pip)
-    update db (with south)
-    collect static
-    restart webserver (gunicorn)
-"""
-
-# Supervisor commands
-#   supervisorctl start/stop/restart <appname>
-#   kill the process... not optimal
-# Graceful restart gunicorn with a HUP signal
-# 	so instead of use supervisor, do a graceful restart with
-# kill -s HUP $(cat gunicorn.pid)
+# Facilitate deployment to server
+#
+# Deploy will consist of:
+#     push changes to GIT repository
+#     update dependences (with pip)
+#     update db (with migrations)
+#     collect static
+#     restart webserver (daphne)
 
 import glob
 import os
 import posixpath
-from contextlib import contextmanager as _contextmanager
+from contextlib import contextmanager
 from functools import wraps
 from io import StringIO
 
@@ -81,7 +73,7 @@ def secrets_file_paths():
     return [env.settings_file + ".py"]
 
 
-@_contextmanager
+@contextmanager
 def virtualenv(venv_path=None):
     """
     Put fabric commands in a virtualenv
@@ -110,7 +102,7 @@ def create_virtualenv():
 
 def update_distribute():
     with virtualenv():
-        run('pip install -U -q distribute')
+        run('pip install -U -q pip distribute')
 
 
 @task
@@ -126,7 +118,6 @@ def initial_deploy():
         run('mkdir -p %s' % settings.DEPLOYMENT['FOLDERS']['LOGDIR'])  # create logdir if missing
         run('chmod +x node_modules/.bin/yuglify')
     send_brand()
-    create_run_command()
     set_mailgun_webhooks()
 
 
@@ -178,64 +169,35 @@ def update_instance(do_update_requirements=True, justPull=False):
             update_database()
 
 
-def start(daemon=True):
-    if settings.DEPLOYMENT['USE_SUPERVISOR']:
-        # Supervisor should be set to use this fabfile too
-        # the command should be 'fab gunicorn_start_local'
-        run('supervisorctl start %s' % settings.DEPLOYMENT['SUPERVISOR_JOBNAME'])
-    else:  # directly start remote Gunicorn
-        with virtualenv():
-            with cd(env.REPOSITORY_FOLDER):
-                run("manage.py daphne")
+def start():
+    with virtualenv():
+        with cd(env.REPOSITORY_FOLDER):
+            run("python manage.py daphne start")
 
 
 @task
 @require_settings
 def stop():
-    """ Stop the remote gunicorn instance (eventually using supervisor) """
-    if settings.DEPLOYMENT['USE_SUPERVISOR']:
-        run('supervisorctl stop %s' % settings.DEPLOYMENT['SUPERVISOR_JOBNAME'])
-    else:  # directly start remote Gunicorn
-        puts('Sending TERM signal to Gunicorn.')
-        gunicorn_pid = int(run('cat %s' % settings.DEPLOYMENT['GUNICORN']['PID_FILE'], quiet=True))
-        run("kill %d" % gunicorn_pid)
-
-
-@task
-def start_local():
-    """ Start locally gunicorn instance """
-    gunicorn_command = get_gunicorn_command(daemon=False)
-    if settings.DEPLOYMENT['USE_SUPERVISOR']:
-        # abort("You should not start_local if you would like to use Supervisor.")
-        process = None
-        try:
-            process = local(gunicorn_command)
-        except Exception as e:
-            print("EXCEPTION: %s" % e)
-            if process is not None:
-                import signal
-
-                process.send_signal(signal.SIGTERM)
-    else:
-        with lcd(env.REPOSITORY_FOLDER):
-            local(gunicorn_command)
+    """ Stop the remote frontend instance """
+    puts('Sending TERM signal to Frontend')
+    daphne_pid = int(run('cat %s' % settings.DEPLOYMENT['FRONTEND']['PID_FILE'], quiet=True))
+    run("kill %d" % daphne_pid)
 
 
 @task
 @require_settings
 def restart():
-    """ Start/Restart the remote gunicorn instance (eventually using supervisor) """
-    if run("test -e %s" % settings.DEPLOYMENT['GUNICORN']['PID_FILE'], quiet=True).failed:
-        puts("Gunicorn doesn't seems to be running (PID file missing)...")
+    """ Start/Restart the frontend server """
+    if not exists(settings.DEPLOYMENT['FRONTEND']['PID_FILE']):
+        puts("Frontend server doesn't seems to be running (PID file missing)...")
         start()
-
-    # gunicorn_pid = int(run('cat %s' % GUNICORN_PID_FILE, quiet=True))
-    # if not gunicorn_pid:
-    # 	abort('ERROR: Gunicorn seems down after the start command.')
-    else:
-        puts('Gracefully restarting Gunicorn.')
-        gunicorn_pid = int(run('cat %s' % settings.DEPLOYMENT['GUNICORN']['PID_FILE'], quiet=True))
-        run("kill -s HUP %d" % gunicorn_pid)
+    with fabsettings(warn_only=True):
+        print('Gracefully restarting Frontend server.')
+        daphne_pid = int(run('cat %s' % settings.DEPLOYMENT['FRONTEND']['PID_FILE'], quiet=True))
+        r = run("kill -s HUP %d" % daphne_pid)
+        if r.return_code != 0:
+            print("Can't gracefully restart: %s" % r)
+            start()
 
 
 @task
@@ -258,46 +220,13 @@ def send_secrets(secret_files=None, ask=False):
             run('ln -s -f %s settings_local.py' % secret_files[0])
 
 
-def run_command_content(daemon=True):
-    with open('run_server.template.sh', "r") as f:
-        content = f.read()
-    return content % dict(
-        VENV_FOLDER=settings.DEPLOYMENT['FOLDERS']['VENV_FOLDER'],
-        GUNICORN_ARGUMENTS=get_gunicorn_command(daemon),
-        FRONT_PID_FILE=settings.DEPLOYMENT['GUNICORN']['PID_FILE'],
-        REPOSITORY_FOLDER=env.REPOSITORY_FOLDER,
-    )
-
-
-@task
-@require_settings
-def create_run_command():
-    """ Create the remote_run command to be executed """
-    puts("Creating run_server.sh")
-    with lcd(localfolder):
-        with cd(env.REPOSITORY_FOLDER):
-            run_temp_file = StringIO(run_command_content())
-            run_temp_file.name = "run_server.sh"  # to show it as fabric file representation
-            put(run_temp_file, posixpath.join(env.REPOSITORY_FOLDER, 'run_server.sh'))
-            run('chmod +x run_server.sh')
-
-
-@task
-def local_create_run_command(daemon=False):
-    puts("Creating run_server.sh command to be run " + (
-        "with" if settings.DEPLOYMENT['USE_SUPERVISOR'] else "without") + " supervisor.")
-    with lcd(localfolder):
-        with open('run_server.sh', 'w') as runner:
-            runner.write(run_command_content(daemon=daemon))
-
-
 @task
 @require_settings
 def deploy(justPull=False):
     """
     Update the remote instance.
 
-    Pull from git, update virtualenv, create static and restart gunicorn
+    Pull from git, update virtualenv, create static and restart the server
     """
     is_this_initial = False
     if run("test -d %s/.git" % env.REPOSITORY_FOLDER, quiet=True).failed:
@@ -310,7 +239,7 @@ def deploy(justPull=False):
             is_this_initial = True
 
     for secret in secrets_file_paths():
-        if run("test -e %s" % posixpath.join(env.REPOSITORY_FOLDER, secret), quiet=True).failed:
+        if not exists(posixpath.join(env.REPOSITORY_FOLDER, secret)):
             send_secrets(ask=True)  # secrets missing
 
     update_instance(do_update_requirements=is_this_initial or DO_REQUIREMENTS, justPull=justPull)
@@ -414,6 +343,6 @@ if __name__ == '__main__':
     from fabric.main import main
 
     # sys.argv[1:] = ["s:arte", "set_mailgun_webhooks"]
-    sys.argv[1:] = ["s:taxi2beta", "create_run_command"]
+    sys.argv[1:] = ["s:taxi2beta", "restart"]
     print(sys.argv)
     main()

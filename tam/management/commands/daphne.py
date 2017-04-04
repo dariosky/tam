@@ -34,9 +34,9 @@ class Command(AppCommand):
                             help="start, restart, stop")
 
     def handle(self, *args, **options):
-        pid_file = settings.DEPLOYMENT['GUNICORN']['PID_FILE']
-        log_file = settings.DEPLOYMENT['GUNICORN']['LOG_FILE']
-        port = settings.DEPLOYMENT['GUNICORN']['PORT']
+        pid_file = settings.DEPLOYMENT['FRONTEND']['PID_FILE']
+        log_file = settings.DEPLOYMENT['FRONTEND']['LOG_FILE']
+        port = settings.DEPLOYMENT['FRONTEND']['PORT']
         venv = settings.DEPLOYMENT['FOLDERS']['VENV_FOLDER']
 
         if options['action'] == 'start':
@@ -55,8 +55,7 @@ class Command(AppCommand):
                     f.write("%s\n" % proc.pid)
             else:
                 logger.info("Daphne was already running")
-
-        if options['action'] == 'stop':
+        elif options['action'] == 'stop':
             pid = is_ps_running(pid_file)
             if pid:
                 logger.info("Stopping Daphne")
@@ -64,3 +63,6 @@ class Command(AppCommand):
                 os.remove(pid_file)
             else:
                 logger.info("Daphne is not running")
+        else:
+            logger.error("Unknown action %s" % options['action'])
+            exit(1)

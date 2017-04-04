@@ -475,45 +475,6 @@ AUTH_PASSWORD_VALIDATORS = [
 RATELIMIT_CACHE_BACKEND = 'tam.ratelimit.RateCache'
 
 # This are all settings for the deployment ***
-WEBHOST = "www.hostname.com"  # the main hostname serving the site
-
-DEPLOYMENT = dict(  # defining parameters for the deployment
-    NAME="TaM",  # the name of the process
-    HOST="tam",  # the hostname, eventually you can use your .ssh/config
-    REMOTE_SSH_PORT=22,
-
-    USE_SUPERVISOR=False,
-    SUPERVISOR_JOBNAME='tam',
-
-    GIT_REPOSITORY="git@github.com:dariosky/tam.git",  # repository for clone
-    WEBHOST=WEBHOST,
-
-    FOLDERS=dict(
-        HOME='/home/user',
-        REPOSITORY_FOLDER="{HOME}/repo/tam",
-        VENV_FOLDER="{HOME}/.environments/tam",
-        REQUIREMENT_PATH="{REPOSITORY_FOLDER}/requirements/requirements.txt",
-        STATIC_FOLDER="{REPOSITORY_FOLDER}/static",  # static assets collected
-        MEDIA_FOLDER="{REPOSITORY_FOLDER}/media",  # This is for UGC
-        LOGDIR="{REPOSITORY_FOLDER}/logs",
-    ),
-
-    GUNICORN=dict(
-        RUN_GUNICORN_COMMAND="{REPOSITORY_FOLDER}/run_gunicorn",
-        PORT=8888,
-        PID_FILE="{LOGDIR}/pids/daphne.pid",
-        LOG_FILE="{LOGDIR}/daphne.log",
-    ),
-
-    WORKERS=dict(
-        THREADS=4,
-        PID_FILE="{LOGDIR}/pids/workers.pid",
-        LOG_FILE="{LOGDIR}/workers.log",
-    ),
-
-    WSGI_APPLICATION="wsgi:application",
-    BRAND_FOLDER="brand",  # this is a subfolder, per deployment of static brand assets
-)
 
 PRENOTAZIONI_QUICK = dict(
     # choices=[dict(name="Locale"),  # no place_name means same place of client
@@ -558,8 +519,8 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
         LOGDIR="{REPOSITORY_FOLDER}/logs",
     ),
 
-    GUNICORN=dict(
-        RUN_GUNICORN_COMMAND="{REPOSITORY_FOLDER}/run_gunicorn",
+    FRONTEND=dict(
+        RUN_COMMAND="{REPOSITORY_FOLDER}/manage.py daphne start",
         PORT=8888,
         PID_FILE="{LOGDIR}/pids/daphne.pid",
         LOG_FILE="{LOGDIR}/daphne.log",
@@ -574,7 +535,6 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
     WSGI_APPLICATION="wsgi:application",
     BRAND_FOLDER="brand",  # this is a subfolder, per deployment of static brand assets
 )
-
 # WARNING: set a new password here
 REDIS_PASSWORD = ""  # example: hashlib.sha256(b"a secure password").hexdigest()
 REDIS_DATABASE = 0
