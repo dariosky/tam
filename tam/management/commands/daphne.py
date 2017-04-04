@@ -44,7 +44,9 @@ class Command(AppCommand):
             running = is_ps_running(pid_file)
             if not running:
                 logger.info("Starting Daphne frontend server")
-                command = ['%s/bin/daphne' % venv, '-p %d' % port, 'asgi:channel_layer',
+                command = ['%s/bin/daphne' % venv, '-p %d' % port,
+                           '--http-timeout 30',  # 1 minute timeout
+                           'asgi:channel_layer',
                            '>> %s' % log_file,
                            '2>&1'
                            ]

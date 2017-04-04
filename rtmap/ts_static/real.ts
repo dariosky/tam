@@ -4,7 +4,7 @@
 import map = L.map;
 interface Settings {
     MAPBOX_ACCESS_TOKEN: string;
-    CENTER: [number,number];
+    CENTER: [number, number];
 }
 
 declare var RTMAP_SETTINGS: Settings;
@@ -29,36 +29,36 @@ class Realtime {
         this.connect()
     }
 
-    connect = ()=> {
+    connect = () => {
         console.debug("ws connection");
         this.socket = new WebSocket(wsUrl);
         this.socket.onclose = this.disconnected;
         this.socket.onopen = this.connected;
     };
 
-    resetReconnection = ()=> {
+    resetReconnection = () => {
         if (this.reconnectTimer) {
             clearTimeout(this.reconnectTimer);
         }
         this.reconnectTimer = 0;
         // 1-2 sec befor first reconnection
         this.reconnectDelay = 1000;
-        this.reconnectDelay+= Math.floor(Math.random() * 1000)
+        this.reconnectDelay += Math.floor(Math.random() * 1000)
     };
 
-    connected = ()=> {
+    connected = () => {
         console.log("Connected");
         this.resetReconnection();
         if (this.messageQueue.length) {
             let len = this.messageQueue.length;
             console.log(`Sending ${len} messages`);
-            for (var message of this.messageQueue) {
+            for (let message of this.messageQueue) {
                 this.send(message);
             }
         }
     };
 
-    disconnected = ()=> {
+    disconnected = () => {
         console.log("Disconnected. Reconnecting in", this.reconnectDelay);
 
         this.reconnectTimer = setTimeout(this.reconnect, this.reconnectDelay)
@@ -75,7 +75,7 @@ class Realtime {
         }
     };
 
-    send = (message)=> {
+    send = (message) => {
         if (this.socket.readyState == this.socket.OPEN) {  // when connection is open
             console.debug("Sending", message);
             this.socket.send(message);
@@ -104,11 +104,12 @@ class Map {
 
 }
 
-let wsUrl = "ws://" + document.location.host,
+let websocketSchema = window.location.protocol === 'https:' ? 'wss' : 'ws',
+    wsUrl = websocketSchema + "://" + document.location.host,
     rt = new Realtime(wsUrl);
 
 $(function () {
-    console.log("Ready!;");
+    console.log("Ready!");
     let m = new Map('mapid'),
         locator = new GeoLocator(rt);
 });
@@ -132,7 +133,7 @@ class GeoLocator {
     }
 
     successPositionCallback(position) {
-        let latlong: [number,number] = [position.coords.latitude, position.coords.longitude];
+        let latlong: [number, number] = [position.coords.latitude, position.coords.longitude];
         console.debug("Got position", latlong);
         /*
          if (this.map) {

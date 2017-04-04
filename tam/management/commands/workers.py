@@ -60,7 +60,7 @@ class Command(AppCommand):
             else:
                 logger.info("Workers were already running")
 
-        if options['action'] == 'stop':
+        elif options['action'] == 'stop':
             pid = is_ps_running(pid_file)
             if pid:
                 logger.info("Stopping Workers processes")
@@ -68,3 +68,7 @@ class Command(AppCommand):
                 os.remove(pid_file)
             else:
                 logger.info("Workers are not running")
+                
+        else:
+            logger.error("Unknown action %s" % options['action'])
+            exit(1)

@@ -12,9 +12,9 @@
 import glob
 import os
 import posixpath
+import sys
 from contextlib import contextmanager
 from functools import wraps
-from io import StringIO
 
 import requests
 from django.conf import LazySettings
@@ -27,7 +27,6 @@ from fabric.operations import local
 from fabric.utils import puts
 from past.builtins import basestring
 from requests.auth import HTTPBasicAuth
-import sys
 
 localfolder = os.path.realpath(os.path.dirname(__file__))
 sys.path.insert(1, localfolder)
@@ -57,7 +56,7 @@ def s(name):
 def require_settings(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if not 'name' in env:
+        if 'name' not in env:
             print("Define an environment with the *s* command before calling an action")
             print("Available environments:")
             for setting in glob.glob("settings_*.py"):
@@ -169,10 +168,10 @@ def update_instance(do_update_requirements=True, justPull=False):
             update_database()
 
 
-def start():
+def daphne(action):
     with virtualenv():
         with cd(env.REPOSITORY_FOLDER):
-            run("python manage.py daphne start")
+            run("python manage.py daphne %s" % action)
 
 
 @task
@@ -190,14 +189,14 @@ def restart():
     """ Start/Restart the frontend server """
     if not exists(settings.DEPLOYMENT['FRONTEND']['PID_FILE']):
         puts("Frontend server doesn't seems to be running (PID file missing)...")
-        start()
+        daphne('restart')
     with fabsettings(warn_only=True):
         print('Gracefully restarting Frontend server.')
         daphne_pid = int(run('cat %s' % settings.DEPLOYMENT['FRONTEND']['PID_FILE'], quiet=True))
         r = run("kill -s HUP %d" % daphne_pid)
         if r.return_code != 0:
             print("Can't gracefully restart: %s" % r)
-            start()
+            daphne('restart')
 
 
 @task

@@ -59,9 +59,9 @@ var Realtime = (function () {
         this.resetReconnection();
         this.connect();
     }
-    Realtime.MAX_RECONNECT_DELAY = 30000; // retry every 30sec max
     return Realtime;
 }());
+Realtime.MAX_RECONNECT_DELAY = 30000; // retry every 30sec max
 var Map = (function () {
     function Map(selector) {
         this.selector = selector;
@@ -77,9 +77,9 @@ var Map = (function () {
     }
     return Map;
 }());
-var wsUrl = "ws://" + document.location.host, rt = new Realtime(wsUrl);
+var websocketSchema = window.location.protocol === 'https:' ? 'wss' : 'ws', wsUrl = websocketSchema + "://" + document.location.host, rt = new Realtime(wsUrl);
 $(function () {
-    console.log("Ready!;");
+    console.log("Ready!");
     var m = new Map('mapid'), locator = new GeoLocator(rt);
 });
 var GeoLocator = (function () {
