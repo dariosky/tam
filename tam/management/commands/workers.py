@@ -68,7 +68,7 @@ class Command(AppCommand):
                 os.remove(pid_file)
             else:
                 logger.info("Workers are not running")
-                
+
         else:
             logger.error("Unknown action %s" % options['action'])
             exit(1)

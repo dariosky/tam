@@ -1,4 +1,5 @@
 # coding=utf-8
+# noinspection PyUnresolvedReferences
 from settings import *
 
 SECRET_KEY = "TestTestTestTest"
@@ -16,4 +17,5 @@ PASSWORD_HASHERS = (
 
 EMAIL_BACKEND = "django.core.mail.backends.dummy.EmailBackend"
 
+# noinspection PyUnresolvedReferences
 from tam.views.classifiche_taxiabano import *

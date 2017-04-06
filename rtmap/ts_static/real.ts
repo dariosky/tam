@@ -5,6 +5,7 @@ import map = L.map;
 interface Settings {
     MAPBOX_ACCESS_TOKEN: string;
     CENTER: [number, number];
+    WEBSOCKET_PORT: number;
 }
 
 declare var RTMAP_SETTINGS: Settings;
@@ -105,7 +106,7 @@ class Map {
 }
 
 let websocketSchema = window.location.protocol === 'https:' ? 'wss' : 'ws',
-    wsUrl = websocketSchema + "://" + document.location.host,
+    wsUrl = `${websocketSchema}://${document.location.host}:${RTMAP_SETTINGS.WEBSOCKET_PORT || 80}`,
     rt = new Realtime(wsUrl);
 
 $(function () {
