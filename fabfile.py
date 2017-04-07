@@ -178,25 +178,14 @@ def daphne(action):
 @require_settings
 def stop():
     """ Stop the remote frontend instance """
-    puts('Sending TERM signal to Frontend')
-    daphne_pid = int(run('cat %s' % settings.DEPLOYMENT['FRONTEND']['PID_FILE'], quiet=True))
-    run("kill %d" % daphne_pid)
+    daphne('stop')
 
 
 @task
 @require_settings
 def restart():
     """ Start/Restart the frontend server """
-    if not exists(settings.DEPLOYMENT['FRONTEND']['PID_FILE']):
-        puts("Frontend server doesn't seems to be running (PID file missing)...")
-        daphne('restart')
-    with fabsettings(warn_only=True):
-        print('Gracefully restarting Frontend server.')
-        daphne_pid = int(run('cat %s' % settings.DEPLOYMENT['FRONTEND']['PID_FILE'], quiet=True))
-        r = run("kill -s HUP %d" % daphne_pid)
-        if r.return_code != 0:
-            print("Can't gracefully restart: %s" % r)
-            daphne('restart')
+    daphne('restart')
 
 
 @task
