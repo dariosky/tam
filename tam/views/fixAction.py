@@ -8,7 +8,7 @@ from prenotazioni.models import Prenotazione
 from tam import tamdates
 from tam.models import Viaggio, Luogo
 from django.http import HttpResponseRedirect
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 import datetime
 from django.shortcuts import render
 from tam.disturbi import trovaDisturbi, fasce_semilineari

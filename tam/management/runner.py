@@ -52,7 +52,7 @@ class RunnerCommand(AppCommand):
     def handle_start(self):
         running = is_ps_running(self.pid_file)
         if not running:
-            logger.info("Starting {name} frontend server".format(name=self.name))
+            logger.info("Starting {name}".format(name=self.name))
             command = [
                 command_part.format(self) for command_part in self.command
             ]

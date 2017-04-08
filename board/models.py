@@ -31,7 +31,7 @@ def board_upload_to(instance, filename):
 @python_2_unicode_compatible
 class BoardMessage(models.Model):
     date = models.DateTimeField('Data di inserimento', null=False)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField('Messaggio', blank=True, null=True)
     attachment = models.FileField(storage=fs,
                                   upload_to=board_upload_to,

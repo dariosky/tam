@@ -48,6 +48,7 @@ class ViaggioArchive(models.Model):
     note = models.TextField(blank=True)  # le note, pari pari
 
     padre = models.ForeignKey("ViaggioArchive", null=True,
+                              on_delete=models.CASCADE,
                               blank=True)  # il "ViaggioArchive" padre di questa corsa
 
     def __str__(self):

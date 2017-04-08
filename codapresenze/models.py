@@ -7,7 +7,7 @@ from future.utils import python_2_unicode_compatible
 @python_2_unicode_compatible
 class CodaPresenze(models.Model):
     data_accodamento = models.DateTimeField(auto_now_add=True, editable=True)
-    utente = models.ForeignKey(User)
+    utente = models.ForeignKey(User, on_delete=models.CASCADE)
     luogo = models.TextField(max_length=30)
 
     class Meta:
@@ -20,6 +20,6 @@ class CodaPresenze(models.Model):
 
     def __str__(self):
         return "%s %s a %s" % (
-        self.data_accodamento.strftime("%d/%m/%Y %H:%M"), self.utente, self.luogo)
+            self.data_accodamento.strftime("%d/%m/%Y %H:%M"), self.utente, self.luogo)
 
 # l'utente potente potrà rimettere in fondo alla coda e cancellare

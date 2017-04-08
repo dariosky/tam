@@ -136,7 +136,7 @@ def update_requirements():
     with virtualenv():
         with cd(env.REPOSITORY_FOLDER):
             # update libraries
-            run('pip install -U -r %s' % settings.DEPLOYMENT['FOLDERS']['REQUIREMENT_PATH'],
+            run('pip install -U --quiet -r %s' % settings.DEPLOYMENT['FOLDERS']['REQUIREMENT_PATH'],
                 pty=False)
 
 
@@ -163,9 +163,7 @@ def update_instance(do_update_requirements=True, justPull=False):
                 puts("Creating media subfolder for user uploaded assets.")
                 run("mkdir -p %s" % media_folder)
 
-            run("python manage.py collectstatic --noinput")
-
-            update_database()
+            run("python manage.py collectstatic --noinput -v0")
 
 
 def daphne(action):

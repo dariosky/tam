@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib import messages
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models.aggregates import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render

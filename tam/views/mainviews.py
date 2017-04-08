@@ -32,7 +32,9 @@ def errorview(request):
 
 def pingview(request):
     error = False
-    results = ['{{host}}', "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
+    results = ['TAM for {} on {}'.format(settings.LICENSE_OWNER, settings.HOST),
+               "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
+    results += ["Python {}".format(".".join(map(str, sys.version_info)))]
 
     response = Template('\n'.join(results)).render(RequestContext(request))
     return HttpResponse(response, status=200 if not error else 500, content_type='text/plain')

@@ -30,7 +30,7 @@ for app, desc in settings.PLUGGABLE_APPS.items():
         urlpatterns.append(url(url_regex, include(import_location)))
 
 admin.autodiscover()
-urlpatterns.append(url(r'^admin/', include(admin.site.urls)))
+urlpatterns.append(url(r'^admin/', admin.site.urls))
 
 # Serve media settings to simulate production, we know in REAL production this won't happend
 if settings.DEBUG:

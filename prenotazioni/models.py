@@ -24,7 +24,8 @@ TIPI_PAGAMENTO = (
 
 @python_2_unicode_compatible
 class UtentePrenotazioni(models.Model):
-    user = models.OneToOneField(User, related_name='prenotazioni')
+    user = models.OneToOneField(User, related_name='prenotazioni',
+                                on_delete=models.CASCADE)
     clienti = models.ManyToManyField(Cliente)
     luogo = models.ForeignKey(Luogo, on_delete=models.PROTECT)
     nome_operatore = models.CharField(max_length=40, null=True)
@@ -86,7 +87,7 @@ class Prenotazione(models.Model):
         Viaggio,
         null=True,
         editable=False,
-        # on_delete=models.SET_NULL,  # allow delete a viaggio, deleting the prenotazione
+        on_delete=models.CASCADE,  # allow delete a viaggio, deleting the prenotazione
     )
 
     attachment = models.FileField(_("Allegato"),

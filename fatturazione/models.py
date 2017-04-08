@@ -2,7 +2,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
 from future.utils import python_2_unicode_compatible
@@ -118,7 +118,8 @@ class Fattura(models.Model):
 
 @python_2_unicode_compatible
 class RigaFattura(models.Model):
-    fattura = models.ForeignKey(Fattura, related_name="righe")
+    fattura = models.ForeignKey(Fattura, related_name="righe",
+                                on_delete=models.CASCADE)
     riga = models.IntegerField()
 
     descrizione = models.TextField()

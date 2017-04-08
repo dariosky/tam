@@ -12,7 +12,7 @@ TAM_VERSION = "6.81"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
-if 'TAM_DEBUG' in os.environ or 'webfaction' not in host:
+if 'TAM_DEBUG' in os.environ:
     DEBUG = True
 else:
     DEBUG = False

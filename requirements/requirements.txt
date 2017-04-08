@@ -1,5 +1,5 @@
 # Django related ***
-django<1.11
+django<1.12
 
 # security
 argon2-cffi

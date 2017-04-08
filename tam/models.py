@@ -10,7 +10,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
-from django.core.urlresolvers import reverse  # to resolve named urls
+from django.urls import reverse  # to resolve named urls
 from django.db import connections
 from django.db import models
 from django.db.models.deletion import SET_NULL, PROTECT
@@ -84,7 +84,8 @@ class Luogo(models.Model):
     """
     nome = models.CharField("Località ", max_length=25, unique=True)
     bacino = models.ForeignKey("Bacino", verbose_name="Bacino di appartenenza",
-                               null=True, blank=True)
+                               null=True, blank=True,
+                               on_delete=models.CASCADE)
     speciale = models.CharField("Luogo particolare", max_length=1,
                                 default="",
                                 choices=(("-", "-"), ("A", "Aeroporto"),
@@ -149,8 +150,10 @@ class Bacino(models.Model):
 class Tratta(models.Model):
     """ Indica un tragitto, con indicati i default
         di tempo, spazio e spese di autostrada """
-    da = models.ForeignKey(Luogo, related_name="tempo_da")
-    a = models.ForeignKey(Luogo, related_name="tempo_a")
+    da = models.ForeignKey(Luogo, related_name="tempo_da",
+                           on_delete=models.CASCADE)
+    a = models.ForeignKey(Luogo, related_name="tempo_a",
+                          on_delete=models.CASCADE)
     minuti = models.IntegerField(
         default=0)  # tempo di viaggio espresso in minuti
     km = models.IntegerField(default=0)
@@ -224,8 +227,10 @@ class Viaggio(models.Model):
         Tabella chiave di tutto. """
     # nell'inserimento chiedo inizialmente le basi
     data = models.DateTimeField("Data e ora", db_index=True)
-    da = models.ForeignKey(Luogo, related_name="da")
-    a = models.ForeignKey(Luogo, related_name="a")
+    da = models.ForeignKey(Luogo, related_name="da",
+                           on_delete=models.CASCADE)
+    a = models.ForeignKey(Luogo, related_name="a",
+                          on_delete=models.CASCADE)
     numero_passeggeri = models.IntegerField(default=1)
     # se non è consentito il raggruppamento contemporaneo
     esclusivo = models.BooleanField("Servizio taxi", default=True)
@@ -284,7 +289,8 @@ class Viaggio(models.Model):
     numero_pratica = models.CharField(max_length=20, null=True, blank=True)
 
     # l'eventuale viaggio padre nei raggruppamenti
-    padre = models.ForeignKey("Viaggio", null=True, blank=True)
+    padre = models.ForeignKey("Viaggio", null=True, blank=True,
+                              on_delete=models.CASCADE)
 
     data_padre = models.DateTimeField("Data e ora padre", db_index=True,
                                       null=True, editable=False)
@@ -297,7 +303,8 @@ class Viaggio(models.Model):
 
     # conducente (proposto o fissato)
     conducente = models.ForeignKey("Conducente", null=True, blank=True,
-                                   db_index=True)
+                                   db_index=True,
+                                   on_delete=models.CASCADE)
 
     # True quando il conducente è fissato
     conducente_confermato = models.BooleanField("Conducente confermato",
@@ -308,7 +315,8 @@ class Viaggio(models.Model):
 
     # Luogo to calculate stats, in instance, should be populated on creation
     luogoDiRiferimento = models.ForeignKey(Luogo, related_name="riferimento",
-                                           null=True)
+                                           null=True,
+                                           on_delete=models.PROTECT)
 
     # per i padri della abbinate conta quanti km di abbinata
     # sono già  stati conguagliati
@@ -318,13 +326,16 @@ class Viaggio(models.Model):
 
     html_tragitto = models.TextField(blank=True, editable=False)
     tratta = models.ForeignKey(Tratta, null=True, blank=True, default=None,
-                               editable=False)
+                               editable=False,
+                               on_delete=models.PROTECT)
     tratta_start = models.ForeignKey(Tratta, null=True, blank=True,
                                      related_name='viaggio_start_set',
-                                     editable=False)
+                                     editable=False,
+                                     on_delete=models.PROTECT)
     tratta_end = models.ForeignKey(Tratta, null=True, blank=True,
                                    related_name='viaggio_end_set',
-                                   editable=False)
+                                   editable=False,
+                                   on_delete=models.PROTECT)
 
     # tipo (null: non è abbinata, P: partenza, successiva altrimenti)
     is_abbinata = models.CharField(max_length=1, null=True, blank=True, editable=False)
@@ -1148,7 +1159,8 @@ class Cliente(models.Model):
                                               default=False)
     incassato_albergo = models.BooleanField("Conto fine mese", default=False)
     listino = models.ForeignKey("Listino", verbose_name="Listino cliente",
-                                null=True, blank=True)
+                                null=True, blank=True,
+                                on_delete=models.SET_NULL)
     commissione = models.DecimalField("Quota consorzio", max_digits=9,
                                       decimal_places=2,
                                       default=0)  # in euro o percentuale, a seconda del tipo
@@ -1237,8 +1249,10 @@ class Listino(models.Model):
 @python_2_unicode_compatible
 class PrezzoListino(models.Model):
     """ Ogni tratta del listino ha due prezzi, una per la fascia diurna e una per la fascia notturna """
-    listino = models.ForeignKey(Listino)
-    tratta = models.ForeignKey(Tratta)
+    listino = models.ForeignKey(Listino,
+                                on_delete=models.CASCADE)
+    tratta = models.ForeignKey(Tratta,
+                               on_delete=models.PROTECT)
     prezzo_diurno = models.DecimalField(max_digits=9, decimal_places=2,
                                         default=10)  # fino a 9999.99
     prezzo_notturno = models.DecimalField(max_digits=9, decimal_places=2,
@@ -1296,8 +1310,10 @@ class PrezzoListino(models.Model):
 
 @python_2_unicode_compatible
 class ProfiloUtente(models.Model):
-    user = models.OneToOneField(User, unique=True, editable=False)
-    luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza", null=True, blank=True)
+    user = models.OneToOneField(User, unique=True, editable=False,
+                                on_delete=models.CASCADE)
+    luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza", null=True, blank=True,
+                              on_delete=models.PROTECT)
 
     class Meta:
         permissions = (('can_backup', 'Richiede un backup'),
@@ -1314,7 +1330,8 @@ class ProfiloUtente(models.Model):
 class Conguaglio(models.Model):
     """ Memorizza tutti i conguagli effettuati tra i conducenti """
     data = models.DateTimeField(auto_now=True)
-    conducente = models.ForeignKey(Conducente)
+    conducente = models.ForeignKey(Conducente,
+                                   on_delete=models.PROTECT)
     dare = models.DecimalField(max_digits=9, decimal_places=2,
                                default=10)  # fino a 9999.99
 
