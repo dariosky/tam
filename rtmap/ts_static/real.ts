@@ -106,7 +106,7 @@ class Map {
 }
 
 let websocketSchema = window.location.protocol === 'https:' ? 'wss' : 'ws',
-    wsUrl = `${websocketSchema}://${document.location.host}:${RTMAP_SETTINGS.WEBSOCKET_PORT || 80}`,
+    wsUrl = `${websocketSchema}://${document.location.host}`,
     rt = new Realtime(wsUrl);
 
 $(function () {
