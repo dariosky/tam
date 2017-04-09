@@ -33,3 +33,4 @@ def is_ps_running(pid_file):
             return process
         except psutil.NoSuchProcess:
             logger.info("Process in PID not found")
+            os.remove(pid_file)

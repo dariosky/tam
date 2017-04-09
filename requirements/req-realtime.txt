@@ -5,9 +5,11 @@ python-telegram-bot
 channels
 asgi_redis
 
-# secure ssl
-pyOpenSSL
-service_identity
-ndg-httpsclient
-pyasn
-certifi
+# secure ssl --- disabled - using Python 3.6
+# pyOpenSSL
+# service_identity
+# ndg-httpsclient
+# pyasn
+# certifi
+
+Twisted[tls,http2]

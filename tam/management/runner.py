@@ -56,7 +56,7 @@ class RunnerCommand(AppCommand):
             command = [
                 command_part.format(self) for command_part in self.command
             ]
-            print(command)
+            print(" ".join(command))
 
             proc = subprocess.Popen(' '.join(command), shell=True,
                                     stdin=None, stdout=None, stderr=None
