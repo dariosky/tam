@@ -28,6 +28,7 @@ class MapConsumer(JsonWebsocketConsumer):
         print("connected {user}".format(
             user=self.message.user,
         ))
+        self.message.reply_channel.send({"accept": True})
         # self.close() # DEBUG: to test disconnection right after connection
 
     def receive(self, content, **kwargs):

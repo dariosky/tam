@@ -46,4 +46,7 @@ django-brake
 # cache
 django-redis
 
+# webfaction cli
+wfcli
+
 -r req-realtime.txt
