@@ -95,7 +95,7 @@ def action(request, template_name="archive/action.html"):
     if "archive" in request.POST:
         from tamArchive.tasks import do_archiviazioneTask
 
-        do_archiviazioneTask(request.user, end_date)  # @UndefinedVariable
+        do_archiviazioneTask(request.user, end_date)
         messages.info(request, "Archiviazione iniziata.")
 
         return HttpResponseRedirect(reverse("tamArchiveUtil"))

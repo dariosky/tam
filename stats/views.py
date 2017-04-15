@@ -1,15 +1,12 @@
 # coding=utf-8
 import datetime
-
-import django
-from django.contrib.auth.decorators import permission_required
-from django.db.models.functions import Extract
-from django.utils.decorators import method_decorator
-
-django.setup()
 from decimal import Decimal
+
+from django.contrib.auth.decorators import permission_required
 from django.db.models import Case, When, F, DecimalField, Value
 from django.db.models.aggregates import Sum
+from django.db.models.functions import Extract
+from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 
 from fatturazione.models import Fattura

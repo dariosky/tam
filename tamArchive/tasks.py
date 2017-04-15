@@ -86,7 +86,6 @@ def daRicordareDelViaggio(ricordi, viaggio):
 # ===============================================================================
 
 def spawn_thread(target, *args, **kwargs):
-
     t = Thread(target=target,
                args=args,
                kwargs=kwargs,
@@ -96,16 +95,8 @@ def spawn_thread(target, *args, **kwargs):
 
 
 def do_archiviazioneTask(user, end_date):
-    """ Crea il task per l'archiviazione e lo schedula """
+    """ run an archive task in a separate thread """
     spawn_thread(target=do_archiviazione, user=user, end_date=end_date)
-    # from tam.models import TaskArchive
-
-    # archiviazione_task = TaskArchive(user=user, end_date=end_date)
-    # archiviazione_task.save()
-
-    # ...and finally defer the task
-    # task = djangotasks.task_for_object(archiviazione_task.do)
-    # djangotasks.run_task(task)
 
 
 def applyRicordi(ricordi):
@@ -123,12 +114,8 @@ def applyRicordi(ricordi):
     ricordi.clear()
 
 
-# @task(name="archive.job")
-@single_instance_task(60 * 30)  # 5 minutes timeout
 @print_timing
-# @transaction.commit_manually
-# @transaction.commit_manually(using="archive")
-# @transaction.commit_manually(using="modellog")
+@single_instance_task(60 * 30)  # 5 minutes timeout
 def do_archiviazione(user, end_date):
     # if settings.DEBUG:
     # raise Exception("Per archiviare devi uscire dal DEBUG mode.")
