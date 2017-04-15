@@ -5,7 +5,7 @@ from socket import gethostname
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.81"
+TAM_VERSION = "6.92"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
@@ -215,7 +215,7 @@ if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -264,8 +264,19 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-        'django': {
-            'handlers': ['null', ],
+        'tam': {
+            'level': 'DEBUG',
+            'handlers': [
+                'mail_admins',
+                'console',
+                'production_file'
+            ],
+            'propagate': False
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
         },
         'django.server': {
             'level': 'WARNING'

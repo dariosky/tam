@@ -27,7 +27,10 @@ def print_timing(func):
         t1 = time.time()
         res = func(*arg, **kwargs)
         t2 = time.time()
-        print('%s took %s' % (func.func_name, humanizeTime(t2 - t1)))
+        func_name = getattr(func, "__name__", None)
+        if not func_name:
+            func_name = func.func.__name__
+        print('%s took %s' % (func_name, humanizeTime(t2 - t1)))
         return res
 
     return wrapper
