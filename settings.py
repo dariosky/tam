@@ -3,6 +3,8 @@ import os
 import logging
 from socket import gethostname
 
+from prenotazioni.views.notice import notice_required
+
 host = gethostname().lower()
 
 TAM_VERSION = "6.92"
@@ -535,6 +537,19 @@ PRENOTAZIONI_QUICK = dict(
     #     esclusivo=True,
     # ),
 )
+
+
+def preavviso_necessario(requested_date, prenotazione=None):
+    if prenotazione and prenotazione.get('is_collettivo'):
+        notice_hours = 24
+    else:
+        notice_hours = 6
+    return notice_required(requested_date,
+                           working_hours=(7, 20),
+                           night_notice=notice_hours, work_notice=notice_hours)
+
+
+PRENOTAZIONI_PREAVVISO_NEEDED_FUNC = preavviso_necessario
 
 # END OF DEFAULTS **************************************************************
 
