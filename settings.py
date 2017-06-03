@@ -458,6 +458,7 @@ TAM = dict(
         BUS=False,  # allow filter bus, for whatever driver name containing "bus"
     ),
 )
+TAM_PERMANENT_CLOCK = True
 TAM_BACKGROUND_COLOR = '#FBFFBA'  # the default background
 TAM_SHOW_CLASSIFICA_FATTURE = False
 
