@@ -27,9 +27,8 @@ archiveNotBefore_days = getattr(settings, "ARCHIVE_NOT_BEFORE_DAYS", 365 * 2)
 
 def menu(request, template_name="archive/menu.html"):
     dontHilightFirst = True
-    if not request.user.has_perm(
-        'tamArchive.archive') and not request.user.has_perm(
-        'tamArchive.flat'):
+    if not request.user.has_perm('tamArchive.archive') and \
+        not request.user.has_perm('tamArchive.flat'):
         messages.error(request,
                        "Devi avere accesso o all'archiviazione o all'appianamento.")
         return HttpResponseRedirect(reverse("tamUtil"))
@@ -96,7 +95,7 @@ def action(request, template_name="archive/action.html"):
     if "archive" in request.POST:
         from tamArchive.tasks import do_archiviazioneTask
 
-        do_archiviazioneTask(request.user, end_date)  # @UndefinedVariable
+        do_archiviazioneTask(request.user, end_date)
         messages.info(request, "Archiviazione iniziata.")
 
         return HttpResponseRedirect(reverse("tamArchiveUtil"))
@@ -118,6 +117,9 @@ def view(request, template_name="archive/view.html"):
     """ Visualizza le corse archiviate """
     profile = ProfiloUtente.objects.get(user=request.user)
     from django.core.paginator import Paginator
+    if not request.user.has_perm('tamArchive.view'):
+        messages.error(request, "Devi avere accesso all'archiviazione.")
+        return HttpResponseRedirect(reverse("tamUtil"))
 
     archiviati = ViaggioArchive.objects.filter(padre__isnull=True)
     # pagine da tot righe (cui si aggiungono i figli)

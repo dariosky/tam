@@ -31,7 +31,7 @@ $(function () {
 		var imponibile = 0;
 		var iva = 0;
 		var totale = 0;
-		var righe = $('#righe .priceRow').each(function () {
+		var righe = $('#righe').find('.priceRow').each(function () {
 			var rowData = rowProcess($(this));
 			iva = iva + rowData.val_iva;
 			imponibile += rowData.val_imponibile;
@@ -45,7 +45,7 @@ $(function () {
 
 	function editableSubmit(content) {
 		var pre = $.trim(content.previous), post = $.trim(content.current);
-		if (post != pre) {
+		if (post !== pre) {
 			var $this = $(this);
 			var id = $this.attr('id');
 			$.post("", {
@@ -55,10 +55,10 @@ $(function () {
 				csrfmiddlewaretoken: csrf_token
 			})
 				.complete(function (xhr, data) {
-					if (xhr.status == 200) {
+					if (xhr.status === 200) {
 						//console.log("set successful")
 						var row = $this.closest('#righe .priceRow');
-						if (row.length == 1) {
+						if (row.length === 1) {
 							var rowData = rowProcess(row);
 							//console.log("Modifica ad una riga. Ricomputo.");
 							var $totaleRiga = row.find('.totale').text(rowData.val_totale.formatMoney(2, ',', '.'));
@@ -74,7 +74,9 @@ $(function () {
 	}
 
 	Number.prototype.formatMoney = function (c, d, t) {
-		var n = this, c = isNaN(c = Math.abs(c)) ? 2 : c, d = d == undefined ? "," : d, t = t == undefined ? "." : t, s = n < 0 ? "-" : "", i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
+		var n = this, c = isNaN(c = Math.abs(c)) ? 2 : c, d = d == undefined ? "," : d,
+			t = t == undefined ? "." : t, s = n < 0 ? "-" : "",
+			i = parseInt(n = Math.abs(+n || 0).toFixed(c)) + "", j = (j = i.length) > 3 ? j % 3 : 0;
 		return s + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 	};
 
@@ -91,7 +93,7 @@ $(function () {
 				}
 			)
 				.complete(function (xhr, data) {
-					if (xhr.status == 200) {
+					if (xhr.status === 200) {
 						row.hide('fast', function () {
 							row.remove();
 							ricalcolaTotali();
@@ -112,7 +114,7 @@ $(function () {
 				{action: 'delete-fat', csrfmiddlewaretoken: csrf_token}
 			)
 				.complete(function (xhr, data) {
-					if (xhr.status == 200) {
+					if (xhr.status === 200) {
 						document.location = xhr.responseText;
 					}
 					else {
@@ -128,7 +130,7 @@ $(function () {
 			var lastRow = $(this).closest('tr');
 			$.post("", {action: 'append-row', csrfmiddlewaretoken: csrf_token})
 				.complete(function (xhr, data) {
-					if (xhr.status == 200) {
+					if (xhr.status === 200) {
 						var newRow = $(xhr.responseText); // return the row to insert
 						$(newRow).find('.editable').editable({onSubmit: editableSubmit}); // keep things editable
 						lastRow.before(newRow);

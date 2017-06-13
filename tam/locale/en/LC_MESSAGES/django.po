@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TaM\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-27 23:56+0200\n"
+"POT-Creation-Date: 2017-03-19 17:06+0100\n"
 "PO-Revision-Date: 2016-09-28 00:02+0200\n"
 "Last-Translator: Dario Varotto <dariosky@gmail.com>\n"
 "Language-Team: Dariosky <dariosky@gmail.com>\n"
@@ -17,51 +17,59 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: models.py:96
+#: models.py:95
 msgid "Luoghi"
 msgstr "Places"
 
-#: models.py:138
+#: models.py:137
 msgid "Bacini"
 msgstr "Areas"
 
-#: models.py:161
+#: models.py:160
 msgid "Tratte"
 msgstr "Paths"
 
-#: models.py:356
+#: models.py:258
+msgid "Prezzo sosta addizionale"
+msgstr ""
+
+#: models.py:264
+msgid "Sosta addizionale (minuti)"
+msgstr ""
+
+#: models.py:369
 msgid "Viaggi"
 msgstr "Run"
 
-#: models.py:1073
+#: models.py:1101
 msgid "Conducenti"
 msgstr "Drivers"
 
-#: models.py:1135
+#: models.py:1163
 msgid "Clienti"
 msgstr "Clients"
 
-#: models.py:1164
+#: models.py:1192
 msgid "Passeggeri"
 msgstr "Passengers"
 
-#: models.py:1187
+#: models.py:1215
 msgid "Listini"
 msgstr "Prices"
 
-#: models.py:1246
+#: models.py:1274
 msgid "Prezzi Listino"
 msgstr "Price list"
 
-#: models.py:1279
+#: models.py:1307
 msgid "Can reset session"
 msgstr "Può resettare le sessioni"
 
-#: models.py:1281
+#: models.py:1309
 msgid "Profili utente"
 msgstr "User profiles"
 
-#: models.py:1296
+#: models.py:1324
 msgid "Conguagli"
 msgstr "Balances"
 
@@ -117,7 +125,7 @@ msgstr "Open sessions"
 msgid "Disconnetti utente"
 msgstr "Disconnect user"
 
-#: views/login.py:24
+#: views/login.py:26
 msgid "Più dispositivi sono connessi con le stesse credenziali. Devi disconnetterti per collegarti qua."
 msgstr "Multiple devices connected with the same credentials. You should disconnect from other devices to connect from here."
 
@@ -125,7 +133,7 @@ msgstr "Multiple devices connected with the same credentials. You should disconn
 msgid "%d/%m/%Y"
 msgstr "%d/%m/%Y"
 
-#: views/users.py:88
+#: views/users.py:89
 msgid "Le due password non coincidono"
 msgstr "The two passwords do not match"
 

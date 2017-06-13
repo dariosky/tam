@@ -10,8 +10,11 @@ class ViaggioArchive(models.Model):
     class Meta:
         verbose_name_plural = "Archivi"
         ordering = ["data"]
-        permissions = (('flat', 'Esegue l\'appianamento'),
-                       ('archive', 'Esegue l\'archiviazione'))
+        permissions = (
+            ('flat', 'Esegue l\'appianamento'),
+            ('archive', 'Esegue l\'archiviazione'),
+            ('view', 'Visualizza l\'archiviazione'),
+        )
 
     data = models.DateTimeField("Data della corsa", db_index=True)
 

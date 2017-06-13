@@ -1,6 +1,8 @@
 # coding=utf-8
 from django.conf.urls import url
 from django.shortcuts import render
+
+from tam.views.users import password_change_prenotazioni
 from .models import *
 from .views import fixAction
 from .views import backup, login
@@ -104,6 +106,7 @@ urlpatterns = [
     url(r"^deluser/(?P<username>.*)/$", delUser, name="delUser"),
 
     url(r'^password/$', passwordChangeAndReset, name='change_password'),
+    url(r'^user_password/$', password_change_prenotazioni, name='change_user_password'),
 
     url(r'^changelog/$', changeLog, {}, name="tam_changelog"),
 

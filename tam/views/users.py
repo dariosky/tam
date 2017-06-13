@@ -14,6 +14,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 
+from markViews import prenotazioni
 from tam.middleware.prevent_multisession import get_concurrent_sessions
 from tam.models import Cliente, Luogo, ProfiloUtente
 
@@ -214,9 +215,19 @@ def delUser(request, username, template_name="utils/delUser.html"):
 def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
     form = PasswordChangeForm(request.user, request.POST or None)
     if form.is_valid():
-        logging.debug("Cambio la password")
+        logging.debug("Changing password for %s" % request.user)
         form.save()
         reset_user_session(request.user)  # reset delle sessioni
         return HttpResponseRedirect('/')
-    # response=password_change(request, template_name=template_name, post_change_redirect='/')
     return render(request, template_name, {'form': form})
+
+
+@prenotazioni
+def password_change_prenotazioni(request, template_name="prenotazioni/changePassword.html"):
+    form = PasswordChangeForm(request.user, request.POST or None)
+    if form.is_valid():
+        logging.debug("Changing password for %s" % request.user)
+        form.save()
+        return HttpResponseRedirect('/')
+    return render(request, template_name, {'form': form,
+                                           "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO, })

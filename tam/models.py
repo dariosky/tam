@@ -4,18 +4,17 @@ import itertools
 import logging
 import re
 from decimal import Decimal
-from future.utils import python_2_unicode_compatible
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
-from django.urls import reverse  # to resolve named urls
-from django.db import connections
-from django.db import models
+from django.db import connections, models
 from django.db.models.deletion import SET_NULL, PROTECT
 from django.template.loader import render_to_string
+from django.urls import reverse  # to resolve named urls
 from django.utils.translation import ugettext_lazy as _
+from future.utils import python_2_unicode_compatible
 
 import tam.tamdates as tamdates
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
@@ -1079,6 +1078,9 @@ class Conducente(models.Model):
     emette_ricevute = models.BooleanField("Emette senza IVA?",
                                           help_text="Il conducente può emettere fatture senza IVA?",
                                           default=True)
+    has_bus = models.BooleanField("Ha un bus?",
+                                  editable=False,
+                                  default=False)
     assente = models.BooleanField(default=False)
 
     classifica_iniziale_diurni = models.DecimalField("Supplementari diurni",

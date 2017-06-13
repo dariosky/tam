@@ -4,11 +4,12 @@ import os
 import logging
 from socket import gethostname
 
+from prenotazioni.views.notice import notice_required
 from utils.env_subs import perform_dict_substitutions
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.81"
+TAM_VERSION = "6.93"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
@@ -218,7 +219,7 @@ if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -262,11 +263,25 @@ LOGGING = {
         }
     },
     'loggers': {
-        'root': {
+        '': {
             'handlers': ['mail_admins', 'console'],
             'formatter': 'main_formatter',
             'level': 'ERROR',
             'propagate': True,
+        },
+        'tam': {
+            'level': 'DEBUG',
+            'handlers': [
+                'mail_admins',
+                'console',
+                'production_file'
+            ],
+            'propagate': False
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
         },
         'django.server': {
             'level': 'WARNING'
@@ -447,6 +462,7 @@ TAM = dict(
         BUS=False,  # allow filter bus, for whatever driver name containing "bus"
     ),
 )
+TAM_PERMANENT_CLOCK = True
 TAM_BACKGROUND_COLOR = '#FBFFBA'  # the default background
 TAM_SHOW_CLASSIFICA_FATTURE = False
 
@@ -544,6 +560,31 @@ REDIS_URL = 'redis://:{password}@{host}:{port}/{db}'.format(
     port=WEBFACTION['REDIS_PORT'],
     db=REDIS_DATABASE,
 )
+
+PRENOTAZIONI_QUICK = dict(
+    # choices=[dict(name="Locale"),  # no place_name means same place of client
+    #          dict(name="Padova", place_name='.Padova Città'),
+    #          dict(name="Venezia", place_name='.Venezia Marco Polo'),
+    #          ],
+    # defaults=dict(
+    #     numero_passeggeri=2,
+    #     note="Prenotazione rapida",
+    #     esclusivo=True,
+    # ),
+)
+
+
+def preavviso_necessario(requested_date, prenotazione=None):
+    if prenotazione and prenotazione.get('is_collettivo'):
+        notice_hours = 24
+    else:
+        notice_hours = 6
+    return notice_required(requested_date,
+                           working_hours=(7, 20),
+                           night_notice=notice_hours, work_notice=notice_hours)
+
+
+PRENOTAZIONI_PREAVVISO_NEEDED_FUNC = preavviso_necessario
 
 # END OF DEFAULTS **************************************************************
 

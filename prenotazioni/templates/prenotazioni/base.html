@@ -68,6 +68,7 @@
 		{% block footer %}
 			{% blocktrans %}Accesso effettuato con nome utente:{% endblocktrans %}
 			{{ request.user }} -
+			<a href='{% url 'change_user_password' %}'>{% trans "cambia password" %}</a> -
 			<a href='{% url 'logout' %}?next=/prenotazioni'>{% trans "disconnettiti" %}</a>
 		{% endblock footer %}
 	</div>

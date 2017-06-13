@@ -159,7 +159,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
         ).annotate(
             invoice_count=Count('viaggio'),
             invoice_val=Sum('viaggio__prezzo'),
-        ).order_by("-invoice_val", "-invoice_count")
+        ).order_by("invoice_val", "invoice_count")
         if classifica_fatture.count():
             max_val = classifica_fatture[0].invoice_val
         else:

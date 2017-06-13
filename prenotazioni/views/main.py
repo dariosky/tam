@@ -101,16 +101,14 @@ class FormPrenotazioni(forms.ModelForm):
         notice_func = getattr(settings, 'PRENOTAZIONI_PREAVVISO_NEEDED_FUNC', None)
         rdate = cleaned_data.get('data_corsa')
         if notice_func and rdate:
-            notice_max = notice_func(rdate)
+            notice_max = notice_func(rdate, cleaned_data)
             if ora > notice_max:
-                hours = (rdate - notice_max).seconds / 60 / 60
+                delta = rdate - notice_max
+                hours = delta.seconds / 60 / 60 + delta.days * 24
                 raise forms.ValidationError(
-                    ungettext(
-                        "Il preavviso minimo per questa corsa è di un'ora",
-                        "Il preavviso minimo per questa corsa è di {hours} ore",
-                        hours).format(
-                        hours=hours
-                    )
+                    ungettext("Il preavviso minimo per questa corsa è di un'ora",
+                              "Il preavviso minimo per questa corsa è di {hours} ore", hours)
+                        .format(hours=int(hours))
                 )
 
     def __init__(self, *args, **kwargs):

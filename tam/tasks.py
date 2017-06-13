@@ -1,8 +1,11 @@
 # coding: utf-8
+import logging
 import time
 
 from django.contrib.auth.models import User
 from django.core.cache import cache
+
+logger = logging.getLogger('tam.tasks')
 
 
 # ===============================================================================
@@ -27,7 +30,10 @@ def print_timing(func):
         t1 = time.time()
         res = func(*arg, **kwargs)
         t2 = time.time()
-        print('%s took %s' % (func.func_name, humanizeTime(t2 - t1)))
+        func_name = getattr(func, "__name__", None)
+        if not func_name:
+            func_name = func.func.__name__
+        logger.debug('%s took %s' % (func_name, humanizeTime(t2 - t1)))
         return res
 
     return wrapper
@@ -49,7 +55,7 @@ def single_instance_task(timeout=60 * 60 * 2):  # 2 hour of default timeout
                 finally:
                     release_lock()
             else:
-                print("stop concurrency")
+                logger.warning("Stopping %s to avoid concurrency" % func.__name__)
 
         return wrapper
 
@@ -74,8 +80,7 @@ def moveLogs(name='movelogs.job'):
         cursor.execute(
             "SELECT count(*) FROM tam_actionlog WHERE data>='2012-01-01'")  # sposto solo dal 2012
     except:
-        print
-        "no table actionlog"
+        print("no table actionlog")
         con.set_clean()
         return
     totalcount = cursor.fetchone()[0]

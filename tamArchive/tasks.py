@@ -1,15 +1,18 @@
 # coding: utf-8
-from pytz import timezone
-from modellog.actions import logAction, stopLog, startLog
-from django.contrib.auth.models import User
-import logging
-from django.db import transaction
-from modellog.models import ActionLog
-from django.db.models.query_utils import Q
-from tam.tasks import print_timing, single_instance_task
-from django.template.loader import render_to_string
 import datetime
+import logging
+from threading import Thread
+
+from django.contrib.auth.models import User
+from django.db import transaction
+from django.db.models.query_utils import Q
+from django.template.loader import render_to_string
+from pytz import timezone
+
+from modellog.actions import logAction, stopLog, startLog
+from modellog.models import ActionLog
 from tam.models import Viaggio, Conducente
+from tam.tasks import print_timing, single_instance_task
 from tamArchive.models import ViaggioArchive
 
 logger = logging.getLogger('tam.archive')
@@ -82,17 +85,18 @@ def daRicordareDelViaggio(ricordi, viaggio):
 
 # ===============================================================================
 
+def spawn_thread(target, *args, **kwargs):
+    t = Thread(target=target,
+               args=args,
+               kwargs=kwargs,
+               daemon=True,
+               )
+    t.start()
+
+
 def do_archiviazioneTask(user, end_date):
-    """ Crea il task per l'archiviazione e lo schedula """
-    raise Exception("Not implemented")
-    # from tam.models import TaskArchive
-
-    # archiviazione_task = TaskArchive(user=user, end_date=end_date)
-    # archiviazione_task.save()
-
-    # ...and finally defer the task
-    # task = djangotasks.task_for_object(archiviazione_task.do)
-    # djangotasks.run_task(task)
+    """ run an archive task in a separate thread """
+    spawn_thread(target=do_archiviazione, user=user, end_date=end_date)
 
 
 def applyRicordi(ricordi):
@@ -110,12 +114,8 @@ def applyRicordi(ricordi):
     ricordi.clear()
 
 
-# @task(name="archive.job")
-@single_instance_task(60 * 30)  # 5 minutes timeout
 @print_timing
-# @transaction.commit_manually
-# @transaction.commit_manually(using="archive")
-# @transaction.commit_manually(using="modellog")
+@single_instance_task(60 * 30)  # 5 minutes timeout
 def do_archiviazione(user, end_date):
     # if settings.DEBUG:
     # raise Exception("Per archiviare devi uscire dal DEBUG mode.")
@@ -140,7 +140,6 @@ def do_archiviazione(user, end_date):
     total = to_archive.count()
 
     logger.debug(u"Archivio %d viaggi padre." % total)
-    # to_archive = to_archive[:1]  # TODO: temp debug 1 viaggio
     while to_archive:
         # split viaggi padre in chucks
         viaggi_chunk, to_archive = to_archive[:chunkSize], to_archive[chunkSize:]
