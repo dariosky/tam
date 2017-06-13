@@ -45,3 +45,4 @@ run_server
 .pycharmrc
 
 /backup/*
+.python-version

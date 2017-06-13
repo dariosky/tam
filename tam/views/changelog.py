@@ -189,6 +189,8 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.91', '24/9/2016', "Nuove statistiche dettagliate. "
                               "Rate-limiting login, new hash e verifica sicurezza delle password"),
         ('6.92', '15/4/2017', "Riabilitazione archiviazione"),
+        ('6.93', '24/5/2017', "Tempo di preavviso dinamico per le prenotazioni"),
+        ('6.93', '3/6/2017', "Orologio permanente" if settings.TAM_PERMANENT_CLOCK else ""),
 
     ]
     # ('', '', mark_safe('''''')),
