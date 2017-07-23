@@ -7,23 +7,23 @@ import django
 from django.conf import settings
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-# Enable logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
-
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('tam.bot')
 
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-def start(bot, update):
-    bot.sendMessage(update.message.chat_id, text='Hi!')
 
 
-def help(bot, update):
-    logger.debug("Help was asked by")
-    bot.sendMessage(update.message.chat_id, text='Help!')
+def about(bot, update):
+    username = update.message.from_user.username
+    logger.info("Help was asked by %s" % username)
+    bot.sendMessage(update.message.chat_id,
+                    text=("TAM bot - un aiuto digitale per le prenotazioni"
+                          "\n\n"
+                          "Tam invierà in questo canale le richieste di prenotazioni rapide.\n"
+                          "Si può confermare la propria disponibilità ed interagire con il cliente."
+                          )
+                    )
 
 
 def message_handler(bot, update):
@@ -41,7 +41,7 @@ def error(bot, update, error):
     logger.error('Update "%s" caused error "%s"' % (update, error))
 
 
-def main():
+def run_tambot():
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(settings.BOT_TOKEN)
 
@@ -49,11 +49,10 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("about", about))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler([Filters.text], message_handler))
+    dp.add_handler(MessageHandler(Filters.text, message_handler))
 
     # log all errors
     dp.add_error_handler(error)
@@ -68,7 +67,13 @@ def main():
 
 
 if __name__ == '__main__':
+    # Enable logging
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
+
     django.setup()
 
     print('TaM Telegram Bot is running ...')
-    main()
+    run_tambot()

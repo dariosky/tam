@@ -9,7 +9,7 @@ from utils.env_subs import perform_dict_substitutions
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.93"
+TAM_VERSION = "7.00"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
