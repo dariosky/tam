@@ -571,3 +571,4 @@ for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
 WSGI_APPLICATION = 'wsgi.application'
+ATTESA_AEROPORTI = 30

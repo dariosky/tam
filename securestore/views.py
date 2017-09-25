@@ -8,8 +8,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
-from django.template.loader import get_template
 from django.template import Context
+from django.template.loader import get_template
 
 
 def serve_secure_file(request, path):

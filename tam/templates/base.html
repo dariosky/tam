@@ -17,7 +17,7 @@
 		{% if tam_stealth %}{% stylesheet 'tam-stealth' %}{% endif %}
 		<style>
 			body{
-				background-color: {{ TAM_BACKGROUND }}
+				background-color: {{ settings.TAM_BACKGROUND }}
 			}
 		</style>
 	{% endblock %}
@@ -42,7 +42,7 @@
 		{% block clienti %}<a href="{% url "tamListini" %}" class='menuGroup'>Clienti</a>{% endblock %}
 		{% block conducenti %}<a href="{% url "tamConducenti" %}" class='menuGroup'>Classifiche</a>{% endblock %}
 		{% block util %}<a href="{% url "tamUtil" %}" class='menuGroup'>Strumenti</a>{% endblock %}
-		{% if TAM_PERMANENT_CLOCK %}<div class="clock"></div>{% endif %}
+		{% if settings.TAM_PERMANENT_CLOCK %}<div class="clock"></div>{% endif %}
 		<i class="sprite icon-tam_16 loghetto"></i>
 	{% endblock navBar %}
 	{% block topContent %}{% endblock %}

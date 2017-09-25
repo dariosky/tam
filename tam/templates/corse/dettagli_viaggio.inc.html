@@ -34,7 +34,7 @@
 	    {% if viaggio.tratta.is_valid %}
 	        {{ viaggio.da }}
 			{% if viaggio.da.speciale == 'A' %}
-				<i class="sprite icon-airport"></i> (attendo 30 minuti)
+				<i class="sprite icon-airport"></i> (attendo {{ settings.ATTESA_AEROPORTI }} minuti)
 			{% endif%}
 	        - {% if nextfratello %}{{ nextfratello.da }}{% else %}{{ viaggio.a }}{% endif %}
 			{% if viaggio.additional_stop  %}

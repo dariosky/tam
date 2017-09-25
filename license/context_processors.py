@@ -14,9 +14,10 @@ def license_details(request):
     result["tam_version"] = settings.TAM_VERSION
     result["tam_stealth"] = False
 
-    # Aggiungo al contesto il percorso completo della richiesta (mi serve per i "?next=")
-    if request.META["QUERY_STRING"]:
-        result["full_request_path"] = request.path + "?" + urlquote(request.META["QUERY_STRING"])
-    else:
-        result["full_request_path"] = request.path
+    if request:
+        # Aggiungo al contesto il percorso completo della richiesta (mi serve per i "?next=")
+        if request.META["QUERY_STRING"]:
+            result["full_request_path"] = request.path + "?" + urlquote(request.META["QUERY_STRING"])
+        else:
+            result["full_request_path"] = request.path
     return result

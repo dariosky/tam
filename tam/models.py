@@ -12,6 +12,7 @@ from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse  # to resolve named urls
 from django.db import connections, models
 from django.db.models.deletion import SET_NULL, PROTECT
+from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 from future.utils import python_2_unicode_compatible
@@ -605,8 +606,9 @@ class Viaggio(models.Model):
     def get_html_tragitto(self):
         """ Ritorna il tragitto da template togliendogli tutti gli spazi """
         tragitto = render_to_string('corse/dettagli_viaggio.inc.html',
-                                    {"viaggio": self,
-                                     "STATIC_URL": settings.STATIC_URL})
+                                    RequestContext(None, {"viaggio": self,
+                                                          "settings": settings,
+                                                          "STATIC_URL": settings.STATIC_URL}))
         tragitto = reallySpaceless(tragitto)
         return tragitto
 
@@ -816,17 +818,17 @@ class Viaggio(models.Model):
 
         # logging.debug("Partiamo da %s"%end_time)
 
-        # quando parto da un aeroporto la corsa dura 30 minuti di più
+        # quando parto da un aeroporto la corsa dura X minuti di più
         # non quando sono in sosta, arrivato in un aereoporto,
-        # in modo che i 30 minuti in più siano alla ripartenza
+        # in modo che gli X minuti in più siano alla ripartenza
         if ultimaCorsa.da.speciale == 'A' and tratta:
-            end_time += datetime.timedelta(minutes=30)
+            end_time += datetime.timedelta(minutes=settings.ATTESA_AEROPORTI)
 
         if self.additional_stop:
             end_time += datetime.timedelta(minutes=self.additional_stop)
 
         if tratta and tratta.is_valid():  # add the runtime of this tratta
-            # logging.debug("Aggiungo %s per la tratta %s" %(tratta.minuti, tratta))
+            # loggingebug("Aggiungo %s per la tratta %s" %(tratta.minuti, tratta))
             end_time += datetime.timedelta(minutes=tratta.minuti)
         if tratta_end and tratta_end.is_valid():
             # logging.debug("Aggiungo %s per la tratta %s" %(tratta_end.minuti, tratta_end))
