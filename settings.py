@@ -426,6 +426,7 @@ if DEBUG:
 # ===============================================================================
 
 TAM_VIAGGI_PAGINA = 100
+ATTESA_AEROPORTI = 30
 
 # ******************* CACHE
 CACHES = {
@@ -571,4 +572,3 @@ for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
 WSGI_APPLICATION = 'wsgi.application'
-ATTESA_AEROPORTI = 30
