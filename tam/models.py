@@ -12,7 +12,6 @@ from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse  # to resolve named urls
 from django.db import connections, models
 from django.db.models.deletion import SET_NULL, PROTECT
-from django.template import RequestContext
 from django.template.loader import render_to_string
 from django.utils.translation import ugettext_lazy as _
 from future.utils import python_2_unicode_compatible
@@ -606,9 +605,9 @@ class Viaggio(models.Model):
     def get_html_tragitto(self):
         """ Ritorna il tragitto da template togliendogli tutti gli spazi """
         tragitto = render_to_string('corse/dettagli_viaggio.inc.html',
-                                    RequestContext(None, {"viaggio": self,
-                                                          "settings": settings,
-                                                          "STATIC_URL": settings.STATIC_URL}))
+                                    {"viaggio": self,
+                                     "settings": settings,
+                                     "STATIC_URL": settings.STATIC_URL})
         tragitto = reallySpaceless(tragitto)
         return tragitto
 
@@ -901,9 +900,9 @@ class Viaggio(models.Model):
             # se il successivo parte da dove arrivo è sicuramente un collettivo in successione
             return False
         if nextbro and nextbro.data < \
-                self.data + datetime.timedelta(
-                minutes=get_tratta(self.da, self.a).minuti + (
-                    30 if self.da.speciale == "A" else 0)):
+            self.data + datetime.timedelta(
+            minutes=get_tratta(self.da, self.a).minuti + (
+                30 if self.da.speciale == "A" else 0)):
             # tengo conto che questa corsa dura 30 minuti in più se parte da un aereoporto
             # logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
             return True
@@ -943,8 +942,8 @@ class Viaggio(models.Model):
         tratta = self.tratta
         tratta_end = self.tratta_end
         if (tratta_start is None or tratta_start.is_valid()) and (
-                    tratta is None or tratta.is_valid()) and (
-                    tratta_end is None or tratta_end.is_valid()):
+            tratta is None or tratta.is_valid()) and (
+            tratta_end is None or tratta_end.is_valid()):
             return True
         else:
             return False
@@ -961,7 +960,7 @@ class Viaggio(models.Model):
             if self.tipo_commissione == "P":
                 return self.prezzo * (
                     self.commissione / Decimal(
-                        100))  # commissione in percentuale
+                    100))  # commissione in percentuale
             else:
                 return self.commissione
 
@@ -1017,7 +1016,7 @@ class Viaggio(models.Model):
         """ True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
         return (not self.conducente_confermato
                 and (self.date_start - datetime.timedelta(
-            hours=2) < tamdates.ita_now())
+                hours=2) < tamdates.ita_now())
                 )
 
     def punti_notturni_interi_list(self):
