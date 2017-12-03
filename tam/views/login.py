@@ -62,7 +62,7 @@ def login(request):
         logger.error("\n".join(messages))
         return render_to_response("429-limited.html", status=429)
 
-    logged = request.user.is_authenticated() and request.user.username
+    logged = request.user.is_authenticated and request.user.username
     response = django_login(request,
                             template_name="login.html",
                             extra_context={'logo_consorzio': settings.TRANSPARENT_LOGO,
@@ -70,7 +70,7 @@ def login(request):
                                            },
                             authentication_form=AuthenticationFormWrapped,
                             )
-    if request.user.is_authenticated() and request.user.username != logged:  # just logged in
+    if request.user.is_authenticated and request.user.username != logged:  # just logged in
         request.session["userAgent"] = request.META.get('HTTP_USER_AGENT')
         logger.debug("Login for %s" % request.user)
         logAction('L', description='Accesso effettuato', user=request.user)
@@ -85,9 +85,9 @@ def login(request):
 
 @public
 def logout(request):
-    logged = request.user.is_authenticated() and request.user
+    logged = request.user.is_authenticated and request.user
     response = django_logout(request, login_url="/")
-    if not request.user.is_authenticated() and logged:  # just logged out
+    if not request.user.is_authenticated and logged:  # just logged out
         logger.debug("Logout user %s" % logged)
         logAction('O', description='Disconnesso', user=logged)
     return response

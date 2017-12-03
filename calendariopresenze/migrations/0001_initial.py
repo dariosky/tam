@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
                 ('type', models.IntegerField(choices=[(1, b'Ferie'), (2, b'Riposo'), (3, b'Ufficio')])),
                 ('available', models.BooleanField(default=False)),
                 ('value', models.IntegerField()),
-                ('conducente', models.ForeignKey(related_name='presenze', to='tam.Conducente')),
+                ('conducente', models.ForeignKey(related_name='presenze', to='tam.Conducente', on_delete=models.PROTECT)),
             ],
             options={
                 'ordering': ['date_start', 'conducente'],

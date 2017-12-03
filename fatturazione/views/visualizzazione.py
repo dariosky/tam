@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.db.models.aggregates import Max
 from django.http import HttpResponse, HttpResponseRedirect

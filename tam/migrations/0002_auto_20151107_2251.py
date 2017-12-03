@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='profiloutente',
             name='user',
-            field=models.OneToOneField(editable=False, to=settings.AUTH_USER_MODEL),
+            field=models.OneToOneField(editable=False, to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT),
         ),
         migrations.DeleteModel(
             name='TaskArchive',

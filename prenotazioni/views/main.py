@@ -10,7 +10,7 @@ from email.mime.base import MIMEBase
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import transaction
 from django.forms.fields import TypedChoiceField
 from django.http import HttpResponseRedirect

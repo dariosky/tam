@@ -45,7 +45,7 @@ class Migration(migrations.Migration):
                 ('prezzo', models.DecimalField(default=0, null=True, max_digits=9, decimal_places=2)),
                 ('iva', models.IntegerField()),
                 ('conducente', models.ForeignKey(related_name='fatture', on_delete=django.db.models.deletion.SET_NULL, to='tam.Conducente', null=True)),
-                ('fattura', models.ForeignKey(related_name='righe', to='fatturazione.Fattura')),
+                ('fattura', models.ForeignKey(related_name='righe', to='fatturazione.Fattura', on_delete=models.PROTECT)),
                 ('riga_fattura_consorzio', models.OneToOneField(related_name='fattura_conducente_collegata', null=True, on_delete=django.db.models.deletion.SET_NULL, to='fatturazione.RigaFattura')),
                 ('viaggio', models.OneToOneField(related_name='riga_fattura', null=True, on_delete=django.db.models.deletion.SET_NULL, to='tam.Viaggio')),
             ],

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('message', models.TextField(null=True, verbose_name=b'Messaggio', blank=True)),
                 ('attachment', models.FileField(storage=tam.models.UnSerializableFileSystemStorage(), null=True, upload_to=board.models.board_upload_to, blank=True)),
                 ('active', models.BooleanField(default=True, verbose_name=b'Messaggio visibile')),
-                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
             ],
             options={
                 'ordering': ['-date'],

@@ -6,7 +6,7 @@ from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db.models import Sum, Q
 from django.http.response import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext

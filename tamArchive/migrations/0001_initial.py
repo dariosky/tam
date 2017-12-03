@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('flag_arrivo', models.BooleanField(default=True, editable=False)),
                 ('punti_abbinata', models.IntegerField(default=0, editable=False)),
                 ('note', models.TextField(blank=True)),
-                ('padre', models.ForeignKey(blank=True, to='tamArchive.ViaggioArchive', null=True)),
+                ('padre', models.ForeignKey(blank=True, to='tamArchive.ViaggioArchive', null=True, on_delete=models.PROTECT)),
             ],
             options={
                 'ordering': ['data'],

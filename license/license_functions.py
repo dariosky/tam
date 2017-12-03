@@ -2,7 +2,7 @@
 import datetime
 # from tam.models import TamLicense
 # from django.http import HttpResponseRedirect	#use the redirects
-# from django.core.urlresolvers import reverse	#to resolve named urls
+# from django.urls import reverse	#to resolve named urls
 # from django import forms
 # import random
 # import base64

@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('data_accodamento', models.DateTimeField(auto_now_add=True)),
                 ('luogo', models.TextField(max_length=30)),
-                ('utente', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('utente', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
             ],
             options={
                 'ordering': ['data_accodamento'],

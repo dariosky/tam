@@ -48,7 +48,7 @@ class Migration(migrations.Migration):
                 ('email', models.EmailField(max_length=75, null=True)),
                 ('clienti', models.ManyToManyField(to='tam.Cliente')),
                 ('luogo', models.ForeignKey(to='tam.Luogo', on_delete=django.db.models.deletion.PROTECT)),
-                ('user', models.OneToOneField(related_name='prenotazioni', to=settings.AUTH_USER_MODEL)),
+                ('user', models.OneToOneField(related_name='prenotazioni', to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
             ],
             options={
                 'ordering': ('user',),
@@ -60,13 +60,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='prenotazione',
             name='owner',
-            field=models.ForeignKey(editable=False, to='prenotazioni.UtentePrenotazioni'),
+            field=models.ForeignKey(editable=False, to='prenotazioni.UtentePrenotazioni', on_delete=models.PROTECT),
             preserve_default=True,
         ),
         migrations.AddField(
             model_name='prenotazione',
             name='viaggio',
-            field=models.OneToOneField(null=True, editable=False, to='tam.Viaggio'),
+            field=models.OneToOneField(null=True, editable=False, to='tam.Viaggio', on_delete=models.PROTECT),
             preserve_default=True,
         ),
     ]

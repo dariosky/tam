@@ -9,7 +9,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _

@@ -21,7 +21,7 @@ print("Running in %s MODE" % ("PRODUCTION" if not DEBUG else "DEBUG"))
 
 # DEBUG = False
 
-if DEBUG:
+if DEBUG and False:
     # set naive Datetime as errors
     import warnings
 
@@ -293,9 +293,10 @@ LOGGING = {
     }
 }
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     # 'mediagenerator.middleware.MediaMiddleware',
     # 'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',  # check requests for csrf
@@ -304,9 +305,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'tam.middleware.loginRequirement.RequireLoginMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    # 'django.middleware.transaction.TransactionMiddleware',
-    #  deprecated in django 1.6
 
     'tam.middleware.threadlocals.ThreadLocals',
 )
@@ -423,7 +421,7 @@ if use_debug_toolbar:
     ]
 
 if DEBUG:
-    MIDDLEWARE_CLASSES += (
+    MIDDLEWARE += (
         # 'tam.middleware.profiler.ProfileMiddleware',
         # 'tam.middleware.sqlLogMiddleware.SQLLogMiddleware',
     )

@@ -3,7 +3,7 @@ from operator import itemgetter
 from threading import Thread
 
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, render
 from glob import glob

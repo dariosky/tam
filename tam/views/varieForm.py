@@ -3,7 +3,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.staticfiles.storage import staticfiles_storage
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from tam.models import Viaggio, Passeggero
 from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe

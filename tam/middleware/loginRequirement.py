@@ -5,16 +5,23 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import mail_admins
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
 logger = logging.getLogger('tam.general')
 
 
-class RequireLoginMiddleware(object):
+class RequireLoginMiddleware:
     """Middleware that gets various objects from the
     request object and saves them in thread local storage."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         public_view = getattr(view_func, 'public', False)
@@ -24,7 +31,7 @@ class RequireLoginMiddleware(object):
             return None
         else:
             # not a public view, if not authenticaded ask for login
-            if not request.user.is_authenticated():
+            if not request.user.is_authenticated:
                 return login_required(view_func)(request, *view_args, **view_kwargs)
 
             prenotazioni_view = getattr(view_func, 'prenotazioni', False)
@@ -41,7 +48,7 @@ class RequireLoginMiddleware(object):
                 # messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
                 return HttpResponseRedirect(reverse('tamCorse'))
             else:
-                if request.user.is_authenticated():
+                if request.user.is_authenticated:
                     # everything is OK proceed with other middlewares
                     return None
                 else:
