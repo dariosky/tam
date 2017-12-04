@@ -7,13 +7,17 @@ from future.utils import python_2_unicode_compatible
 
 LOG_ACTION_TYPE = [
     ("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
-    ('L', "Login"), ("O", "Logout"),
+    ("B", "Backup"), ("G", "Backup scaricato"),
     ("K", "Archiviazione"), ("F", "Appianamento"),
+    ('L', "Login"), ("O", "Logout"),
     ('X', "Export Excel"),
+    ('C', "Fatturazione"),
+    ('Q', 'Presenze'),
 ]
 
+actiontypes_as_dict = {k: v for k, v in LOG_ACTION_TYPE}
 
-@python_2_unicode_compatible
+
 class ActionLog(models.Model):
     data = models.DateTimeField(db_index=True)
     user_id = models.IntegerField(null=True, blank=True, default=None)
@@ -37,10 +41,8 @@ class ActionLog(models.Model):
         ordering = ["-data"]
 
     def __str__(self):
-        longName = {"A": "Creazione", "M": "Modifica", "D": "Cancellazione"}[
-            self.action_type]
-        return "%s di un %s - %s.\n  %s" % (
-            longName, self.content_type, self.user, self.description)
+        type_description = actiontypes_as_dict.get(self.action_type, 'Unknown action')
+        return f"{type_description} - {self.user_id}. {self.description}"
 
     def user(self):
         """ The user who made the action """

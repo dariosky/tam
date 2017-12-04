@@ -12,25 +12,12 @@
 			<label for="action">Filtra per:</label>
 			<select name="action" id="action" class="selectFilter">
 				<option value="">Tutte le azioni</option>
-				<option value="A"{% if filterAction == 'A' %} selected="selected"{% endif %}>Creazione</option>
-				<option value="M"{% if filterAction == "M" %} selected="selected"{% endif %}>Modifica</option>
-				<option value="D"{% if filterAction == "D" %} selected="selected"{% endif %}>Cancellazione</option>
-
-				<option value="B"{% if filterAction == "B" %} selected="selected"{% endif %}>Backup richiesto</option>
-				<option value="G"{% if filterAction == "G" %} selected="selected"{% endif %}>Backup scaricato</option>
-
-				<option value="K"{% if filterAction == "K" %} selected="selected"{% endif %}>Archiviazione</option>
-				<option value="F"{% if filterAction == "F" %} selected="selected"{% endif %}>Appianamento</option>
-
-				<option value="L"{% if filterAction == "L" %} selected="selected"{% endif %}>Login</option>
-				<option value="O"{% if filterAction == "O" %} selected="selected"{% endif %}>Logout</option>
-
-				<option value="X"{% if filterAction == "X" %} selected="selected"{% endif %}>Excel</option>
-
-				<option value="C"{% if filterAction == "C" %} selected="selected"{% endif %}>Fatturazione</option>
-
-				<option value="P"{% if filterAction == "P" %} selected="selected"{% endif %}>Presenze</option>
-
+			{% for action_type, action_name in action_types %}
+				<option value="{{action_type}}"
+						{% if filterAction == action_type %} selected="selected"{% endif %}>
+					{{action_name}}
+				</option>
+			{% endfor %}
 			</select>
 			<select name="user" class="selectFilter" title="Utenti">
 				<option value="">Tutti gli utenti</option>

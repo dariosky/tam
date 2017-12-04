@@ -1,9 +1,13 @@
 # coding=utf-8
-from django.db.models import signals
-from tam.middleware import threadlocals
 from django.contrib.contenttypes.models import ContentType
-from modellog.models import ActionLog
+from django.db.models import signals
 from django.utils import timezone
+
+from modellog.models import ActionLog
+from tam.middleware import threadlocals
+import logging
+
+logger = logging.getLogger('tam.action')
 
 
 def logAction(action, instance=None, description=u'', user=None, log_date=None):
@@ -27,9 +31,10 @@ def logAction(action, instance=None, description=u'', user=None, log_date=None):
         modelName=content_type.model if instance else None,
         instance_id=instance.id if instance else None,
     )
-    if instance and modification.modelName == "viaggio" and instance.data < log_date.replace(
-        hour=0, minute=0):
+    if instance and modification.modelName == "viaggio" \
+        and instance.data < log_date.replace(hour=0, minute=0):
         modification.hilight = True
+    logger.debug(modification)
     modification.save()
 
 
@@ -63,7 +68,6 @@ def presave_logger(sender, instance, signal, **kwargs):
         if prevalue != newvalue:
             prevalue = traduci(prevalue)
             newvalue = traduci(newvalue)
-
             instance._changeList.append(u"%s: da '%s' a '%s'" % (fieldname, prevalue, newvalue))
 
 

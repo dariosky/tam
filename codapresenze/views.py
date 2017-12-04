@@ -52,15 +52,19 @@ def coda(request, template_name='codapresenze/coda.html'):
                 messageParts.append('Effettuato da %s' % request.user)
             logAction('Q', description=" ".join(messageParts), user=actinguser)
 
-    coda = CodaPresenze.objects.all().values('id', 'utente__username', 'luogo', 'data_accodamento')
-    dthandler = lambda obj: obj.astimezone(tz_italy).isoformat() if isinstance(obj,
-                                                                               datetime.datetime) else None
-    coda = [{"luogo": u["luogo"],
-             "utente": u["utente__username"],
-             "data": u['data_accodamento'],
-             "id": u['id']
-             } for u in coda]
-    codajson = json.dumps(coda, default=dthandler)
+    presenzedb = CodaPresenze.objects.all() \
+        .values('id', 'utente__username', 'luogo', 'data_accodamento')
+
+    def dthandler(obj):
+        if isinstance(obj, datetime.datetime):
+            return obj.astimezone(tz_italy).isoformat()
+
+    presenze = [{"luogo": u["luogo"],
+                 "utente": u["utente__username"],
+                 "data": u['data_accodamento'],
+                 "id": u['id']
+                 } for u in presenzedb]
+    codajson = json.dumps(presenze, default=dthandler)
 
     if request.is_ajax():
         return HttpResponse(codajson, content_type="application/json")

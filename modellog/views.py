@@ -11,7 +11,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from modellog.actions import logAction
-from modellog.models import ActionLog
+from modellog.models import ActionLog, LOG_ACTION_TYPE
 from tam import tamdates
 from tam.views.tamviews import SmartPager
 
@@ -131,6 +131,7 @@ def actionLog(request, template_name="actionLog.html"):
                       'filterAction': filterAction,
                       "filterUtente": filterUtente,
                       "filterPreInsert": filterPreInsert,
-                      "viaggioType": viaggioType
+                      "viaggioType": viaggioType,
+                      "action_types": LOG_ACTION_TYPE,
                   },
                   )
