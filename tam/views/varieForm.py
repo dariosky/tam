@@ -8,6 +8,7 @@ from tam.models import Viaggio, Passeggero
 from django.utils.translation import ugettext as _
 from django.utils.safestring import mark_safe
 from tam.widgets import MySplitDateTimeField, MySplitDateWidget
+from django.forms.utils import flatatt
 
 
 class AutoCompleteForm(forms.ModelChoiceField):
@@ -48,7 +49,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
         self.Model = Model
         self.fieldname = fieldname
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ""
         else:
@@ -56,7 +57,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
                 value = getattr(self.Model.objects.get(id=value), self.fieldname)
             except:
                 value = ""
-        final_attrs = self.build_attrs(attrs, name=name, value=value)
+        final_attrs = self.build_attrs(attrs, dict(name=name, value=value))
         final_attrs['class'] = 'autocomplete_widget'
         id = final_attrs.get('id', 'id_%s' % name)
 
@@ -68,7 +69,7 @@ class AutoCompleteWidget(forms.widgets.Widget):
             </script>
         """ % {"id": id, 'lookup_url': self.lookup_url}
         return mark_safe(
-            "<input%(attrs)s /> %(js)s" % {"attrs": forms.widgets.flatatt(final_attrs), "js": js})
+            "<input%(attrs)s /> %(js)s" % {"attrs": flatatt(final_attrs), "js": js})
 
 
 class AutoCompleteUIWidget(forms.widgets.Widget):
@@ -80,7 +81,7 @@ class AutoCompleteUIWidget(forms.widgets.Widget):
         self.Model = Model
         self.fieldname = fieldname
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if value is None:
             value = ""
         else:
@@ -88,7 +89,7 @@ class AutoCompleteUIWidget(forms.widgets.Widget):
                 value = getattr(self.Model.objects.get(id=value), self.fieldname)
             except:
                 value = ""
-        final_attrs = self.build_attrs(attrs, name=name, value=value)
+        final_attrs = self.build_attrs(attrs, dict(name=name, value=value))
         final_attrs['class'] = 'autocomplete_widget'
         this_id = final_attrs.get('id', 'id_%s' % name)
 
@@ -109,7 +110,7 @@ class AutoCompleteUIWidget(forms.widgets.Widget):
             </script>
         """ % {"id": this_id, 'lookup_url': self.lookup_url}
         return mark_safe(
-            "<input%(attrs)s /> %(js)s" % {"attrs": forms.widgets.flatatt(final_attrs), "js": js})
+            "<input%(attrs)s /> %(js)s" % {"attrs": flatatt(final_attrs), "js": js})
 
 
 class ViaggioForm(forms.ModelForm):

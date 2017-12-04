@@ -21,11 +21,11 @@ print("Running in %s MODE" % ("PRODUCTION" if not DEBUG else "DEBUG"))
 
 # DEBUG = False
 
-if DEBUG and False:
+if DEBUG:
     # set naive Datetime as errors
     import warnings
 
-    # warnings.simplefilter('error', DeprecationWarning)
+    warnings.simplefilter('always', DeprecationWarning)
     warnings.filterwarnings(
         'error', r"DateTimeField received a naive datetime",
         RuntimeWarning, r'django\.db\.models\.fields')

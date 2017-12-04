@@ -2,8 +2,9 @@
 python-telegram-bot
 
 # django channels
-channels
-asgi_redis
+channels==1.1.8
+asgi-redis==1.4.3
+asgiref==2.0.1
 
 # secure ssl --- disabled - using Python 3.6
 # pyOpenSSL
