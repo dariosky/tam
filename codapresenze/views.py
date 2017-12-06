@@ -1,18 +1,45 @@
 # coding=utf-8
-import json
 import datetime
+import json
+import logging
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 
-from codapresenze.models import CodaPresenze
+from codapresenze.models import CodaPresenze, StoricoPresenze
 from modellog.actions import logAction
-from tam.tamdates import tz_italy
+from tam.tamdates import tz_italy, ita_now
 from tam.views.users import get_userkeys
+
+logger = logging.getLogger("tam.codapresenze")
+
+
+def dequeue(currentPosition: CodaPresenze):
+    """ Dequeue from the current position
+        We leave the queue and add to the history
+    """
+    currentPosition.delete()
+    now = ita_now()
+    start = currentPosition.data_accodamento
+    seconds = (now - start).seconds
+    if seconds > 60:
+        # minimum 60 seconds
+        minutes = seconds // 60
+        logger.debug(f"Queue history: {currentPosition.utente}"
+                     f" @{currentPosition.luogo} for {minutes} minutes")
+        story = StoricoPresenze(
+            start_date=start,
+            user=currentPosition.utente,
+            place=currentPosition.luogo,
+            minutes=minutes,
+        )
+        story.save()
+    else:
+        logger.debug(f"{currentPosition.utente} was only {seconds}s@{currentPosition.luogo}")
 
 
 def coda(request, template_name='codapresenze/coda.html'):
@@ -36,7 +63,7 @@ def coda(request, template_name='codapresenze/coda.html'):
             if posizioneCorrente:
                 posizioneCorrente = posizioneCorrente[0]
                 messageParts.append("Si disaccoda da %s." % posizioneCorrente.luogo)
-                posizioneCorrente.delete()
+                dequeue(posizioneCorrente)
 
         if 'place' in request.POST:
             # mi riaccodo
