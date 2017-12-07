@@ -1,4 +1,6 @@
 $(document).ready(function () {
+	/* put any place in a group, all the missing in the other */
+
 	var auto_refresh_interval = 90
 	var count = auto_refresh_interval   // update every TOT seconds
 	//var countdown;
@@ -12,7 +14,8 @@ $(document).ready(function () {
 		data.csrfmiddlewaretoken = csrf_token
 		$.post('', data)
 			.fail(function (data) {
-				alert("C'è stato un errore.")
+				alert("Errore di connessione.\n" +
+					"La pagina verrà ricaricata.")
 				window.location.reload()
 			})
 			.done(function (coda) {
@@ -70,8 +73,9 @@ $(document).ready(function () {
 
 function ricreaCoda(coda) {
 	/* riceve una lista di oggetti e popola il DOM con la coda */
-	var coda_container_obj = $('#coda')
-	coda_container_obj.empty()
+	var $codeContainer = $('#code')
+	$codeContainer.find(".queue").empty()
+
 	var oggiString = (new Date()).toDateString()
 
 	var timeFormat = function (data) {
@@ -83,12 +87,21 @@ function ricreaCoda(coda) {
 
 	for (var i = coda.length - 1; i >= 0; i--) {
 		var e = coda[i]
-		//console.log(e);
-		var e_obj = $("<div />")
+		var groupName = queueGroups[e.luogo] || 'other'
+		var $coda = $codeContainer.find('#' + groupName)
+		if (!$coda.length) {
+			$coda = $('<div/>')
+				.addClass('queue')
+				.attr('id', groupName)
+				.appendTo($codeContainer)
+		}
+
+		console.log(e, groupName)
+		var $obj = $("<div />").addClass('item')
 		var e_username = e.utente
 		var numerico = e_username.match(/\d+/)
 		if (numerico && numerico.length) e_username = numerico[0]
-		e_obj.append($("<div />").html(e_username).addClass('name'))
+		$obj.append($("<div />").html(e_username).addClass('name'))
 
 		var data = new Date(e.data)
 		var testo = ""
@@ -99,12 +112,11 @@ function ricreaCoda(coda) {
 			testo += "\ndal " + data.toLocaleString()
 		}
 		//testo += "\n" + e['luogo'];
-		e_obj.append($('<div />').html(testo))
-		e_obj.append($("<span />", {class: "place"}).html(e.luogo))
+		$obj.append($('<div />').html(testo))
+		$obj.append($("<span />", {class: "place"}).html(e.luogo))
 		if (e.utente === username) {    // global variable
-			e_obj.addClass('current')
+			$obj.addClass('current')
 		}
-		coda_container_obj.prepend(e_obj)
+		$coda.prepend($obj)
 	}
-	coda_container_obj.append($("<br />").css("clear", "both"))
 }

@@ -96,18 +96,31 @@ def coda(request, template_name='codapresenze/coda.html'):
     if request.is_ajax():
         return HttpResponse(codajson, content_type="application/json")
 
-    piazze = getattr(settings, "CODA_PIAZZE", ['Abano', 'Montegrotto'])
     utenti = User.objects.filter(prenotazioni__isnull=True, is_active=True)
     if not request.user.is_superuser:
         utenti = utenti.filter(is_superuser=False)  # solo i superuser vedono i superuser
     utenti = sorted(utenti, key=get_userkeys)
+
+    piazze = getattr(settings, "CODA_PIAZZE", ['Abano', 'Montegrotto'])
+    places = [(piazza, "other") if isinstance(piazza, str) else piazza for piazza in piazze]
+    queueGroupsJson = {}
+    queues = []
+
+    for piazza in places:
+        name, group = piazza
+        queueGroupsJson[name] = group
+        if group not in queues:
+            queues.append(group)
 
     return render(
         request,
         template_name,
         {
             'codajson': codajson,
-            "piazze": piazze,
             'utenti': utenti,
+
+            "places": places,  # the places
+            "queues": queues,  # the groups
+            'queueGroupsJson': json.dumps(queueGroupsJson),  # the associations
         },
     )
