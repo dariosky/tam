@@ -2,6 +2,7 @@
 /// <reference path="./leaflet.d.ts"/>
 
 import map = L.map;
+
 interface Settings {
     MAPBOX_ACCESS_TOKEN: string;
     CENTER: [number, number];
@@ -27,7 +28,7 @@ class Realtime {
 
     constructor(public url: string) {
         this.resetReconnection();
-        this.connect()
+        this.connect();
     }
 
     connect = () => {
@@ -35,6 +36,7 @@ class Realtime {
         this.socket = new WebSocket(wsUrl);
         this.socket.onclose = this.disconnected;
         this.socket.onopen = this.connected;
+        this.socket.onmessage = this.receive;
     };
 
     resetReconnection = () => {
@@ -86,6 +88,18 @@ class Realtime {
             this.messageQueue.push(message)
         }
     };
+
+    receive = (data) => {
+        console.debug("Received WS message", data);
+        const message = JSON.parse(data.data);
+        switch (message.type) {
+            case 'realtimePositions':
+                console.log("Positions:", message.positions);
+                break;
+            default:
+                console.warn("Unknown message type:", message.type)
+        }
+    }
 }
 
 class Map {
@@ -136,16 +150,16 @@ class GeoLocator {
     successPositionCallback(position) {
         let latlong: [number, number] = [position.coords.latitude, position.coords.longitude];
         console.debug("Got position", latlong);
-        /*
-         if (this.map) {
-         let leafmap = this.map.leafmap,
-         marker = L.marker(latlong).addTo(leafmap),
-         group = L.featureGroup([marker]);
-         leafmap.fitBounds(group.getBounds().pad(5));
-         }
-         */
+        if (this.map) {
+            let leafmap = this.map.leafmap,
+                marker = L.marker(latlong).addTo(leafmap),
+                group = L.featureGroup([marker]);
+            leafmap.fitBounds(group.getBounds(), {padding: [5, 5]});
+        }
         if (this.realtime) {
-            this.realtime.send(JSON.stringify(latlong));
+            /*this.realtime.send(
+                JSON.stringify({position: latlong})
+            );*/
         }
     }
 

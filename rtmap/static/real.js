@@ -1,7 +1,7 @@
 /// <reference path="./jquery.d.ts"/>
 /// <reference path="./leaflet.d.ts"/>
 var map = L.map;
-var Realtime = (function () {
+var Realtime = /** @class */ (function () {
     function Realtime(url) {
         var _this = this;
         this.url = url;
@@ -11,6 +11,7 @@ var Realtime = (function () {
             _this.socket = new WebSocket(wsUrl);
             _this.socket.onclose = _this.disconnected;
             _this.socket.onopen = _this.connected;
+            _this.socket.onmessage = _this.receive;
         };
         this.resetReconnection = function () {
             if (_this.reconnectTimer) {
@@ -56,13 +57,24 @@ var Realtime = (function () {
                 _this.messageQueue.push(message);
             }
         };
+        this.receive = function (data) {
+            console.debug("Received WS message", data);
+            var message = JSON.parse(data.data);
+            switch (message.type) {
+                case 'realtimePositions':
+                    console.log("Positions:", message.positions);
+                    break;
+                default:
+                    console.warn("Unknown message type:", message.type);
+            }
+        };
         this.resetReconnection();
         this.connect();
     }
+    Realtime.MAX_RECONNECT_DELAY = 30000; // retry every 30sec max
     return Realtime;
 }());
-Realtime.MAX_RECONNECT_DELAY = 30000; // retry every 30sec max
-var Map = (function () {
+var Map = /** @class */ (function () {
     function Map(selector) {
         this.selector = selector;
         this.attribution = "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>";
@@ -82,7 +94,7 @@ $(function () {
     console.log("Ready!");
     var m = new Map('mapid'), locator = new GeoLocator(rt);
 });
-var GeoLocator = (function () {
+var GeoLocator = /** @class */ (function () {
     function GeoLocator(realtime, map) {
         this.realtime = realtime;
         this.map = map;
@@ -100,16 +112,14 @@ var GeoLocator = (function () {
     GeoLocator.prototype.successPositionCallback = function (position) {
         var latlong = [position.coords.latitude, position.coords.longitude];
         console.debug("Got position", latlong);
-        /*
-         if (this.map) {
-         let leafmap = this.map.leafmap,
-         marker = L.marker(latlong).addTo(leafmap),
-         group = L.featureGroup([marker]);
-         leafmap.fitBounds(group.getBounds().pad(5));
-         }
-         */
+        if (this.map) {
+            var leafmap = this.map.leafmap, marker = L.marker(latlong).addTo(leafmap), group = L.featureGroup([marker]);
+            leafmap.fitBounds(group.getBounds(), { padding: [5, 5] });
+        }
         if (this.realtime) {
-            this.realtime.send(JSON.stringify(latlong));
+            /*this.realtime.send(
+                JSON.stringify({position: latlong})
+            );*/
         }
     };
     return GeoLocator;

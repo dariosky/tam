@@ -20,7 +20,6 @@
 	<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 	{% block realtime %}
 		{% if user.is_authenticated %}
-{#			<script type="text/javascript" src="{% static 'realtam.js' %}"></script>#}
 			<script type="text/javascript" src="{% static 'real.js' %}"></script>
 		{% endif %}
 	{% endblock realtime %}

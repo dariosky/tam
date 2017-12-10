@@ -9,3 +9,6 @@ class Positions(models.Model):
     lat = models.FloatField(_('Latitude'), blank=True, null=True)
     lon = models.FloatField(_('Longitude'), blank=True, null=True)
     last_update = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user}@{self.lat},{self.lon} - {self.last_update}"

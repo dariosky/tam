@@ -67,13 +67,7 @@ def run_tambot():
 
 
 if __name__ == '__main__':
-    # Enable logging
-    logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        level=logging.INFO
-    )
-
     django.setup()
 
-    print('TaM Telegram Bot is running ...')
+    logger.info('TaM Telegram Bot is running ...')
     run_tambot()
