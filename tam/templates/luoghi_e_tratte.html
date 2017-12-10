@@ -7,7 +7,7 @@
 		<div>
 			<h2>Tratte</h2>
 
-			<div>
+			<div class="accordion-content">
 				<a href="{% url "tamNuovaTratta" %}"><i class="sprite icon-addbtn"></i> Nuova Tratta</a><br/>
 				{% if tratte %}
 					<table id="tratte" class="tablesorter">
@@ -44,7 +44,7 @@
 		<div>
 			<h2>Bacini e luoghi</h2>
 
-			<div>
+			<div class="accordion-content">
 				<a href="{% url "tamNuovoBacino" %}"><i class="sprite icon-addbtn"></i> Nuovo Bacino</a><br/>
 				<a href="{% url "tamNuovoLuogo" %}"><i class="sprite icon-addbtn"></i> Nuovo Luogo</a><br/>
 				{% if bacini or unbacined %}

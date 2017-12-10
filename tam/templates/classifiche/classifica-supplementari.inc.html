@@ -1,31 +1,32 @@
 {% load utilTag %}{% load staticfiles %}
 <div>
-<h2><a href="#">
+	<h2><a href="#">
 		{{ classifica_definita.nome }}
 		{% if classifica_definita.descrizione %}({{ classifica_definita.descrizione }}){% endif %}
 	</a>
-</h2>
-<div>
-<table class="tablesorter">
-    <thead>
-	<tr>
-	    <th>Nome</th>
-	    <th>Punteggio</th>
-	</tr>
-    </thead>
+	</h2>
+	<div class="accordion-content">
+		<table class="tablesorter">
+			<thead>
+			<tr>
+				<th>Nome</th>
+				<th>Punteggio</th>
+			</tr>
+			</thead>
 
-    <tbody>
-    {% with classifica_definita.image as image %}
-	{% for punti, nick, classifica in classifica_definita.dati %}
-	    <tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
-		<td>{{ classifica.conducente }}</td>
-		<td>
-			{% if image %}<i class="sprite icon-{{ image }}"></i>{% endif %} x {{ punti }}
-		</td>
-	    </tr>
-	{% endfor %}
-	{% endwith %}
-    </tbody>
-</table>
-</div>
+			<tbody>
+			{% with classifica_definita.image as image %}
+				{% for punti, nick, classifica in classifica_definita.dati %}
+					<tr {% if not classifica.conducente.attivo %} class="inattivo"{% endif %}>
+						<td>{{ classifica.conducente }}</td>
+						<td>
+							{% if image %}<i class="sprite icon-{{ image }}"></i>{% endif %}
+							x {{ punti }}
+						</td>
+					</tr>
+				{% endfor %}
+			{% endwith %}
+			</tbody>
+		</table>
+	</div>
 </div>

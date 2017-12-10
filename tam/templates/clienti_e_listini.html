@@ -7,7 +7,7 @@
 		<div>
 			<h2>Clienti e passeggeri</h2>
 
-			<div>
+			<div class="accordion-content">
 				<a href="{% url "tamCliente" %}"><i class="sprite icon-addbtn"></i> Nuovo
 					Cliente</a><br/>
 				<a href="{% url "tamPrivati" %}">Elenco passeggeri privati</a><br/>
@@ -25,19 +25,25 @@
 						{% for cliente in clienti %}
 							<tr {% if not cliente.attivo %} class="inattivo"{% endif %}>
 								<td>
-									<i style='float: right' class="sprite icon-clienttype_{{ cliente.tipo }}"></i>
+									<i style='float: right'
+									   class="sprite icon-clienttype_{{ cliente.tipo }}"></i>
 									<a href="{% url "tamClienteId" cliente.id %}">{{ cliente }}</a>
 								</td>
 								<td>
-									{% if cliente.fatturazione %}<i class="sprite icon-fattura"></i>{% endif %}
-									{% if cliente.pagamento_differito %}<i class="sprite icon-timedelta"></i>{% endif %}
-									{% if cliente.incassato_albergo %}<i class="sprite icon-incassato"></i>{% endif %}
+									{% if cliente.fatturazione %}
+										<i class="sprite icon-fattura"></i>{% endif %}
+									{% if cliente.pagamento_differito %}
+										<i class="sprite icon-timedelta"></i>{% endif %}
+									{% if cliente.incassato_albergo %}
+										<i class="sprite icon-incassato"></i>{% endif %}
 									{% if cliente.commissione %} commissione:
 										{{ cliente.commissione }}
-										{% if cliente.tipo_commissione == "P" %}%{% else %}€{% endif %}
+										{% if cliente.tipo_commissione == "P" %}%{% else %}€
+										{% endif %}
 									{% endif %}
 								</td>
-								<td><a href="{% url "tamListinoId" cliente.listino.id %}">{{ cliente.listino.nome }}</a>
+								<td>
+									<a href="{% url "tamListinoId" cliente.listino.id %}">{{ cliente.listino.nome }}</a>
 								</td>
 							</tr>
 						{% endfor %}
@@ -53,7 +59,7 @@
 		<div>
 			<h2>Listini</h2>
 
-			<div>
+			<div class="accordion-content">
 				<a href="{% url 'tamNuovoListino' %}"><i class="sprite icon-addbtn"></i> Nuovo
 					Listino</a><br/>
 				{% if listini %}
@@ -67,7 +73,9 @@
 						<tbody>
 						{% for listino in listini %}
 							<tr>
-								<td><a href="{% url "tamListinoId" listino.id %}">{{ listino.nome }}</a></td>
+								<td>
+									<a href="{% url "tamListinoId" listino.id %}">{{ listino.nome }}</a>
+								</td>
 								<td>{{ listino.prezzolistino__count }}</td>
 							</tr>
 						{% endfor %}
@@ -84,14 +92,16 @@
 {% block bottom %}
 	<script type="text/javascript">
 		$(document).ready(function () {
-			$("#accordion").find("div").accordion({
-				header: "h2",
-				alwaysOpen: false,
-				active: false,
-				animated: false,
-				collapsible: true
-			});
+			if ($.fn.accordion) {
+				$("#accordion").find("div").accordion({
+					header: "h2",
+					alwaysOpen: false,
+					active: false,
+					animated: false,
+					collapsible: true
+				})
+			}
 			//$("#accordion .selected").removeClass("selected");
-		});
+		})
 	</script>
 {% endblock bottom %}

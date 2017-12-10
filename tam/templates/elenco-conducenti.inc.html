@@ -1,32 +1,35 @@
-{% load staticfiles %}<div>
+{% load staticfiles %}
+<div>
 	<h2>Soci</h2>
-	<div>
-	<a href="{% url "tamNuovoConducente" %}">
-		<i class="sprite icon-addbtn"></i> Nuovo Socio
-	</a><br/>
-	{% if tuttiConducenti %}
-		<table class="tablesorter">
-		<thead>
-			<tr>
-			<th>Nome</th>
-			<th>Sigla [pax]</th>
-			</tr>
-		</thead>
+	<div class="accordion-content">
+		<a href="{% url "tamNuovoConducente" %}">
+			<i class="sprite icon-addbtn"></i> Nuovo Socio
+		</a><br/>
+		{% if tuttiConducenti %}
+			<table class="tablesorter">
+				<thead>
+				<tr>
+					<th>Nome</th>
+					<th>Sigla [pax]</th>
+				</tr>
+				</thead>
 
-		<tbody>
-			{% for conducente in tuttiConducenti %}
-			<tr {% if not conducente.attivo %} class="inattivo"{% endif %}>
-				<td>
-					<a href="{% url "tamConducenteId" conducente.id %}">{{ conducente.nome }}</a>
-					{% if not conducente.attivo %}NON ATTIVO{% endif %}
-				</td>
-				<td>{{ conducente.nick }} [{{ conducente.max_persone }}]</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		</table>
-	{% else %}
-		Nessun conducente in anagrafica.
-	{% endif %}
+				<tbody>
+				{% for conducente in tuttiConducenti %}
+					<tr {% if not conducente.attivo %} class="inattivo"{% endif %}>
+						<td>
+							<a href="{% url "tamConducenteId" conducente.id %}">
+								{{ conducente.nome }}
+							</a>
+							{% if not conducente.attivo %}NON ATTIVO{% endif %}
+						</td>
+						<td>{{ conducente.nick }} [{{ conducente.max_persone }}]</td>
+					</tr>
+				{% endfor %}
+				</tbody>
+			</table>
+		{% else %}
+			Nessun conducente in anagrafica.
+		{% endif %}
 	</div>
 </div>

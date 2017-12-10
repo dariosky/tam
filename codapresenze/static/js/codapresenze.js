@@ -96,7 +96,6 @@ function ricreaCoda(coda) {
 				.appendTo($codeContainer)
 		}
 
-		console.log(e, groupName)
 		var $obj = $("<div />").addClass('item')
 		var e_username = e.utente
 		var numerico = e_username.match(/\d+/)
