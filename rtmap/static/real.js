@@ -1,11 +1,11 @@
 /// <reference path="./jquery.d.ts"/>
 /// <reference path="./leaflet.d.ts"/>
-var map = L.map;
 var Realtime = /** @class */ (function () {
     function Realtime(url) {
         var _this = this;
         this.url = url;
         this.messageQueue = [];
+        this.events = {};
         this.connect = function () {
             console.debug("ws connection");
             _this.socket = new WebSocket(wsUrl);
@@ -63,9 +63,21 @@ var Realtime = /** @class */ (function () {
             switch (message.type) {
                 case 'realtimePositions':
                     console.log("Positions:", message.positions);
+                    _this.fire('positions', message.positions);
                     break;
                 default:
                     console.warn("Unknown message type:", message.type);
+            }
+        };
+        this.on = function (eventName, callback) {
+            if (!_this.events[eventName])
+                _this.events[eventName] = [];
+            _this.events[eventName].push(callback);
+        };
+        this.fire = function (eventName, payload) {
+            for (var _i = 0, _a = (_this.events[eventName] || []); _i < _a.length; _i++) {
+                var callback = _a[_i];
+                callback(payload);
             }
         };
         this.resetReconnection();
@@ -76,11 +88,33 @@ var Realtime = /** @class */ (function () {
 }());
 var Map = /** @class */ (function () {
     function Map(selector) {
+        var _this = this;
         this.selector = selector;
         this.attribution = "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>";
         this.token = RTMAP_SETTINGS.MAPBOX_ACCESS_TOKEN;
         this.center = RTMAP_SETTINGS.CENTER;
         this.tileUrl = 'https://api.mapbox.com/styles/v1/mapbox/streets-v10/tiles/256/{z}/{x}/{y}?access_token=';
+        this.markers = {};
+        this.positioned = false; // was it rescaled?
+        this.setPositions = function (positions) {
+            console.log("Setting map positions to ", positions);
+            var leafmap = _this.leafmap;
+            positions.map(function (position) {
+                var latlong = [position.lat, position.lon];
+                var user = position.user;
+                if (_this.markers[user]) {
+                    console.debug("Removing previous marker");
+                    _this.markers[user].remove();
+                }
+                _this.markers[user] = L.marker(latlong).addTo(leafmap)
+                    .bindPopup(user).openPopup();
+            });
+            if (!_this.positioned) {
+                var markers = Object.keys(_this.markers).map(function (key) { return _this.markers[key]; });
+                var group = L.featureGroup(markers);
+                leafmap.fitBounds(group.getBounds(), { padding: [5, 5] });
+            }
+        };
         this.leafmap = L.map(selector).setView(this.center, 12);
         L.tileLayer(this.tileUrl + this.token, {
             attribution: this.attribution,
@@ -92,15 +126,31 @@ var Map = /** @class */ (function () {
 var websocketSchema = window.location.protocol === 'https:' ? 'wss' : 'ws', wsUrl = websocketSchema + "://" + document.location.host, rt = new Realtime(wsUrl);
 $(function () {
     console.log("Ready!");
-    var m = new Map('mapid'), locator = new GeoLocator(rt);
+    var m = new Map('mapid');
+    new GeoLocator(rt, m);
 });
 var GeoLocator = /** @class */ (function () {
     function GeoLocator(realtime, map) {
+        var _this = this;
         this.realtime = realtime;
         this.map = map;
+        this.successPositionCallback = function (position) {
+            var latlong = [position.coords.latitude, position.coords.longitude];
+            console.debug("Got position", latlong);
+            if (_this.map) {
+                // we don't set the map directly, we wait for the server to answer it back
+            }
+            if (_this.realtime) {
+                _this.realtime.send(JSON.stringify({ position: latlong }));
+            }
+        };
+        this.setPositions = function (positions) {
+            _this.map.setPositions(positions);
+        };
         console.debug("Init locator", "rt:", realtime);
+        realtime.on('positions', this.setPositions);
         if (navigator && navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(this.successPositionCallback.bind(this), GeoLocator.errorPositionCallback);
+            navigator.geolocation.getCurrentPosition(this.successPositionCallback, GeoLocator.errorPositionCallback);
         }
         else {
             console.error('Geolocation is not supported');
@@ -108,19 +158,6 @@ var GeoLocator = /** @class */ (function () {
     }
     GeoLocator.errorPositionCallback = function () {
         console.error("Error getting current position");
-    };
-    GeoLocator.prototype.successPositionCallback = function (position) {
-        var latlong = [position.coords.latitude, position.coords.longitude];
-        console.debug("Got position", latlong);
-        if (this.map) {
-            var leafmap = this.map.leafmap, marker = L.marker(latlong).addTo(leafmap), group = L.featureGroup([marker]);
-            leafmap.fitBounds(group.getBounds(), { padding: [5, 5] });
-        }
-        if (this.realtime) {
-            /*this.realtime.send(
-                JSON.stringify({position: latlong})
-            );*/
-        }
     };
     return GeoLocator;
 }());
