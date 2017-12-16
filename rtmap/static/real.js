@@ -1,5 +1,6 @@
 /// <reference path="./jquery.d.ts"/>
 /// <reference path="./leaflet.d.ts"/>
+var RANDOMIZE_POSITION = false;
 var Realtime = /** @class */ (function () {
     function Realtime(url) {
         var _this = this;
@@ -58,7 +59,6 @@ var Realtime = /** @class */ (function () {
             }
         };
         this.receive = function (data) {
-            console.debug("Received WS message", data);
             var message = JSON.parse(data.data);
             switch (message.type) {
                 case 'realtimePositions':
@@ -106,7 +106,15 @@ var Map = /** @class */ (function () {
                     console.debug("Removing previous marker");
                     _this.markers[user].remove();
                 }
-                _this.markers[user] = L.marker(latlong).addTo(leafmap)
+                var myIcon = L.divIcon({
+                    className: (user === currentUID ? 'highlighted ' : '') +
+                        'tam-marker',
+                    iconSize: L.point(49, 49),
+                });
+                _this.markers[user] = L.marker(latlong, {
+                    icon: myIcon
+                })
+                    .addTo(leafmap)
                     .bindPopup(user).openPopup();
             });
             if (!_this.positioned) {
@@ -135,8 +143,12 @@ var GeoLocator = /** @class */ (function () {
         this.realtime = realtime;
         this.map = map;
         this.successPositionCallback = function (position) {
-            var latlong = [position.coords.latitude, position.coords.longitude];
-            console.debug("Got position", latlong);
+            var adjustPos = function (pos) { return RANDOMIZE_POSITION ? pos * (1 + .0002 * Math.random()) : pos; };
+            var latlong = [
+                adjustPos(position.coords.latitude),
+                adjustPos(position.coords.longitude)
+            ];
+            console.debug("Got my geolocation", latlong);
             if (_this.map) {
                 // we don't set the map directly, we wait for the server to answer it back
             }
@@ -147,7 +159,6 @@ var GeoLocator = /** @class */ (function () {
         this.setPositions = function (positions) {
             _this.map.setPositions(positions);
         };
-        console.debug("Init locator", "rt:", realtime);
         realtime.on('positions', this.setPositions);
         if (navigator && navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(this.successPositionCallback, GeoLocator.errorPositionCallback);

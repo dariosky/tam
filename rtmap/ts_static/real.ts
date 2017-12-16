@@ -10,6 +10,9 @@ interface Settings {
 }
 
 declare var RTMAP_SETTINGS: Settings
+declare var currentUID: string
+
+const RANDOMIZE_POSITION = false
 
 class Realtime {
     socket: WebSocket
@@ -91,7 +94,6 @@ class Realtime {
     }
 
     receive = (data) => {
-        console.debug("Received WS message", data)
         const message = JSON.parse(data.data)
         switch (message.type) {
             case 'realtimePositions':
@@ -143,7 +145,16 @@ class Map {
                 console.debug("Removing previous marker")
                 this.markers[user].remove()
             }
-            this.markers[user] = L.marker(latlong).addTo(leafmap)
+            let myIcon = L.divIcon({
+                className: (user === currentUID ? 'highlighted ' : '') +
+                'tam-marker',
+                iconSize: L.point(49, 49),
+
+            })
+            this.markers[user] = L.marker(latlong, {
+                icon: myIcon
+            })
+                .addTo(leafmap)
                 .bindPopup(user).openPopup()
         })
 
@@ -169,7 +180,6 @@ $(function () {
 
 class GeoLocator {
     constructor(public realtime?: Realtime, public map?: Map) {
-        console.debug("Init locator", "rt:", realtime)
         realtime.on('positions', this.setPositions)
 
         if (navigator && navigator.geolocation) {
@@ -187,8 +197,13 @@ class GeoLocator {
     }
 
     successPositionCallback = (position) => {
-        let latlong: [number, number] = [position.coords.latitude, position.coords.longitude]
-        console.debug("Got position", latlong)
+        const adjustPos = pos => RANDOMIZE_POSITION ? pos * (1 + .0002 * Math.random()) : pos
+        let latlong: [number, number] = [
+            adjustPos(position.coords.latitude),
+            adjustPos(position.coords.longitude)]
+
+        console.debug("Got my geolocation", latlong)
+
         if (this.map) {
             // we don't set the map directly, we wait for the server to answer it back
         }

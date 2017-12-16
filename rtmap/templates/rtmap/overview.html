@@ -7,4 +7,7 @@
 
 {% block bottom %}
 	{{ block.super }}
+	<script type="text/javascript">
+		currentUID = '{{ request.user|escapejs }}'
+	</script>
 {% endblock %}
