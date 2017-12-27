@@ -8,6 +8,12 @@
 {% block content %}
 	<h1 style="float:left">Coda Presenze</h1>
 	<div id="user-choser">
+
+		<a class="btnbox small" href="{% url 'codapresenze-ferie' %}">
+			<img src="{% static 'img/calendar.gif' %}" alt="">
+			Calendario
+		</a>
+
 		{% if perms.codapresenze.editall %}
 			<label for="conducente">Socio:</label><select id='conducente'>
 			{% for utente in utenti %}
@@ -42,7 +48,6 @@
 	</div>
 
 	<div id='counter'></div>
-
 {% endblock content %}
 
 {% block bottom %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% load staticfiles %}{% load pipeline %}
+
+{% block css %}
+	{{ block.super }}
+	{% stylesheet 'codapresenze' %}
+{% endblock %}
+
+{% block content %}
+	<h1>Conteggio presenze/ferie</h1>
+{% endblock content %}
+
+{% block bottom %}
+	{{ block.super }}
+
+{% endblock bottom %}

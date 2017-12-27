@@ -146,7 +146,7 @@ class Map {
                 this.markers[user].remove()
             }
             let myIcon = L.divIcon({
-                className: (user === currentUID ? 'highlighted ' : '') +
+                className: (user === currentUID ? 'current ' : '') +
                 'tam-marker',
                 iconSize: L.point(49, 49),
 

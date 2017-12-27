@@ -141,7 +141,7 @@ a:hover {
 .content {
   max-width: 100%;
   /*min-width: 600px;*/
-  text-align: justify;
+  text-align: left;
   background: white url(../img/v-grad-inv.png) repeat-x bottom;
   margin: 3em 5px auto;
   padding: 5px 10px 40px 10px;
@@ -150,12 +150,12 @@ a:hover {
 
 .mainlogo {
   margin: 0;
-}
 
-.mainlogo img {
-  max-width: 100%;
-  margin: 0;
-  padding: 0;
+  img {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 h2 {
@@ -169,11 +169,10 @@ h2 {
   float: right;
   margin: 0;
 
-}
-
-.credits a {
-  text-decoration: none;
-  color: #3D3D3D;
+  a {
+    text-decoration: none;
+    color: #3D3D3D;
+  }
 }
 
 .errorlist li, .errorlist {
@@ -356,26 +355,26 @@ td img {
   clear: both;
   float: right;
   font-size: smaller;
-}
 
-.countblock a {
-  text-decoration: none;
-}
+  a {
+    text-decoration: none;
+  }
 
-.countblock .page {
-  padding-left: 10px;
-  padding-right: 10px;
-  border: 1px solid silver;
-}
+  .page {
+    padding-left: 10px;
+    padding-right: 10px;
+    border: 1px solid silver;
+  }
 
-.countblock .blankpage {
-  padding-left: 10px;
-  padding-right: 10px;
-}
+  .blankpage {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
 
-.countblock .selected {
-  background: silver;
-  color: black;
+  .selected {
+    background: silver;
+    color: black;
+  }
 }
 
 #filterForm {
@@ -418,21 +417,34 @@ td img {
 }
 
 .btnbox {
-  user-select: none;
+  text-align: center;
   background: white url(../img/v-grad-inv.png) repeat-x bottom;
-  text-align: center;
-  float: left;
-  width: 120px;
-  height: 100px;
-  padding: 10px;
-  margin: 10px;
-  border: 2px ridge black;
-}
+  user-select: none;
+  padding: 5px;
+  margin: 5px;
+  display: inline-block;
+  vertical-align: top;
 
-.btnbox img {
-  margin: 6px auto 0;
-  display: block;
-  text-align: center;
+  &:not(.small) {
+    border: 2px ridge black;
+    width: 120px;
+    height: 100px;
+  }
+
+  img {
+    margin: 6px auto 0;
+    display: block;
+    text-align: center;
+  }
+
+  &.small {
+    vertical-align: middle;
+    border: 1px ridge silver;
+
+    img {
+      height: 20px
+    }
+  }
 }
 
 .super {
@@ -812,13 +824,6 @@ input[type="button"], input[type="submit"], input[type="reset"], input[type="fil
 
 .accordion-content {
   display: none;
-}
-
-.tam-marker {
-  background-image: url(../img/marker.png);
-  &.highlighted {
-    background-image: url(../img/marker-highlighted.png);
-  }
 }
 
 @import "stats";

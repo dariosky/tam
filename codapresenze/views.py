@@ -124,3 +124,9 @@ def coda(request, template_name='codapresenze/coda.html'):
             'queueGroupsJson': json.dumps(queueGroupsJson),  # the associations
         },
     )
+
+
+def ferie(request, template_name='codapresenze/ferie.html'):
+    return render(request,
+                  template_name,
+                  {})

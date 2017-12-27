@@ -20,3 +20,11 @@ body {
   right: 0;
   bottom: 0;
 }
+
+.tam-marker {
+  background-image: url(../img/marker-highlighted.png);
+
+  &.current {
+    background-image: url(../img/marker.png);
+  }
+}
