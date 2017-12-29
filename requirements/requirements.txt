@@ -6,7 +6,7 @@ pyyaml
 argon2-cffi
 
 # static files ***
-django-pipeline < 1.6
+django-pipeline==1.6.13
 jinja2
 
 # exports ***

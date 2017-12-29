@@ -17,7 +17,6 @@ handlers:
     console:
         class: logging.StreamHandler
         level: DEBUG
-        filters: [require_debug_true]
         formatter: main_formatter
 
     production_file:

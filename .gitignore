@@ -38,6 +38,8 @@ run_server.sh
 /media/brand
 /media_secured/
 
+/node_modules
+
 /logs
 /_dev/
 .sass-cache

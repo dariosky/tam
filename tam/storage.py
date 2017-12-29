@@ -1,17 +1,22 @@
 # coding=utf-8
-from django.contrib.staticfiles.storage import CachedFilesMixin, StaticFilesStorage
+import logging
+
+from django.contrib.staticfiles.storage import (CachedFilesMixin,
+                                                CachedStaticFilesStorage)
 from pipeline.storage import PipelineMixin
+
+logger = logging.getLogger('tam.myCachedFiles')
 
 
 class MyCachedFilesMixin(CachedFilesMixin):
-    def hashed_name(self, name, *a, **kw):
+    def stored_name(self, name, *a, **kw):
         try:
-            return super(MyCachedFilesMixin, self).hashed_name(name, *a, **kw)
+            return super(MyCachedFilesMixin, self).stored_name(name, *a, **kw)
         except ValueError:
-            print('WARNING: Failed to find file %s. Cannot generate hashed name' % name)
+            logger.warning('Failed to find file %s. Cannot generate hashed name' % name)
             return name
 
 
-class PipelineCachedStorage(PipelineMixin, MyCachedFilesMixin, StaticFilesStorage):
+class PipelineCachedStorage(PipelineMixin, MyCachedFilesMixin, CachedStaticFilesStorage):
     """ A cache storage, who doesn't error if an asset is missing """
     pass

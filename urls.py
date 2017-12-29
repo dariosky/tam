@@ -1,11 +1,12 @@
 # coding=utf-8
-from django.conf.urls import url, include
-from django.conf import settings
 import os
-from django.views import static
-from django.contrib import admin
-import tam
 
+from django.conf import settings
+from django.conf.urls import url, include
+from django.contrib import admin
+from django.views import static
+
+import tam
 from tam.views.mainviews import pingview, email_test, errorview
 
 secure_url_regex = settings.SECURE_URL
@@ -39,11 +40,13 @@ if settings.DEBUG:
                            {'document_root': os.path.join(os.path.dirname(__file__), "media")}
                            ))
 
-# *** Per servire i staticfiles generati, come in produzione ***
-# urlpatterns += patterns('',
-#                         ("^static/" + r'(?P<path>.*)$', 'django.views.static.serve',
-#                          {'document_root': os.path.join(os.path.dirname(__file__), "static")}),
-# )
+# *** Serve generated staticfiles, like in production ***
+urlpatterns.append(
+    url("^static/" + r'(?P<path>.*)$',
+        static.serve,
+        {'document_root': os.path.join(os.path.dirname(__file__), "static")}
+        ),
+)
 
 handler500 = tam.views.mainviews.errors500
 handler404 = tam.views.mainviews.errors400
