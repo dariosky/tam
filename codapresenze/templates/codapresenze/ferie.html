@@ -3,13 +3,63 @@
 {% block css %}
 	{{ block.super }}
 	{% stylesheet 'codapresenze' %}
+	<style type="text/css">
+		.ui-datepicker-calendar {
+			display: none
+		}
+	</style>
 {% endblock %}
 
 {% block content %}
 	<h1>Conteggio presenze/ferie</h1>
+
+	<div id="date_range">
+		<form method='get' action=''>
+			<label>
+				mese
+				<input type='text' name='month'
+					   id="monthPicker"
+					   value='{{ months.date_start|date:"Y-m" }}'>
+			</label>
+			<input type="submit" value="Visualizza mese"/>
+		</form>
+		<a href="?month=cur">{{ months.currentName }}</a>
+		<a href="?month=prev">{{ months.prevName }}</a>
+		<a href="?month=prevprev">{{ months.prevprevName }}</a>
+	</div>
+
 {% endblock content %}
 
 {% block bottom %}
 	{{ block.super }}
+	<script type="text/javascript">
+		$(function () {/*
+		 Month picker:
+		 via http://www.jquerybyexample.net/2012/06/show-only-month-and-year-in-jquery-ui.html
+		*/
+			$('#monthPicker').datepicker({
+				changeMonth: true,
+				changeYear: true,
+				dateFormat: 'yy-mm',
 
+				onClose: function () {
+					var $ui = $("#ui-datepicker-div")
+					var iMonth = $ui.find(".ui-datepicker-month :selected").val()
+					var iYear = $ui.find(".ui-datepicker-year :selected").val()
+					$(this).datepicker('setDate', new Date(iYear, iMonth, 1))
+				},
+
+				beforeShow: function () {
+					var seldate, iYear, iMonth
+					if ((selDate = $(this).val()).length > 0) {
+						iYear = selDate.substring(0, 4)
+						iMonth = selDate.substring(5)-1
+						$(this).datepicker('option', 'defaultDate', new Date(iYear, iMonth, 1))
+						$(this).datepicker('setDate', new Date(iYear, iMonth, 1))
+					}
+				}
+			})
+
+		})
+	</script>
 {% endblock bottom %}

@@ -9,11 +9,13 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.views.generic import TemplateView
 
 from codapresenze.models import CodaPresenze, StoricoPresenze
 from modellog.actions import logAction
 from tam.tamdates import tz_italy, ita_now
 from tam.views.users import get_userkeys
+from utils.date_views import ThreeMonthsView
 
 logger = logging.getLogger("tam.codapresenze")
 
@@ -126,7 +128,8 @@ def coda(request, template_name='codapresenze/coda.html'):
     )
 
 
-def ferie(request, template_name='codapresenze/ferie.html'):
-    return render(request,
-                  template_name,
-                  {})
+class FerieView(TemplateView, ThreeMonthsView):
+    template_name = 'codapresenze/ferie.html'
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(**kwargs)

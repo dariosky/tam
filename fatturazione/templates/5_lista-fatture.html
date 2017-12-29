@@ -7,8 +7,14 @@
 	<h1>Visualizzazione fatture</h1>
 	<div id='date_range'>
 		<form method='get' action=''>
-			da <input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
-			a  <input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			<label>
+				da
+				<input type='text' name='data_start' value='{{ data_start|date:"d/m/Y" }}'>
+			</label>
+			<label>
+				a
+				<input type='text' name='data_end' value='{{ data_end|date:"d/m/Y" }}'>
+			</label>
 			<input type="submit" value="Trova fatture"/>
 		</form>
 		<a href="?mese=cur">{{ quick_month_names.0 }}</a>
@@ -16,33 +22,35 @@
 		<a href="?mese=prevprev">{{ quick_month_names.2 }}</a>
 	</div>
 
-{% for f in gruppo_fatture %}
- 	{% with f.lista as lista %}
- 	{% if lista  %}
-	<div>
-		<h2 class='accordhead fatturaTipo{{ f.d.codice }}'>{{ f.d.nome }}</h2>
-		{% include f.d.template_visualizzazione %}
-		{{ lista.count }} {{ f.d.nome|lower }}.
-		<a href='{% url "tamExportMultiFattura" tipo=f.d.codice export_type="pdf" %}?data_start={{ data_start|date:"d/m/Y" }}&data_end={{ data_end|date:"d/m/Y" }}'>
-			<img src='{% static 'fatturazione/print_icon_small.png' %}' title='Stampa' alt='Stampa' />
-		</a>
-	</div>
-	{%endif%}
-	{% endwith %}
-{% endfor %}
+	{% for f in gruppo_fatture %}
+		{% with f.lista as lista %}
+			{% if lista %}
+				<div>
+					<h2 class='accordhead fatturaTipo{{ f.d.codice }}'>{{ f.d.nome }}</h2>
+					{% include f.d.template_visualizzazione %}
+					{{ lista.count }} {{ f.d.nome|lower }}.
+					<a href='{% url "tamExportMultiFattura" tipo=f.d.codice export_type="pdf" %}?data_start={{ data_start|date:"d/m/Y" }}&data_end={{ data_end|date:"d/m/Y" }}'>
+						<img src='{% static 'fatturazione/print_icon_small.png' %}' title='Stampa'
+							 alt='Stampa'/>
+					</a>
+				</div>
+			{% endif %}
+		{% endwith %}
+	{% endfor %}
 
 {% endblock %}
 
 
 {% block bottom %}
 	<script type="text/javascript">
-	    $(function() {
-			$(".accordhead").click(function(){
-					$(this).next().toggle('slow');
-					return false;
-				});
+		$(function () {
+			$(".accordhead").click(function () {
+				$(this).next().toggle('slow')
+				return false
+			})
 
-			$('#date_range input[type=text]').datepicker();
-	    });
+			$('#date_range')
+				.find('input[type=text]').datepicker()
+		})
 	</script>
 {% endblock bottom %}
