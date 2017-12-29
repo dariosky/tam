@@ -1,8 +1,11 @@
 # coding: utf-8
 import hashlib
-import os
 import logging
+import logging.config
+import os
 from socket import gethostname
+
+import yaml
 
 from prenotazioni.views.notice import notice_required
 from utils.env_subs import perform_dict_substitutions
@@ -17,9 +20,9 @@ if 'TAM_DEBUG' in os.environ:
     DEBUG = True
 else:
     DEBUG = False
-print("Running in %s MODE" % ("PRODUCTION" if not DEBUG else "DEBUG"))
 
 # DEBUG = False
+print("Running in %s MODE" % ("PRODUCTION" if not DEBUG else "DEBUG"))
 
 if DEBUG:
     # set naive Datetime as errors
@@ -217,81 +220,13 @@ PIPELINE = dict(
 if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
     os.mkdir(os.path.join(PROJECT_PATH, "logs"))
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue'
-        }
-    },
-    'formatters': {
-        'main_formatter': {
-            'format': '%(levelname)s:%(name)s: %(message)s '
-                      '(%(asctime)s; %(filename)s:%(lineno)d)',
-            'datefmt': "%Y-%m-%d %H:%M:%S",
-        },
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'console': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'main_formatter',
-        },
-        'production_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(PROJECT_PATH, 'logs', 'main.log'),
-            'when': 'midnight',
-            'utc': True,
-            'delay': True,
-            'backupCount': 7,
-            'formatter': 'main_formatter',
-            'filters': ['require_debug_false'],
-        },
-        'null': {
-            "class": 'logging.NullHandler',
-        }
-    },
-    'loggers': {
-        '': {
-            'handlers': ['mail_admins', 'console'],
-            'formatter': 'main_formatter',
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        'tam': {
-            'level': 'DEBUG',
-            'handlers': [
-                'mail_admins',
-                'console',
-                'production_file'
-            ],
-            'propagate': False
-        },
-        'django.request': {
-            'handlers': ['mail_admins', 'console'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'django.server': {
-            'level': 'WARNING'
-        },
-        'django.db': {
-            'handlers': ['null'],
-            'propagate': False,
-        },
-    }
-}
+LOGGING_CONFIG = None
+
+with open('logging_config.yaml', 'rt') as f:
+    config = yaml.safe_load(f)
+    # config['handlers']['production_file']['filename'] = os.path.join(PROJECT_PATH, 'logs',
+    #                                                                  'main.log')
+logging.config.dictConfig(config)
 
 MIDDLEWARE = (
     # 'mediagenerator.middleware.MediaMiddleware',
@@ -557,18 +492,6 @@ REDIS_URL = 'redis://:{password}@{host}:{port}/{db}'.format(
     host='localhost',
     port=WEBFACTION['REDIS_PORT'],
     db=REDIS_DATABASE,
-)
-
-PRENOTAZIONI_QUICK = dict(
-    # choices=[dict(name="Locale"),  # no place_name means same place of client
-    #          dict(name="Padova", place_name='.Padova Città'),
-    #          dict(name="Venezia", place_name='.Venezia Marco Polo'),
-    #          ],
-    # defaults=dict(
-    #     numero_passeggeri=2,
-    #     note="Prenotazione rapida",
-    #     esclusivo=True,
-    # ),
 )
 
 

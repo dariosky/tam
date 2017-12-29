@@ -1,5 +1,6 @@
 # Django related ***
 Django==2.0
+pyyaml
 
 # security
 argon2-cffi
