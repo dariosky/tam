@@ -28,7 +28,7 @@ def on_login_expire_older_sessions(sender, user, request, **kwargs):
     # this will be slow for sites with LOTS of active users
     for session in get_concurrent_sessions(request, user):
         # found duplicate session, expire it
-        logger.info("{username} is logging in more than one device")
+        logger.info(f"{request.user.username} is logging in more than one device")
         session.expire_date = timezone.now()
         session.save()
     return
