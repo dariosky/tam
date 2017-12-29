@@ -15,5 +15,5 @@ class TamConfig(AppConfig):
         from tam.middleware.prevent_multisession import register_session_limit
 
         if settings.FORCE_SINGLE_DEVICE_SESSION:
-            logger.info("Register single session check on login")
+            logger.debug("Register single session check on login")
             register_session_limit()
