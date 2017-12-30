@@ -18,6 +18,7 @@ from tam.views.users import get_userkeys
 from utils.date_views import ThreeMonthsView
 
 logger = logging.getLogger("tam.codapresenze")
+MAX_QUEUE_TIME = 60 * 11  # max 11 hours (in minutes)
 
 
 def dequeue(currentPosition: CodaPresenze):
@@ -31,6 +32,9 @@ def dequeue(currentPosition: CodaPresenze):
     if seconds > 60:
         # minimum 60 seconds
         minutes = seconds // 60
+        if minutes > MAX_QUEUE_TIME:
+            logger.warning(f'Cutting queue time to maximum: {MAX_QUEUE_TIME} instead of {minutes}')
+            minutes = MAX_QUEUE_TIME
         logger.debug(f"Queue history: {currentPosition.utente}"
                      f" @{currentPosition.luogo} for {minutes} minutes")
         story = StoricoPresenze(
@@ -132,4 +136,5 @@ class FerieView(TemplateView, ThreeMonthsView):
     template_name = 'codapresenze/ferie.html'
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        return context
