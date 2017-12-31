@@ -70,7 +70,7 @@ def get_classifiche():
 
 def reallySpaceless(s):
     """ Given a string, removes all double spaces and tab """
-    s = re.sub('[\s\t][\s\t]+', " ", s, flags=re.DOTALL).strip()
+    s = re.sub(r'[\s\t][\s\t]+', " ", s, flags=re.DOTALL).strip()
     return s
 
 
@@ -910,9 +910,9 @@ class Viaggio(models.Model):
             # se il successivo parte da dove arrivo è sicuramente un collettivo in successione
             return False
         if nextbro and nextbro.data < \
-                self.data + datetime.timedelta(
-                minutes=get_tratta(self.da, self.a).minuti + (
-                    30 if self.da.speciale == "A" else 0)):
+            self.data + datetime.timedelta(
+            minutes=get_tratta(self.da, self.a).minuti + (
+                30 if self.da.speciale == "A" else 0)):
             # tengo conto che questa corsa dura 30 minuti in più se parte da un aereoporto
             # logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
             return True
@@ -952,8 +952,8 @@ class Viaggio(models.Model):
         tratta = self.tratta
         tratta_end = self.tratta_end
         if (tratta_start is None or tratta_start.is_valid()) and (
-                    tratta is None or tratta.is_valid()) and (
-                    tratta_end is None or tratta_end.is_valid()):
+            tratta is None or tratta.is_valid()) and (
+            tratta_end is None or tratta_end.is_valid()):
             return True
         else:
             return False
@@ -970,7 +970,7 @@ class Viaggio(models.Model):
             if self.tipo_commissione == "P":
                 return self.prezzo * (
                     self.commissione / Decimal(
-                        100))  # commissione in percentuale
+                    100))  # commissione in percentuale
             else:
                 return self.commissione
 
@@ -1026,7 +1026,7 @@ class Viaggio(models.Model):
         """ True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
         return (not self.conducente_confermato
                 and (self.date_start - datetime.timedelta(
-            hours=2) < tamdates.ita_now())
+                hours=2) < tamdates.ita_now())
                 )
 
     def punti_notturni_interi_list(self):
@@ -1073,6 +1073,9 @@ class Conducente(models.Model):
     dati = models.TextField(null=True, blank=True,
                             help_text='Stampati nelle fattura conducente')
     nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, null=True,
+                                limit_choices_to={'prenotazioni__isnull': True})
+
     max_persone = models.IntegerField(default=4)
     attivo = models.BooleanField(default=True, db_index=True)
     emette_ricevute = models.BooleanField("Emette senza IVA?",

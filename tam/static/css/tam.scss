@@ -58,12 +58,12 @@ body {
   box-sizing: border-box;
 }
 
-a, a:visited {
-  color: green
-}
+a {
+  color: green;
 
-a:hover {
-  color: blue;
+  &:hover {
+    color: blue;
+  }
 }
 
 .clock {
@@ -111,10 +111,10 @@ a:hover {
   padding: 5px 20px;
   text-decoration: none;
   font-family: sans-serif;
-}
 
-.navBar a:hover {
-  background: white;
+  &:hover {
+    background: white;
+  }
 }
 
 #footer {

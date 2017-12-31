@@ -14,6 +14,8 @@
 
     <form method='post' action=''>
         {% csrf_token %}
+		<input type='submit' name='associate-drivers'
+			   value='Associate drivers to users'/>
 {#        <input type='submit' name='spostaILog' value='Sposta i log in un DB separato (Asincrono)'/>#}
 		<input type='submit' name='consolidateLog' value='Consolidate log (move logs from sqlite to default)'/>
 

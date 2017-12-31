@@ -2,11 +2,11 @@
 from django import db
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group, Permission, User
 from modellog.models import ActionLog
 from prenotazioni.models import Prenotazione
 from tam import tamdates
-from tam.models import Viaggio, Luogo
+from tam.models import Viaggio, Luogo, Conducente
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 import datetime
@@ -23,6 +23,24 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
     messageLines = []
     error = ""
+    if request.POST.get('associate-drivers'):
+        unassociated_drivers = Conducente.objects.filter(user__isnull=True, attivo=True)
+        messageLines.append(
+            'We have %d unassociated drivers' % len(unassociated_drivers)
+        )
+        available_users = User.objects.filter(is_active=True,
+                                              prenotazioni__isnull=True)
+        for driver in unassociated_drivers:
+            maybe_users = available_users.filter(username__in=["socio%s" % driver.nick])
+            if maybe_users:
+                if len(maybe_users) == 1:
+                    user = maybe_users[0]
+                    driver.user = user
+                    driver.save()
+                    messageLines.append(f"Associated {driver} with user {user}")
+                else:
+                    messageLines.append(f"Multiple possible associations with {driver}")
+
     #	messageLines.append("Nessuna azione correttiva impostata. Meglio tenere tutto fermo di default.")
     if request.POST.get('toV2'):
         # ===========================================================================

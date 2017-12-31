@@ -21,6 +21,7 @@
 							<a href="{% url "tamConducenteId" conducente.id %}">
 								{{ conducente.nome }}
 							</a>
+							{% if conducente.user %} - {{ conducente.user }}{% endif %}
 							{% if not conducente.attivo %}NON ATTIVO{% endif %}
 						</td>
 						<td>{{ conducente.nick }} [{{ conducente.max_persone }}]</td>

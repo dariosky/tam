@@ -5,6 +5,21 @@
 {% block content %}
 	<h1>Impostazioni permessi</h1>
 
+	{% if unassociated_drivers %}
+		<h2>Alcuni conducenti non sono associati ad un utente</h2>
+		<p>Per le codepresenze ed altre funzioni è necessario associare
+			ai conducenti un utente.
+		</p>
+		<p>Clicca sul conducente, e associalo al corrispondente utente di TaM</p>
+		<ul>
+			{% for conducente in unassociated_drivers %}
+				<li><a href="{% url "tamConducenteId" conducente.id %}">
+					{{ conducente }}
+				</a></li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+
 	<form method="get" action=".">
 		<p>
 			<label for="selectedUser">Seleziona l'utente da gestire.</label>
@@ -79,31 +94,31 @@
 	{% endif %}
 	<script type="text/javascript">
 		$(document).ready(function () {
-			var $esclusivoBlock = $('#esclusivoBlock').find('input');
+			var $esclusivoBlock = $('#esclusivoBlock').find('input')
 
 			$esclusivoBlock.change(
-					function () {
-						var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked');
-						if (utente_prenotazioni) {
-							$('#configuratore_prenotazioni').show('slow');
-							$('#user_group').hide('slow');
-
-						}
-						else {
-							$('#configuratore_prenotazioni').hide('slow');
-							$('#user_group').show('slow');
-						}
+				function () {
+					var utente_prenotazioni = $('#tipo_prenotazioni_1').is(':checked')
+					if (utente_prenotazioni) {
+						$('#configuratore_prenotazioni').show('slow')
+						$('#user_group').hide('slow')
 
 					}
-			);
-			$esclusivoBlock.change();
+					else {
+						$('#configuratore_prenotazioni').hide('slow')
+						$('#user_group').show('slow')
+					}
+
+				}
+			)
+			$esclusivoBlock.change()
 
 			$("#configuratore_prenotazioni").find("select[multiple]").asmSelect({
 				highlight: true,
 				removeLabel: "rimuovi",
 				highlightAddedLabel: "Aggiunto: ",
 				highlightRemovedLabel: "Rimosso: "
-			});
-		});
+			})
+		})
 	</script>
 {% endblock bottom %}

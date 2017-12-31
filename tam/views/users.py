@@ -16,7 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from markViews import prenotazioni
 from tam.middleware.prevent_multisession import get_concurrent_sessions
-from tam.models import Cliente, Luogo, ProfiloUtente
+from tam.models import Cliente, Luogo, ProfiloUtente, Conducente
 
 
 def reset_sessions(request, template_name="utils/resetSessions.html"):
@@ -61,6 +61,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
         .exclude(id=user.id) \
         .exclude(is_active=False)
     users = sorted(users, key=get_userkeys)
+
+    unassociated_drivers = Conducente.objects.filter(user__isnull=True, attivo=True)
 
     getUsername = request.GET.get("selectedUser", None)
     if getUsername:
