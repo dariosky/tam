@@ -43,8 +43,8 @@ class ThreeMonthsView(ContextMixin, View):
         for _ in range(0, delta_month, -1):
             d = (d - datetime.timedelta(days=1)).replace(day=1)
         date_start = d
-        date_end = (date_start + datetime.timedelta(days=32)).replace(
-            day=1) - datetime.timedelta(days=1)
+        # the first day of next month (end not inclusive)
+        date_end = (date_start + datetime.timedelta(days=32)).replace(day=1)
 
         threemonths = ThreeMonths(
             currentName=MONTH_NAMES[(today.month - 1) % 12],
