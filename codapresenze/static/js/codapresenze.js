@@ -97,10 +97,8 @@ function ricreaCoda(coda) {
 		}
 
 		var $obj = $("<div />").addClass('item')
-		var e_username = e.utente
-		var numerico = e_username.match(/\d+/)
-		if (numerico && numerico.length) e_username = numerico[0]
-		$obj.append($("<div />").html(e_username).addClass('name'))
+		var socio = e.conducente || e.utente
+		$obj.append($("<div />").html(socio).addClass('name'))
 
 		var data = new Date(e.data)
 		var testo = ""

@@ -6,6 +6,7 @@ import logging
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -13,6 +14,7 @@ from django.views.generic import TemplateView
 
 from codapresenze.models import CodaPresenze, StoricoPresenze
 from modellog.actions import logAction
+from tam.models import Conducente
 from tam.tamdates import tz_italy, ita_now
 from tam.views.users import get_userkeys
 from utils.date_views import ThreeMonthsView
@@ -60,7 +62,7 @@ def coda(request, template_name='codapresenze/coda.html'):
                 username = request.POST.get('user').strip()
                 # print 'Changing user to %s' % username
                 actinguser = User.objects.get(username=username)
-            except:
+            except Exception:
                 raise Exception("Error changing user")
         posizioneCorrente = CodaPresenze.objects.filter(utente=actinguser)
         messageParts = []
@@ -86,7 +88,8 @@ def coda(request, template_name='codapresenze/coda.html'):
             logAction('Q', description=" ".join(messageParts), user=actinguser)
 
     presenzedb = CodaPresenze.objects.all() \
-        .values('id', 'utente__username', 'luogo', 'data_accodamento')
+        .values('id', 'utente__username', 'luogo', 'data_accodamento',
+                'utente__conducente__nick')
 
     def dthandler(obj):
         if isinstance(obj, datetime.datetime):
@@ -94,6 +97,7 @@ def coda(request, template_name='codapresenze/coda.html'):
 
     presenze = [{"luogo": u["luogo"],
                  "utente": u["utente__username"],
+                 "conducente": u["utente__conducente__nick"],
                  "data": u['data_accodamento'],
                  "id": u['id']
                  } for u in presenzedb]
@@ -132,9 +136,48 @@ def coda(request, template_name='codapresenze/coda.html'):
     )
 
 
+def humanizeTime(minutes):
+    r = minutes
+    unit = 'm'
+    if minutes > 60:
+        unit = 'h'
+        r /= 60
+    return f'{r:.1f}{unit}'
+
+
 class FerieView(TemplateView, ThreeMonthsView):
     template_name = 'codapresenze/ferie.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        qs = StoricoPresenze.objects.all()
+        months = context['months']
+        date_start, date_end = months.date_start, months.date_end
+        # FIXME? start_date is deciding the month, should we count partially?
+        qs = qs.filter(start_date__gte=date_start, start_date__lt=date_end)
+        qs = qs.order_by()  # remove existing order, or they'll be used as grouper
+        qs = qs.values('user').annotate(minutes=Sum('minutes'))
+
+        users_data = {}
+        for driver in Conducente.objects.filter(attivo=True):
+            user = driver.user
+            # we list all users_data
+            users_data[user.id] = {
+                'worked': humanizeTime(minutes=0),
+                'userWithNoDriver': False,
+                'driver': driver.nick,
+                'username': user.username if user else '-'
+            }
+
+        for work_record in qs:
+            user_id = work_record['user']
+            if user_id not in users_data:
+                users_data[user_id] = {
+                    'userWithNoDriver': True,
+                    'userId': user_id,
+                    'username': User.objects.get(id=user_id).username,
+                }
+            users_data[user_id]['worked'] = humanizeTime(work_record['minutes'])
+
+        context['data'] = users_data
         return context

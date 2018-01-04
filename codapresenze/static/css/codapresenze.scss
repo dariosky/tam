@@ -94,3 +94,21 @@ h2 {
 .locale, #locale {
   background-color: #fff651 !important;
 }
+
+// Calendar view ***
+.ui-datepicker-calendar {
+  display: none
+}
+
+#codaferie {
+  min-width: 50%;
+  .card {
+    padding: 5px;
+    border: 1px solid silver;
+  }
+
+  .name {
+    font-size: 15pt;
+    font-weight: bold;
+  }
+}
