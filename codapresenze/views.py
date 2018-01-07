@@ -2,7 +2,9 @@
 import datetime
 import json
 import logging
+from collections import defaultdict
 
+from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -14,7 +16,7 @@ from django.views.generic import TemplateView
 
 from codapresenze.models import CodaPresenze, StoricoPresenze
 from modellog.actions import logAction
-from tam.models import Conducente
+from tam.models import Conducente, Viaggio
 from tam.tamdates import tz_italy, ita_now
 from tam.views.users import get_userkeys
 from utils.date_views import ThreeMonthsView
@@ -145,39 +147,81 @@ def humanizeTime(minutes):
     return f'{r:.1f}{unit}'
 
 
+class DriverMonthly:
+    def __init__(self,
+                 driver: Conducente = None,
+                 user: User = None) -> None:
+        self.driver = driver
+        self.user = user
+        self.minutes = 0
+        self.userWithNoDriver = driver is None
+        self.worked_counters = defaultdict(int)
+        self.username = '-' if not user else user.username
+
+    def hours(self):
+        result = defaultdict(int)
+        result.update({t: Decimal(minutes / 60) for t, minutes in self.worked_counters.items()})
+        result['tot'] = Decimal(self.minutes / 60)
+        result.update({k: round(v, 1) for k, v in result.items()})  # just a single decimal
+        return result
+
+    def pretty_worked(self):
+        return humanizeTime(self.minutes)
+
+    def add(self, minutes, worked_type):
+        self.minutes += minutes
+        self.worked_counters[worked_type] += minutes
+
+
 class FerieView(TemplateView, ThreeMonthsView):
     template_name = 'codapresenze/ferie.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        qs = StoricoPresenze.objects.all()
+        queue_history = StoricoPresenze.objects.all()
         months = context['months']
         date_start, date_end = months.date_start, months.date_end
         # FIXME? start_date is deciding the month, should we count partially?
-        qs = qs.filter(start_date__gte=date_start, start_date__lt=date_end)
-        qs = qs.order_by()  # remove existing order, or they'll be used as grouper
-        qs = qs.values('user').annotate(minutes=Sum('minutes'))
+        queue_history = queue_history.filter(start_date__gte=date_start,
+                                             start_date__lt=date_end)
+        queue_history = queue_history.order_by()  # remove existing order, or they'll be used as grouper
+        queue_history = queue_history.values('user').annotate(minutes=Sum('minutes'))
+
+        confirmed_history = Viaggio.objects.filter(
+            date_start__lt=date_end,
+            date_end__gt=date_start,
+            conducente_confermato=True
+        ).prefetch_related('conducente')
 
         users_data = {}
-        for driver in Conducente.objects.filter(attivo=True):
+        for driver in Conducente.objects.filter(attivo=True).prefetch_related('user'):
             user = driver.user
             # we list all users_data
-            users_data[user.id] = {
-                'worked': humanizeTime(minutes=0),
-                'userWithNoDriver': False,
-                'driver': driver.nick,
-                'username': user.username if user else '-'
-            }
+            users_data[user.id] = DriverMonthly(
+                driver=driver, user=user
+            )
 
-        for work_record in qs:
-            user_id = work_record['user']
+        def add(user_id, worked_type, minutes):
+            logger.debug(f"{user_id} add {humanizeTime(minutes)} {worked_type}")
             if user_id not in users_data:
-                users_data[user_id] = {
-                    'userWithNoDriver': True,
-                    'userId': user_id,
-                    'username': User.objects.get(id=user_id).username,
-                }
-            users_data[user_id]['worked'] = humanizeTime(work_record['minutes'])
+                users_data[user_id] = DriverMonthly(
+                    user=User.objects.get(id=user_id),
+                )
+            users_data[user_id].add(minutes, worked_type)
+
+        for work_record in queue_history:
+            add(work_record['user'], 'queue', work_record['minutes'])
+
+        for run in confirmed_history:
+            user_id = run.conducente.user_id
+            # get the part of the run in this slice
+            run_start = max(run.date_start, date_start)
+            run_end = min(run.date_end, date_end)
+            minutes = (run_end - run_start).seconds / 60
+
+            add(user_id, 'run', minutes)
 
         context['data'] = users_data
+        # for d in users_data.values():
+        #     d['worked'] = humanizeTime(d['minutes'])
         return context

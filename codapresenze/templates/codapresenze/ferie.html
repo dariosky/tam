@@ -29,7 +29,9 @@
 			<th>
 				Socio
 			</th>
-			<th>Lavorate</th>
+			<th>In viaggio</th>
+			<th>In coda</th>
+			<th><b>TOT (h.)</b></th>
 		</tr>
 		{% for d in data.values %}
 			<tr>
@@ -40,8 +42,10 @@
 						<div class="name user">{{ d.username }}</div>
 					{% endif %}
 				</td>
+				<td>{{ d.hours.run|intcomma }}</td>
+				<td>{{ d.hours.queue|intcomma }}</td>
 				<td>
-					{{ d.worked|intcomma }}
+					{{ d.hours.tot|intcomma }}
 				</td>
 				{% if d.userWithNoDriver %}
 					<td class="error">
