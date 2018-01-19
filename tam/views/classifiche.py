@@ -116,7 +116,17 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
                             # classifiche.append(classifica)
 
     for classifica_definita in classifiche_definite:  # ordino i dati
-        classifica_definita['dati'].sort()
+        def keyfunc(item):
+            if isinstance(item, dict):
+                return 0
+            if isinstance(item, tuple): # ignore the dict when ordering
+                return [i for i in item if not isinstance(i, dict)]
+            else:
+                return item
+
+        classifica_definita['dati'].sort(
+            key=keyfunc
+        )
         if classifica_definita['dati']:
             classifica_definita['min'] = classifica_definita["dati"][0][
                 0]  # prendo la chiave del primo valore
