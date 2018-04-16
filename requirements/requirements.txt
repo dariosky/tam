@@ -1,5 +1,5 @@
 # Django related ***
-Django==2.0
+Django==2.0.4
 pyyaml
 
 # security
@@ -19,7 +19,7 @@ pytz
 python-dateutil
 
 # DB ***
-psycopg2
+psycopg2-binary==2.7.4
 
 # deployment ***
 gunicorn
