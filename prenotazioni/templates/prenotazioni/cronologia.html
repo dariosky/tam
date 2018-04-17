@@ -15,7 +15,8 @@
 					<option value='all'>{% blocktrans %}Tutti i clienti{% endblocktrans %}</option>
 					{% for cliente in clienti_attivi %}
 						{% if cliente == cliente_selezionato %}
-							<option value="{{ cliente.id }}" selected="selected"><b>{{ cliente.nome }}</b></option>
+							<option value="{{ cliente.id }}" selected="selected">
+								<b>{{ cliente.nome }}</b></option>
 						{% else %}
 							<option value="{{ cliente.id }}">{{ cliente.nome }}</option>
 						{% endif %}
@@ -25,32 +26,41 @@
 			{% endif %}
 			<select name='data' id="datemode">
 				<option value='all'>Tutte le date</option>
-				<option value='next'{% if current_date_filter == "next" %}  selected="selected"{% endif %}>
+				<option value='next'{% if current_date_filter == "next" %}
+						selected="selected"{% endif %}>
 					{% blocktrans %}Prossime corse{% endblocktrans %}
 				</option>
-				<option value='day'{% if current_date_filter == "day" %}  selected="selected"{% endif %}>
+				<option value='day'{% if current_date_filter == "day" %}
+						selected="selected"{% endif %}>
 					{% trans "Odierne" %}
 				</option>
-				<option value='cur'{% if current_date_filter == "cur" %}  selected="selected"{% endif %}>
+				<option value='cur'{% if current_date_filter == "cur" %}
+						selected="selected"{% endif %}>
 					{% blocktrans %}Mese corrente{% endblocktrans %}
 				</option>
-				<option value='prev'{% if current_date_filter == "prev" %}  selected="selected"{% endif %}>
+				<option value='prev'{% if current_date_filter == "prev" %}
+						selected="selected"{% endif %}>
 					{% blocktrans %}Mese precedente{% endblocktrans %}
 				</option>
-				<option value='adv'{% if current_date_filter == "adv" %}  selected="selected"{% endif %}>
+				<option value='adv'{% if current_date_filter == "adv" %}
+						selected="selected"{% endif %}>
 					{% blocktrans %}Da data - a data{% endblocktrans %}
 				</option>
 			</select>
 
 			<div class="input-daterange input-group hidden" id="datepicker">
-				<label for="datepicker">{% blocktrans %}Seleziona le date per il filtro:{% endblocktrans %}</label>
+				<label for="datepicker">{% blocktrans %}Seleziona le date per il
+					filtro:{% endblocktrans %}</label>
 				{% trans "Da:" %}
-				<input type="text" class="input-sm form-control" name="dstart" value="{{ data_inizio }}"/>
+				<input type="text" class="input-sm form-control" name="dstart"
+					   value="{{ data_inizio }}"/>
 				{% trans "a:" %}
-				<input type="text" class="input-sm form-control" name="dend" value="{{ data_fine }}"/>
+				<input type="text" class="input-sm form-control" name="dend"
+					   value="{{ data_fine }}"/>
 			</div>
 
-			<a class="btn btn-mini" href="javascript:document.filter.submit()"><i class="icon-refresh"></i> {% trans "Aggiorna" %}
+			<a class="btn btn-mini" href="javascript:document.filter.submit()"><i
+					class="icon-refresh"></i> {% trans "Aggiorna" %}
 			</a>
 		</form>
 	</div>
@@ -67,6 +77,7 @@
 			</tr>
 			{% for viaggio in viaggi %}
 				<tr>
+					{{ prenotazione.id }}
 					{% if not cliente_unico %}
 						<td>{{ viaggio.cliente }}</td>{% endif %}
 					{% include "corse/cella_partenza_arrivo.inc.html" %}
@@ -82,11 +93,25 @@
 					{% if viaggio.is_prenotazione %}
 						{% with prenotazione=viaggio.prenotazione %}
 							<td class='note'>
-								{% if prenotazione.note_camera %}{% trans "Camera:" %} {{ prenotazione.note_camera }}<br/>{% endif %}
+								{% if prenotazione.note_camera %}{% trans "Camera:" %}
+									{{ prenotazione.note_camera }}<br/>{% endif %}
 								{% if prenotazione.note_cliente %}{% trans "Cliente:" %}
 									{{ prenotazione.note_cliente }}<br/>{% endif %}
 								{% if prenotazione.note %}{{ prenotazione.note }}{% endif %}
+								{% if prenotazione.had_attachment %}
+									{% if prenotazione.attachment %}
+										<a href="{% url "tamPrenotazioni-attachment" prenotazione.id %}"
+										   target="_blank"><i title="Vedi l'allegato"
+															  class="sprite icon-attachment"></i></a>
+									{% else %}
+										<div>
+											<i title="Un allegato è già stato inviato"
+											   class="sprite icon-attachment"></i>
+										</div>
+									{% endif %}
+								{% endif %}
 							</td>
+
 							{% if prenotazione.owner == request.user.prenotazioni %}
 								<td>
 									<a href='{% url 'tamPrenotazioni-edit' prenotazione.id %}'>
@@ -96,14 +121,8 @@
 											{% trans "visualizza" %}
 										{% endif %}
 									</a>
-									{% if prenotazione.had_attachment %}
-										<div>
-											<i title="Un allegato è già stato inviato" class="sprite icon-attachment"></i>
-										</div>
-									{% endif %}
 								</td>
 							{% endif %}
-
 						{% endwith %}
 					{% endif %}
 					{% if viaggio.annullato %}
@@ -124,17 +143,17 @@
 					todayBtn: "linked",
 					language: "it",
 					autoclose: true
-				});
+				})
 				$('#datemode').change(
-						function () {
-							var datemode = $(this).find(":selected").val();
-							if (datemode == 'adv')
-								$('#datepicker').removeClass('hidden');
-							else
-								$('#datepicker').addClass('hidden');
-						}
-				).change();
-			});
+					function () {
+						var datemode = $(this).find(":selected").val()
+						if (datemode === 'adv')
+							$('#datepicker').removeClass('hidden')
+						else
+							$('#datepicker').addClass('hidden')
+					}
+				).change()
+			})
 		</script>
 	{% endif %}
 

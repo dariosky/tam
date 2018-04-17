@@ -10,12 +10,12 @@ from email.mime.base import MIMEBase
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.urls import reverse
 from django.db import transaction
 from django.forms.fields import TypedChoiceField
 from django.http import HttpResponseRedirect
 from django.http.response import Http404
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.translation import ugettext as _
 
 from markViews import prenotazioni
@@ -23,6 +23,7 @@ from prenotazioni.models import Prenotazione
 from prenotazioni.util import prenotaCorsa
 from prenotazioni.views.forms import FormPrenotazioni
 from prenotazioni.views.tam_email import notifyByMail
+from securestore.views import serve_secure_file
 from tam import tamdates
 from tam.models import Viaggio, Cliente, Luogo
 from tam.tamdates import parse_datestring, MONTH_NAMES
@@ -282,6 +283,33 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                       "quick_book": QUICK_BOOK,
                   },
                   )
+
+
+@prenotazioni
+def download_attachment(request, id_prenotazione):
+    redirect_page = HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+    try:
+        prenotazione = Prenotazione.objects.get(id=id_prenotazione)
+    except Prenotazione.DoesNotExist:
+        prenotazione = None
+    if prenotazione is not None:
+        utentePrenotazioni = request.user.prenotazioni
+        clienti_attivi = utentePrenotazioni.clienti.all()
+        if prenotazione.cliente not in clienti_attivi:
+            prenotazione = None
+    if prenotazione and not prenotazione.attachment:
+        prenotazione = None
+    if prenotazione is None:
+        messages.error(
+            request,
+            _("Non puoi accedere a questo allegato")
+        )
+        return redirect_page
+    response = serve_secure_file(request, prenotazione.attachment.name)
+    response[
+        'Content-Disposition'] = 'attachment; ' \
+                                 f'filename="{os.path.basename(prenotazione.attachment.name)}"'
+    return response
 
 
 @prenotazioni

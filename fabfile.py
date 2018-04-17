@@ -25,7 +25,6 @@ from fabric.contrib.files import exists
 from fabric.decorators import serial
 from fabric.operations import local
 from fabric.utils import puts
-from past.builtins import basestring
 from requests.auth import HTTPBasicAuth
 
 localfolder = os.path.realpath(os.path.dirname(__file__))
@@ -194,7 +193,7 @@ def send_secrets(secret_files=None, ask=False):
         return
     if secret_files is None:
         secret_files = secrets_file_paths()
-    if isinstance(secret_files, basestring):
+    if isinstance(secret_files, str):
         secret_files = [secret_files]
     puts("Uploading secrets.")
     for filename in secret_files:
@@ -312,8 +311,8 @@ def set_mailgun_webhooks():
 @task
 @require_settings
 def prepare_webfaction():
-    from utils.webfaction_deployment import webfaction_install_redis, create_all_domains, \
-        create_all_apps, create_all_websites
+    from utils.webfaction_deployment import (webfaction_install_redis, create_all_domains,
+                                             create_all_apps, create_all_websites)
     # we start doing all REDIS
     webfaction_install_redis()
 
