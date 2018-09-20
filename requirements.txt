@@ -18,7 +18,7 @@ pytz
 python-dateutil
 
 # DB ***
-psycopg2
+psycopg2-binary
 
 # deployment ***
 gunicorn
