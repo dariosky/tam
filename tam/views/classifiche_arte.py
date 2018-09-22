@@ -64,6 +64,7 @@ CLASSIFICHE = [
 NOMI_CAMPI_CONDUCENTE = {}  # tutto dai modelli
 
 kmPuntoAbbinate = Decimal(120)
+COMMISSIONE_CARTA = 0
 
 
 def process_classifiche(viaggio, force_numDoppi=None):
@@ -218,8 +219,8 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
         multiplier = 1
         for i, v in enumerate(viaggi):
             importo_riga = v.prezzo
-            if viaggio.cartaDiCredito:
-                importo_riga *= Decimal(0.98)  # tolgo il 2% al lordo per i pagamenti con carta di credito
+            if COMMISSIONE_CARTA and viaggio.cartaDiCredito:
+                importo_riga *= Decimal((100 - COMMISSIONE_CARTA) / 100)  # tolgo il 2% al lordo per i pagamenti con carta di credito
             if v.commissione:  # tolgo la commissione dal lordo
                 if v.tipo_commissione == "P":
                     # commissione in percentuale
@@ -273,8 +274,8 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
     else:
         # Viaggi singoli
         importoViaggio = viaggio.prezzo  # lordo
-        if viaggio.cartaDiCredito:
-            importoViaggio *= Decimal(0.98)  # tolgo il 2% al lordo per i pagamenti con carta di credito
+        if COMMISSIONE_CARTA and viaggio.cartaDiCredito:
+            importoViaggio *= Decimal((100 - COMMISSIONE_CARTA) / 100)  # tolgo il 2% al lordo per i pagamenti con carta di credito
         if viaggio.commissione:  # tolgo la commissione dal lordo
             if viaggio.tipo_commissione == "P":
                 # commissione in percentuale
