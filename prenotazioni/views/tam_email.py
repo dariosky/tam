@@ -4,13 +4,14 @@ if __name__ == '__main__':
 
     django.setup()
 
-from io import StringIO  # for handling unicode strings
+import logging
+import os
 from email.mime.base import MIMEBase
+from io import StringIO  # for handling unicode strings
+
 import requests
 from django.conf import settings
 from django.template.loader import get_template
-import os
-import logging
 from django.utils.safestring import mark_safe
 
 ADMIN_MAIL = ",".join(["%s <%s>" % adm for adm in settings.ADMINS])

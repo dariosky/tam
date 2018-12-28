@@ -112,7 +112,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
     # gli utenti con smalledit possono cambiare le fatture conducenti, per alcuni campi
     smallEdit = request.user.has_perm('fatturazione.smalledit') \
                 and fattura.tipo in (
-        '2', '5')  # le fatture conducente IVATE e NON consentono gli smalledit
+                    '2', '5')  # le fatture conducente IVATE e NON consentono gli smalledit
     editable = bigEdit or smallEdit
     readonly = not editable
 
@@ -176,7 +176,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
             smallcampi_modificabili = (
                 'fat_anno', 'fat_progressivo', 'fat_note')  # modificabili in testata
             if smallEdit and (
-                        object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
+                object_id in smallcampi_modificabili or object_id.startswith('riga-desc-')):
                 # posso modificare il campo in quanto è una modifica consentita
                 pass
             else:
@@ -189,6 +189,7 @@ def fattura(request, id_fattura=None, anno=None, progressivo=None, tipo=None,
                           'fat_destinatario': 'emessa_a',
                           'fat_anno': 'anno', 'fat_progressivo': 'progressivo',
                           'fat_data': 'data',
+                          'fat_title': 'doc_name',
                           }
             header_numerici = ['fat_anno', 'fat_progressivo']
             logAction('C', instance=fattura,

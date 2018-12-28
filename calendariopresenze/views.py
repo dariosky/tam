@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.db.models import Sum, Q
 from django.http.response import HttpResponseRedirect, HttpResponse
-from django.template import RequestContext
 from django.template.loader import get_template
 from django.utils import timezone
 from django.views.generic.base import TemplateView

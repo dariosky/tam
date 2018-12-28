@@ -1,10 +1,11 @@
 # coding: utf-8
 """ Definizione per classi dei vari tipi di fatturazione """
 
-from tam.models import Viaggio
 from django.db.models.query_utils import Q
-from fatturazione.views.util import ultimoProgressivoFattura
+
 from fatturazione.models import RigaFattura
+from fatturazione.views.util import ultimoProgressivoFattura
+from tam.models import Viaggio
 
 
 class ModelloFattura(object):

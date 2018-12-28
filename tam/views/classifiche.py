@@ -119,7 +119,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
         def keyfunc(item):
             if isinstance(item, dict):
                 return 0
-            if isinstance(item, tuple): # ignore the dict when ordering
+            if isinstance(item, tuple):  # ignore the dict when ordering
                 return [i for i in item if not isinstance(i, dict)]
             else:
                 return item

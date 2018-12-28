@@ -302,6 +302,7 @@ if DEBUG:
 # ===============================================================================
 
 TAM_VIAGGI_PAGINA = 100
+ATTESA_AEROPORTI = 30
 
 # ******************* CACHE
 CACHES = {
@@ -335,7 +336,7 @@ TAM = dict(
     ),
 )
 TAM_PERMANENT_CLOCK = True
-TAM_BACKGROUND_COLOR = '#FBFFBA'  # the default background
+TAM_BACKGROUND = '#FBFFBA'  # the default background
 TAM_SHOW_CLASSIFICA_FATTURE = False
 
 FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions

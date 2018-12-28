@@ -18,10 +18,10 @@ verranno aggiungi in visualizzazione:
 
 """
 import datetime
-from django.utils.safestring import mark_safe
-import pytz
 from decimal import Decimal
-import logging
+
+import pytz
+from django.utils.safestring import mark_safe
 
 tz_italy = pytz.timezone('Europe/Rome')
 DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI = tz_italy.localize(datetime.datetime(2016, 4, 1, 0, 0))
@@ -64,6 +64,7 @@ CLASSIFICHE = [
 NOMI_CAMPI_CONDUCENTE = {}  # tutto dai modelli
 
 kmPuntoAbbinate = Decimal(120)
+COMMISSIONE_CARTA = 0
 
 
 def process_classifiche(viaggio, force_numDoppi=None):
@@ -210,6 +211,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
         if padre.is_abbinata == "P" and scoreVersion and scoreVersion >= '2016-04-01':
             # i figli degli abbinati in partenza sono nulli
             return 0
+
     # logging.info("Using scoreVersion: %s" % scoreVersion)
     if viaggio.is_abbinata == "P" and scoreVersion and scoreVersion >= '2016-04-01':
         viaggi = [viaggio] + list(viaggio.viaggio_set.all())
@@ -217,10 +219,12 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
         multiplier = 1
         for i, v in enumerate(viaggi):
             importo_riga = v.prezzo
+            if COMMISSIONE_CARTA and viaggio.cartaDiCredito:
+                importo_riga *= Decimal((100 - COMMISSIONE_CARTA) / 100)  # tolgo il 2% al lordo per i pagamenti con carta di credito
             if v.commissione:  # tolgo la commissione dal lordo
                 if v.tipo_commissione == "P":
                     # commissione in percentuale
-                    importo_riga = importo_riga * (Decimal(1) - v.commissione / Decimal(100))
+                    importo_riga *= (Decimal(1) - v.commissione / Decimal(100))
                 else:
                     importo_riga = importo_riga - v.commissione
 
@@ -238,7 +242,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                 multiplier = renditaChilometrica / Decimal("0.65")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
         elif 25 <= km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-                    km < 25 and sum(importiViaggio) > 16):
+            km < 25 and sum(importiViaggio) > 16):
             if renditaChilometrica < Decimal("0.8"):
                 multiplier = renditaChilometrica / Decimal("0.8")
                 # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
@@ -270,6 +274,8 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
     else:
         # Viaggi singoli
         importoViaggio = viaggio.prezzo  # lordo
+        if COMMISSIONE_CARTA and viaggio.cartaDiCredito:
+            importoViaggio *= Decimal((100 - COMMISSIONE_CARTA) / 100)  # tolgo il 2% al lordo per i pagamenti con carta di credito
         if viaggio.commissione:  # tolgo la commissione dal lordo
             if viaggio.tipo_commissione == "P":
                 # commissione in percentuale
@@ -313,6 +319,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                 Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
         else:
             importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
+
     return importoViaggio.quantize(Decimal('.01'))
 
 

@@ -1,20 +1,22 @@
 # coding: utf-8
-from django.conf import settings
-import os
-from django import http
 import copy
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import Frame, Paragraph, PageBreak, KeepTogether, TableStyle, Table, \
-    Preformatted
-from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate
-from reportlab.lib.units import cm
-from reportlab.lib.pagesizes import A4, portrait
-from reportlab.lib import colors
-from django.templatetags.l10n import localize
-from fatturazione.views.money_util import moneyfmt, NumberedCanvas
 import datetime
-from fatturazione.views.generazione import FATTURE_PER_TIPO
+import os
 from decimal import Decimal
+
+from django import http
+from django.conf import settings
+from django.templatetags.l10n import localize
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A4, portrait
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.platypus import (Frame, Paragraph, PageBreak, KeepTogether, TableStyle, Table,
+                                Preformatted)
+from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate
+
+from fatturazione.views.generazione import FATTURE_PER_TIPO
+from fatturazione.views.money_util import moneyfmt, NumberedCanvas
 
 logoImage_path = os.path.join(settings.MEDIA_ROOT, settings.OWNER_LOGO)
 test = settings.DEBUG
@@ -46,10 +48,7 @@ def onPage(canvas, doc, da=None, a=None):
     canvas.setCreator('TaM v.%s' % settings.TAM_VERSION)
     canvas._doc.info.producer = ('TaM invoices')
     canvas.setSubject(u"%s" % fattura.nome_fattura())
-    if tipo == '3':
-        nome = 'Ricevuta servizio TAXI'
-    else:
-        nome = 'Fattura'  # Fatture consorzio e conducente si chiamano semplicemente FATTURA
+    nome = fattura.custom_name
     descrittoreFattura = u"%s %s" % (nome, fattura.descrittore())
     canvas.setTitle(descrittoreFattura)
 
@@ -268,7 +267,7 @@ def render_to_reportlab(context):
             if "Imposta di bollo" not in [r.descrizione for r in righe]:
                 if not (totale < settings.MIN_PRICE_FOR_TAXSTAMP
                         and (conducente is None or conducente.emette_ricevute)
-                        ):
+                ):
                     raggruppa_barbatrucco = True
 
         if raggruppa_barbatrucco:
@@ -344,7 +343,7 @@ def render_to_reportlab(context):
         ])
 
         colWidths = ((width - doc.leftMargin - doc.rightMargin) - (1.6 * 4) * cm,) + (
-                                                                                         1.6 * cm,) * 4
+            1.6 * cm,) * 4
         story_fattura = [Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths)]
         story_fattura.append(KeepTogether(Table(righeTotali, style=totaliStyle,
                                                 colWidths=(

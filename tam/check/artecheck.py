@@ -9,9 +9,11 @@ if __name__ == '__main__':
     os.environ['TAM_SETTINGS'] = "settings_arte"
     django.setup()
 
-from tam.check.checks import arrivo_singolo_o_due_arrivi, run_tests, check_associata, \
-    bus_1go_3back, \
-    abbinata_con_abbuoni
+from tam.check.checks import (arrivo_singolo_o_due_arrivi,
+                              run_tests,
+                              check_associata,
+                              bus_1go_3back,
+                              abbinata_con_abbuoni)
 from decimal import Decimal
 from tam.models import Luogo
 

@@ -13,6 +13,10 @@ nomi_fatture = {'1': "Fattura consorzio", '2': "Fattura conducente", '3': "Ricev
                 '4': "Fattura consorzio esente IVA", '5': "Fattura conducente esente IVA"}
 nomi_plurale = {'1': "fatture consorzio", '2': "fatture conducente", '3': "ricevute taxi",
                 '4': "fatture consorzio esente IVA", '5': "fatture conducente esente IVA"}
+default_invoice_name = {
+    '3': 'Ricevuta servizio TAXI',  # Fatture consorzio e conducente si chiamano semplicemente FATTURA
+    '1': 'Allegato Fattura',
+}
 
 DATA_RICEVUTE_SDOPPIATE = getattr(settings, 'DATA_RICEVUTE_SDOPPIATE', None)
 INVOICES_FOOTERS = getattr(settings, "INVOICES_FOOTERS", {})
@@ -33,6 +37,7 @@ class Fattura(models.Model):
 
     tipo = models.CharField(max_length=1,
                             db_index=True)  # tipo fattura: 1.Consorzio (a cliente), 2.Conducente (a consorzio), 3.Ricevuta (a cliente)
+    doc_name = models.CharField(max_length=32, null=True, blank=True)  # the name of the document, as it will be shown in the invoice
 
     data = models.DateField(db_index=True)
     anno = models.IntegerField(db_index=True, null=True)
@@ -77,6 +82,12 @@ class Fattura(models.Model):
         """ Nome fattura (singolare) """
         return nomi_fatture[self.tipo]
 
+    @property
+    def custom_name(self):
+        if self.doc_name:
+            return self.doc_name
+        return default_invoice_name.get(self.tipo)
+
     def url(self):
         return reverse("tamFatturaId",
                        kwargs={'id_fattura': self.id})
@@ -114,6 +125,11 @@ class Fattura(models.Model):
     def log_url(self):
         # <a href="{% url "actionLog" %}?type=fattura&amp;id={{ viaggio.id }}">log</a>
         return mark_safe(reverse('actionLog') + "?type=fattura&amp;id=%d" % self.id)
+
+    def save(self, *args, **kwargs):
+        if self.doc_name == default_invoice_name.get(self.tipo) or not self.doc_name:
+            self.doc_name = None  # don't save the custom name unless necessary
+        super().save(*args, **kwargs)
 
 
 @python_2_unicode_compatible
