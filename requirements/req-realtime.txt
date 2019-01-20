@@ -1,16 +1,3 @@
 # telegram integration
 python-telegram-bot
 
-# django channels
-channels==1.1.8
-asgi-redis==1.4.3
-asgiref==2.0.1
-
-# secure ssl --- disabled - using Python 3.6
-# pyOpenSSL
-# service_identity
-# ndg-httpsclient
-# pyasn
-# certifi
-
-Twisted[tls,http2]

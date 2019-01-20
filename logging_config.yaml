@@ -43,6 +43,9 @@ handlers:
 loggers:
     tam:
         level: DEBUG
+        
+    django.channels:
+        level: DEBUG
 
     daphne.server:
         level: WARNING

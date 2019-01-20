@@ -453,12 +453,12 @@ settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
 try:
     # Dynamically import settings from the specified sys envoronment var
     # from settings_local import *
-    print("TAM using {}".format(settings_file))
+    print(f"TAM using {settings_file}")
     localsets = __import__(settings_file, globals(), locals(), ['*'])
     for k in dir(localsets):
         locals()[k] = getattr(localsets, k)
 except ImportError:
-    logging.warning("'%s.py' has not been found." % settings_file +
+    logging.warning(f"'{settings_file}.py' has not been found." +
                     "Use this to keep out of VC secret settings.")
     pass
 
@@ -473,8 +473,8 @@ CHANNEL_LAYERS = dict(
         CONFIG={
             'hosts': [os.environ.get('REDIS_URL', REDIS_URL)],
         },
-        ROUTING="routing.channel_routing",
     )
 )
+ASGI_APPLICATION = "routing.application"
 
 perform_dict_substitutions(DEPLOYMENT)  # change the deployment string to use a kind of templates

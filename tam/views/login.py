@@ -1,19 +1,18 @@
 # coding=utf-8
 import logging
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.views import login as django_login
-from django.contrib.auth.views import logout_then_login as django_logout
+
+from brake.decorators import ratelimit
 from django.conf import settings
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.views import LoginView, logout_then_login as django_logout
 from django.forms import forms
 from django.http import HttpResponseServerError
 from django.shortcuts import render_to_response
+from django.utils.translation import ugettext_lazy as _
 
 from markViews import public
 from modellog.actions import logAction
 from tam.middleware.prevent_multisession import get_concurrent_sessions
-from django.utils.translation import ugettext_lazy as _
-from brake.decorators import ratelimit
-
 from tam.ratelimit import get_client_ip
 
 logger = logging.getLogger('tam.login')
@@ -63,13 +62,15 @@ def login(request):
         return render_to_response("429-limited.html", status=429)
 
     logged = request.user.is_authenticated and request.user.username
-    response = django_login(request,
-                            template_name="login.html",
-                            extra_context={'logo_consorzio': settings.TRANSPARENT_LOGO,
-                                           'nome_consorzio': settings.LICENSE_OWNER
-                                           },
-                            authentication_form=AuthenticationFormWrapped,
-                            )
+
+    class WrappedView(LoginView):
+        template_name = "login.html"
+        extra_context = {'logo_consorzio': settings.TRANSPARENT_LOGO,
+                         'nome_consorzio': settings.LICENSE_OWNER
+                         }
+        authentication_form = AuthenticationFormWrapped
+
+    response = WrappedView.as_view()(request)
     if request.user.is_authenticated and request.user.username != logged:  # just logged in
         request.session["userAgent"] = request.META.get('HTTP_USER_AGENT')
         logger.debug("Login for %s" % request.user)

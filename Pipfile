@@ -1,0 +1,38 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+django-debug-toolbar = "*"
+django-debug-toolbar-template-timings = "*"
+pytest-django = "*"
+Fabric3 = "*"
+
+[packages]
+django-pipeline = "*"
+xlrd = "*"
+xlwt = "*"
+reportlab = "*"
+pytz = "*"
+python-dateutil = "*"
+psycopg2-binary = "*"
+gunicorn = "*"
+setproctitle = "*"
+psutil = "*"
+requests = "*"
+django-mailgun = "*"
+ndg-httpsclient = "*"
+django-brake = "*"
+django-redis = "*"
+wfcli = "*"
+python-telegram-bot = "*"
+Django = "*"
+PyYAML = "*"
+argon2_cffi = "*"
+Jinja2 = "*"
+pyOpenSSL = "*"
+channels = "*"
+
+[requires]
+python_version = "3.7"
