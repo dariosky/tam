@@ -191,7 +191,7 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.92', '15/4/2017', "Riabilitazione archiviazione"),
         ('6.93', '24/5/2017', "Tempo di preavviso dinamico per le prenotazioni"),
         ('6.93', '3/6/2017', "Orologio permanente" if settings.TAM_PERMANENT_CLOCK else ""),
-
+        ('6.94', '28/12/2018', "Fatture - tipo documento modificabile"),
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:
