@@ -7,7 +7,7 @@ from prenotazioni.views.notice import notice_required
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.94"
+TAM_VERSION = "6.95"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
@@ -444,6 +444,7 @@ NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
                             "FattureConducente", "FattureConducenteNoIva",
                             "Ricevute"]
 MIN_PRICE_FOR_TAXSTAMP = 77.47
+FATTURE_SHOW_VAT_COLUMN = True
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
 SECURE_STORE_CUSTOM_SUBFOLDER = None

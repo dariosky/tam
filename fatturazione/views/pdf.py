@@ -18,6 +18,7 @@ from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, Pa
 from fatturazione.views.generazione import FATTURE_PER_TIPO
 from fatturazione.views.money_util import moneyfmt, NumberedCanvas
 
+FATTURE_SHOW_VAT_COLUMN = getattr(settings, 'FATTURE_SHOW_VAT_COLUMN', True)
 logoImage_path = os.path.join(settings.MEDIA_ROOT, settings.OWNER_LOGO)
 test = settings.DEBUG
 
@@ -160,7 +161,7 @@ def onPage(canvas, doc, da=None, a=None):
 
 
 def onPageNormal(canvas, doc):
-    # print "Current template:", doc.pageTemplate.id, "coming from", doc.lastTemplateID
+    # print ("Current template:", doc.pageTemplate.id, "coming from", doc.lastTemplateID)
     if doc.pageTemplate.id != doc.lastTemplateID:
         doc.lastTemplateID = doc.pageTemplate.id
         canvas.apply_page_numbers()
@@ -173,7 +174,7 @@ def onPageConducenteConsorzio(canvas, doc):
     templateID = "ConducenteConsorzio"
     currentTemplate = getattr(doc, 'lastTemplateID', doc.pageTemplates[0].id)
     if currentTemplate != templateID:
-        # print "Cambio da %s a %s" % (getattr(doc, 'lastTemplateID', None), templateID)
+        # print ("Cambio da %s a %s" % (getattr(doc, 'lastTemplateID', None), templateID))
         doc.lastTemplateID = templateID
 
     # print "Conducente consorzio"
@@ -255,7 +256,9 @@ def render_to_reportlab(context):
         fatturazione = FATTURE_PER_TIPO[fattura.tipo]
 
         righeFattura = [
-            ('Descrizione', 'Q.tà', 'Prezzo', 'IVA %', 'Importo'),
+            ('Descrizione', 'Q.tà',) +
+            (('Prezzo', 'IVA %') if FATTURE_SHOW_VAT_COLUMN else tuple()) +
+            ('Importo',),
         ]
 
         righe = fattura.righe.all()
@@ -305,18 +308,29 @@ def render_to_reportlab(context):
         for riga in righe:
             descrizione = riga.descrizione
             if riga.note: descrizione += " (%s)" % riga.note
-            righeFattura.append((
-                Paragraph(descrizione, normalStyle),
-                Paragraph("%s" % riga.qta, normalStyle),
-                moneyfmt(riga.prezzo), riga.iva, moneyfmt(riga.val_totale())
-            ))
+            row_values = (
+                (
+                    Paragraph(descrizione, normalStyle),
+                    Paragraph("%s" % riga.qta, normalStyle)
+                ) +
+                (
+                    (
+                        moneyfmt(riga.prezzo),
+                        riga.iva,
+                    ) if FATTURE_SHOW_VAT_COLUMN else tuple()) +
+                (
+                    moneyfmt(riga.val_totale()),
+                )
+            )
+            righeFattura.append(row_values)
         righeTotali = []
-        righeTotali.append((
-            'Imponibile', moneyfmt(imponibile)
-        ))
-        righeTotali.append((
-            'IVA', moneyfmt(iva)
-        ))
+        if FATTURE_SHOW_VAT_COLUMN:
+            righeTotali.append((
+                'Imponibile', moneyfmt(imponibile)
+            ))
+            righeTotali.append((
+                'IVA', moneyfmt(iva)
+            ))
         righeTotali.append((
             'TOTALE', moneyfmt(fattura.val_totale())
         ))
@@ -342,8 +356,11 @@ def render_to_reportlab(context):
 
         ])
 
-        colWidths = ((width - doc.leftMargin - doc.rightMargin) - (1.6 * 4) * cm,) + (
-            1.6 * cm,) * 4
+        price_columns = 4 if FATTURE_SHOW_VAT_COLUMN else 2
+        colWidths = (
+            ((width - doc.leftMargin - doc.rightMargin) - (1.6 * cm * price_columns),) +
+            (1.6 * cm,) * price_columns
+        )
         story_fattura = [Table(righeFattura, style=righeStyle, repeatRows=1, colWidths=colWidths)]
         story_fattura.append(KeepTogether(Table(righeTotali, style=totaliStyle,
                                                 colWidths=(
@@ -375,9 +392,7 @@ if __name__ == '__main__':
                                      data__lte=datetime.date(2012, 10, 22),
                                      tipo='1',
                                      )[:4]
-    print
-    "Esporto %d fatture" % len(fatture)
+    print("Esporto %d fatture" % len(fatture))
     response = render_to_reportlab(context={"fatture": fatture})
 
-    print
-    "end"
+    print("end")
