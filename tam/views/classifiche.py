@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
-from django.db.models import Case, When, IntegerField, F, DecimalField
+from django.db.models import Case, When, IntegerField, F, DecimalField, Q
 from django.db.models.aggregates import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -164,47 +164,20 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 
     if settings.TAM_SHOW_CLASSIFICA_FATTURE:
         classifica_fatture = Conducente.objects.filter(
-            attivo=True,
-            viaggio__annullato=False,
+            Q(attivo=True) & Q(viaggio__annullato=False)
+            &
+            (Q(viaggio__fatturazione=True) | Q(viaggio__incassato_albergo=True))
         ).annotate(
-            invoice_count=Count(
-                Case(
-                    When(viaggio__fatturazione=True, then=F('viaggio')),
-                    default=None,
-                    output_field=IntegerField()
-                ),
-                distinct=True,
-            ),
-            invoice_val=Sum(
-                Case(
-                    When(viaggio__fatturazione=True, then=F('viaggio__prezzo')),
-                    default=0,
-                    output_field=DecimalField()
-                )
-            ),
-            endofmonth_count=Count(
-                Case(
-                    When(viaggio__incassato_albergo=True, then=F('viaggio')),
-                    default=None,
-                    output_field=IntegerField()
-                ),
-                distinct=True,
-            ),
-            endofmonth_val=Sum(
-                Case(
-                    When(viaggio__incassato_albergo=True, then=F('viaggio__prezzo')),
-                    default=0,
-                    output_field=DecimalField()
-                )
-            ),
-        ).order_by("invoice_val", "invoice_count")
+            count=Count('viaggio'),
+            val=Sum('viaggio__prezzo')
+        ).order_by("val", "count")
         if classifica_fatture.count():
-            max_val = classifica_fatture[0].invoice_val
+            max_val = classifica_fatture[0].val
         else:
             max_val = 0
         for c in classifica_fatture:
-            if c.invoice_val > max_val:
-                max_val = c.invoice_val
+            if c.val > max_val:
+                max_val = c.val
         classifica_fatture.max_val = max_val  # put the maxval in the queryset
     else:
         classifica_fatture = []
