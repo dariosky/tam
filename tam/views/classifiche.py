@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.core.urlresolvers import reverse
+from django.db.models import Case, When, IntegerField, F, DecimalField
 from django.db.models.aggregates import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -165,10 +166,37 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
         classifica_fatture = Conducente.objects.filter(
             attivo=True,
             viaggio__annullato=False,
-            viaggio__fatturazione=True
         ).annotate(
-            invoice_count=Count('viaggio'),
-            invoice_val=Sum('viaggio__prezzo'),
+            invoice_count=Count(
+                Case(
+                    When(viaggio__fatturazione=True, then=F('viaggio')),
+                    default=None,
+                    output_field=IntegerField()
+                ),
+                distinct=True,
+            ),
+            invoice_val=Sum(
+                Case(
+                    When(viaggio__fatturazione=True, then=F('viaggio__prezzo')),
+                    default=0,
+                    output_field=DecimalField()
+                )
+            ),
+            endofmonth_count=Count(
+                Case(
+                    When(viaggio__incassato_albergo=True, then=F('viaggio')),
+                    default=None,
+                    output_field=IntegerField()
+                ),
+                distinct=True,
+            ),
+            endofmonth_val=Sum(
+                Case(
+                    When(viaggio__incassato_albergo=True, then=F('viaggio__prezzo')),
+                    default=0,
+                    output_field=DecimalField()
+                )
+            ),
         ).order_by("invoice_val", "invoice_count")
         if classifica_fatture.count():
             max_val = classifica_fatture[0].invoice_val
@@ -177,7 +205,7 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
         for c in classifica_fatture:
             if c.invoice_val > max_val:
                 max_val = c.invoice_val
-        classifica_fatture.max_val = max_val  # put the maxval in the queryser
+        classifica_fatture.max_val = max_val  # put the maxval in the queryset
     else:
         classifica_fatture = []
 

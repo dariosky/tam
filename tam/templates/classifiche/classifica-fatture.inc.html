@@ -9,6 +9,8 @@
 				<th>Nome</th>
 				<th>Numero fatture</th>
 				<th>Valore fatture</th>
+				<th>Numero finemese</th>
+				<th>Valore finemese</th>
 			</tr>
 			</thead>
 
@@ -22,6 +24,8 @@
 					<td>{{ c }}</td>
 					<td>{{ c.invoice_count }}</td>
 					<td>{{ c.invoice_val|floatformat:"-2" }}€</td>
+					<td>{{ c.endofmonth_count }}</td>
+					<td>{{ c.endofmonth_val|floatformat:"-2" }}€</td>
 				</tr>
 			{% endfor %}
 			</tbody>
