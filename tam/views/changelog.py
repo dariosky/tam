@@ -193,6 +193,7 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.93', '3/6/2017', "Orologio permanente" if settings.TAM_PERMANENT_CLOCK else ""),
         ('6.94', '28/12/2018', "Fatture - tipo documento modificabile"),
         ('6.95', '24/2/2019', "Fatture - opzionabile IVA in pdf"),
+        ('6.96', '25/5/2019', "Colonna prezzo nei permessi"),
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:

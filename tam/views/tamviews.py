@@ -9,8 +9,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
-from django.db import IntegrityError
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models.aggregates import Count
 from django.db.models.deletion import ProtectedError
 from django.db.models.query_utils import Q
@@ -19,9 +18,9 @@ from django.shortcuts import HttpResponse, get_object_or_404, render
 from django.utils.translation import ugettext as _
 
 from tam import tamdates
-from tam.models import Luogo, get_classifiche, Cliente, \
-    PrezzoListino, Bacino, Tratta, Conducente, Listino, \
-    ProfiloUtente, Viaggio, Passeggero
+from tam.models import (Luogo, get_classifiche, Cliente, \
+                        PrezzoListino, Bacino, Tratta, Conducente, Listino, \
+                        ProfiloUtente, Viaggio, Passeggero)
 from tam.views.genericUtils import getActionName, copy_model_instance
 from . import pdfListino
 
