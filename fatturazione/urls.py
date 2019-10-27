@@ -8,7 +8,7 @@ from django.conf.urls import url
 
 from fatturazione.views import view_fatture, fattura, exportmultifattura, exportfattura, \
     nuova_fattura, genera_fatture
-from fatturazione.views.generazione import DEFINIZIONE_FATTURE, lista_fatture_generabili
+from fatturazione.views.generazione import DEFINIZIONE_FATTURE, lista_fatture_generabili, setPagato
 
 urlpatterns = [
     url(r'^$', lista_fatture_generabili, name="tamGenerazioneFatture"),
@@ -24,7 +24,9 @@ urlpatterns = [
     url(r'archivio/export/group/(?P<tipo>.*?)/(?P<export_type>pdf|html)/$',
         exportmultifattura,
         name='tamExportMultiFattura'),
-
+    url(r'setPagato$',
+        setPagato,
+        name='tamSetPagatoFattura'),
 ]
 
 for fatturazione in DEFINIZIONE_FATTURE:

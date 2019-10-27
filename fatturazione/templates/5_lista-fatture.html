@@ -3,7 +3,7 @@
 
 {% block title %}Visualizzazione fatture &raquo; {{ block.super }} {% endblock %}
 {% block content %}
-
+	{% csrf_token %}
 	<h1>Visualizzazione fatture</h1>
 	<div id='date_range'>
 		<form method='get' action=''>
@@ -37,12 +37,27 @@
 {% block bottom %}
 	<script type="text/javascript">
 	    $(function() {
+          	var csrf_token = $('input[type=hidden][name=csrfmiddlewaretoken]').get(0).value;
 			$(".accordhead").click(function(){
 					$(this).next().toggle('slow');
 					return false;
 				});
 
 			$('#date_range input[type=text]').datepicker();
+			$('.flag_pagato').change(function(e){
+              var $checkbox = $(e.target),
+                fatId = $checkbox.data('id'),
+				value = $checkbox.prop('checked')
+              $.ajax({
+                url: "/fatture/setPagato",
+                type: 'post',
+                data: { id: fatId, pagato: value, csrfmiddlewaretoken: csrf_token },
+              })
+                .fail(function () {
+                  $checkbox.prop('checked', !value)
+                  alert("Errore impostando il flag di pagato per la fattura")
+                })
+			})
 	    });
 	</script>
 {% endblock bottom %}

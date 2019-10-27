@@ -1,6 +1,6 @@
 # coding: utf-8
-import os
 import logging
+import os
 from socket import gethostname
 
 from prenotazioni.views.notice import notice_required
@@ -276,7 +276,7 @@ LOGGING = {
             'propagate': False
         },
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['mail_admins', 'console'],
             'level': 'ERROR',
             'propagate': False,
         },
@@ -333,7 +333,7 @@ TEMPLATES = [
             'loaders': (
                 'django.template.loaders.filesystem.Loader',
                 'django.template.loaders.app_directories.Loader',
-            ) if DEBUG  else (
+            ) if DEBUG else (
                 ('django.template.loaders.cached.Loader', (
                     'django.template.loaders.filesystem.Loader',
                     'django.template.loaders.app_directories.Loader',
