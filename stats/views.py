@@ -138,6 +138,8 @@ class StatsView(MonthDatesMixin):
                 qs = qs.filter(fatturazione=True)
             if 'carte' in qfilter:
                 qs = qs.filter(cartaDiCredito=True)
+            if 'fattura-pagata' in qfilter:
+                qs = qs.filter(riga_fattura__fattura__pagata=True)
 
         data = dict(tot=qs.count())
         rows = []
@@ -148,9 +150,7 @@ class StatsView(MonthDatesMixin):
                                     then=F('commissione') * F('prezzo') / Value(100)),
                                ),
                           output_field=DecimalField(max_digits=9, decimal_places=2, default=0),
-
-                      )
-                      )
+                      ))
         if 'socio' in qgrouper:
             fields['conducente_nome'] = F('conducente__nome')
         if 'cliente' in qgrouper:
@@ -165,12 +165,16 @@ class StatsView(MonthDatesMixin):
             if detailed:
                 add_details(rows, qs)
             qs = qs.aggregate(**fields)
-            rows.append(
-                dict(type="row", data=("{num} {tipo}".format(num=num_rows, tipo=qtype),
-                                       qs['tot'],
-                                       qs['commissione'].quantize(Decimal("0.01")))
-                     )
-            )
+            if qs:
+                tot, commissione = qs['tot'], qs['commissione']
+                rows.append(
+                    dict(type="row",
+                         data=("{num} {tipo}".format(num=num_rows, tipo=qtype),
+                               tot or 0,
+                               commissione.quantize(Decimal("0.01")) if commissione else 0
+                               )
+                         )
+                )
         else:
             fields_name = dict(socio='conducente',
                                mese='year,month')  # the field name in the model
