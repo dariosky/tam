@@ -1,6 +1,7 @@
 # coding: utf-8
 import hashlib
 import logging
+import os
 import logging.config
 import os
 from socket import gethostname
@@ -16,8 +17,10 @@ TAM_VERSION = "7.00"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
-DEBUG = False if "TAM_PROD" in os.environ else True
-
+if 'TAM_DEBUG' in os.environ:
+    DEBUG = True
+else:
+    DEBUG = False
 print("Running in %s MODE" % ("PRODUCTION" if not DEBUG else "DEBUG"))
 
 if DEBUG:
@@ -320,6 +323,7 @@ NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
                             "FattureConducente", "FattureConducenteNoIva",
                             "Ricevute"]
 MIN_PRICE_FOR_TAXSTAMP = 77.47
+FATTURE_SHOW_VAT_COLUMN = True
 
 SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
 SECURE_STORE_CUSTOM_SUBFOLDER = None

@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.conf import settings
 from django.contrib import messages
 from django.urls import reverse
+from django.db.models import Case, When, IntegerField, F, DecimalField, Q
 from django.db.models.aggregates import Count, Sum
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
@@ -163,9 +164,9 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
 
     if settings.TAM_SHOW_CLASSIFICA_FATTURE:
         classifica_fatture = Conducente.objects.filter(
-            attivo=True,
-            viaggio__annullato=False,
-            viaggio__fatturazione=True
+            Q(attivo=True) & Q(viaggio__annullato=False)
+            &
+            (Q(viaggio__fatturazione=True) | Q(viaggio__incassato_albergo=True))
         ).annotate(
             invoice_count=Count('viaggio'),
             invoice_val=Sum('viaggio__prezzo'),

@@ -44,6 +44,7 @@ class Fattura(models.Model):
     progressivo = models.IntegerField(db_index=True, null=True)
 
     archiviata = models.BooleanField(default=False)  # se true la fattura non è più modificabile
+    pagata = models.BooleanField(default=False)  # la fattura è stata pagata? Per le statistiche
 
     class Meta:
         verbose_name_plural = "Fatture"

@@ -10,6 +10,14 @@
 					<img src='{% static 'fatturazione/invoice-icon.png' %}' />
 				</a>
 				emessa {{fattura.data|date:"l j F Y"}}
+				<label style="display:block">
+					Pagata:
+					<input style="vertical-align: middle" type="checkbox"
+						   class="flag_pagato"
+						   data-id="{{ fattura.id }}"
+						   {% if fattura.pagata %}checked{% endif %}
+					/>
+				</label>
 			</td>
 			<td>
 				{% if fattura.cliente %}
@@ -25,7 +33,9 @@
 				<div class='dati'>{{ fattura.emessa_a }}</div>
 			</td>
 			<td>{{fattura.righe.count}}</td>
-			<td class='prezzo'>{{fattura.val_totale|floatformat:"-2"}} €</td>
+			<td class='prezzo'>
+				{{fattura.val_totale|floatformat:"-2"}} €
+			</td>
 		</tr>
 	{% endfor %}
 	</table>

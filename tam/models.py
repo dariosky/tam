@@ -378,8 +378,11 @@ class Viaggio(models.Model):
 
     class Meta:
         verbose_name_plural = _("Viaggi")
-        permissions = (('change_oldviaggio', 'Cambia vecchio viaggio'),
-                       ('change_doppi', 'Cambia il numero di casette'))
+        permissions = (
+            ('change_oldviaggio', 'Cambia vecchio viaggio'),
+            ('change_doppi', 'Cambia il numero di casette'),
+            ('disableviewprice', 'Disable view of the price column'),
+        )
         ordering = ("data_padre", "id_padre", "data", 'id')
 
     def url(self):

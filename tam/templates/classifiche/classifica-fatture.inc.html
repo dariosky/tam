@@ -1,14 +1,14 @@
 {% load humanize staticfiles %}
 <div>
-	<h2><a href="#">Classifica Fatture</a></h2>
+	<h2><a href="#">Classifica Fatture e Fine-mese</a></h2>
 	<div class="accordion-content">
 		<table class="tablesorter">
 			<thead>
 			<tr>
 				<th></th>
 				<th>Nome</th>
-				<th>Numero fatture</th>
-				<th>Valore fatture</th>
+				<th>Numero corse</th>
+				<th>Valore</th>
 			</tr>
 			</thead>
 
@@ -17,11 +17,11 @@
 				<tr {% if not c.attivo %} class="inattivo"{% endif %}>
 					<td style="width:130px;">
 						<img alt="" class="hbar" src="{% static 'img/hbar.png' %}"
-							 width="{% widthratio c.invoice_val classifica_fatture.max_val 130 %}"/>
+							 width="{% widthratio c.val classifica_fatture.max_val 130 %}"/>
 					</td>
 					<td>{{ c }}</td>
-					<td>{{ c.invoice_count }}</td>
-					<td>{{ c.invoice_val|floatformat:"-2" }}€</td>
+					<td>{{ c.count }}</td>
+					<td>{{ c.val|floatformat:"-2" }}€</td>
 				</tr>
 			{% endfor %}
 			</tbody>

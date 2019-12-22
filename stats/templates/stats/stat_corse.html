@@ -41,15 +41,25 @@
 		</fieldset>
 		<fieldset class="formset">
 			<legend>Filtro</legend>
-			<label><input type="checkbox" name="qfilter" value="fatture"
-						  {% if 'fatture' in qfilter %}checked{% endif %}>
-				Fatture</label>
-			<label><input type="checkbox" name="qfilter" value="carte"
-						  {% if 'carte' in qfilter %}checked{% endif %}>
-				Carta</label>
-			<label><input type="checkbox" name="qfilter" value="finemese"
-						  {% if 'finemese' in qfilter %}checked{% endif %}>
-				Fine mese</label>
+			<div style="display:flex">
+				<div style="display: flex; flex-direction: column">
+					<label><input type="checkbox" name="qfilter" value="fatture"
+								  {% if 'fatture' in qfilter %}checked{% endif %}>
+						Fatture</label>
+					<label><input type="checkbox" name="qfilter" value="fattura-pagata"
+								  {% if 'fattura-pagata' in qfilter %}checked{% endif %}>
+						Fattura pagata</label>
+
+				</div>
+				<div style="display: flex; flex-direction: column">
+					<label><input type="checkbox" name="qfilter" value="carte"
+								  {% if 'carte' in qfilter %}checked{% endif %}>
+						Carta</label>
+					<label><input type="checkbox" name="qfilter" value="finemese"
+								  {% if 'finemese' in qfilter %}checked{% endif %}>
+						Fine mese</label>
+				</div>
+			</div>
 		</fieldset>
 		<fieldset class="formset">
 			<legend>Raggruppamento (trascina a destra)</legend>

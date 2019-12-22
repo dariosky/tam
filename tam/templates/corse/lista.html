@@ -32,7 +32,7 @@
 				    <th>Cliente</th>
 				    <th>da - a</th>
 				    <th>Note</th>
-				    <th></th>
+					{% if user.is_superuser or not perms.tam.disableviewprice %}<th></th>{% endif %}
 				    <th>Socio</th>
 				</tr>
 			</thead>

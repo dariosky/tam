@@ -5,6 +5,7 @@ Created on 11/set/2011
 @author: Dario
 '''
 import datetime
+import json
 from decimal import Decimal
 
 from django.contrib import messages
@@ -12,10 +13,10 @@ from django.contrib.auth.decorators import permission_required
 from django.urls import reverse
 from django.db import transaction
 from django.db.models import Max
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 
-from fatturazione.models import Fattura, RigaFattura, nomi_fatture, \
-    nomi_plurale
+from fatturazione.models import (Fattura, RigaFattura, nomi_fatture,
+                                 nomi_plurale)
 from fatturazione.views.util import ultimoProgressivoFattura
 from modellog.actions import logAction
 from tam.models import Viaggio, ProfiloUtente
@@ -44,7 +45,7 @@ Generazione Ricevute (viaggi con pagamento posticipato)
 
 """
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from tam.tamdates import parse_datestring
 from django.conf import settings
 import tam.tamdates as tamdates
@@ -393,3 +394,21 @@ def genera_fatture(request, fatturazione):
                       'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
                   },
                   )
+
+
+@transaction.atomic
+@permission_required('fatturazione.generate', '/')
+def setPagato(request):
+    if request.method != 'POST':
+        return HttpResponse(json.dumps({"error": "Method not allowed"}), status=405,
+                            content_type="application/json")
+    fattura = get_object_or_404(Fattura, id=request.POST['id'])
+    pagato = request.POST['pagato'] == 'true'
+    fattura.pagata = pagato
+    fattura.save()
+    result = {"ok": True,
+              "fattura": fattura.id,
+              "pagato": pagato,
+              }
+    return HttpResponse(json.dumps(result),
+                        content_type="application/json")
