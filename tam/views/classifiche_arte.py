@@ -56,7 +56,7 @@ CLASSIFICHE = [
      'viaggio_field': 'prezzoDoppioPadova',
      },
     {"nome": "Padova",
-     "descrizione": ">16€, <60km",
+     "descrizione": ">18€, <60km",
      "mapping_field": "prezzoPadova",
      'viaggio_field': 'prezzoPadova',
      },
@@ -242,7 +242,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                 multiplier = renditaChilometrica / Decimal("0.65")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
         elif 25 <= km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-            km < 25 and sum(importiViaggio) > 16):
+            km < 25 and sum(importiViaggio) > settings.IMPORTO_MASSIMO_CORTA):
             if renditaChilometrica < Decimal("0.8"):
                 multiplier = renditaChilometrica / Decimal("0.8")
                 # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)

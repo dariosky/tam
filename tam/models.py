@@ -937,7 +937,7 @@ class Viaggio(models.Model):
     def is_medium(self):
         """ Ritorna vero se la tratta è media """
         return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-            self.km < 25 and self.prezzo > 16)
+            self.km < 25 and self.prezzo > settings.IMPORTO_MASSIMO_CORTA)
 
     def _is_valid(self):
         """Controlla che il viaggio abbia tutte le tratte definite"""
