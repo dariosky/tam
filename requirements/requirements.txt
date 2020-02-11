@@ -1,5 +1,5 @@
 # Django related ***
-Django==2.0.4
+Django==2.2.10
 pyyaml
 
 # security
