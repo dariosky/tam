@@ -83,7 +83,7 @@ class Calendar(models.Model):
                 duration=self.pretty_duration(),
                 type=self.type
             )
-        return f"{result} {' but available' if self.available else ''} {self.value}"
+        return result + (u" but available" if self.available else u"")
 
     def pretty_duration(self):
         return pretty_duration(self.minutes)
