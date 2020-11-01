@@ -1432,8 +1432,11 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
     class RecurrenceForm(forms.Form):
         repMode = forms.ChoiceField(label="Ricorrenza",
                                     choices=[("m", "Mensile"),
+                                             ("12", "12 giorni"),
                                              ("w", "Settimanale"),
-                                             ("d", "Giornaliero")])
+                                             ("6", "6 giorni"),
+                                             ("d", "Giornaliero"),
+                                             ])
         start = forms.DateField(label="Data iniziale",
                                 input_formats=[_('%d/%m/%Y')])
         end = forms.DateField(label="Data finale",
@@ -1461,8 +1464,12 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
 
                 if type == "d":
                     day += datetime.timedelta(days=1)
+                elif type == "6":
+                    day += datetime.timedelta(days=6)
                 elif type == "w":
                     day += datetime.timedelta(days=7)
+                elif type == "12":
+                    day += datetime.timedelta(days=12)
                 else:
                     if day.month == 12:
                         day = day.replace(year=day.year + 1)

@@ -134,7 +134,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         return locals()
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
-    forzaSingolo = (force_numDoppi is 0)
+    forzaSingolo = (force_numDoppi == 0)
     baciniDiPartenza = conta_bacini_partenza([viaggio] + list(viaggio.viaggio_set.all()))
 
     scoreVersion = None  # We keep a progressive date 'yyyy-mm-dd-vv' to track version changes
@@ -367,14 +367,13 @@ def cal_display_mattino_pomeriggio(calendar):
 
 def cal_display_allday2_halfday1(calendar):
     reference_date = calendar.date_start.astimezone(tz_italy)
-    result = u""
     if calendar.minutes < 60 * 24:
         if reference_date.hour <= 12:
-            result += u"mattino"
+            result = "mattino"
         else:
-            result += u"pomeriggio"
+            result = "pomeriggio"
     else:
-        result += u"tutto il giorno"
+        result = "tutto il giorno"
     return result
 
 
