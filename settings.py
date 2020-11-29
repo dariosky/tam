@@ -7,9 +7,10 @@ from prenotazioni.views.notice import notice_required
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.97"
+TAM_VERSION = "6.98"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
+TAM_MAINTENANCE_URL = True  # can be True - for a generic maintenance page - or an URL to redirect to
 
 if 'TAM_DEBUG' in os.environ:
     DEBUG = True
@@ -306,6 +307,7 @@ MIDDLEWARE_CLASSES = (
     #  deprecated in django 1.6
 
     'tam.middleware.threadlocals.ThreadLocals',
+    'tam.middleware.maintenance_redirect.MaintenanceRedirectMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
