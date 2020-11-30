@@ -382,7 +382,10 @@ def deploy(justPull=False):
         if run("test -e %s" % posixpath.join(env.REPOSITORY_FOLDER, secret),
                quiet=True).failed:  # secrets missing
             message = 'Some secret doesn\'t exists on destination. Proceed with initial deploy?'
-            send_secrets(ask=True)
+            if confirm(message):
+                send_secrets(ask=True)
+            else:
+                abort("Aborting at user request.")
 
     update_instance(do_update_requirements=is_this_initial or DO_REQUIREMENTS, justPull=justPull)
 
