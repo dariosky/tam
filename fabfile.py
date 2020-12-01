@@ -187,9 +187,14 @@ def start(daemon=False):
         run('supervisorctl start %s' % env.SUPERVISOR_JOBNAME)
     else:  # directly start remote Gunicorn
         with virtualenv():
-            with cd(env.REPOSITORY_FOLDER):
-                gunicorn_command = get_gunicorn_command(daemon=True)
-                run(gunicorn_command)
+            if env.UWSGI_START_COMMAND:
+                print("Starting UWSGI")
+                run(env.UWSGI_START_COMMAND)
+            else:
+                with cd(env.REPOSITORY_FOLDER):
+                    print("Starting GUNICORN")
+                    gunicorn_command = get_gunicorn_command(daemon=True)
+                    run(gunicorn_command)
 
 
 @task
@@ -226,7 +231,9 @@ def start_local():
 @task
 def restart():
     """ Start/Restart the remote gunicorn instance (eventually using supervisor) """
-    if run("test -e %s" % env.GUNICORN_PID_FILE, quiet=True).failed:
+    PID_FILE = env.UWSGI_PID_FILE or env.GUNICORN_PID_FILE
+    server_name = 'UWSGI' if env.UWSGI_PID_FILE else 'Gunicorn'
+    if run("test -e %s" % PID_FILE, quiet=True).failed:
         puts("Gunicorn doesn't seems to be running (PID file missing)...")
         start()
 
@@ -234,9 +241,9 @@ def restart():
     # if not gunicorn_pid:
     # 	abort('ERROR: Gunicorn seems down after the start command.')
     else:
-        puts('Gracefully restarting Gunicorn.')
-        gunicorn_pid = int(run('cat %s' % env.GUNICORN_PID_FILE, quiet=True))
-        run("kill -s HUP %d" % gunicorn_pid)
+        puts(f'Gracefully restarting {server_name}.')
+        server_pid = int(run('cat %s' % PID_FILE, quiet=True))
+        run("kill -s HUP %d" % server_pid)
 
 
 @task

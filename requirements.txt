@@ -21,7 +21,8 @@ python-dateutil
 psycopg2-binary
 
 # deployment ***
-gunicorn
+# gunicorn
+uwsgi
 # setproctitle to set the process title, doesn't work on Windows
 setproctitle
 requests
