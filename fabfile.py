@@ -231,8 +231,8 @@ def start_local():
 @task
 def restart():
     """ Start/Restart the remote gunicorn instance (eventually using supervisor) """
-    PID_FILE = env.UWSGI_PID_FILE or env.GUNICORN_PID_FILE
-    server_name = 'UWSGI' if env.UWSGI_PID_FILE else 'Gunicorn'
+    PID_FILE = getattr(env, 'UWSGI_PID_FILE', None) or env.GUNICORN_PID_FILE
+    server_name = 'UWSGI' if getattr(env, 'UWSGI_PID_FILE', None) else 'Gunicorn'
     if run("test -e %s" % PID_FILE, quiet=True).failed:
         puts("Gunicorn doesn't seems to be running (PID file missing)...")
         start()
