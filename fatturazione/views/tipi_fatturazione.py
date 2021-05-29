@@ -58,7 +58,7 @@ class FattureConsorzio(ModelloFattura):
     codice_fattura = "FC"
     destinatario = "cliente"
     mittente = "consorzio"
-    note = 'Pagamento: Bonifico bancario 30 giorni data fattura'
+    note = 'Segue fattura elettronica\nPagamento: Bonifico bancario 30 giorni data fattura'
     esente_iva = False
 
     @staticmethod
@@ -94,7 +94,8 @@ class FattureNoIVA(ModelloFattura):
     codice_fattura = "FE"
     destinatario = "cliente"
     mittente = "consorzio"
-    note = 'Pagamento: Bonifico bancario 30 giorni data fattura' + \
+    note = 'Segue fattura elettronica\n' \
+           'Pagamento: Bonifico bancario 30 giorni data fattura' + \
            "\nServizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
     esente_iva = True
 
