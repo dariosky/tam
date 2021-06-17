@@ -196,6 +196,7 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.96', '25/5/2019', "Colonna prezzo nei permessi"),
         ('6.97', '2/11/2019', "Fatture - flag pagato e reportistica"),
         ('6.98', '29/11/2020', "Supporto per flag manutenzione"),
+        ('6.99', '23/1/2021', "Ritardo partenza su ogni luogo"),
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:

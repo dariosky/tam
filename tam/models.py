@@ -614,6 +614,10 @@ class Viaggio(models.Model):
         tragitto = reallySpaceless(tragitto)
         return tragitto
 
+    @property
+    def type_arrivo_partenza(self):
+        return "arrivo" if self.arrivo else "partenza"
+
     def save(self, *args, **kwargs):
         """Ridefinisco il salvataggio dei VIAGGI
             per popolarmi i campi calcolati"""
