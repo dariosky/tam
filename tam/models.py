@@ -10,6 +10,7 @@ from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
 from django.core.urlresolvers import reverse  # to resolve named urls
+from django.core.validators import MinValueValidator
 from django.db import connections, models
 from django.db.models.deletion import SET_NULL, PROTECT
 from django.template.loader import render_to_string
@@ -18,7 +19,9 @@ from future.utils import python_2_unicode_compatible
 
 import tam.tamdates as tamdates
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
+import logging
 
+logger = logging.getLogger("tam.models")
 Calendar = None
 if 'calendariopresenze' in settings.INSTALLED_APPS:
     try:
@@ -77,11 +80,11 @@ def reallySpaceless(s):
 @python_2_unicode_compatible
 class Luogo(models.Model):
     """ Indica un luogo, una destinazione conosciuta.
-        Ogni luogo appartiene ad un bacino all'interno del quale
+        Ogni luogo appartiene a un bacino all'interno del quale
          verrano cercati gli accoppiamenti.
         Al luogo afferiranno i listini, le corse e tutto il resto.
     """
-    nome = models.CharField("Località ", max_length=25, unique=True)
+    nome = models.CharField("Località", max_length=25, unique=True)
     bacino = models.ForeignKey("Bacino", verbose_name="Bacino di appartenenza",
                                null=True, blank=True)
     speciale = models.CharField("Luogo particolare", max_length=1,
@@ -89,7 +92,10 @@ class Luogo(models.Model):
                                 choices=(("-", "-"), ("A", "Aeroporto"),
                                          ("S", "Stazione")))
 
-    # una delle località sarà  la predefinita... tra le proprietà  dell'utente
+    anticipo_servizio = models.IntegerField("Anticipo servizio", default=20,
+                                            validators=(MinValueValidator(0),))
+
+    # una delle localitàsarà la predefinita... tra le proprietà dell'utente
 
     class Meta:
         verbose_name_plural = _("Luoghi")
@@ -110,7 +116,8 @@ class Luogo(models.Model):
         else:
             updateViaggi = True
         super(Luogo, self).save(*args, **kwargs)
-        if not updateViaggi: return
+        if not updateViaggi:
+            return
         # aggiorno tutte le corse precalcolate con quel luogo
         viaggiCoinvolti = Viaggio.objects.filter(
             tratta_start__da=self) | Viaggio.objects.filter(
@@ -196,7 +203,8 @@ class Tratta(models.Model):
 
 def get_tratta(da, a):
     """ Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
-    if not da or not a: return
+    if not da or not a:
+        return
     keyword = ("tratta%s-%s" % (da.id, a.id)).replace(" ", "")
     trattacache = cache.get(keyword)
     if trattacache:
@@ -310,7 +318,7 @@ class Viaggio(models.Model):
                                            null=True)
 
     # per i padri della abbinate conta quanti km di abbinata
-    # sono già  stati conguagliati
+    # sono già stati conguagliati
     km_conguagliati = models.IntegerField("Km conguagliati", null=True,
                                           blank=True, default=0,
                                           editable=False)
@@ -794,6 +802,17 @@ class Viaggio(models.Model):
             minutes += int(sosta.seconds / 60)
         return minutes
 
+    def anticipo_servizio(self):
+        if self.id and not self.padre_id:  # itero sui figli
+            anticipo = max(self.da.anticipo_servizio, self.a.anticipo_servizio)
+            for figlio in self.viaggio_set.all():
+                anticipo = max(anticipo, figlio.da.anticipo_servizio, figlio.a.anticipo_servizio)
+        else:
+            anticipo = 0
+        if anticipo:
+            logger.debug(f"Aggiungo un antipo di {anticipo} minuti")
+        return anticipo
+
     def _date_start(self):
         """ Return the time to start to be there in time, looking Tratte
             if the start place is the same time is the time of the travel
@@ -802,6 +821,9 @@ class Viaggio(models.Model):
         anticipo = 0
         if tratta_start and tratta_start.is_valid():  # tratta iniziale
             anticipo += tratta_start.minuti
+
+        anticipo += self.anticipo_servizio()
+
         if anticipo:
             return self.data - datetime.timedelta(minutes=anticipo)
         else:
@@ -852,13 +874,18 @@ class Viaggio(models.Model):
         else:
             end = self.data
         inizioNotte = start.replace(hour=22, minute=0)
-        if start.hour < 6: inizioNotte -= datetime.timedelta(days=1)
+        if start.hour < 6:
+            inizioNotte -= datetime.timedelta(days=1)
         fineNotte = end.replace(hour=6, minute=0)
-        if fineNotte < inizioNotte: fineNotte += datetime.timedelta(days=1)
+        if fineNotte < inizioNotte:
+            fineNotte += datetime.timedelta(days=1)
         result = False
-        if start <= inizioNotte and end >= inizioNotte: result = True
-        if start < fineNotte and end >= fineNotte: result = True
-        if start >= inizioNotte and end <= fineNotte: result = True
+        if start <= inizioNotte and end >= inizioNotte:
+            result = True
+        if start < fineNotte and end >= fineNotte:
+            result = True
+        if start >= inizioNotte and end <= fineNotte:
+            result = True
         return result
 
     def disturbi(self, date_start=None, date_end=None):
@@ -884,22 +911,26 @@ class Viaggio(models.Model):
         tratta = self._tratta()
         tratta_end = self._tratta_end()
         result = 0
-        if tratta_start: result += tratta_start.km
-        if tratta: result += tratta.km
-        if tratta_end: result += tratta_end.km
+        if tratta_start:
+            result += tratta_start.km
+        if tratta:
+            result += tratta.km
+        if tratta_end:
+            result += tratta_end.km
         return result
 
     def get_kmtot(self):
         """ Restituisce il N° di KM totali di corsa con andata, corsa, figli e ritorno """
         result = self.get_kmrow()
-        if self.id is None: return result
+        if self.id is None:
+            return result
         for figlio in self.viaggio_set.all():
             result += figlio.get_kmrow()
         return result
 
     def _is_collettivoInPartenza(self):
         """	Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
-            Assieme si andrà  ad una destinazione comune
+            Assieme si andrà ad una destinazione comune
         """
         # logging.debug("Is collettivo in partenza %s" %self.id)
         nextbro = self.nextfratello()
@@ -926,7 +957,8 @@ class Viaggio(models.Model):
             # prima di salvare non sono un'abbinata (viaggio_set.count() mi darebbe tutte le corse
             return False if simpleOne else None
         if self.padre_id or self.viaggio_set.count() > 0:
-            if simpleOne: return True
+            if simpleOne:
+                return True
             if self._is_collettivoInPartenza():
                 return "P"  # collettivo in partenza
             else:
@@ -1022,9 +1054,7 @@ class Viaggio(models.Model):
     def warning(self):
         """ True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
         return (not self.conducente_confermato
-                and (self.date_start - datetime.timedelta(
-                hours=2) < tamdates.ita_now())
-                )
+                and (self.date_start - datetime.timedelta(hours=2) < tamdates.ita_now()))
 
     def punti_notturni_interi_list(self):
         return range(int(self.punti_notturni))
@@ -1235,10 +1265,12 @@ class Listino(models.Model):
         choosenResult = None  # scelgo il prezzo adeguato con meno passeggeri max
         for prezzoPossibile in prezziDiretti:
             if choosenResult:
-                if prezzoPossibile.max_pax < choosenResult.max_pax: choosenResult = prezzoPossibile
+                if prezzoPossibile.max_pax < choosenResult.max_pax:
+                    choosenResult = prezzoPossibile
             else:
                 choosenResult = prezzoPossibile
-        if choosenResult: return choosenResult
+        if choosenResult:
+            return choosenResult
         if tryReverse:
             return self.get_prezzo(a, da, tipo_servizio, pax,
                                    tryReverse=False)  # provo a tornare il prezzo inverso
