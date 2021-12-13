@@ -57,9 +57,7 @@
     {% if tratta_end %}
 		{% if tratta_end.is_valid %}
 		    {% if nextfratello %}
-				<div class="{{ viaggio.type_arrivo_partenza }}">
-					arrivo alle {{ viaggio.get_date_end|date:"H:i" }}
-				</div>
+				arrivo alle {{ viaggio.get_date_end|date:"H:i" }}
 			{% endif %}
 		{% else %}
 			<a href="{% url "tamTrattaId" tratta_end.id %}" class="errorlist">tratta {{tratta_end.da}}-{{tratta_end.a}} scononosciuta</a>
