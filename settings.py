@@ -7,7 +7,7 @@ from prenotazioni.views.notice import notice_required
 
 host = gethostname().lower()
 
-TAM_VERSION = "6.99"
+TAM_VERSION = "7.0"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 TAM_MAINTENANCE_URL = False  # can be True - for a generic maintenance page - or an URL to redirect to

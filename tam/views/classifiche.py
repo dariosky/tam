@@ -168,8 +168,8 @@ def classificheconducenti(request, template_name="classifiche/classifiche-conduc
             &
             (Q(viaggio__fatturazione=True) | Q(viaggio__incassato_albergo=True))
         ).annotate(
-            count=Count('viaggio'),
-            val=Sum('viaggio__prezzo')
+            count=Count('viaggio') + F("classifica_iniziale_fatture_corse"),
+            val=Sum('viaggio__prezzo') + F("classifica_iniziale_fatture_valore"),
         ).order_by("val", "count")
         if classifica_fatture.count():
             max_val = classifica_fatture[0].val

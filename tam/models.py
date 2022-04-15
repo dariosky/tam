@@ -1126,14 +1126,22 @@ class Conducente(models.Model):
     classifica_iniziale_doppiPadova = models.DecimalField("Doppi Padova",
                                                           max_digits=12,
                                                           decimal_places=2,
-                                                          default=0)  # fino a 9999.99
+                                                          default=0)  # in Euro
 
     classifica_iniziale_long = models.DecimalField("Venezia", max_digits=12,
                                                    decimal_places=2,
-                                                   default=0)  # fino a 9999.99
+                                                   default=0)  # in Euro
     classifica_iniziale_medium = models.DecimalField("Padova", max_digits=12,
                                                      decimal_places=2,
-                                                     default=0)  # fino a 9999.99
+                                                     default=0)  # in Euro
+    classifica_iniziale_fatture_corse = models.IntegerField("Classifica fatture - corse",
+                                                            editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
+                                                            default=0)
+    classifica_iniziale_fatture_valore = models.DecimalField("Classifica fatture - valore",
+                                                             editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
+                                                             max_digits=12,
+                                                             decimal_places=2,
+                                                             default=0)  # in Euro fino a 9.999.999.999,99
 
     class Meta:
         verbose_name_plural = _("Conducenti")

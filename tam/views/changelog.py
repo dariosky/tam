@@ -197,6 +197,7 @@ def changeLog(request, template_name='static/changelog.html'):
         ('6.97', '2/11/2019', "Fatture - flag pagato e reportistica"),
         ('6.98', '29/11/2020', "Supporto per flag manutenzione"),
         ('6.99', '23/1/2021', "Ritardo partenza su ogni luogo"),
+        ('7.0', '16/4/2022', "Classifica fatture - valori iniziali di ogni utente") if settings.TAM_SHOW_CLASSIFICA_FATTURE else "",
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:
