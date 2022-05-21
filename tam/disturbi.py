@@ -32,7 +32,8 @@ def fascia_quarti_lineari(fascia_start, fascia_end, date_start, date_end,
         intersezione = (intersection_end - intersection_start)
         minuti = intersezione.days * (24 * 60 * 60) + (
             intersezione.seconds / 60)  # calcolo la durata in minuti dell'intersezione
-        if minuti < 1: return
+        if minuti < 1:
+            return
         quarti = ceil(float(minuti) / minuti_per_quarto)
         # if quarti == 0: quarti = 1.0	# minimo un quarto
         #		print "%d minuti. Quarti: %d." % (minuti, quarti)
@@ -211,6 +212,37 @@ def fasce_semilineari_notturne(dayMarker, data_inizio, data_fine, results):
             if results[k] < max_val:
                 # print "cancello", k
                 del (results[k])
+
+
+def fasce_semilineari_notturne_fisse(dayMarker, data_inizio, data_fine, results):
+    # come le semilineari notturne - ma fisse dalle 19:30 indipendentemente dal giorno
+    fascia_semilineari(dayMarker.replace(hour=0, minute=0),
+                       dayMarker.replace(hour=3, minute=29),
+                       data_inizio, data_fine,
+                       minuti_per_quarto=30, tipo='night', results=results,
+                       punti_partenza=2.5)
+
+    fascia_semilineari(dayMarker.replace(hour=19, minute=30),
+                       dayMarker.replace(hour=23, minute=59),
+                       data_inizio, data_fine,
+                       minuti_per_quarto=30, tipo='night', results=results)
+    # qui ho i risultati delle fasce diurine e notturne.
+    # restituisco però solo la fascia con il massimo
+    if results:
+        max_val = max(results.values())
+        for k in results.keys():
+            if results[k] < max_val:
+                # print "cancello", k
+                del (results[k])
+
+
+def fasce_semilineari_notturne_fisse_dal(dayMarker, data_inizio, data_fine, results,
+                                         activation_date=datetime.datetime(2022, 5, 22, 12,
+                                                                           tzinfo=datetime.timezone.utc)):
+    if dayMarker >= activation_date:
+        fasce_semilineari_notturne_fisse(dayMarker, data_inizio, data_fine, results)
+    else:
+        fasce_semilineari_notturne(dayMarker, data_inizio, data_fine, results)
 
 
 # ***************************************************************************************
