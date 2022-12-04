@@ -22,7 +22,6 @@ class TestKnownTaxi2():
 
     @pytest.mark.django_db
     def test_known_taxi2(self):
-        print(Luogo.objects.all())
         tests = [
             partial(arrivo_singolo_o_due_arrivi,
                     da=self.venezia, a=self.abano, riferimento=self.abano,
@@ -47,9 +46,6 @@ class TestKnownTaxi2():
         ]
 
         run_tests(tests)
-
-
-        # run_taxi2_tests(taxi2_tests)
 
 
 def test_known_arte():

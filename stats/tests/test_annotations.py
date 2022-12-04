@@ -89,7 +89,3 @@ def testing_annotations():
     anakin_runs = list(filter(lambda x: x['conducente__nome'] == 'Anakin Skywalker', qs))
     assert len(anakin_runs) == 1
     assert anakin_runs[0]['month'] == 1 and anakin_runs[0]['tot'] == 30
-
-
-if __name__ == '__main__':
-    testing_annotations()

@@ -18,6 +18,7 @@ from django.utils.translation import ugettext_lazy as _
 from future.utils import python_2_unicode_compatible
 
 import tam.tamdates as tamdates
+from settings import NIGHT_START, NIGHT_END
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
 import logging
 
@@ -873,10 +874,12 @@ class Viaggio(models.Model):
             end = self.data + datetime.timedelta(minutes=tratta.minuti)
         else:
             end = self.data
-        inizioNotte = start.replace(hour=22, minute=0)
-        if start.hour < 6:
+        night_start_hour, night_start_minute = NIGHT_START
+        night_end_hour, night_end_minute = NIGHT_END
+        inizioNotte = start.replace(hour=night_start_hour, minute=night_start_minute)
+        if start.hour < night_end_hour:
             inizioNotte -= datetime.timedelta(days=1)
-        fineNotte = end.replace(hour=6, minute=0)
+        fineNotte = end.replace(hour=night_end_hour, minute=night_end_minute)
         if fineNotte < inizioNotte:
             fineNotte += datetime.timedelta(days=1)
         result = False

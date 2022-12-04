@@ -30,14 +30,14 @@ def fascia_quarti_lineari(fascia_start, fascia_end, date_start, date_end,
     if intersection_start <= intersection_end:
         #		print "Disturbo dalle %s alle %s ogni %d minuti" % (intersection_start, intersection_end, minuti_per_quarto)
         intersezione = (intersection_end - intersection_start)
-        minuti = intersezione.days * (24 * 60 * 60) + (
-            intersezione.seconds / 60)  # calcolo la durata in minuti dell'intersezione
+        minuti = intersezione.days * (24 * 60 * 60) + (intersezione.seconds / 60)
+        # calcolo la durata in minuti dell'intersezione
         if minuti < 1:
             return
-        quarti = ceil(float(minuti) / minuti_per_quarto)
+        quarti = Decimal(ceil(minuti / minuti_per_quarto))
         # if quarti == 0: quarti = 1.0	# minimo un quarto
         #		print "%d minuti. Quarti: %d." % (minuti, quarti)
-        results[tipo] = Decimal(results.get(tipo, 0.0) + quarti / 4)
+        results[tipo] = Decimal(results.get(tipo, 0) + quarti / 4)
 
 
 def fascia_semilineari(fascia_start, fascia_end, date_start, date_end,
@@ -180,6 +180,45 @@ def fasce_semilineari(dayMarker, data_inizio, data_fine, results):
                 del (results[k])
 
 
+def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
+    giornoPrima = dayMarker - datetime.timedelta(days=1)
+    if giornoPrima.isoweekday() in (6, 7):
+        # il giorno prima era festivo, a mezzanotte sono arrivato a 2.25 punti
+        fascia_semilineari(dayMarker.replace(hour=0, minute=0),
+                           dayMarker.replace(hour=3, minute=29),
+                           data_inizio, data_fine,
+                           minuti_per_quarto=30, tipo='night', punti_partenza=2.25, results=results)
+    else:
+        fascia_semilineari(dayMarker.replace(hour=0, minute=0),
+                           dayMarker.replace(hour=3, minute=29),
+                           data_inizio, data_fine,
+                           minuti_per_quarto=30, tipo='night', punti_partenza=2.0, results=results)
+
+    fascia_semilineari(dayMarker.replace(hour=3, minute=30), dayMarker.replace(hour=7, minute=45),
+                       # la mattina scendo
+                       data_inizio, data_fine,
+                       minuti_per_quarto=-30, punti_partenza=2.25, tipo='morning', results=results)
+
+    if dayMarker.isoweekday() in (6, 7):  # saturday and sunday, normal worktime is less
+        fascia_semilineari(dayMarker.replace(hour=20, minute=0),
+                           dayMarker.replace(hour=23, minute=59),
+                           data_inizio, data_fine,
+                           minuti_per_quarto=30, tipo='night', results=results)
+    else:
+        fascia_semilineari(dayMarker.replace(hour=20, minute=30),
+                           dayMarker.replace(hour=23, minute=59),
+                           data_inizio, data_fine,
+                           minuti_per_quarto=30, tipo='night', results=results)
+    # qui ho i risultati delle fasce diurine e notturne.
+    # restituisco però solo la fascia con il massimo
+    if results:
+        max_val = max(results.values())
+        for k in list(results.keys()):
+            if results[k] < max_val:
+                # print "cancello", k
+                del (results[k])
+
+
 def fasce_semilineari_notturne(dayMarker, data_inizio, data_fine, results):
     giornoPrima = dayMarker - datetime.timedelta(days=1)
     if giornoPrima.isoweekday() in (
@@ -245,11 +284,19 @@ def fasce_semilineari_notturne_fisse_dal(dayMarker, data_inizio, data_fine, resu
         fasce_semilineari_notturne(dayMarker, data_inizio, data_fine, results)
 
 
+def fasce_semilineari_dal(dayMarker, data_inizio, data_fine, results,
+                          activation_date=datetime.datetime(2022, 12, 2,
+                                                            tzinfo=datetime.timezone.utc)):
+    if dayMarker >= activation_date:
+        fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results)
+    else:
+        fasce_semilineari(dayMarker, data_inizio, data_fine, results)
+
+
 # ***************************************************************************************
 
 def trovaDisturbi(data_inizio, data_fine, metodo=fasce_lineari):
     """ Itero tra giorni e fasce chiamando il metodo di calcolo dei punti supplementari	"""
-    #	print "da", data_inizio, "a", data_fine
     results = {}
     # faccio si che data_inizio e fine siano entrambe in TZ italiana:
     data_inizio, data_fine = timezone.localtime(data_inizio), timezone.localtime(data_fine)
@@ -257,8 +304,6 @@ def trovaDisturbi(data_inizio, data_fine, metodo=fasce_lineari):
     giorno_fine = data_fine.date()
     dayMarker = data_inizio.replace(hour=0, minute=0)
     while dayMarker.date() <= giorno_fine:
-        #		print 'aggiungo le fasce del ', dayMarker
         metodo(dayMarker, data_inizio, data_fine, results)
         dayMarker += datetime.timedelta(days=1)
-        # print results
     return results

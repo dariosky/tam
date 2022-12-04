@@ -7,7 +7,7 @@ from prenotazioni.views.notice import notice_required
 
 host = gethostname().lower()
 
-TAM_VERSION = "7.0"
+TAM_VERSION = "7.0.1"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 TAM_MAINTENANCE_URL = False  # can be True - for a generic maintenance page - or an URL to redirect to
@@ -576,3 +576,5 @@ for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
 WSGI_APPLICATION = 'wsgi.application'
+NIGHT_START = (22, 0)
+NIGHT_END = (6, 0)
