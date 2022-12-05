@@ -93,7 +93,7 @@ class Luogo(models.Model):
                                 choices=(("-", "-"), ("A", "Aeroporto"),
                                          ("S", "Stazione")))
 
-    anticipo_servizio = models.IntegerField("Anticipo servizio", default=20,
+    anticipo_servizio = models.IntegerField("Anticipo servizio", default=0,
                                             validators=(MinValueValidator(0),))
 
     # una delle localitàsarà la predefinita... tra le proprietà dell'utente
