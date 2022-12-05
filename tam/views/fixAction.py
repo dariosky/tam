@@ -75,43 +75,6 @@ def fixAction(request, template_name="utils/fixAction.html"):
             corse += 1
         messageLines.append("Corse aggiornate %d/%d" % (corseCambiate, corse))
 
-    if False:
-        messageLines.append("Conguaglio completamente la corsa 35562")
-        messageLines.append("e tolgo il conguaglio alle 38740 e 38887")
-
-        def status():
-            corsa = Viaggio.objects.filter(pk=35562)[0]
-            messageLines.append("la prima del %s è conguagliata di %d km su %d punti. Andrebbe 360."
-                                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
-
-            corsa = Viaggio.objects.filter(pk=38740)[0]
-            messageLines.append("la seconda del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-                                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
-
-            corsa = Viaggio.objects.filter(pk=38887)[0]
-            messageLines.append("la terza del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-                                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
-
-        status()
-
-        messageLines.append("EFFETTUO LE AZIONI!")
-        corsa = Viaggio.objects.filter(pk=35562)[0]
-        corsa.km_conguagliati = 360
-        corsa.save()
-        corsa.updatePrecomp()  # salvo perché mi toglierà i punti
-
-        corsa = Viaggio.objects.filter(pk=38740)[0]
-        corsa.km_conguagliati = 0
-        corsa.save()
-        corsa.updatePrecomp()  # salvo perché mi toglierà i punti
-
-        corsa = Viaggio.objects.filter(pk=38887)[0]
-        corsa.km_conguagliati = 0
-        corsa.save()
-        corsa.updatePrecomp()  # salvo perché mi toglierà i punti
-
-        status()
-
     if request.POST.get('fixDisturbi'):
         # Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi
         print("Refixo")
@@ -246,7 +209,10 @@ def fixAction(request, template_name="utils/fixAction.html"):
             codename='can_see_stats')
         messageLines.append(
             "Stats permissions where already there" if not created else "Stats permissions created")
-
+    if request.POST.get('noAnticipo'):
+        for luogo in Luogo.objects.all():
+            luogo.anticipo_servizio = 0
+            luogo.save()
     if request.POST.get('consolidateLog'):
         messageLines.append("Starting moving log files from SQLITE to the default connection")
         sourceLogs = ActionLog.objects.using('modellog').all()

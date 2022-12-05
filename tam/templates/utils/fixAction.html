@@ -15,6 +15,7 @@
     <form method='post' action=''>
         {% csrf_token %}
 {#        <input type='submit' name='spostaILog' value='Sposta i log in un DB separato (Asincrono)'/>#}
+		<input type='submit' name='noAnticipo' value="Rimuovi anticipo da tutti i luoghi"/>
 		<input type='submit' name='consolidateLog' value='Consolidate log (move logs from sqlite to default)'/>
 
         <input type='submit' name='permessiStandard' value='Reset di tutti i permessi e dei gruppi allo standard'/>
