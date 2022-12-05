@@ -16,6 +16,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='luogo',
             name='anticipo_servizio',
-            field=models.IntegerField(default=20, validators=(django.core.validators.MinValueValidator(0),), verbose_name='Anticipo servizio'),
+            field=models.IntegerField(default=0, validators=(django.core.validators.MinValueValidator(0),), verbose_name='Anticipo servizio'),
         ),
     ]
