@@ -194,10 +194,11 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         fascia_uno_o_due_disturbi(dayMarker.replace(hour=21, minute=30),
                                   dayMarker.replace(hour=22, minute=29),
                                   data_inizio, data_fine,
-                                  punti_fascia=2, tipo='night', results=results)
+                                  punti_fascia=1.25, tipo='night', results=results)
         fascia_semilineari(dayMarker.replace(hour=22, minute=30),
                            dayMarker.replace(hour=23, minute=59),
                            data_inizio, data_fine,
+                           punti_partenza=1.25,
                            minuti_per_quarto=30, tipo='night', results=results)
         fascia_semilineari(dayMarker.replace(hour=3, minute=30), dayMarker.replace(hour=5, minute=59),
                            # la mattina scendo
@@ -219,6 +220,7 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         fascia_semilineari(dayMarker.replace(hour=22, minute=30),
                            dayMarker.replace(hour=23, minute=59),
                            data_inizio, data_fine,
+                           punti_partenza=1,
                            minuti_per_quarto=30, tipo='night', results=results)
         fascia_semilineari(dayMarker.replace(hour=3, minute=30), dayMarker.replace(hour=5, minute=59),
                            # la mattina scendo
