@@ -296,3 +296,18 @@ class TestSemiLineare(unittest.TestCase, DisturbiTest):
                           metodo=fasce_semilineari_dal),
             {'night': 1.5}
         )
+
+    def test_lineari_2022_feriali(self):
+        self.assertEqual(
+            trovaDisturbi(data_inizio=datetime.datetime(2022, 12, 16, 18, 35),
+                          data_fine=datetime.datetime(2022, 12, 16, 23, 17),
+                          metodo=fasce_semilineari_dal),
+            {'night': 1.5}
+        )
+
+        self.assertEqual(
+            trovaDisturbi(data_inizio=datetime.datetime(2022, 12, 16, 20, 00),
+                          data_fine=datetime.datetime(2022, 12, 16, 22, 40),
+                          metodo=fasce_semilineari_dal),
+            {'night': 1.25}
+        )
