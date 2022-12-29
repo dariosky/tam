@@ -7,12 +7,14 @@ from prenotazioni.views.notice import notice_required
 
 host = gethostname().lower()
 
-TAM_VERSION = "7.0.1"
+TAM_VERSION = "7.0.2"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
-TAM_MAINTENANCE_URL = False  # can be True - for a generic maintenance page - or an URL to redirect to
+TAM_MAINTENANCE_URL = (
+    False  # can be True - for a generic maintenance page - or an URL to redirect to
+)
 
-if 'TAM_DEBUG' in os.environ:
+if "TAM_DEBUG" in os.environ:
     DEBUG = True
 else:
     DEBUG = False
@@ -26,19 +28,20 @@ if DEBUG:
 
     # warnings.simplefilter('error', DeprecationWarning)
     warnings.filterwarnings(
-        'error', r"DateTimeField received a naive datetime",
-        RuntimeWarning, r'django\.db\.models\.fields')
+        "error",
+        r"DateTimeField received a naive datetime",
+        RuntimeWarning,
+        r"django\.db\.models\.fields",
+    )
 # logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 
-ADMINS = (
-    ('Dario Varotto', 'dario.varotto@gmail.com'),
-)
+ADMINS = (("Dario Varotto", "dario.varotto@gmail.com"),)
 
 MANAGERS = ADMINS
 DATABASES = {}  # set them in settings_local
 
 DATABASE_ROUTERS = [
-    'db_routers.TamArchiveRouter',
+    "db_routers.TamArchiveRouter",
     # 'modellog.db_routers.SeparateLogRouter'
 ]
 
@@ -47,12 +50,12 @@ DATABASE_ROUTERS = [
 # although not all choices may be avilable on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'Europe/Rome'
+TIME_ZONE = "Europe/Rome"
 USE_TZ = True
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'it-it'
+LANGUAGE_CODE = "it-it"
 USE_L10N = True
 # USE_THOUSAND_SEPARATOR = True # mi incasina gli invii delle form
 
@@ -66,16 +69,16 @@ MEDIA_ROOT = os.path.join(PROJECT_PATH, "media/")
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
-STATIC_ROOT = os.path.join(PROJECT_PATH, 'static/')
+STATIC_ROOT = os.path.join(PROJECT_PATH, "static/")
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -87,299 +90,314 @@ STATICFILES_DIRS = (
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'pipeline.finders.PipelineFinder',
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "pipeline.finders.PipelineFinder",
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-STATICFILES_STORAGE = 'tam.storage.PipelineCachedStorage'
+STATICFILES_STORAGE = "tam.storage.PipelineCachedStorage"
 
-jqueryURL = 'js/jquery.min.js'  # 1.7.2, port no newer one should need change autocomplete
-jqueryUIURL = 'js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js'
-jqueryUICSSURL = 'js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css'
+jqueryURL = (
+    "js/jquery.min.js"  # 1.7.2, port no newer one should need change autocomplete
+)
+jqueryUIURL = "js/jquery-ui-1.10.3.custom/js/jquery-ui-1.10.3.custom.min.js"
+jqueryUICSSURL = (
+    "js/jquery-ui-1.10.3.custom/css/ui-lightness/jquery-ui-1.10.3.custom.min.css"
+)
 
 PIPELINE_CSS = {
-    'tam': {'source_filenames': ['css/tam.css'],
-            'output_filename': 'css/tam.min.css'},
-    'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
-                    'output_filename': 'css/tam-stealth.min.css'},
-    'tamUI': {
-        'source_filenames': (
-            jqueryUICSSURL,
-            'css/tam.css',
-        ),
-        'output_filename': 'css/tamUI.min.css',
+    "tam": {"source_filenames": ["css/tam.css"], "output_filename": "css/tam.min.css"},
+    "tam-stealth": {
+        "source_filenames": ["css/tam-stealth.css"],
+        "output_filename": "css/tam-stealth.min.css",
     },
-    'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
-                     'output_filename': 'css/prenotazioni.min.css'},
-    'codapresenze': {'source_filenames': ('css/codapresenze.css',),
-                     'output_filename': 'css/codapresenze.min.css'},
+    "tamUI": {
+        "source_filenames": (
+            jqueryUICSSURL,
+            "css/tam.css",
+        ),
+        "output_filename": "css/tamUI.min.css",
+    },
+    "prenotazioni": {
+        "source_filenames": ("css/prenotazioni.css",),
+        "output_filename": "css/prenotazioni.min.css",
+    },
+    "codapresenze": {
+        "source_filenames": ("css/codapresenze.css",),
+        "output_filename": "css/codapresenze.min.css",
+    },
 }
 
 PIPELINE_JS = {
-    'tam': {
-        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                             'js/tam-common.js'],
-        'output_filename': 'tam.min.js'
+    "tam": {
+        "source_filenames": [jqueryURL, "js/jquery.hotkeys.js", "js/tam-common.js"],
+        "output_filename": "tam.min.js",
     },
-    'tamUI': {
-        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                             jqueryUIURL, 'js/calendarPreferences.js',
-                             'js/tam-common.js'],
-        'output_filename': 'tamUI.min.js'
+    "tamUI": {
+        "source_filenames": [
+            jqueryURL,
+            "js/jquery.hotkeys.js",
+            jqueryUIURL,
+            "js/calendarPreferences.js",
+            "js/tam-common.js",
+        ],
+        "output_filename": "tamUI.min.js",
     },
-    'tamCorse': {
-        'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                             jqueryUIURL,
-                             'js/calendarPreferences.js',
-                             'js/tam-common.js',
-                             'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
-        'output_filename': 'tamCorse.min.js'
+    "tamCorse": {
+        "source_filenames": [
+            jqueryURL,
+            "js/jquery.hotkeys.js",
+            jqueryUIURL,
+            "js/calendarPreferences.js",
+            "js/tam-common.js",
+            "js/jquery.scrollTo-min.js",
+            "js/listaCorse.js",
+        ],
+        "output_filename": "tamCorse.min.js",
     },
-    'jquery.editable': {
-        'source_filenames': ['js/jquery.editable-1.3.3.js'],
-        'output_filename': 'js/jquery.editable.min.js',
+    "jquery.editable": {
+        "source_filenames": ["js/jquery.editable-1.3.3.js"],
+        "output_filename": "js/jquery.editable.min.js",
     },
-    'fattura': {
-        'source_filenames': ['fatturazione/fattura.js'],
-        'output_filename': 'js/fattura.min.js',
+    "fattura": {
+        "source_filenames": ["fatturazione/fattura.js"],
+        "output_filename": "js/fattura.min.js",
     },
-    'codapresenze': {
-        'source_filenames': ['js/codapresenze.js'],
-        'output_filename': 'js/codapresenze.min.js',
+    "codapresenze": {
+        "source_filenames": ["js/codapresenze.js"],
+        "output_filename": "js/codapresenze.min.js",
     },
 }
 PIPELINE_DISABLE_WRAPPER = True
 
-PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH,
-                                       'node_modules/.bin/yuglify')
+PIPELINE_YUGLIFY_BINARY = os.path.join(PROJECT_PATH, "node_modules/.bin/yuglify")
 
 # Pipeline 1.6 is still in early stages - here the settings
 PIPELINE = dict(
     PIPELINE_ENABLED=True,
     STYLESHEETS={
-        'tam': {'source_filenames': ['css/tam.css'],
-                'output_filename': 'css/tam.min.css'},
-        'tam-stealth': {'source_filenames': ['css/tam-stealth.css'],
-                        'output_filename': 'css/tam-stealth.min.css'},
-        'tamUI': {
-            'source_filenames': (
-                jqueryUICSSURL,
-                'css/tam.css',
-            ),
-            'output_filename': 'css/tamUI.min.css',
+        "tam": {
+            "source_filenames": ["css/tam.css"],
+            "output_filename": "css/tam.min.css",
         },
-        'prenotazioni': {'source_filenames': ('css/prenotazioni.css',),
-                         'output_filename': 'css/prenotazioni.min.css'},
-        'codapresenze': {'source_filenames': ('css/codapresenze.css',),
-                         'output_filename': 'css/codapresenze.min.css'},
+        "tam-stealth": {
+            "source_filenames": ["css/tam-stealth.css"],
+            "output_filename": "css/tam-stealth.min.css",
+        },
+        "tamUI": {
+            "source_filenames": (
+                jqueryUICSSURL,
+                "css/tam.css",
+            ),
+            "output_filename": "css/tamUI.min.css",
+        },
+        "prenotazioni": {
+            "source_filenames": ("css/prenotazioni.css",),
+            "output_filename": "css/prenotazioni.min.css",
+        },
+        "codapresenze": {
+            "source_filenames": ("css/codapresenze.css",),
+            "output_filename": "css/codapresenze.min.css",
+        },
     },
     JAVASCRIPT={
-        'tam': {
-            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                                 'js/tam-common.js'],
-            'output_filename': 'tam.min.js'
+        "tam": {
+            "source_filenames": [jqueryURL, "js/jquery.hotkeys.js", "js/tam-common.js"],
+            "output_filename": "tam.min.js",
         },
-        'tamUI': {
-            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                                 jqueryUIURL, 'js/calendarPreferences.js',
-                                 'js/tam-common.js'],
-            'output_filename': 'tamUI.min.js'
+        "tamUI": {
+            "source_filenames": [
+                jqueryURL,
+                "js/jquery.hotkeys.js",
+                jqueryUIURL,
+                "js/calendarPreferences.js",
+                "js/tam-common.js",
+            ],
+            "output_filename": "tamUI.min.js",
         },
-        'tamCorse': {
-            'source_filenames': [jqueryURL, 'js/jquery.hotkeys.js',
-                                 jqueryUIURL,
-                                 'js/calendarPreferences.js',
-                                 'js/tam-common.js',
-                                 'js/jquery.scrollTo-min.js', 'js/listaCorse.js'],
-            'output_filename': 'tamCorse.min.js'
+        "tamCorse": {
+            "source_filenames": [
+                jqueryURL,
+                "js/jquery.hotkeys.js",
+                jqueryUIURL,
+                "js/calendarPreferences.js",
+                "js/tam-common.js",
+                "js/jquery.scrollTo-min.js",
+                "js/listaCorse.js",
+            ],
+            "output_filename": "tamCorse.min.js",
         },
-        'jquery.editable': {
-            'source_filenames': ['js/jquery.editable-1.3.3.js'],
-            'output_filename': 'js/jquery.editable.min.js',
+        "jquery.editable": {
+            "source_filenames": ["js/jquery.editable-1.3.3.js"],
+            "output_filename": "js/jquery.editable.min.js",
         },
-        'fattura': {
-            'source_filenames': ['fatturazione/fattura.js'],
-            'output_filename': 'js/fattura.min.js',
+        "fattura": {
+            "source_filenames": ["fatturazione/fattura.js"],
+            "output_filename": "js/fattura.min.js",
         },
-        'codapresenze': {
-            'source_filenames': ['js/codapresenze.js'],
-            'output_filename': 'js/codapresenze.min.js',
+        "codapresenze": {
+            "source_filenames": ["js/codapresenze.js"],
+            "output_filename": "js/codapresenze.min.js",
         },
     },
     DISABLE_WRAPPER=True,
-    YUGLIFY_BINARY=os.path.join(PROJECT_PATH, 'node_modules/.bin/yuglify'),
-    CSS_COMPRESSOR='pipeline.compressors.yuglify.YuglifyCompressor',
-    JS_COMPRESSOR='pipeline.compressors.yuglify.YuglifyCompressor',
+    YUGLIFY_BINARY=os.path.join(PROJECT_PATH, "node_modules/.bin/yuglify"),
+    CSS_COMPRESSOR="pipeline.compressors.yuglify.YuglifyCompressor",
+    JS_COMPRESSOR="pipeline.compressors.yuglify.YuglifyCompressor",
 )
 
 if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
     os.mkdir(os.path.join(PROJECT_PATH, "logs"))
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': True,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue'
-        }
+    "version": 1,
+    "disable_existing_loggers": True,
+    "filters": {
+        "require_debug_false": {"()": "django.utils.log.RequireDebugFalse"},
+        "require_debug_true": {"()": "django.utils.log.RequireDebugTrue"},
     },
-    'formatters': {
-        'main_formatter': {
-            'format': '%(levelname)s:%(name)s: %(message)s '
-                      '(%(asctime)s; %(filename)s:%(lineno)d)',
-            'datefmt': "%Y-%m-%d %H:%M:%S",
+    "formatters": {
+        "main_formatter": {
+            "format": "%(levelname)s:%(name)s: %(message)s "
+            "(%(asctime)s; %(filename)s:%(lineno)d)",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+    "handlers": {
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler",
         },
-        'console': {
-            'level': 'DEBUG',
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'main_formatter',
+        "console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "main_formatter",
         },
-        'production_file': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': os.path.join(PROJECT_PATH, 'logs', 'main.log'),
-            'when': 'midnight',
-            'utc': True,
-            'delay': True,
-            'backupCount': 7,
-            'formatter': 'main_formatter',
-            'filters': ['require_debug_false'],
+        "production_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": os.path.join(PROJECT_PATH, "logs", "main.log"),
+            "when": "midnight",
+            "utc": True,
+            "delay": True,
+            "backupCount": 7,
+            "formatter": "main_formatter",
+            "filters": ["require_debug_false"],
         },
-        'null': {
-            "class": 'logging.NullHandler',
-        }
+        "null": {
+            "class": "logging.NullHandler",
+        },
     },
-    'loggers': {
-        '': {
-            'handlers': ['mail_admins', 'console'],
-            'level': 'ERROR',
-            'propagate': True,
+    "loggers": {
+        "": {
+            "handlers": ["mail_admins", "console"],
+            "level": "ERROR",
+            "propagate": True,
         },
-        'tam': {
-            'level': 'DEBUG',
-            'handlers': [
-                'mail_admins',
-                'console',
-                'production_file'
+        "tam": {
+            "level": "DEBUG",
+            "handlers": ["mail_admins", "console", "production_file"],
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["mail_admins", "console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.server": {"level": "WARNING"},
+        "django.db": {
+            "handlers": [
+                "null",
             ],
-            'propagate': False
+            "propagate": False,
         },
-        'django.request': {
-            'handlers': ['mail_admins', 'console'],
-            'level': 'ERROR',
-            'propagate': False,
-        },
-        'django.server': {
-            'level': 'WARNING'
-        },
-        'django.db': {
-            'handlers': ['null', ],
-            'propagate': False,
-        },
-    }
+    },
 }
 
 MIDDLEWARE_CLASSES = (
     # 'mediagenerator.middleware.MediaMiddleware',
     # 'django.middleware.gzip.GZipMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',  # check requests for csrf
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'tam.middleware.loginRequirement.RequireLoginMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",  # check requests for csrf
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "tam.middleware.loginRequirement.RequireLoginMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # 'django.middleware.transaction.TransactionMiddleware',
     #  deprecated in django 1.6
-
-    'tam.middleware.threadlocals.ThreadLocals',
-    'tam.middleware.maintenance_redirect.MaintenanceRedirectMiddleware',
+    "tam.middleware.threadlocals.ThreadLocals",
+    "tam.middleware.maintenance_redirect.MaintenanceRedirectMiddleware",
 )
 
-ROOT_URLCONF = 'urls'
-CSRF_FAILURE_VIEW = 'tam.middleware.loginRequirement.csrf_failure_view'
+ROOT_URLCONF = "urls"
+CSRF_FAILURE_VIEW = "tam.middleware.loginRequirement.csrf_failure_view"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-        ],
-        'OPTIONS': {
-            'context_processors': [
-                'django.contrib.auth.context_processors.auth',
-                'django.template.context_processors.request',
-                'django.template.context_processors.debug',
-                'django.template.context_processors.i18n',
-                'django.template.context_processors.media',
-                'django.template.context_processors.static',
-                'django.template.context_processors.tz',
-                'django.contrib.messages.context_processors.messages',
-
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "OPTIONS": {
+            "context_processors": [
+                "django.contrib.auth.context_processors.auth",
+                "django.template.context_processors.request",
+                "django.template.context_processors.debug",
+                "django.template.context_processors.i18n",
+                "django.template.context_processors.media",
+                "django.template.context_processors.static",
+                "django.template.context_processors.tz",
+                "django.contrib.messages.context_processors.messages",
                 "license.context_processors.license_details",
                 "tam.context_processors.common",
             ],
-            'loaders': (
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ) if DEBUG else (
-                ('django.template.loaders.cached.Loader', (
-                    'django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader',
-                )),
+            "loaders": (
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            )
+            if DEBUG
+            else (
+                (
+                    "django.template.loaders.cached.Loader",
+                    (
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                    ),
+                ),
             ),
         },
     },
 ]
-LICENSE_OWNER = ''  # to be shown on the footer
+LICENSE_OWNER = ""  # to be shown on the footer
 DATI_CONSORZIO = """"""  # to be printed on the invoices
-OWNER_LOGO = 'fatture/logo.jpg'  # relative to media folder
+OWNER_LOGO = "fatture/logo.jpg"  # relative to media folder
 INVOICES_FOOTERS = {}  # a dictionary with <invoinces type>:<list of footers>
 
 INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',  # 'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
-    'django.contrib.admindocs',
-    'django.contrib.humanize',
-
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",  # 'django.contrib.sites',
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.admindocs",
+    "django.contrib.humanize",
+    "anymail",
     # this assetmanager is not more developed
     # and since django 1.2 it requires nothreading
     # 'mediagenerator',
-
-    'pipeline',
-
-    'tam',
-
+    "pipeline",
+    "tam",
     # it's no needed anymore in Django 1.7, thanks for serving us so well
     # 'south',
-
-    'tamArchive',
-
-    'fatturazione',
-
-    'modellog',
-    'securestore',
+    "tamArchive",
+    "fatturazione",
+    "modellog",
+    "securestore",
     # 'license',
-    'tamhooks',
-
-    'django.contrib.admin',
+    "tamhooks",
+    "django.contrib.admin",
 ]
 
 LOGIN_URL = "/login/"
@@ -398,25 +416,25 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 days of session cookies
 use_debug_toolbar = DEBUG and False
 if use_debug_toolbar:
     DEBUG_TOOLBAR_CONFIG = {
-        'JQUERY_URL': '',  # use the page jquery
+        "JQUERY_URL": "",  # use the page jquery
     }
     DEBUG_TOOLBAR_PANELS = [
-        'debug_toolbar.panels.versions.VersionsPanel',
-        'debug_toolbar.panels.timer.TimerPanel',
-        'debug_toolbar.panels.settings.SettingsPanel',
-        'debug_toolbar.panels.headers.HeadersPanel',
-        'debug_toolbar.panels.request.RequestPanel',
-        'debug_toolbar.panels.sql.SQLPanel',
-        'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-        'debug_toolbar.panels.templates.TemplatesPanel',
-        'debug_toolbar.panels.cache.CachePanel',
-        'debug_toolbar.panels.signals.SignalsPanel',
-        'debug_toolbar.panels.logging.LoggingPanel',
-        'debug_toolbar.panels.redirects.RedirectsPanel',
+        "debug_toolbar.panels.versions.VersionsPanel",
+        "debug_toolbar.panels.timer.TimerPanel",
+        "debug_toolbar.panels.settings.SettingsPanel",
+        "debug_toolbar.panels.headers.HeadersPanel",
+        "debug_toolbar.panels.request.RequestPanel",
+        "debug_toolbar.panels.sql.SQLPanel",
+        "debug_toolbar.panels.staticfiles.StaticFilesPanel",
+        "debug_toolbar.panels.templates.TemplatesPanel",
+        "debug_toolbar.panels.cache.CachePanel",
+        "debug_toolbar.panels.signals.SignalsPanel",
+        "debug_toolbar.panels.logging.LoggingPanel",
+        "debug_toolbar.panels.redirects.RedirectsPanel",
         # 'template_timings_panel.panels.TemplateTimings.TemplateTimings',
     ]
     INSTALLED_APPS += [
-        'debug_toolbar',
+        "debug_toolbar",
         # 'template_timings_panel'
     ]
 
@@ -433,9 +451,9 @@ IMPORTO_MASSIMO_CORTA = 16
 
 # ******************* CACHE
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'TaM',
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "TaM",
     }
 }
 
@@ -443,13 +461,17 @@ CACHES = {
 # to know what are the active session for the log
 # SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-NOMI_DEFINIZIONE_FATTURE = ["FattureConsorzio", "FattureNoIVA",
-                            "FattureConducente", "FattureConducenteNoIva",
-                            "Ricevute"]
+NOMI_DEFINIZIONE_FATTURE = [
+    "FattureConsorzio",
+    "FattureNoIVA",
+    "FattureConducente",
+    "FattureConducenteNoIva",
+    "Ricevute",
+]
 MIN_PRICE_FOR_TAXSTAMP = 77.47
 FATTURE_SHOW_VAT_COLUMN = True
 
-SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, 'media_secured')
+SECURE_STORE_LOCATION = os.path.join(PROJECT_PATH, "media_secured")
 SECURE_STORE_CUSTOM_SUBFOLDER = None
 SECURE_URL = "/secure/"
 
@@ -464,32 +486,37 @@ TAM = dict(
     ),
 )
 TAM_PERMANENT_CLOCK = True
-TAM_BACKGROUND = '#FBFFBA'  # the default background
+TAM_BACKGROUND = "#FBFFBA"  # the default background
 TAM_SHOW_CLASSIFICA_FATTURE = False
 
-FORCE_SINGLE_DEVICE_SESSION = False  # when true, the user cannot have multiple active sessions
+FORCE_SINGLE_DEVICE_SESSION = (
+    False  # when true, the user cannot have multiple active sessions
+)
 
 GOOGLE_ANALYTICS_ID = None
 
 # set password hasher, we use Argon as default
 PASSWORD_HASHERS = [
-    'django.contrib.auth.hashers.Argon2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
-    'django.contrib.auth.hashers.BCryptPasswordHasher',
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
+    "django.contrib.auth.hashers.BCryptPasswordHasher",
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-     'OPTIONS': {'min_length': 8}
-     },
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-RATELIMIT_CACHE_BACKEND = 'tam.ratelimit.RateCache'
+RATELIMIT_CACHE_BACKEND = "tam.ratelimit.RateCache"
 
 # This are all settings for the deployment ***
 WEBHOST = "www.hostname.com"  # the main hostname serving the site
@@ -498,15 +525,12 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
     NAME="TaM",  # the name of the process
     HOST="tam",  # the hostname, eventually you can use your .ssh/config
     REMOTE_SSH_PORT=22,
-
     USE_SUPERVISOR=False,
-    SUPERVISOR_JOBNAME='tam',
-
+    SUPERVISOR_JOBNAME="tam",
     GIT_REPOSITORY="git@github.com:dariosky/tam.git",  # repository for clone
     WEBHOST=WEBHOST,
-
     FOLDERS=dict(
-        HOME='/home/user',
+        HOME="/home/user",
         REPOSITORY_FOLDER="{HOME}/repo/tam",
         VENV_FOLDER="{HOME}/.environments/tam",
         REQUIREMENT_PATH="{REPOSITORY_FOLDER}/requirements/requirements.txt",
@@ -514,20 +538,17 @@ DEPLOYMENT = dict(  # defining parameters for the deployment
         MEDIA_FOLDER="{REPOSITORY_FOLDER}/media",  # This is for UGC
         LOGDIR="{REPOSITORY_FOLDER}/logs",
     ),
-
     GUNICORN=dict(
         RUN_GUNICORN_COMMAND="{REPOSITORY_FOLDER}/run_gunicorn",
         PORT=8888,
         PID_FILE="{LOGDIR}/pids/daphne.pid",
         LOG_FILE="{LOGDIR}/daphne.log",
     ),
-
     WORKERS=dict(
         THREADS=4,
         PID_FILE="{LOGDIR}/pids/workers.pid",
         LOG_FILE="{LOGDIR}/workers.log",
     ),
-
     WSGI_APPLICATION="wsgi:application",
     BRAND_FOLDER="brand",  # this is a subfolder, per deployment of static brand assets
 )
@@ -546,35 +567,40 @@ PRENOTAZIONI_QUICK = dict(
 
 
 def preavviso_necessario(requested_date, prenotazione=None):
-    if prenotazione and prenotazione.get('is_collettivo'):
+    if prenotazione and prenotazione.get("is_collettivo"):
         notice_hours = 24
     else:
         notice_hours = 6
-    return notice_required(requested_date,
-                           working_hours=(7, 20),
-                           night_notice=notice_hours, work_notice=notice_hours)
+    return notice_required(
+        requested_date,
+        working_hours=(7, 20),
+        night_notice=notice_hours,
+        work_notice=notice_hours,
+    )
 
 
 PRENOTAZIONI_PREAVVISO_NEEDED_FUNC = preavviso_necessario
 
 # END OF DEFAULTS **************************************************************
 
-settings_file = os.environ.get('TAM_SETTINGS', 'settings_local')
+settings_file = os.environ.get("TAM_SETTINGS", "settings_local")
 try:
     # Dynamically import settings from the specified sys envoronment var
     # from settings_local import *
     print("TAM using {}".format(settings_file))
-    localsets = __import__(settings_file, globals(), locals(), ['*'])
+    localsets = __import__(settings_file, globals(), locals(), ["*"])
     for k in dir(localsets):
         locals()[k] = getattr(localsets, k)
 except ImportError:
-    logging.warning("'%s.py' has not been found." % settings_file +
-                    "Use this to keep out of VC secret settings.")
+    logging.warning(
+        "'%s.py' has not been found." % settings_file
+        + "Use this to keep out of VC secret settings."
+    )
     pass
 
 for app, desc in PLUGGABLE_APPS.items():
     INSTALLED_APPS.append(app)
 
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = "wsgi.application"
 NIGHT_START = (22, 0)
 NIGHT_END = (6, 0)

@@ -30,7 +30,7 @@ requests
 # mails ***
 # djrill was for Mandrill, but their free tier has been suspended
 # djrill
-django-mailgun
+django-anymail[mailgun]==3.0
 
 # proper ssl connections ***
 pyopenssl
