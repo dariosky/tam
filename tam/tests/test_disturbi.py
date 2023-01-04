@@ -421,3 +421,23 @@ class TestSemiLineare(unittest.TestCase, DisturbiTest):
             ),
             {"night": 1.25},
         )
+
+    def test_end_of_the_early_morning_festivo(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 1, 7, 45),
+                data_fine=datetime.datetime(2023, 1, 1, 9, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 0.5},
+        )
+
+    def test_end_of_the_early_morning_feriale(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 4, 7, 45),
+                data_fine=datetime.datetime(2023, 1, 4, 9, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 0.5},
+        )

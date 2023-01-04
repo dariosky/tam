@@ -355,7 +355,7 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         )
         fascia_uno_o_due_disturbi(
             dayMarker.replace(hour=7, minute=0),
-            dayMarker.replace(hour=7, minute=44),
+            dayMarker.replace(hour=7, minute=45),
             data_inizio,
             data_fine,
             punti_fascia=0.5,
@@ -404,7 +404,7 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         )
         fascia_uno_o_due_disturbi(
             dayMarker.replace(hour=7, minute=0),
-            dayMarker.replace(hour=7, minute=44),
+            dayMarker.replace(hour=7, minute=45),
             data_inizio,
             data_fine,
             punti_fascia=0.5,
