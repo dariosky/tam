@@ -417,7 +417,10 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         max_value = max(results.values())
         for k, v in results.items():
             if v == max_value:
-                return {k: v}
+                results: dict
+                results.clear()
+                results[k] = v  # change results inplace
+                return {k: v}  # and return the new
     return {}
 
 

@@ -145,8 +145,6 @@ def update_instance(do_update_requirements=True, justPull=False):
             if do_update_requirements:
                 update_requirements()
 
-            run("python manage.py migrate")
-
             if run("test -d %s" % env.STATIC_FOLDER, quiet=True).failed:
                 puts("Creating static subfolder for generated assets.")
                 run("mkdir -p %s" % env.STATIC_FOLDER)
