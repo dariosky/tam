@@ -7,7 +7,7 @@ def perform_dict_substitutions(d):
     vars = {}
 
     def flat_dict(d):
-        """ Recursively iterate dictionary and flat it to vars """
+        """Recursively iterate dictionary and flat it to vars"""
         for k, v in d.items():
             if isinstance(v, dict):
                 flat_dict(v)  # recurse on sub-dictionary
@@ -17,7 +17,7 @@ def perform_dict_substitutions(d):
     flat_dict(d)  # so everything is in flat
 
     def substitute(d):
-        """ Do substitution until something change """
+        """Do substitution until something change"""
         while True:
             something_changed = False
             for k, v in d.items():

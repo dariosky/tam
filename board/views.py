@@ -9,12 +9,12 @@ from django.utils import timezone
 from board.models import BoardMessage
 
 
-@permission_required('board.view', '/')
-def main(request, template_name='board/bacheca.html'):
+@permission_required("board.view", "/")
+def main(request, template_name="board/bacheca.html"):
     if request.method == "POST":
         # invio senza socket
-        if 'deleteMessage' in request.POST:
-            messageId = request.POST.get('deleteMessage', None)
+        if "deleteMessage" in request.POST:
+            messageId = request.POST.get("deleteMessage", None)
             if messageId:
                 message = BoardMessage.objects.get(id=messageId)
                 if message.author != request.user:
@@ -25,21 +25,23 @@ def main(request, template_name='board/bacheca.html'):
                     messages.success(request, "Messaggio cancellato.")
                     # TODO: Warn via socket of the deleted message
         else:
-            messageText = request.POST.get('m', None)
-            attachment = request.FILES.get('attach', None)
+            messageText = request.POST.get("m", None)
+            attachment = request.FILES.get("attach", None)
             if messageText or attachment:
-                newMessage = BoardMessage(author=request.user,
-                                          message=messageText,
-                                          date=timezone.now(),
-                                          attachment=attachment)
+                newMessage = BoardMessage(
+                    author=request.user,
+                    message=messageText,
+                    date=timezone.now(),
+                    attachment=attachment,
+                )
                 newMessage.save()
                 # TODO: Warn via socket of the new message
-        return HttpResponseRedirect(reverse('board-home'))
+        return HttpResponseRedirect(reverse("board-home"))
 
     board_messages = BoardMessage.objects.filter(active=True)
 
     return render(
         request,
         template_name,
-        {'board_messages': board_messages},
+        {"board_messages": board_messages},
     )

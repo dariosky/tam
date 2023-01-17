@@ -8,18 +8,17 @@ from django.contrib.auth.signals import user_logged_in
 from django.db.models import Q
 from django.utils import timezone
 
-logger = logging.getLogger('tam.appconfig')
+logger = logging.getLogger("tam.appconfig")
 
 
 def get_concurrent_sessions(request, user):
     results = []
     for session in Session.objects.filter(
-        ~Q(session_key=request.session.session_key),
-        expire_date__gte=timezone.now()
+        ~Q(session_key=request.session.session_key), expire_date__gte=timezone.now()
     ):
         data = session.get_decoded()
         session.decoded = data
-        if data.get('_auth_user_id', None) == str(user.id):
+        if data.get("_auth_user_id", None) == str(user.id):
             results.append(session)
     return results
 

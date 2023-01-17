@@ -1,5 +1,5 @@
 # coding: utf-8
-if __name__ == '__main__':
+if __name__ == "__main__":
     import django
 
     django.setup()
@@ -15,18 +15,24 @@ from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
 ADMIN_MAIL = ",".join(["%s <%s>" % adm for adm in settings.ADMINS])
-logger = logging.getLogger('tam.mail')
+logger = logging.getLogger("tam.mail")
 
 
-def notifyByMail(to=None, subject="",
-                 context=None, contextText=None,
-                 messageTxtTemplateName=None, messageHtmlTemplateName=None, bcc=None,
-                 body=None,
-                 reply_to=None,
-                 attachments=None,
-                 from_email=None,
-                 **kwargs):
-    """ Warn with a mail when some event occour """
+def notifyByMail(
+    to=None,
+    subject="",
+    context=None,
+    contextText=None,
+    messageTxtTemplateName=None,
+    messageHtmlTemplateName=None,
+    bcc=None,
+    body=None,
+    reply_to=None,
+    attachments=None,
+    from_email=None,
+    **kwargs
+):
+    """Warn with a mail when some event occour"""
     if not context:
         context = {}
     if attachments is None:
@@ -72,42 +78,42 @@ def notifyByMail(to=None, subject="",
             htmlMessage = htmlTemplate.render(context_html)
         else:  # default html message
             htmlTemplate = get_template("prenotazioni_email/htmlMailTemplate.html")
-            htmlMessage = htmlTemplate.render({"message": messageText,  # generic html message
-                                               "logofilename": os.path.basename(logo_filename)}
-                                              )
+            htmlMessage = htmlTemplate.render(
+                {
+                    "message": messageText,  # generic html message
+                    "logofilename": os.path.basename(logo_filename),
+                }
+            )
 
     if signatureTXT:
-        messageText += u"\n-- \n" + signatureTXT
-    mail_data = {'from': from_email,
-                 'to': to,
-                 'subject': subject,
-                 }
+        messageText += "\n-- \n" + signatureTXT
+    mail_data = {
+        "from": from_email,
+        "to": to,
+        "subject": subject,
+    }
 
     for value, mail_field in (
-        (settings.MAIL_TAG, 'o:tag'),
-        (bcc, 'bcc'),
-        (messageText, 'text'),
-        (htmlMessage, 'html'),
-        (reply_to, 'h:Reply-To'),
+        (settings.MAIL_TAG, "o:tag"),
+        (bcc, "bcc"),
+        (messageText, "text"),
+        (htmlMessage, "html"),
+        (reply_to, "h:Reply-To"),
     ):
         if value:
             mail_data[mail_field] = value
 
-    with open(logo_filename, 'rb') as f:
-        files = [('inline', f)]
+    with open(logo_filename, "rb") as f:
+        files = [("inline", f)]
         for attachment in attachments:
             if isinstance(attachment, str):
                 # attachment is a filename
-                files.append(
-                    ('attachment', open(attachment))
-                )
+                files.append(("attachment", open(attachment)))
             elif isinstance(attachment, MIMEBase):
                 filename = attachment.get_filename()
                 content_type = attachment.get_content_type()
                 file_like = StringIO(attachment.get_payload())
-                files.append(
-                    ('attachment', (filename, file_like))
-                )
+                files.append(("attachment", (filename, file_like)))
             else:
                 raise Exception("What is this attachment? %s" % type(attachment))
 
@@ -115,7 +121,7 @@ def notifyByMail(to=None, subject="",
             "https://api.mailgun.net/v3/%s/messages" % settings.MAILGUN_SERVER_NAME,
             auth=("api", settings.MAILGUN_ACCESS_KEY),
             data=mail_data,
-            files=files
+            files=files,
         )
 
 
@@ -123,11 +129,9 @@ if __name__ == "__main__":
     notifyByMail(
         to=[ADMIN_MAIL],
         subject="Testing confirm mail",
-        context={
-        },
+        context={},
         reply_to=settings.EMAIL_CONSORZIO,
         messageTxtTemplateName="prenotazioni_email/conferma.inc.txt",
         messageHtmlTemplateName="prenotazioni_email/conferma.inc.html",
-
     )
     print("Fine.")

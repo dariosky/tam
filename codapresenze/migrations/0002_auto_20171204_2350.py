@@ -9,33 +9,51 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('codapresenze', '0001_initial'),
+        ("codapresenze", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='StoricoPresenze',
+            name="StoricoPresenze",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('start_date', models.DateTimeField(auto_now_add=True)),
-                ('place', models.TextField(max_length=30)),
-                ('minutes', models.IntegerField()),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("start_date", models.DateTimeField(auto_now_add=True)),
+                ("place", models.TextField(max_length=30)),
+                ("minutes", models.IntegerField()),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Presenza',
-                'verbose_name_plural': 'Presenze',
-                'ordering': ['start_date'],
-                'permissions': (('view', 'Visualizzazione coda'),),
+                "verbose_name": "Presenza",
+                "verbose_name_plural": "Presenze",
+                "ordering": ["start_date"],
+                "permissions": (("view", "Visualizzazione coda"),),
             },
         ),
         migrations.AlterField(
-            model_name='codapresenze',
-            name='utente',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="codapresenze",
+            name="utente",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddIndex(
-            model_name='storicopresenze',
-            index=models.Index(fields=['user', 'minutes'], name='codapresenz_user_id_3c222d_idx'),
+            model_name="storicopresenze",
+            index=models.Index(
+                fields=["user", "minutes"], name="codapresenz_user_id_3c222d_idx"
+            ),
         ),
     ]

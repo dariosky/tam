@@ -15,18 +15,47 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='BoardMessage',
+            name="BoardMessage",
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('date', models.DateTimeField(verbose_name=b'Data di inserimento')),
-                ('message', models.TextField(null=True, verbose_name=b'Messaggio', blank=True)),
-                ('attachment', models.FileField(storage=tam.models.UnSerializableFileSystemStorage(), null=True, upload_to=board.models.board_upload_to, blank=True)),
-                ('active', models.BooleanField(default=True, verbose_name=b'Messaggio visibile')),
-                ('author', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT)),
+                (
+                    "id",
+                    models.AutoField(
+                        verbose_name="ID",
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True,
+                    ),
+                ),
+                ("date", models.DateTimeField(verbose_name=b"Data di inserimento")),
+                (
+                    "message",
+                    models.TextField(null=True, verbose_name=b"Messaggio", blank=True),
+                ),
+                (
+                    "attachment",
+                    models.FileField(
+                        storage=tam.models.UnSerializableFileSystemStorage(),
+                        null=True,
+                        upload_to=board.models.board_upload_to,
+                        blank=True,
+                    ),
+                ),
+                (
+                    "active",
+                    models.BooleanField(
+                        default=True, verbose_name=b"Messaggio visibile"
+                    ),
+                ),
+                (
+                    "author",
+                    models.ForeignKey(
+                        to=settings.AUTH_USER_MODEL, on_delete=models.PROTECT
+                    ),
+                ),
             ],
             options={
-                'ordering': ['-date'],
-                'permissions': (('view', 'Visualizzazione bacheca'),),
+                "ordering": ["-date"],
+                "permissions": (("view", "Visualizzazione bacheca"),),
             },
             bases=(models.Model,),
         ),

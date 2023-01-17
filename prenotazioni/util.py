@@ -4,7 +4,7 @@ from tam.views.tamUtils import getDefault
 
 
 def prenotaCorsa(prenotazione, dontsave=False):
-    """" Crea il viaggio e lo associa alla corsa """
+    """ " Crea il viaggio e lo associa alla corsa"""
 
     utentePrenotazioni = prenotazione.owner
     profilo, created = ProfiloUtente.objects.get_or_create(user=utentePrenotazioni.user)
@@ -25,24 +25,19 @@ def prenotaCorsa(prenotazione, dontsave=False):
     cliente = prenotazione.cliente
     viaggio = Viaggio(
         data=prenotazione.data_corsa,
-
         da=partenza,
         a=arrivo,
         luogoDiRiferimento=profilo.luogo,  # è il riferimento di chi ha creato l'utente
-
         numero_passeggeri=prenotazione.pax,
         esclusivo=not prenotazione.is_collettivo,
         cliente=cliente,
         prezzo=0,
-
         note=note_complete,
-
         incassato_albergo=cliente.incassato_albergo,
         fatturazione=cliente.fatturazione,
         pagamento_differito=cliente.pagamento_differito,
-        tipo_commissione=cliente.tipo_commissione if cliente.commissione > 0 else 'F',
+        tipo_commissione=cliente.tipo_commissione if cliente.commissione > 0 else "F",
         commissione=cliente.commissione,
-
     )
     default = getDefault(viaggio)
     for attribute_name in default:
@@ -51,9 +46,9 @@ def prenotaCorsa(prenotazione, dontsave=False):
     viaggio.is_prenotazione = True
     pagamento = prenotazione.pagamento
 
-    if pagamento == 'F':
+    if pagamento == "F":
         viaggio.fatturazione = True
-    elif pagamento == 'H':
+    elif pagamento == "H":
         viaggio.incassato_albergo = True
 
     if dontsave is False:
@@ -62,13 +57,13 @@ def prenotaCorsa(prenotazione, dontsave=False):
     return viaggio
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import datetime
     from prenotazioni.models import Prenotazione
 
     viaggi = Viaggio.objects.filter(
         data__gt=datetime.datetime(2012, 11, 14, 0, 0),
-        data__lt=datetime.datetime(2012, 11, 14, 22, 0)
+        data__lt=datetime.datetime(2012, 11, 14, 22, 0),
     )
     viaggi = viaggi.exclude(note__icontains="Creato a mano")
     viaggi.delete()

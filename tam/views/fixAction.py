@@ -18,18 +18,19 @@ from django.contrib import messages
 @user_passes_test(lambda user: user.is_superuser)
 def fixAction(request, template_name="utils/fixAction.html"):
     if not request.user.is_superuser:
-        messages.error(request, "Devi avere i superpoteri per eseguire le azioni correttive.")
+        messages.error(
+            request, "Devi avere i superpoteri per eseguire le azioni correttive."
+        )
         return HttpResponseRedirect(reverse("tamUtil"))
 
     messageLines = []
     error = ""
-    if request.POST.get('associate-drivers'):
+    if request.POST.get("associate-drivers"):
         unassociated_drivers = Conducente.objects.filter(user__isnull=True, attivo=True)
         messageLines.append(
-            'We have %d unassociated drivers' % len(unassociated_drivers)
+            "We have %d unassociated drivers" % len(unassociated_drivers)
         )
-        available_users = User.objects.filter(is_active=True,
-                                              prenotazioni__isnull=True)
+        available_users = User.objects.filter(is_active=True, prenotazioni__isnull=True)
         for driver in unassociated_drivers:
             maybe_users = available_users.filter(username__in=["socio%s" % driver.nick])
             if maybe_users:
@@ -41,37 +42,41 @@ def fixAction(request, template_name="utils/fixAction.html"):
                 else:
                     messageLines.append(f"Multiple possible associations with {driver}")
 
-    #	messageLines.append("Nessuna azione correttiva impostata. Meglio tenere tutto fermo di default.")
-    if request.POST.get('toV2'):
+    # 	messageLines.append("Nessuna azione correttiva impostata. Meglio tenere tutto fermo di default.")
+    if request.POST.get("toV2"):
         # ===========================================================================
         # Azione di aggiornamento alla 2.0
         # Aggiungo lo speciale ai luoghi in base al nome
         # Effettuo il vacuum del DB
         from tamArchive.tasks import vacuum_db
 
-        messageLines.append('Imposto gli speciali sui luoghi con stazione/aer* nel nome.')
-        stazioni = Luogo.objects.filter(nome__icontains='stazione').exclude(speciale='S')
+        messageLines.append(
+            "Imposto gli speciali sui luoghi con stazione/aer* nel nome."
+        )
+        stazioni = Luogo.objects.filter(nome__icontains="stazione").exclude(
+            speciale="S"
+        )
         if len(stazioni):
-            messageLines.append('%d stazioni trovate:' % len(stazioni))
+            messageLines.append("%d stazioni trovate:" % len(stazioni))
         for stazione in stazioni:
-            stazione.speciale = 'S'
+            stazione.speciale = "S"
             stazione.save()
             messageLines.append(stazione.nome)
-        aeroporti = Luogo.objects.filter(nome__icontains=' aer').exclude(speciale='A')
+        aeroporti = Luogo.objects.filter(nome__icontains=" aer").exclude(speciale="A")
         if len(aeroporti):
-            messageLines.append('%d aeroporti trovati:' % len(aeroporti))
+            messageLines.append("%d aeroporti trovati:" % len(aeroporti))
         for aeroporto in aeroporti:
-            aeroporto.speciale = 'A'
+            aeroporto.speciale = "A"
             aeroporto.save()
             messageLines.append(aeroporto.nome)
 
-        gruppo_potenti = Group.objects.get(name='Potente')
-        permessiDaAggiungere = ('get_backup', 'can_backup', 'archive', 'flat')
+        gruppo_potenti = Group.objects.get(name="Potente")
+        permessiDaAggiungere = ("get_backup", "can_backup", "archive", "flat")
         for nomePermesso in permessiDaAggiungere:
             p = Permission.objects.get(codename=nomePermesso)
             gruppo_potenti.permissions.add(p)
-            messageLines.append('Do agli utenti potenti: %s' % nomePermesso)
-        messageLines.append('Vacuum DB.')
+            messageLines.append("Do agli utenti potenti: %s" % nomePermesso)
+        messageLines.append("Vacuum DB.")
         vacuum_db()
         # ===========================================================================
 
@@ -80,15 +85,27 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
         corseDaSistemare = Viaggio.objects.filter(
             data__gt=datetime.date.today() - datetime.timedelta(days=60),
-            padre__isnull=True)
+            padre__isnull=True,
+        )
         # corseDaSistemare = Viaggio.objects.filter(pk=44068, padre__isnull=True)
         for corsa in corseDaSistemare:
             oldDPadova = corsa.prezzoDoppioPadova
             oldVenezia = corsa.prezzoVenezia
             corsa.updatePrecomp(forceDontSave=True)
-            if oldDPadova != corsa.prezzoDoppioPadova or oldVenezia != corsa.prezzoVenezia:
-                messageLines.append("%s\n   DPD: %d->%d VE: %d->%d" % (
-                    corsa, oldDPadova, corsa.prezzoDoppioPadova, oldVenezia, corsa.prezzoVenezia))
+            if (
+                oldDPadova != corsa.prezzoDoppioPadova
+                or oldVenezia != corsa.prezzoVenezia
+            ):
+                messageLines.append(
+                    "%s\n   DPD: %d->%d VE: %d->%d"
+                    % (
+                        corsa,
+                        oldDPadova,
+                        corsa.prezzoDoppioPadova,
+                        oldVenezia,
+                        corsa.prezzoVenezia,
+                    )
+                )
                 corseCambiate += 1
             corse += 1
         messageLines.append("Corse aggiornate %d/%d" % (corseCambiate, corse))
@@ -99,16 +116,22 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
         def status():
             corsa = Viaggio.objects.filter(pk=35562)[0]
-            messageLines.append("la prima del %s è conguagliata di %d km su %d punti. Andrebbe 360."
-                                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
+            messageLines.append(
+                "la prima del %s è conguagliata di %d km su %d punti. Andrebbe 360."
+                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata)
+            )
 
             corsa = Viaggio.objects.filter(pk=38740)[0]
-            messageLines.append("la seconda del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-                                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
+            messageLines.append(
+                "la seconda del %s è conguagliata di %d km su %d punti. Andrebbe 0."
+                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata)
+            )
 
             corsa = Viaggio.objects.filter(pk=38887)[0]
-            messageLines.append("la terza del %s è conguagliata di %d km su %d punti. Andrebbe 0."
-                                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata))
+            messageLines.append(
+                "la terza del %s è conguagliata di %d km su %d punti. Andrebbe 0."
+                % (corsa.date_start, corsa.km_conguagliati, corsa.punti_abbinata)
+            )
 
         status()
 
@@ -130,27 +153,35 @@ def fixAction(request, template_name="utils/fixAction.html"):
 
         status()
 
-    if request.POST.get('fixDisturbi'):
+    if request.POST.get("fixDisturbi"):
         # Per le corse abbinate, dove l'ultimo fratello è un aereoporto ricalcolo i distrubi
         print("Refixo")
-        viaggi = Viaggio.objects.filter(is_abbinata__in=('P', 'S'),
-                                        date_start__gt=datetime.datetime(2012, 3, 1),
-                                        padre=None)
+        viaggi = Viaggio.objects.filter(
+            is_abbinata__in=("P", "S"),
+            date_start__gt=datetime.datetime(2012, 3, 1),
+            padre=None,
+        )
         sistemati = 0
         for viaggio in viaggi:
             ultimaCorsa = viaggio.lastfratello()
-            if ultimaCorsa.da.speciale == 'A':
+            if ultimaCorsa.da.speciale == "A":
 
-                disturbiGiusti = trovaDisturbi(viaggio.date_start,
-                                               viaggio.get_date_end(recurse=True),
-                                               metodo=fasce_semilineari)
-                notturniGiusti = disturbiGiusti.get('night', 0)
-                diurniGiusti = disturbiGiusti.get('morning', 0)
-                if diurniGiusti != viaggio.punti_diurni or notturniGiusti != viaggio.punti_notturni:
+                disturbiGiusti = trovaDisturbi(
+                    viaggio.date_start,
+                    viaggio.get_date_end(recurse=True),
+                    metodo=fasce_semilineari,
+                )
+                notturniGiusti = disturbiGiusti.get("night", 0)
+                diurniGiusti = disturbiGiusti.get("morning", 0)
+                if (
+                    diurniGiusti != viaggio.punti_diurni
+                    or notturniGiusti != viaggio.punti_notturni
+                ):
                     messageLines.append(viaggio)
                     messageLines.append(ultimaCorsa)
                     messageLines.append(
-                        "prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni))
+                        "prima %s/%s" % (viaggio.punti_diurni, viaggio.punti_notturni)
+                    )
                     messageLines.append("dopo %s/%s" % (diurniGiusti, notturniGiusti))
                     messageLines.append(" ")
                     viaggio.punti_diurni = diurniGiusti
@@ -179,7 +210,9 @@ def fixAction(request, template_name="utils/fixAction.html"):
         Viaggio.objects.all().delete()
 
     if request.POST.get("renewTragitto"):
-        messageLines.append("Aggiorno il tragitto precalcolato, senza toccare nient'altro.")
+        messageLines.append(
+            "Aggiorno il tragitto precalcolato, senza toccare nient'altro."
+        )
         # passaggio da mediagenerator a django-pipeline...
         #  gli asset precalcolati li lascio senza timestamp
         query_asset_sub = r"""
@@ -232,45 +265,60 @@ def fixAction(request, template_name="utils/fixAction.html"):
                             SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport[\d]*)-[a-z0-9]*\.png', '/static/\1.png', 'g')
                             WHERE html_tragitto LIKE '%/mediaprod/flag/%' AND html_tragitto LIKE '%luogo-airport%';
 
-                          """.replace("%", "%%")
+                          """.replace(
+            "%", "%%"
+        )
         from django.db import connection
 
         cursor = connection.cursor()
         cursor.execute(query_asset_sub)
         connection.commit()
         prossimiviaggi = Viaggio.objects.filter(
-            data__gt=tamdates.ita_today() - datetime.timedelta(days=15))
-        messageLines.append("Ricalcolo completamente i prossimi viaggi: %s." % len(prossimiviaggi))
+            data__gt=tamdates.ita_today() - datetime.timedelta(days=15)
+        )
+        messageLines.append(
+            "Ricalcolo completamente i prossimi viaggi: %s." % len(prossimiviaggi)
+        )
         for viaggio in prossimiviaggi:
             viaggio.html_tragitto = viaggio.get_html_tragitto()
             viaggio.save()
 
     if request.POST.get("setEndDates"):
         # add end dates to latest viaggio (I suppose we don't need it the old ones)
-        viaggi = Viaggio.objects.filter(date_end=None, padre_id=None,
-                                        data__gt=tamdates.ita_today() - datetime.timedelta(days=15))
+        viaggi = Viaggio.objects.filter(
+            date_end=None,
+            padre_id=None,
+            data__gt=tamdates.ita_today() - datetime.timedelta(days=15),
+        )
         messageLines.append("Imposto la data di fine a %d corse." % len(viaggi))
         for viaggio in viaggi:
             viaggio.date_end = viaggio.get_date_end(recurse=True)
             viaggio.save(updateViaggi=False)
 
-    if request.POST.get('setCustomPermissions'):
+    if request.POST.get("setCustomPermissions"):
         stats_non_model, created = ContentType.objects.get_or_create(
-            app_label='stats', model='unused'
+            app_label="stats", model="unused"
         )
 
         can_see_stats, created = Permission.objects.get_or_create(
-            name='can see stats', content_type=stats_non_model,
-            codename='can_see_stats')
+            name="can see stats", content_type=stats_non_model, codename="can_see_stats"
+        )
         messageLines.append(
-            "Stats permissions where already there" if not created else "Stats permissions created")
+            "Stats permissions where already there"
+            if not created
+            else "Stats permissions created"
+        )
 
-    if request.POST.get('consolidateLog'):
-        messageLines.append("Starting moving log files from SQLITE to the default connection")
-        sourceLogs = ActionLog.objects.using('modellog').all()
+    if request.POST.get("consolidateLog"):
+        messageLines.append(
+            "Starting moving log files from SQLITE to the default connection"
+        )
+        sourceLogs = ActionLog.objects.using("modellog").all()
         if len(sourceLogs) > 0:
             existing = ActionLog.objects.all()
-            messageLines.append("Deleting the existing logs form the default: %d" % len(existing))
+            messageLines.append(
+                "Deleting the existing logs form the default: %d" % len(existing)
+            )
             existing.delete()
             messageLines.append("%d log records to move" % len(sourceLogs))
             ActionLog.objects.bulk_create(sourceLogs, batch_size=1000)
@@ -279,10 +327,14 @@ def fixAction(request, template_name="utils/fixAction.html"):
             messageLines.append("No records to move in SQLITE")
         cursor = db.connection.cursor()
         messageLines.append("Resetting log sequence")
-        cursor.execute("""
+        cursor.execute(
+            """
         BEGIN;
           SELECT setval(pg_get_serial_sequence('"modellog_actionlog"','id'), coalesce(max("id"), 1), max("id") IS NOT NULL) FROM "modellog_actionlog";
         COMMIT;
-        """)
+        """
+        )
 
-    return render(request, template_name, {"messageLines": messageLines, "error": error})
+    return render(
+        request, template_name, {"messageLines": messageLines, "error": error}
+    )

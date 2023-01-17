@@ -8,68 +8,80 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tamArchive', '0001_initial'),
+        ("tamArchive", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='a',
-            field=models.CharField(max_length=25, verbose_name='A'),
+            model_name="viaggioarchive",
+            name="a",
+            field=models.CharField(max_length=25, verbose_name="A"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='cliente',
-            field=models.CharField(max_length=40, null=True, verbose_name='A'),
+            model_name="viaggioarchive",
+            name="cliente",
+            field=models.CharField(max_length=40, null=True, verbose_name="A"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='conducente',
-            field=models.CharField(blank=True, db_index=True, max_length=5, null=True, verbose_name='Conducente'),
+            model_name="viaggioarchive",
+            name="conducente",
+            field=models.CharField(
+                blank=True,
+                db_index=True,
+                max_length=5,
+                null=True,
+                verbose_name="Conducente",
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='da',
-            field=models.CharField(max_length=25, verbose_name='Da'),
+            model_name="viaggioarchive",
+            name="da",
+            field=models.CharField(max_length=25, verbose_name="Da"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='data',
-            field=models.DateTimeField(db_index=True, verbose_name='Data della corsa'),
+            model_name="viaggioarchive",
+            name="data",
+            field=models.DateTimeField(db_index=True, verbose_name="Data della corsa"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='flag_cartaDiCredito',
-            field=models.BooleanField(default=False, verbose_name='Pagamento con carta di credito'),
+            model_name="viaggioarchive",
+            name="flag_cartaDiCredito",
+            field=models.BooleanField(
+                default=False, verbose_name="Pagamento con carta di credito"
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='flag_esclusivo',
-            field=models.BooleanField(default=True, verbose_name='Servizio taxi'),
+            model_name="viaggioarchive",
+            name="flag_esclusivo",
+            field=models.BooleanField(default=True, verbose_name="Servizio taxi"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='flag_fatturazione',
-            field=models.BooleanField(default=False, verbose_name='Fatturazione richiesta'),
+            model_name="viaggioarchive",
+            name="flag_fatturazione",
+            field=models.BooleanField(
+                default=False, verbose_name="Fatturazione richiesta"
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='flag_fineMese',
-            field=models.BooleanField(default=False, verbose_name='Conto fine mese'),
+            model_name="viaggioarchive",
+            name="flag_fineMese",
+            field=models.BooleanField(default=False, verbose_name="Conto fine mese"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='flag_richiesto',
-            field=models.BooleanField(default=False, verbose_name='Conducente richiesto'),
+            model_name="viaggioarchive",
+            name="flag_richiesto",
+            field=models.BooleanField(
+                default=False, verbose_name="Conducente richiesto"
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='path',
-            field=models.TextField(blank=True, verbose_name='Percorso effettuato'),
+            model_name="viaggioarchive",
+            name="path",
+            field=models.TextField(blank=True, verbose_name="Percorso effettuato"),
         ),
         migrations.AlterField(
-            model_name='viaggioarchive',
-            name='prezzo_detail',
-            field=models.TextField(blank=True, verbose_name='Dettagli prezzo'),
+            model_name="viaggioarchive",
+            name="prezzo_detail",
+            field=models.TextField(blank=True, verbose_name="Dettagli prezzo"),
         ),
     ]

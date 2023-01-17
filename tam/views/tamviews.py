@@ -19,30 +19,44 @@ from django.shortcuts import HttpResponse, get_object_or_404, render
 from django.utils.translation import ugettext as _
 
 from tam import tamdates
-from tam.models import (Luogo, get_classifiche, Cliente, \
-                        PrezzoListino, Bacino, Tratta, Conducente, Listino, \
-                        ProfiloUtente, Viaggio, Passeggero)
+from tam.models import (
+    Luogo,
+    get_classifiche,
+    Cliente,
+    PrezzoListino,
+    Bacino,
+    Tratta,
+    Conducente,
+    Listino,
+    ProfiloUtente,
+    Viaggio,
+    Passeggero,
+)
 from tam.views.genericUtils import getActionName, copy_model_instance
 from . import pdfListino
 
 
-class Step1Data():
-    """ This object serialize and deserialize the data from the step1 of a new run """
+class Step1Data:
+    """This object serialize and deserialize the data from the step1 of a new run"""
+
     REFERENCE_FIELDS_NAMES = (
-        "da", "a", "passeggero",
-        "cliente")  # gli initial dei riferimenti devono essere chiavi non oggetti
+        "da",
+        "a",
+        "passeggero",
+        "cliente",
+    )  # gli initial dei riferimenti devono essere chiavi non oggetti
 
     def __init__(self):
         pass
 
     @staticmethod
     def serialize(cleaned_data):
-        """ Get the form cleaned_data of step1 and return an array with all json-serializable """
+        """Get the form cleaned_data of step1 and return an array with all json-serializable"""
         result = cleaned_data.copy()
         for fieldname in Step1Data.REFERENCE_FIELDS_NAMES:
             if result[fieldname]:
                 result[fieldname] = result[fieldname].pk
-        result['data'] = result['data'].isoformat()
+        result["data"] = result["data"].isoformat()
         # print "serialize to:", result
         return result
 
@@ -53,13 +67,17 @@ class Step1Data():
         result = step1_data.copy()
         if "privato" in result:
             del result["privato"]
-        result['da'] = Luogo.objects.get(id=result['da'])
-        result['a'] = Luogo.objects.get(id=result['a'])
-        result['cliente'] = Cliente.objects.get(id=result['cliente']) if \
-            result['cliente'] else None
-        result['passeggero'] = Passeggero.objects.get(
-            id=result['passeggero']) if result['passeggero'] else None
-        result['data'] = dateutil.parser.parse(result['data'])
+        result["da"] = Luogo.objects.get(id=result["da"])
+        result["a"] = Luogo.objects.get(id=result["a"])
+        result["cliente"] = (
+            Cliente.objects.get(id=result["cliente"]) if result["cliente"] else None
+        )
+        result["passeggero"] = (
+            Passeggero.objects.get(id=result["passeggero"])
+            if result["passeggero"]
+            else None
+        )
+        result["data"] = dateutil.parser.parse(result["data"])
         # print result
         return result
 
@@ -83,7 +101,7 @@ class SmartPager(object):
 
 
 def listaCorse(request, template_name="corse/lista.html"):
-    """ Schermata principale con la lista di tutte le corse """
+    """Schermata principale con la lista di tutte le corse"""
     user = request.user
     profilo, created = ProfiloUtente.objects.get_or_create(user=user)
     dontHilightFirst = True
@@ -94,7 +112,7 @@ def listaCorse(request, template_name="corse/lista.html"):
     #  messages.warning(request, "Messaggio di warning.")
     #  messages.error(request, "Messaggio di error.")
 
-    outputFormat = request.GET.get('format', None)
+    outputFormat = request.GET.get("format", None)
 
     #  precalcolati=0
     #  for viaggio in Viaggio.objects.all(): #filter(html_tragitto=""):
@@ -114,28 +132,34 @@ def listaCorse(request, template_name="corse/lista.html"):
     #    logging.debug("Rimossi gli abbuoni variabili da %d viaggi"%viaggi_con_abbuoni.count())
 
     if request.method == "POST":
-        if not user.has_perm('tam.change_viaggio'):
-            messages.error(request,
-                           "Non hai il permesso di modificare le corse.")
+        if not user.has_perm("tam.change_viaggio"):
+            messages.error(request, "Non hai il permesso di modificare le corse.")
             return HttpResponseRedirect(reverse("tamCorse"))
 
-        if 'assoType' in request.POST and request.POST['assoType']:
-            gestisciAssociazioni(request, request.POST['assoType'],
-                                 request.POST.getlist('viaggioId'))
+        if "assoType" in request.POST and request.POST["assoType"]:
+            gestisciAssociazioni(
+                request, request.POST["assoType"], request.POST.getlist("viaggioId")
+            )
             return HttpResponseRedirect("/")
-        if "confirmed" in request.POST and "viaggio" in request.POST and "conducente" in request.POST:
+        if (
+            "confirmed" in request.POST
+            and "viaggio" in request.POST
+            and "conducente" in request.POST
+        ):
             try:
                 viaggio = Viaggio.objects.get(pk=request.POST["viaggio"])
             except Viaggio.DoesNotExist:
-                messages.error(request,
-                               "Il viaggio che cerchi di confermare non esiste più.")
+                messages.error(
+                    request, "Il viaggio che cerchi di confermare non esiste più."
+                )
                 return HttpResponseRedirect(reverse("tamCorse"))
             if viaggio.confirmed():
                 messages.error(request, "Il viaggio è già stato confermato.")
                 return HttpResponseRedirect(reverse("tamCorse"))
             if viaggio.padre:
-                messages.error(request,
-                               "Non puoi cambiare il conducente a un viaggio figlio.")
+                messages.error(
+                    request, "Non puoi cambiare il conducente a un viaggio figlio."
+                )
                 return HttpResponseRedirect(reverse("tamCorse"))
             conducente = Conducente.objects.get(pk=request.POST["conducente"])
             viaggio.conducente = conducente
@@ -146,48 +170,60 @@ def listaCorse(request, template_name="corse/lista.html"):
     if profilo:
         luogoRiferimento = profilo.luogo
         if not luogoRiferimento:
-            messages.warning(request,
-                             "Non hai ancora definito un luogo preferito.")
+            messages.warning(request, "Non hai ancora definito un luogo preferito.")
 
             #  logging.debug("Comincio a caricare la lista corse")
-    conducenti = Conducente.objects.all()  # list of all conducenti (even inactive ones) to filter
-    clienti = Cliente.objects.filter(attivo=True).only('id', "nome")
-    today = tamdates.ita_today().date()  # today to compare with viaggio.date (on template)
+    conducenti = (
+        Conducente.objects.all()
+    )  # list of all conducenti (even inactive ones) to filter
+    clienti = Cliente.objects.filter(attivo=True).only("id", "nome")
+    today = (
+        tamdates.ita_today().date()
+    )  # today to compare with viaggio.date (on template)
     adesso = tamdates.ita_now()
     distinct = False
 
     # ------------------ raccolgo tutti i possibili filtri
     filtriTipo = [
-        u"Partenze", u"Arrivi",
-        u"Fuori classifica",
-        u"Venezia", u"Padova", u"Doppi Venezia", u"Doppi Padova",
+        "Partenze",
+        "Arrivi",
+        "Fuori classifica",
+        "Venezia",
+        "Padova",
+        "Doppi Venezia",
+        "Doppi Padova",
     ]
-    if 'prenotazioni' in settings.PLUGGABLE_APPS:
+    if "prenotazioni" in settings.PLUGGABLE_APPS:
         filtriTipo.append("Prenotazioni")
 
-    filtriFlag = [u'Fatturate', u'Posticipate', u'Conto fine mese',
-                  u'Carta di credito',
-                  u'Quote consorzio', u'No quota consorzio',
-                  'Abbuoni',
-                  'Sup.diurni', 'Sup.notturni',
-                  ]
+    filtriFlag = [
+        "Fatturate",
+        "Posticipate",
+        "Conto fine mese",
+        "Carta di credito",
+        "Quote consorzio",
+        "No quota consorzio",
+        "Abbuoni",
+        "Sup.diurni",
+        "Sup.notturni",
+    ]
 
-    if u"filterFlag" in request.GET:
+    if "filterFlag" in request.GET:
         filterFlag = request.GET["filterFlag"]
         request.session["filterFlag"] = filterFlag
     else:
-        filterFlag = request.session.get("filterFlag", u"Tutti i flag")
+        filterFlag = request.session.get("filterFlag", "Tutti i flag")
 
-    if u"filterType" in request.GET:
+    if "filterType" in request.GET:
         filterType = request.GET["filterType"]
         request.session["filterType"] = filterType
     else:
-        filterType = request.session.get("filterType", u"Tutti i tipi")
+        filterType = request.session.get("filterType", "Tutti i tipi")
 
-    if u"filterConducente" in request.GET:
+    if "filterConducente" in request.GET:
         filterConducente = request.GET["filterConducente"]
         # filterConducente should be an int or one of these few special string
-        if filterConducente not in ("Non confermate", "", 'bus'):
+        if filterConducente not in ("Non confermate", "", "bus"):
             try:
                 filterConducente = int(filterConducente)
             except:
@@ -196,7 +232,7 @@ def listaCorse(request, template_name="corse/lista.html"):
     else:
         filterConducente = request.session.get("filterConducente", None)
 
-    if u"filterCliente" in request.GET:
+    if "filterCliente" in request.GET:
         filterCliente = request.GET["filterCliente"]
         if filterCliente != "Privato":
             try:
@@ -207,7 +243,7 @@ def listaCorse(request, template_name="corse/lista.html"):
     else:
         filterCliente = request.session.get("filterCliente", None)
 
-    if u'filterPrivato' in request.GET:
+    if "filterPrivato" in request.GET:
         filterPrivato = request.GET["filterPrivato"]
         filterCliente = ""
     # non uso session per filterPrivato
@@ -216,34 +252,43 @@ def listaCorse(request, template_name="corse/lista.html"):
 
     viaggi = Viaggio.objects.all()  # mostro tutti i figli, non raggruppo per padre
     # viaggi = viaggi.filter(Q(padre_id=81833) | Q(id=81833)) #TMP:
-    if filterCliente or (
-            filterFlag != "Tutti i flag") or outputFormat:  # non raggruppo
+    if filterCliente or (filterFlag != "Tutti i flag") or outputFormat:  # non raggruppo
         distinct = True
 
     # viaggi=Viaggio.objects.filter(pk=5266)  #TMP
     if filterConducente:
         if filterConducente == "Non confermate":
             viaggi = viaggi.filter(conducente__isnull=True)
-        elif filterConducente == 'bus' and TAM.get('SPECIAL_FILTERS', {}).get('BUS', False):
-            viaggi = viaggi.filter(conducente__nick__istartswith="bus")  # "bus" in the name
+        elif filterConducente == "bus" and TAM.get("SPECIAL_FILTERS", {}).get(
+            "BUS", False
+        ):
+            viaggi = viaggi.filter(
+                conducente__nick__istartswith="bus"
+            )  # "bus" in the name
         else:
             try:
                 filterConducente = int(filterConducente)
             except ValueError:
                 filterConducente = None
             if filterConducente is not None:
-                viaggi = viaggi.filter(conducente=filterConducente)  # filtro il conducente
+                viaggi = viaggi.filter(
+                    conducente=filterConducente
+                )  # filtro il conducente
                 conducenteFiltrato = Conducente.objects.get(id=filterConducente)
 
-    filtriWhen = [("next", "Prossime corse"), ("all", "Tutte le date"),
-                  ("thisM", "Questo mese"),
-                  ("lastM", "Scorso mese")]
-    if u"filterWhen" in request.GET:
+    filtriWhen = [
+        ("next", "Prossime corse"),
+        ("all", "Tutte le date"),
+        ("thisM", "Questo mese"),
+        ("lastM", "Scorso mese"),
+    ]
+    if "filterWhen" in request.GET:
         filterWhen = request.GET["filterWhen"]
         request.session["filterWhen"] = filterWhen
     else:
-        filterWhen = request.session.get("filterWhen",
-                                         "next")  # filtro predefinito (se non l'ho in sessione ne in get)
+        filterWhen = request.session.get(
+            "filterWhen", "next"
+        )  # filtro predefinito (se non l'ho in sessione ne in get)
 
     data_inizio = None
     data_fine = None
@@ -253,9 +298,8 @@ def listaCorse(request, template_name="corse/lista.html"):
         filtroWhenAvanzato = True
         if "dstart" in request.GET:
             try:
-                data_inizio = tamdates.parse_datestring(
-                    request.GET.get('dstart'))
-                request.session["dstart"] = data_inizio.strftime('%d/%m/%Y')
+                data_inizio = tamdates.parse_datestring(request.GET.get("dstart"))
+                request.session["dstart"] = data_inizio.strftime("%d/%m/%Y")
             except:
                 pass
         elif "dstart" in request.session:
@@ -263,8 +307,8 @@ def listaCorse(request, template_name="corse/lista.html"):
 
         if "dend" in request.GET:
             try:
-                data_fine = tamdates.parse_datestring(request.GET.get('dend'))
-                request.session["dend"] = data_fine.strftime('%d/%m/%Y')
+                data_fine = tamdates.parse_datestring(request.GET.get("dend"))
+                request.session["dend"] = data_fine.strftime("%d/%m/%Y")
             except:
                 pass
         elif "dend" in request.session:
@@ -278,38 +322,39 @@ def listaCorse(request, template_name="corse/lista.html"):
         data_fine = data_inizio + datetime.timedelta(days=15)
     elif filterWhen == "thisM":
         data_inizio = adesso.replace(hour=0, minute=0, day=1)
-        data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0,
-                                                                        minute=0,
-                                                                        day=1)
+        data_fine = (data_inizio + datetime.timedelta(days=32)).replace(
+            hour=0, minute=0, day=1
+        )
     elif filterWhen == "lastM":
-        data_fine = adesso.replace(hour=0, minute=0,
-                                   day=1)  # vado a inizio mese
+        data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
         data_inizio = (data_fine - datetime.timedelta(days=1)).replace(
-            day=1)  # vado a inizio del mese precedente
+            day=1
+        )  # vado a inizio del mese precedente
 
     data_inizio = tamdates.date_enforce(data_inizio)
     data_fine = tamdates.date_enforce(data_fine)
     # -----------------------------  filtro  ------------------------------------
     if filterFlag != "Tutti i  flag":
-        if filterFlag == u"Fatturate":
+        if filterFlag == "Fatturate":
             viaggi = viaggi.filter(fatturazione=True)
-        elif filterFlag == u"Posticipate":
+        elif filterFlag == "Posticipate":
             viaggi = viaggi.filter(pagamento_differito=True)
-        elif filterFlag == u"Quote consorzio":
+        elif filterFlag == "Quote consorzio":
             viaggi = viaggi.filter(commissione__gt=0)
-        elif filterFlag == u'No quota consorzio':
+        elif filterFlag == "No quota consorzio":
             viaggi = viaggi.filter(commissione=0)
-        elif filterFlag == u'Conto fine mese':
+        elif filterFlag == "Conto fine mese":
             viaggi = viaggi.filter(incassato_albergo=True)
-        elif filterFlag == u'Sup.diurni':
+        elif filterFlag == "Sup.diurni":
             viaggi = viaggi.filter(punti_diurni__gt=0)
-        elif filterFlag == u'Sup.notturni':
+        elif filterFlag == "Sup.notturni":
             viaggi = viaggi.filter(punti_notturni__gt=0)
-        elif filterFlag == u'Carta di credito':
+        elif filterFlag == "Carta di credito":
             viaggi = viaggi.filter(cartaDiCredito=True)
-        elif filterFlag == 'Abbuoni':
+        elif filterFlag == "Abbuoni":
             viaggi = viaggi.filter(
-                Q(abbuono_fisso__gt=0) | Q(abbuono_percentuale__gt=0))
+                Q(abbuono_fisso__gt=0) | Q(abbuono_percentuale__gt=0)
+            )
 
     if filterCliente:
         if filterCliente == "Privato":
@@ -317,8 +362,7 @@ def listaCorse(request, template_name="corse/lista.html"):
         else:
             try:
                 clienteFiltrato = Cliente.objects.get(id=filterCliente)
-                viaggi = viaggi.filter(
-                    cliente__id=filterCliente)  # cliente specifico
+                viaggi = viaggi.filter(cliente__id=filterCliente)  # cliente specifico
             except Cliente.DoesNotExist:
                 messages.error(request, "Il cliente cercato non esiste più.")
 
@@ -330,35 +374,40 @@ def listaCorse(request, template_name="corse/lista.html"):
     if data_fine:
         viaggi = viaggi.filter(data__lt=data_fine)  # prossimi 15 giorni
 
-    if filterType == u"Partenze":
+    if filterType == "Partenze":
         viaggi = viaggi.filter(arrivo=False)
     # viaggi=[viaggio for viaggio in viaggi if not viaggio.is_arrivo()]
-    elif filterType == u"Arrivi":
+    elif filterType == "Arrivi":
         viaggi = viaggi.filter(arrivo=True)
     # viaggi=[viaggio for viaggio in viaggi if viaggio.is_arrivo()]
-    elif filterType == u"Fuori classifica":
-        viaggi = viaggi.filter(prezzoVenezia=0, prezzoPadova=0,
-                               punti_abbinata=0, prezzoDoppioPadova=0)
-    elif filterType == u"Venezia":
+    elif filterType == "Fuori classifica":
+        viaggi = viaggi.filter(
+            prezzoVenezia=0, prezzoPadova=0, punti_abbinata=0, prezzoDoppioPadova=0
+        )
+    elif filterType == "Venezia":
         viaggi = viaggi.filter(prezzoVenezia__gt=0)
-    elif filterType == u"Padova":
+    elif filterType == "Padova":
         viaggi = viaggi.filter(prezzoPadova__gt=0)
-    elif filterType == u"Doppi Padova":
+    elif filterType == "Doppi Padova":
         viaggi = viaggi.filter(prezzoDoppioPadova__gt=0) | viaggi.filter(
-            padre__prezzoDoppioPadova__gt=0)
-    elif filterType == u"Doppi Venezia":
+            padre__prezzoDoppioPadova__gt=0
+        )
+    elif filterType == "Doppi Venezia":
         viaggi = viaggi.filter(punti_abbinata__gt=0) | viaggi.filter(
-            padre__punti_abbinata__gt=0)
+            padre__punti_abbinata__gt=0
+        )
     # viaggi=viaggi.filter(is_abbinata__in=('P', 'S'))
     #    viaggi=[viaggio for viaggio in viaggi if viaggio.is_abbinata]
     elif filterType == "Prenotazioni":
         viaggi = viaggi.filter(is_prenotazione=True)
 
-    viaggi = viaggi.select_related("da", "a", "cliente", "conducente",
-                                   "passeggero", "padre", "prenotazione")
+    viaggi = viaggi.select_related(
+        "da", "a", "cliente", "conducente", "passeggero", "padre", "prenotazione"
+    )
 
-    paginator = Paginator(viaggi, settings.TAM_VIAGGI_PAGINA,
-                          orphans=10)  # pagine da tot viaggi
+    paginator = Paginator(
+        viaggi, settings.TAM_VIAGGI_PAGINA, orphans=10
+    )  # pagine da tot viaggi
     tuttiViaggi = viaggi
 
     page = request.GET.get("page", 1)
@@ -383,16 +432,19 @@ def listaCorse(request, template_name="corse/lista.html"):
     conducentiPerCapienza = {}
 
     for viaggio in viaggi:
-        if not viaggio.conducente_confermato and not viaggio.annullato and not viaggio.padre_id:
+        if (
+            not viaggio.conducente_confermato
+            and not viaggio.annullato
+            and not viaggio.padre_id
+        ):
             # se il viaggio non è confermato ne annullato ottengo le classifiche (solo una volta)
             if classifiche is None:
                 classifiche = get_classifiche()
             # for classi in classifiche[:2]:
             #          logging.debug("%(conducente_nick)s %(priceMedium)s %(priceLong)s %(pricyLong)s %(abbinate)s %(num_disturbi_diurni)s %(num_disturbi_notturni)s"%classi)
             viaggio.classifica = viaggio.get_classifica(
-                classifiche=classifiche,
-                conducentiPerCapienza=conducentiPerCapienza)  # ottengo la classifica di conducenti per questo viaggio
-
+                classifiche=classifiche, conducentiPerCapienza=conducentiPerCapienza
+            )  # ottengo la classifica di conducenti per questo viaggio
 
             #  if settings.DEBUG:
             #    q = [ q["sql"] for q in connections['default'].queries ]
@@ -403,37 +455,45 @@ def listaCorse(request, template_name="corse/lista.html"):
             #    qfile.close()
             #    logging.debug("**** Number of queryes: %d ****" % len(connections['default'].queries))
 
-    if outputFormat == 'xls':
+    if outputFormat == "xls":
         from .tamXls import xlsResponse
 
         tuttiViaggi = tuttiViaggi.exclude(annullato=True)
         return xlsResponse(request, tuttiViaggi)
-    mediabundleJS = ('tamCorse',)
-    mediabundleCSS = ('tamUI',)
+    mediabundleJS = ("tamCorse",)
+    mediabundleCSS = ("tamUI",)
     return render(request, template_name, locals())
 
 
 def corsaClear(request, next=None):
-    """ Delete session saves and return to a newCorsa """
-    if not next: next = reverse("tamNuovaCorsa")
+    """Delete session saves and return to a newCorsa"""
+    if not next:
+        next = reverse("tamNuovaCorsa")
     for field in ("step1", "step2"):
         if field in request.session.keys():
             del request.session[
-                field]  # sto ridefinendo il primo passo, lo tolgo dalla session
+                field
+            ]  # sto ridefinendo il primo passo, lo tolgo dalla session
     return HttpResponseRedirect(next)
 
 
-def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
-          delete=False, redirectOk="/"):
+def corsa(
+    request,
+    id=None,
+    step=1,
+    template_name="nuova_corsa.html",
+    delete=False,
+    redirectOk="/",
+):
     user = request.user
     profilo, created = ProfiloUtente.objects.get_or_create(user=user)
 
-    mediabundleJS = ('tamCorse',)
-    mediabundleCSS = ('tamUI',)
-    if id and not user.has_perm('tam.change_viaggio'):
+    mediabundleJS = ("tamCorse",)
+    mediabundleCSS = ("tamUI",)
+    if id and not user.has_perm("tam.change_viaggio"):
         messages.error(request, "Non hai il permesso di modificare le corse.")
         return HttpResponseRedirect("/")
-    if not user.has_perm('tam.add_viaggio'):
+    if not user.has_perm("tam.add_viaggio"):
         messages.error(request, "Non hai il permesso di creare nuove corse.")
         return HttpResponseRedirect("/")
 
@@ -444,11 +504,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
         continue_title = "Avanti" if not id else "Avanti e salva"
 
     if not profilo.luogo:
-        messages.warning(request,
-                         "Non hai ancora definito un luogo preferito.")
+        messages.warning(request, "Non hai ancora definito un luogo preferito.")
     new = id is None
     step1 = Step1Data.deserialize(request.session.get("step1")) or {}
-    dontHilightFirst = id or request.POST or "data" in step1  # non evidenziare il primo input se in modifica o se ho un POST
+    dontHilightFirst = (
+        id or request.POST or "data" in step1
+    )  # non evidenziare il primo input se in modifica o se ho un POST
 
     if not id:  # popola la instance del viaggio
         viaggio = None
@@ -463,33 +524,35 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
         destination1 = reverse("tamNuovaCorsaId", kwargs={"id": id})
         destination2 = reverse("tamNuovaCorsa2Id", kwargs={"id": id})
-    if viaggio and viaggio.vecchioConfermato() and not user.has_perm('tam.change_oldviaggio'):
-        messages.error(request,
-                       "Non puoi cambiare i vecchi viaggi confermati.")
+    if (
+        viaggio
+        and viaggio.vecchioConfermato()
+        and not user.has_perm("tam.change_oldviaggio")
+    ):
+        messages.error(request, "Non puoi cambiare i vecchi viaggi confermati.")
         return HttpResponseRedirect("/")
 
     if delete:
-        if not request.user.has_perm('tam.delete_viaggio'):
-            messages.error(request,
-                           "Non hai permessi per cancellare le corse.")
+        if not request.user.has_perm("tam.delete_viaggio"):
+            messages.error(request, "Non hai permessi per cancellare le corse.")
             return HttpResponseRedirect(redirectOk)
         if not id:
             messages.error(request, "Indicare la corsa da cancellare.")
             return HttpResponseRedirect(redirectOk)
         else:
             if request.method == "POST":
-                if u"OK" in request.POST:
+                if "OK" in request.POST:
                     if viaggio.is_abbinata:
-                        messages.error(request,
-                                       "Non puoi cancellare le corse abbinate, scollegale prima.")
+                        messages.error(
+                            request,
+                            "Non puoi cancellare le corse abbinate, scollegale prima.",
+                        )
                         return HttpResponseRedirect(redirectOk)
                     try:
                         viaggio.delete()
-                        messages.success(request,
-                                         "Cancellata la corsa %s." % viaggio)
+                        messages.success(request, "Cancellata la corsa %s." % viaggio)
                     except ProtectedError:
-                        messages.error(request,
-                                       "Non è possibile cancellare la corsa.")
+                        messages.error(request, "Non è possibile cancellare la corsa.")
                     return HttpResponseRedirect(redirectOk)
                 else:
                     return HttpResponseRedirect(redirectOk)
@@ -497,7 +560,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
 
     if step == 2:  # Integrity controls when accessing STEP2
         if (not id) and (
-            not step1):  # sono in step2 ma non ho definito nulla della step1
+            not step1
+        ):  # sono in step2 ma non ho definito nulla della step1
             return HttpResponseRedirect(destination1)
         if "back" in request.GET:  # back to step1
             return HttpResponseRedirect(destination1)
@@ -512,24 +576,30 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
     formClasses = (ViaggioForm, ViaggioForm2)  # choose the right FormClass
     FormClass = formClasses[step - 1]
 
-    if not "proceed" in request.POST:  # form will be unbound in no proceed is required (useful for reset)
+    if (
+        not "proceed" in request.POST
+    ):  # form will be unbound in no proceed is required (useful for reset)
         request.POST = {}
 
     form = FormClass(request.POST or None, instance=viaggio)
     if step == 1:
-        form.fields['cliente'].queryset = Cliente.objects.filter(attivo=True)
-        can_fast_create = not getattr(settings, "PREVENT_FAST_CREATE",
-                                      False) or request.user.has_perm(
-            'tam.fastinsert_passenger')
+        form.fields["cliente"].queryset = Cliente.objects.filter(attivo=True)
+        can_fast_create = not getattr(
+            settings, "PREVENT_FAST_CREATE", False
+        ) or request.user.has_perm("tam.fastinsert_passenger")
         form.fields["passeggero"].can_fast_create = can_fast_create
     else:
-        help_sosta = "Verrà aggiunto al prezzo scontato del %d%%" % settings.SCONTO_SOSTA if settings.SCONTO_SOSTA else ""
-        form.fields['prezzo_sosta'].help_text = help_sosta
+        help_sosta = (
+            "Verrà aggiunto al prezzo scontato del %d%%" % settings.SCONTO_SOSTA
+            if settings.SCONTO_SOSTA
+            else ""
+        )
+        form.fields["prezzo_sosta"].help_text = help_sosta
 
     # *************** GET DEFAULTS ********************************
     if id:  # modifying
         cliente = viaggio.cliente
-        form.initial["privato"] = (viaggio.cliente is None)
+        form.initial["privato"] = viaggio.cliente is None
         # if viaggio.esclusivo:
         #   form.initial["esclusivo"] = "t"
         # else:
@@ -539,8 +609,10 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
             form.initial["data"] = viaggio.data.astimezone(tamdates.tz_italy)
             if viaggio.is_abbinata:  # ai figli non si può cambiare lo step1...
                 # 21/2/2012 ... anche ai padri non lascio cambiare la prima pagina. Non voglio che cambi la data.
-                messages.info(request,
-                              "Non puoi cambiare la prima pagina di dettagli finché la corsa è abbinata.")
+                messages.info(
+                    request,
+                    "Non puoi cambiare la prima pagina di dettagli finché la corsa è abbinata.",
+                )
                 return HttpResponseRedirect(destination2)
                 # form.fields['data'].widget.attrs['readonly'] = True
         else:  # sto modificando una corsa esistente, step2.
@@ -548,10 +620,12 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
             if cliente:
                 prezzolistino = None
                 if cliente.listino:
-                    prezzolistino = cliente.listino.get_prezzo(viaggio.da,
-                                                               viaggio.a,
-                                                               tipo_servizio=viaggio.esclusivo and "T" or "C",
-                                                               pax=viaggio.numero_passeggeri)
+                    prezzolistino = cliente.listino.get_prezzo(
+                        viaggio.da,
+                        viaggio.a,
+                        tipo_servizio=viaggio.esclusivo and "T" or "C",
+                        pax=viaggio.numero_passeggeri,
+                    )
 
                     if prezzolistino:
                         prezzoDaListinoNotturno = viaggio.trattaInNotturna()
@@ -568,14 +642,17 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
             # print "privato",form.initial['privato']
             if not step1:
                 form.initial["da"] = form.initial[
-                    "a"] = profilo.luogo.pk  # se non bound la form comincia partendo e finendo nel luogo predefinito
+                    "a"
+                ] = (
+                    profilo.luogo.pk
+                )  # se non bound la form comincia partendo e finendo nel luogo predefinito
             else:
-                form.initial['privato'] = cliente is None
+                form.initial["privato"] = cliente is None
                 form.initial.update(step1)
                 for field in Step1Data.REFERENCE_FIELDS_NAMES:
                     try:
-                        if form.initial[field]: form.initial[field] = \
-                            form.initial[field].pk
+                        if form.initial[field]:
+                            form.initial[field] = form.initial[field].pk
                     except:
                         print("Initial should be the PK")
                         pass
@@ -592,15 +669,17 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                 default["fatturazione"] = cliente.fatturazione
                 default["incassato_albergo"] = cliente.incassato_albergo
                 default["pagamento_differito"] = cliente.pagamento_differito
-                if cliente.commissione > 0: default[
-                    "tipo_commissione"] = cliente.tipo_commissione
+                if cliente.commissione > 0:
+                    default["tipo_commissione"] = cliente.tipo_commissione
                 default["commissione"] = cliente.commissione
                 prezzolistino = None
                 if cliente.listino:
                     prezzolistino = cliente.listino.get_prezzo(
-                        da, a,
+                        da,
+                        a,
                         tipo_servizio=viaggio.esclusivo and "T" or "C",
-                        pax=viaggio.numero_passeggeri)
+                        pax=viaggio.numero_passeggeri,
+                    )
 
                 prezzoDaListinoNotturno = viaggio.trattaInNotturna()
                 prezzoDaListinoDiurno = not prezzoDaListinoNotturno
@@ -612,23 +691,23 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                         prezzo_da_listino = prezzolistino.prezzo_notturno
                     default["prezzo"] = prezzo_da_listino
 
-                    if prezzolistino.flag_fatturazione == 'S':
+                    if prezzolistino.flag_fatturazione == "S":
                         default["fatturazione"] = True
-                    elif prezzolistino.flag_fatturazione == 'N':
+                    elif prezzolistino.flag_fatturazione == "N":
                         default["fatturazione"] = False
                     fatturazione_forzata = prezzolistino.flag_fatturazione
 
                     if prezzolistino.commissione is not None:
                         default["commissione"] = prezzolistino.commissione
-                        default[
-                            "tipo_commissione"] = prezzolistino.tipo_commissione
+                        default["tipo_commissione"] = prezzolistino.tipo_commissione
 
             default["costo_autostrada"] = viaggio.costo_autostrada_default()
 
             # creando un viaggio di arrivo da una stazione/aeroporto
             if da != profilo.luogo and da.speciale != "-":
                 logging.debug(
-                    "Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€")
+                    "Sto facendo un arrivo da un luogo speciale, aggiungo un abbuono di 5/10€"
+                )
                 if da.speciale == "A":
                     default["abbuono_fisso"] = settings.ABBUONO_AEROPORTI
                     da_speciale = "A"
@@ -644,48 +723,54 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
         form.fields["note"].widget.attrs["rows"] = 4
         removefields = []
         if not cliente:  # campi rimossi ai privati
-            removefields = ["commissione", "tipo_commissione",
-                            # solo con i clienti
-                            "numero_pratica",  # per le agenzie
-                            #              "incassato_albergo", # per gli alberghi  # tolto il 14/2
-                            #              "fatturazione", "pagamento_differito"
-                            ]
+            removefields = [
+                "commissione",
+                "tipo_commissione",
+                # solo con i clienti
+                "numero_pratica",  # per le agenzie
+                #              "incassato_albergo", # per gli alberghi  # tolto il 14/2
+                #              "fatturazione", "pagamento_differito"
+            ]
         else:
             #      if cliente.tipo!="H":
             #        removefields.append("incassato_albergo")
             if cliente.tipo != "A":  # le agenzie hanno il numero di pratica
                 removefields.append("numero_pratica")
         if not id:
-            removefields += [
-                "conducente_confermato"]  # don't confirm on creation
-            removefields += ['annullato']  # non si annulla in creazione
+            removefields += ["conducente_confermato"]  # don't confirm on creation
+            removefields += ["annullato"]  # non si annulla in creazione
         if id and viaggio and viaggio.padre_id:
             # "Escludo i campi che non vanno nei figli"
-            removefields += ["conducente", "conducente_richiesto",
-                             "conducente_confermato"]
+            removefields += [
+                "conducente",
+                "conducente_richiesto",
+                "conducente_confermato",
+            ]
 
         for field in removefields:
-            if field in form.fields: del form.fields[field]
-        if id and viaggio.punti_abbinata and user.has_perm('tam.change_doppi'):
+            if field in form.fields:
+                del form.fields[field]
+        if id and viaggio.punti_abbinata and user.has_perm("tam.change_doppi"):
             kmTot = viaggio.get_kmtot()
             if kmTot:
                 maxDoppi = viaggio.get_kmtot() / 120
             else:
                 maxDoppi = 9  # imposto a 9 il numero massimo di casette nel caso per esempio non conosca le tratte
             form.fields["numDoppi"] = forms.IntegerField(
-                label="Numero di doppi forzato",
-                help_text="max %d" % maxDoppi)  # aggiungo i doppi forza a Nulla
+                label="Numero di doppi forzato", help_text="max %d" % maxDoppi
+            )  # aggiungo i doppi forza a Nulla
             form.initial["numDoppi"] = viaggio.punti_abbinata
             #      form.fields.append("ciao")
 
     # ****************  VALIDAZIONE E CREAZIONE ********************
     if form.is_valid():
         if step == 1:  # Passo allo step2
-            if form.cleaned_data["data"] < tamdates.ita_now().replace(hour=0,
-                                                                      minute=0):
-                if not user.has_perm('tam.change_oldviaggio'):
-                    messages.error(request,
-                                   "Non hai l'autorizzazione per inserire una corsa vecchia.")
+            if form.cleaned_data["data"] < tamdates.ita_now().replace(hour=0, minute=0):
+                if not user.has_perm("tam.change_oldviaggio"):
+                    messages.error(
+                        request,
+                        "Non hai l'autorizzazione per inserire una corsa vecchia.",
+                    )
                     return HttpResponseRedirect("/")
             if id:
                 viaggio = form.save()  # commit=True
@@ -698,7 +783,7 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
         if step == 2:
             if id:
                 viaggio = form.save()  # commit=False
-                if user.has_perm('tam.change_doppi'):
+                if user.has_perm("tam.change_doppi"):
                     numDoppi = form.cleaned_data.get("numDoppi", None)
                 else:
                     numDoppi = None
@@ -733,7 +818,8 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
                 del request.session["step1"]
             if viaggio.passeggero and "datiPrivato" in request.POST:
                 nuoviDati = request.POST["datiPrivato"]
-                if nuoviDati.strip() == "": nuoviDati = None
+                if nuoviDati.strip() == "":
+                    nuoviDati = None
                 logging.debug("Cambio i dati del privato in %s" % nuoviDati)
                 if nuoviDati != viaggio.passeggero.dati:
                     viaggio.passeggero.dati = nuoviDati
@@ -745,10 +831,9 @@ def corsa(request, id=None, step=1, template_name="nuova_corsa.html",
     return render(request, template_name, locals())
 
 
-def getList(request, model=Luogo.objects, field="nome", format="txt",
-            fields=None):
-    """ API Generica che restituisce un file di testo, con una lista di righe con tutte le istanze
-        che abbiano il campo field uguale al campo q che ottengo via get
+def getList(request, model=Luogo.objects, field="nome", format="txt", fields=None):
+    """API Generica che restituisce un file di testo, con una lista di righe con tutte le istanze
+    che abbiano il campo field uguale al campo q che ottengo via get
     """
     q = request.GET.get("q")
     if q is not None:
@@ -764,56 +849,56 @@ def getList(request, model=Luogo.objects, field="nome", format="txt",
     if format == "json" and fields:
         records = querySet.values(*fields)
         results = [[record[key] for key in fields] for record in records]
-        return HttpResponse(json.dumps(results),
-                            content_type="application/json")
+        return HttpResponse(json.dumps(results), content_type="application/json")
 
 
 def clienti(request, template_name="clienti_e_listini.html"):
-    mediabundleJS = ('tamUI',)
-    mediabundleCSS = ('tamUI',)
-    listini = Listino.objects.annotate(Count('prezzolistino'))
-    clienti = Cliente.objects.filter().select_related('listino')
+    mediabundleJS = ("tamUI",)
+    mediabundleCSS = ("tamUI",)
+    listini = Listino.objects.annotate(Count("prezzolistino"))
+    clienti = Cliente.objects.filter().select_related("listino")
     return render(request, template_name, locals())
 
 
-def cliente(request, template_name="cliente.html", nomeCliente=None,
-            id_cliente=None):
+def cliente(request, template_name="cliente.html", nomeCliente=None, id_cliente=None):
     nuovo = (nomeCliente is None) and (id_cliente is None)
     if id_cliente:
         id_cliente = int(id_cliente)
     user = request.user
     do_delete = "delete" in request.POST
     actionName = getActionName(delete=do_delete, nuovo=nuovo)
-    if not user.has_perm('tam.%s_cliente' % actionName):
+    if not user.has_perm("tam.%s_cliente" % actionName):
         messages.error(request, "Non hai il permesso di modificare i clienti.")
         return HttpResponseRedirect(reverse("tamListini"))
 
     class ClientForm(forms.ModelForm):
         def clean(self):
-            if 'nome' in self.cleaned_data:
-                self.cleaned_data['nome'] = self.cleaned_data['nome'].strip()
+            if "nome" in self.cleaned_data:
+                self.cleaned_data["nome"] = self.cleaned_data["nome"].strip()
                 queryset = Cliente.objects.filter(
-                    nome__iexact=self.cleaned_data['nome'])
-                if id_cliente: queryset = queryset.exclude(
-                    id=id_cliente)  # exclude current id if editing
+                    nome__iexact=self.cleaned_data["nome"]
+                )
+                if id_cliente:
+                    queryset = queryset.exclude(
+                        id=id_cliente
+                    )  # exclude current id if editing
                 if queryset.count() > 0:
                     raise forms.ValidationError(
-                        u"Esiste già un cliente con questo nome.")
+                        "Esiste già un cliente con questo nome."
+                    )
             return self.cleaned_data
 
         class Meta:
             model = Cliente
-            fields = '__all__'
+            fields = "__all__"
 
     cliente = None
     viaggi_del_cliente = None
     if id_cliente:
         try:
-            cliente = Cliente.objects.get(
-                id=id_cliente)  # modifying an existing Client
+            cliente = Cliente.objects.get(id=id_cliente)  # modifying an existing Client
             logging.debug("Modifica di %s" % cliente)
-            viaggi_del_cliente = Viaggio.objects.filter(
-                cliente=cliente).count()
+            viaggi_del_cliente = Viaggio.objects.filter(cliente=cliente).count()
         except:
             messages.error(request, "Cliente inesistente.")
             return HttpResponseRedirect(reverse("tamListini"))
@@ -821,25 +906,29 @@ def cliente(request, template_name="cliente.html", nomeCliente=None,
     if nomeCliente:
         try:
             cliente = Cliente.objects.get(
-                nome=nomeCliente)  # modifying an existing Client
+                nome=nomeCliente
+            )  # modifying an existing Client
         # ClientForm=forms.form_for_instance(cliente)
         except Cliente.DoesNotExist:
             #      ClientForm = forms.form_for_model(Cliente)
             ClientForm.base_fields[
-                "nome"].initial = nomeCliente  # creating a new client with name
+                "nome"
+            ].initial = nomeCliente  # creating a new client with name
 
     if do_delete:
         logging.debug("Cancellerei il cliente %s" % cliente)
-        cliente_url = reverse("tamClienteId",
-                              kwargs={"id_cliente": cliente.id})
-        if not request.user.has_perm('tam.delete_cliente'):
-            messages.error(request,
-                           "Non hai i permessi necessari per cancellare i clienti.")
+        cliente_url = reverse("tamClienteId", kwargs={"id_cliente": cliente.id})
+        if not request.user.has_perm("tam.delete_cliente"):
+            messages.error(
+                request, "Non hai i permessi necessari per cancellare i clienti."
+            )
             return HttpResponseRedirect(cliente_url)
 
         if viaggi_del_cliente:
-            messages.error(request,
-                           "Devi cancellare le corse prima di poter cancellare il cliente.")
+            messages.error(
+                request,
+                "Devi cancellare le corse prima di poter cancellare il cliente.",
+            )
             return HttpResponseRedirect(cliente_url)
 
         message = "Cliente '%s' cancellato." % cliente
@@ -851,8 +940,9 @@ def cliente(request, template_name="cliente.html", nomeCliente=None,
 
     if form.is_valid():
         cliente = form.save()
-        messages.success(request, "%s il cliente %s." % (
-            nuovo and "Creato" or "Aggiornato", cliente))
+        messages.success(
+            request, "%s il cliente %s." % (nuovo and "Creato" or "Aggiornato", cliente)
+        )
         if "next" in request.GET:
             redirectOk = request.GET["next"]
         else:
@@ -875,10 +965,11 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
     class ListinoForm(forms.ModelForm):
         class Meta:
             model = Listino
-            fields = '__all__'
+            fields = "__all__"
 
-    form = ListinoForm(u"new_name" in request.POST and request.POST or None,
-                       instance=listino)
+    form = ListinoForm(
+        "new_name" in request.POST and request.POST or None, instance=listino
+    )
 
     if request.POST.get("da") and request.POST.get("da"):
         try:
@@ -891,9 +982,10 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
             a = None
 
     if "deletePrezzo" in request.POST:
-        if not user.has_perm('tam.delete_prezzolistino'):
-            messages.error(request,
-                           "Non hai il permesso di cancellare i prezzi dal listino.")
+        if not user.has_perm("tam.delete_prezzolistino"):
+            messages.error(
+                request, "Non hai il permesso di cancellare i prezzi dal listino."
+            )
         else:
             try:
                 prezzoL = listino.prezzolistino_set.get(id=prezzoid)
@@ -902,26 +994,29 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
                 messages.success(request, message)
             except PrezzoListino.DoesNotExist:
                 messages.error(request, "Questo prezzo non esiste più.")
-        return HttpResponseRedirect(
-            reverse("tamListinoId", kwargs={"id": listino.id}))
+        return HttpResponseRedirect(reverse("tamListinoId", kwargs={"id": listino.id}))
 
     if form.is_valid():
-        if u"new_name" in request.POST:
+        if "new_name" in request.POST:
             try:
                 actionName = getActionName(delete=False, nuovo=nuovo)
-                if not user.has_perm('tam.%s_listino' % actionName):
-                    messages.error(request,
-                                   "Non hai il permesso di %s i listini." % (
-                                       nuovo and "creare" or "modificare"))
+                if not user.has_perm("tam.%s_listino" % actionName):
+                    messages.error(
+                        request,
+                        "Non hai il permesso di %s i listini."
+                        % (nuovo and "creare" or "modificare"),
+                    )
                     return HttpResponseRedirect(reverse("tamListini"))
                 listino = form.save()
-                messages.success(request, "%s il listino %s." % (
-                    nuovo and "Creato" or "Aggiornato", listino))
+                messages.success(
+                    request,
+                    "%s il listino %s." % (nuovo and "Creato" or "Aggiornato", listino),
+                )
                 return HttpResponseRedirect(
-                    reverse("tamListinoId", kwargs={"id": listino.id}))
+                    reverse("tamListinoId", kwargs={"id": listino.id})
+                )
             except IntegrityError:
-                form.errors["nome"] = (
-                    u"Esiste già un listino con lo stesso nome.",)
+                form.errors["nome"] = ("Esiste già un listino con lo stesso nome.",)
 
     class FormPrezzoListino(forms.ModelForm):
         da = forms.ModelChoiceField(Luogo.objects)
@@ -935,51 +1030,53 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
         try:
             prezzoListino = listino.prezzolistino_set.get(pk=prezzoid)
         except PrezzoListino.DoesNotExist:
-            messages.error(request,
-                           "Il prezzo a cui provi ad accedere non esiste più.")
+            messages.error(request, "Il prezzo a cui provi ad accedere non esiste più.")
             return HttpResponseRedirect(reverse("tamListini"))
 
     else:
         prezzoListino = None
 
     priceForm = FormPrezzoListino(
-        u"new_price" in request.POST and request.POST or None,
-        instance=prezzoListino)
+        "new_price" in request.POST and request.POST or None, instance=prezzoListino
+    )
     if prezzoListino:
-        priceForm.initial.update({"da": prezzoListino.tratta.da.pk,
-                                  "a": prezzoListino.tratta.a.pk})
+        priceForm.initial.update(
+            {"da": prezzoListino.tratta.da.pk, "a": prezzoListino.tratta.a.pk}
+        )
         nuovoPrezzo = False
     else:
         nuovoPrezzo = True
 
     if priceForm.is_valid():
-        if u"new_price" in request.POST:
+        if "new_price" in request.POST:
             actionName = getActionName(delete=False, nuovo=nuovoPrezzo)
-            if not user.has_perm('tam.%s_prezzolistino' % actionName):
-                messages.error(request,
-                               "Non hai il permesso di %s i prezzi di listino." % (
-                                   nuovoPrezzo and "creare" or "modificare"))
+            if not user.has_perm("tam.%s_prezzolistino" % actionName):
+                messages.error(
+                    request,
+                    "Non hai il permesso di %s i prezzi di listino."
+                    % (nuovoPrezzo and "creare" or "modificare"),
+                )
                 return HttpResponseRedirect(reverse("tamListini"))
 
             da = priceForm.cleaned_data["da"]
             a = priceForm.cleaned_data["a"]
             tratta, created = Tratta.objects.get_or_create(da=da, a=a)
             prezzo, created = listino.prezzolistino_set.get_or_create(
-                tratta=tratta, listino=listino,
-                tipo_servizio=priceForm.cleaned_data[
-                    "tipo_servizio"],
-                max_pax=priceForm.cleaned_data["max_pax"])
+                tratta=tratta,
+                listino=listino,
+                tipo_servizio=priceForm.cleaned_data["tipo_servizio"],
+                max_pax=priceForm.cleaned_data["max_pax"],
+            )
             prezzo.prezzo_diurno = priceForm.cleaned_data["prezzo_diurno"]
             prezzo.prezzo_notturno = priceForm.cleaned_data["prezzo_notturno"]
             prezzo.commissione = priceForm.cleaned_data["commissione"]
-            prezzo.tipo_commissione = priceForm.cleaned_data[
-                "tipo_commissione"]
-            prezzo.flag_fatturazione = priceForm.cleaned_data[
-                "flag_fatturazione"]
+            prezzo.tipo_commissione = priceForm.cleaned_data["tipo_commissione"]
+            prezzo.flag_fatturazione = priceForm.cleaned_data["flag_fatturazione"]
             prezzo.save()
             messages.success(request, "Ho aggiunto il prezzo %s." % prezzo)
             return HttpResponseRedirect(
-                reverse("tamListinoId", kwargs={"id": listino.id}))
+                reverse("tamListinoId", kwargs={"id": listino.id})
+            )
 
             #  # tutto l'ambaradam a seguire è solo per ordinare i prezzi per tratta.da, tratta.a
             #  if listino:
@@ -1000,51 +1097,63 @@ def listino(request, template_name="listino.html", id=None, prezzoid=None):
             #    prezzi = None
     if listino:
         prezzi = listino.prezzolistino_set.select_related().order_by(
-            "tipo_servizio", "tratta__da", "tratta__a",
-            "max_pax")
+            "tipo_servizio", "tratta__da", "tratta__a", "max_pax"
+        )
 
     return render(request, template_name, locals())
 
 
 def luoghi(request, template_name="luoghi_e_tratte.html"):
-    """ Mostro tutti i luoghi suddivisi per bacino """
+    """Mostro tutti i luoghi suddivisi per bacino"""
     unbacined = Luogo.objects.filter(bacino__isnull=True)
     bacini = Bacino.objects.all()
     tratte = Tratta.objects.select_related()
-    mediabundleJS = ('tamUI',)
-    mediabundleCSS = ('tamUI',)
+    mediabundleJS = ("tamUI",)
+    mediabundleCSS = ("tamUI",)
     return render(request, template_name, locals())
 
 
 def conducente(*args, **kwargs):
-    request = args and args[0] or kwargs['request']
-    delete = kwargs.get('delete', False)
-    kwargs['fields_descriptions'] = settings.NOMI_CAMPI_CONDUCENTE
+    request = args and args[0] or kwargs["request"]
+    delete = kwargs.get("delete", False)
+    kwargs["fields_descriptions"] = settings.NOMI_CAMPI_CONDUCENTE
 
     if not request.user.has_perm(
-        'tam.change_classifiche_iniziali'):  # gli utenti base non possono cambiare molto dei conducenti
+        "tam.change_classifiche_iniziali"
+    ):  # gli utenti base non possono cambiare molto dei conducenti
         kwargs["excludedFields"] = [
-            'classifica_iniziale_diurni', "classifica_iniziale_notturni",
+            "classifica_iniziale_diurni",
+            "classifica_iniziale_notturni",
             "classifica_iniziale_puntiDoppiVenezia",
             "classifica_iniziale_prezzoDoppiVenezia",
-            "classifica_iniziale_doppiPadova", "classifica_iniziale_long",
+            "classifica_iniziale_doppiPadova",
+            "classifica_iniziale_long",
             "classifica_iniziale_medium",
-            "attivo"
+            "attivo",
         ]
 
         if delete:
-            messages.error(request,
-                           'Devi avere i superpoteri per cancellare un conducente.')
+            messages.error(
+                request, "Devi avere i superpoteri per cancellare un conducente."
+            )
             return HttpResponseRedirect("/")
     return bacino(*args, **kwargs)
 
 
-def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
-           redirectOk="/", delete=False,
-           unique=(("nome",),),
-           note="", excludedFields=None, fields_descriptions=None):
+def bacino(
+    request,
+    Model,
+    template_name="bacinoOluogo.html",
+    id=None,
+    redirectOk="/",
+    delete=False,
+    unique=(("nome",),),
+    note="",
+    excludedFields=None,
+    fields_descriptions=None,
+):
     """
-        @param extra_dict:  Addictional var to give to response
+    @param extra_dict:  Addictional var to give to response
     """
     if "next" in request.GET:
         redirectOk = request.GET["next"]
@@ -1054,8 +1163,10 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
     user = request.user
     actionName = getActionName(delete=delete, nuovo=nuovo)
 
-    permissionName = "tam.%(action)s_%(module)s" % {"action": actionName,
-                                                    "module": Model._meta.model_name}
+    permissionName = "tam.%(action)s_%(module)s" % {
+        "action": actionName,
+        "module": Model._meta.model_name,
+    }
     allowed = user.has_perm(permissionName)
     if not allowed:
         messages.error(request, "Operazione non concessa.")
@@ -1065,31 +1176,35 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
         def clean(self):
             for constraintList in unique:
                 query = self.Meta.model.objects  # get all objects
-                for field in constraintList:  # and filter all with the fields=contraints
+                for (
+                    field
+                ) in constraintList:  # and filter all with the fields=contraints
                     if not field in self.cleaned_data:
-                        return self.cleaned_data  # un campo di controllo è vuoto, fallirà dopo
-                    if isinstance(self.Meta.model._meta.get_field(field),
-                                  models.CharField):
-                        self.cleaned_data[field] = self.cleaned_data[
-                            field].strip()
+                        return (
+                            self.cleaned_data
+                        )  # un campo di controllo è vuoto, fallirà dopo
+                    if isinstance(
+                        self.Meta.model._meta.get_field(field), models.CharField
+                    ):
+                        self.cleaned_data[field] = self.cleaned_data[field].strip()
                         # insensitive match only for CharField fields
-                        kwargs = {
-                            "%s__iexact" % field: self.cleaned_data[field]}
+                        kwargs = {"%s__iexact" % field: self.cleaned_data[field]}
                     else:
                         kwargs = {"%s" % field: self.cleaned_data[field]}
                     query = query.filter(**kwargs)
-                if id: query = query.exclude(
-                    id=id)  # exclude current id if editing
+                if id:
+                    query = query.exclude(id=id)  # exclude current id if editing
                 if query.count() > 0:
                     raise forms.ValidationError(
-                        u"Esiste già un %s con questo %s." % (
-                            verbose_name, ", ".join(constraintList)))
+                        "Esiste già un %s con questo %s."
+                        % (verbose_name, ", ".join(constraintList))
+                    )
             return self.cleaned_data
 
         class Meta:
             model = Model
             exclude = excludedFields
-            fields = '__all__'
+            fields = "__all__"
 
     try:
         instance = id and Model.objects.get(id=id) or None
@@ -1100,19 +1215,22 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
         form = GenericModelForm(request.POST or None, instance=instance)
         if form.is_valid():
             instance = form.save()
-            messages.success(request, "%s %s: %s." % (
-                nuovo and "Creato" or "Aggiornato", verbose_name, instance))
+            messages.success(
+                request,
+                "%s %s: %s."
+                % (nuovo and "Creato" or "Aggiornato", verbose_name, instance),
+            )
             return HttpResponseRedirect(redirectOk)
     else:
         if not instance:
-            messages.error(request,
-                           "Impossibile trovare l'oggetto da cancellare.")
+            messages.error(request, "Impossibile trovare l'oggetto da cancellare.")
             return HttpResponseRedirect(redirectOk)
         if request.method == "POST":
             if "OK" in request.POST:
                 instance.delete()
-                messages.success(request, "Cancellato il %s %s." % (
-                    verbose_name, instance))
+                messages.success(
+                    request, "Cancellato il %s %s." % (verbose_name, instance)
+                )
                 return HttpResponseRedirect(redirectOk)
             else:
                 return HttpResponseRedirect(redirectOk)
@@ -1125,23 +1243,31 @@ def bacino(request, Model, template_name="bacinoOluogo.html", id=None,
 
 
 def privati(request, template_name="passeggeri.html"):
-    """ Mostro tutti i passeggeri privati """
+    """Mostro tutti i passeggeri privati"""
     privati = Passeggero.objects.all()
     return render(request, template_name, locals())
 
 
-def passeggero(request, template_name="passeggero.html", id=None,
-               redirectOk="/privati/", delete=False,
-               unique=(("nome",),),
-               excludedFields=None, fields_descriptions=None):
+def passeggero(
+    request,
+    template_name="passeggero.html",
+    id=None,
+    redirectOk="/privati/",
+    delete=False,
+    unique=(("nome",),),
+    excludedFields=None,
+    fields_descriptions=None,
+):
     if "next" in request.GET:
         redirectOk = request.GET["next"]
     nuovo = id is None
     user = request.user
     actionName = getActionName(delete=delete, nuovo=nuovo)
 
-    permissionName = "tam.%(action)s_%(module)s" % {"action": actionName,
-                                                    "module": Passeggero._meta.model_name}
+    permissionName = "tam.%(action)s_%(module)s" % {
+        "action": actionName,
+        "module": Passeggero._meta.model_name,
+    }
     allowed = user.has_perm(permissionName)
     if not allowed:
         messages.error(request, "Operazione non concessa.")
@@ -1151,25 +1277,29 @@ def passeggero(request, template_name="passeggero.html", id=None,
         def clean(self):
             for constraintList in unique:
                 query = self.Meta.model.objects  # get all objects
-                for field in constraintList:  # and filter all with the fields=contraints
+                for (
+                    field
+                ) in constraintList:  # and filter all with the fields=contraints
                     if not field in self.cleaned_data:
-                        return self.cleaned_data  # un campo di controllo è vuoto, fallirà dopo
-                    if isinstance(self.Meta.model._meta.get_field(field),
-                                  models.CharField):
-                        self.cleaned_data[field] = self.cleaned_data[
-                            field].strip()
+                        return (
+                            self.cleaned_data
+                        )  # un campo di controllo è vuoto, fallirà dopo
+                    if isinstance(
+                        self.Meta.model._meta.get_field(field), models.CharField
+                    ):
+                        self.cleaned_data[field] = self.cleaned_data[field].strip()
                         # insensitive match only for CharField fields
-                        kwargs = {
-                            "%s__iexact" % field: self.cleaned_data[field]}
+                        kwargs = {"%s__iexact" % field: self.cleaned_data[field]}
                     else:
                         kwargs = {"%s" % field: self.cleaned_data[field]}
                     query = query.filter(**kwargs)
-                if id: query = query.exclude(
-                    id=id)  # exclude current id if editing
+                if id:
+                    query = query.exclude(id=id)  # exclude current id if editing
                 if query.count() > 0:
                     raise forms.ValidationError(
-                        u"Esiste già un passeggero con questo %s." % (
-                            ", ".join(constraintList)))
+                        "Esiste già un passeggero con questo %s."
+                        % (", ".join(constraintList))
+                    )
             return self.cleaned_data
 
         class Meta:
@@ -1187,8 +1317,7 @@ def passeggero(request, template_name="passeggero.html", id=None,
         viaggi = Viaggio.objects.filter(passeggero=id)
         viaggi_con_passeggero = viaggi.count()
         permessi_cancellazione = user.has_perm("tam.delete_passeggero")
-        no_corse_future = viaggi.filter(
-            data__gte=tamdates.ita_today()).count() == 0
+        no_corse_future = viaggi.filter(data__gte=tamdates.ita_today()).count() == 0
     else:
         no_corse_future = False
 
@@ -1196,13 +1325,14 @@ def passeggero(request, template_name="passeggero.html", id=None,
         form = GenericModelForm(request.POST or None, instance=instance)
         if form.is_valid():
             instance = form.save()
-            messages.success(request, "%s passeggero: %s." % (
-                nuovo and "Creato" or "Aggiornato", instance))
+            messages.success(
+                request,
+                "%s passeggero: %s." % (nuovo and "Creato" or "Aggiornato", instance),
+            )
             return HttpResponseRedirect(redirectOk)
     else:
         if not instance:
-            messages.error(request,
-                           "Impossibile trovare l'oggetto da cancellare.")
+            messages.error(request, "Impossibile trovare l'oggetto da cancellare.")
             return HttpResponseRedirect(redirectOk)
         if no_corse_future == False:
             messages.error(request, "Passeggero con corse future, protetto.")
@@ -1210,8 +1340,7 @@ def passeggero(request, template_name="passeggero.html", id=None,
         if request.method == "POST":
             if "OK" in request.POST:
                 instance.delete()
-                messages.success(request,
-                                 "Cancellato il passeggero %s." % instance)
+                messages.success(request, "Cancellato il passeggero %s." % instance)
                 return HttpResponseRedirect(redirectOk)
             else:
                 return HttpResponseRedirect(redirectOk)
@@ -1227,8 +1356,7 @@ def passeggero(request, template_name="passeggero.html", id=None,
 def profilo(request, *args, **kwargs):
     instance, created = ProfiloUtente.objects.get_or_create(user=request.user)
     kwargs["id"] = instance.id
-    kwargs[
-        "note"] = u"Puoi definire un po' di dettagli per l'utente %s." % request.user
+    kwargs["note"] = "Puoi definire un po' di dettagli per l'utente %s." % request.user
     return bacino(request, *args, **kwargs)
 
 
@@ -1237,9 +1365,8 @@ def profilo(request, *args, **kwargs):
 
 def clonaListino(request, id, template_name="listino-clona.html"):
     user = request.user
-    if not user.has_perm('tam.add_listino'):
-        messages.error(request,
-                       "Non hai il permesso di creare un nuovo listino.")
+    if not user.has_perm("tam.add_listino"):
+        messages.error(request, "Non hai il permesso di creare un nuovo listino.")
         return HttpResponseRedirect(reverse("tamListini"))
     listino = get_object_or_404(Listino, pk=id)
     num_prezzi = listino.prezzolistino_set.count()
@@ -1252,7 +1379,8 @@ def clonaListino(request, id, template_name="listino-clona.html"):
             try:
                 Listino.objects.get(nome=nome)
                 raise forms.ValidationError(
-                    u"Esiste già un listino chiamato '%s'." % nome)
+                    "Esiste già un listino chiamato '%s'." % nome
+                )
             except Listino.DoesNotExist:
                 return nome
 
@@ -1273,7 +1401,7 @@ def clonaListino(request, id, template_name="listino-clona.html"):
 
 def listinoDelete(request, id, template_name="listino-delete.html"):
     user = request.user
-    if not user.has_perm('tam.delete_listino'):
+    if not user.has_perm("tam.delete_listino"):
         messages.error(request, "Non hai il permesso di cancellare i listini.")
         return HttpResponseRedirect(reverse("tamListini"))
     listino = get_object_or_404(Listino, pk=id)
@@ -1290,8 +1418,8 @@ def listinoDelete(request, id, template_name="listino-delete.html"):
 
 
 def resetAssociatiToDefault(viaggio, recurseOnChild=True):
-    """ Dato un viaggio riporta padre e fratelli, o figli a alcuni settaggi standard come:
-        Costo delle soste, costo autostrada
+    """Dato un viaggio riporta padre e fratelli, o figli a alcuni settaggi standard come:
+    Costo delle soste, costo autostrada
     """
     if viaggio is None:
         return
@@ -1302,9 +1430,12 @@ def resetAssociatiToDefault(viaggio, recurseOnChild=True):
     if recurseOnChild:
         nodiDaSistemare.extend(list(viaggio.viaggio_set.all()))
     for nodo in nodiDaSistemare:
-        if nodo is None: continue
+        if nodo is None:
+            continue
         logging.debug("Reset di %s" % viaggio.pk)
-        nodo.costo_autostrada = nodo.costo_autostrada_default()  # ricalcolo l'autostrada
+        nodo.costo_autostrada = (
+            nodo.costo_autostrada_default()
+        )  # ricalcolo l'autostrada
 
         nodo.conducente_confermato = False
         nodo.conducente = None
@@ -1314,15 +1445,21 @@ def resetAssociatiToDefault(viaggio, recurseOnChild=True):
 def associate(assoType, viaggiIds, request=None):
     logging.debug("Gestisco le associazioni [%s] %s" % (assoType, viaggiIds))
     padri_ids = Viaggio.objects.filter(pk__in=viaggiIds).values_list(
-        'padre_id', flat=True)  # ottengo tutti i padri
+        "padre_id", flat=True
+    )  # ottengo tutti i padri
     # Estendo ai padri
     viaggiIds += padri_ids
-    viaggiIds = [pk for pk in set(viaggiIds) if pk is not None]  # remove duplicates just to count
-    figli_ids = Viaggio.objects.filter(padre_id__in=viaggiIds).values_list('id',
-                                                                           flat=True)  # ottengo tutti i figli
+    viaggiIds = [
+        pk for pk in set(viaggiIds) if pk is not None
+    ]  # remove duplicates just to count
+    figli_ids = Viaggio.objects.filter(padre_id__in=viaggiIds).values_list(
+        "id", flat=True
+    )  # ottengo tutti i figli
     # ... e ai figli
     viaggiIds += figli_ids
-    viaggiIds = [pk for pk in set(viaggiIds) if pk is not None]  # remove duplicates just to count
+    viaggiIds = [
+        pk for pk in set(viaggiIds) if pk is not None
+    ]  # remove duplicates just to count
 
     viaggi_selezionati = Viaggio.objects.filter(pk__in=viaggiIds)
     # estendo la selezione a tutti i figli dei selezionati, e tutti i padri
@@ -1332,68 +1469,101 @@ def associate(assoType, viaggiIds, request=None):
         primo = viaggi[0]
     else:
         if assoType == "link":
-            logging.debug('Link a standalone Viaggio? Nothing to do')
+            logging.debug("Link a standalone Viaggio? Nothing to do")
             return
         primo = None
 
     contatore = 1
     # di standard gli abbinati non hanno abbuoni per aeroporto/stazioni
-    ABBUONI_LUOGO_ABBINATI = getattr(settings, 'ABBUONI_LUOGO_ABBINATI', False)
+    ABBUONI_LUOGO_ABBINATI = getattr(settings, "ABBUONI_LUOGO_ABBINATI", False)
     for viaggio in viaggi:
-        logging.debug("%2s: %s di %s a %s" % (
-            contatore, assoType, viaggio.pk, primo and primo.pk or "None"))
+        logging.debug(
+            "%2s: %s di %s a %s"
+            % (contatore, assoType, viaggio.pk, primo and primo.pk or "None")
+        )
 
-        if assoType == 'unlink':
+        if assoType == "unlink":
             viaggio.padre = None
 
             # rimetto l'associazione a un viaggio da stazione/aeroporto
             # settings.ABBUONI_LUOGO_ABBINATI indica se gli abbinati da luoghi speciali hanno diritto a un abbuono
             if viaggio.da.speciale != "-" and not ABBUONI_LUOGO_ABBINATI:
                 logging.debug(
-                    "Deassocio da un luogo speciale, rimetto l'eventuale abbuono speciale")
-                if viaggio.da.speciale == "A" and viaggio.abbuono_fisso != settings.ABBUONO_AEROPORTI:
+                    "Deassocio da un luogo speciale, rimetto l'eventuale abbuono speciale"
+                )
+                if (
+                    viaggio.da.speciale == "A"
+                    and viaggio.abbuono_fisso != settings.ABBUONO_AEROPORTI
+                ):
                     if request:
-                        messages.info(request,
-                                      "Il %d° viaggio è da un aeroporto rimetto l'abbuono di %d€. Era di %d€." % (
-                                          contatore, settings.ABBUONO_AEROPORTI,
-                                          viaggio.abbuono_fisso))
+                        messages.info(
+                            request,
+                            "Il %d° viaggio è da un aeroporto rimetto l'abbuono di %d€. Era di %d€."
+                            % (
+                                contatore,
+                                settings.ABBUONO_AEROPORTI,
+                                viaggio.abbuono_fisso,
+                            ),
+                        )
                     viaggio.abbuono_fisso = settings.ABBUONO_AEROPORTI
-                elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso != settings.ABBUONO_STAZIONI:
+                elif (
+                    viaggio.da.speciale == "S"
+                    and viaggio.abbuono_fisso != settings.ABBUONO_STAZIONI
+                ):
                     if request:
-                        messages.info(request,
-                                      "Il %d° viaggio è da una stazione rimetto l'abbuono di %d€. Era di %d€." % (
-                                          contatore, settings.ABBUONO_STAZIONI,
-                                          viaggio.abbuono_fisso))
+                        messages.info(
+                            request,
+                            "Il %d° viaggio è da una stazione rimetto l'abbuono di %d€. Era di %d€."
+                            % (
+                                contatore,
+                                settings.ABBUONO_STAZIONI,
+                                viaggio.abbuono_fisso,
+                            ),
+                        )
                     viaggio.abbuono_fisso = settings.ABBUONO_STAZIONI
-        elif assoType == 'link':
+        elif assoType == "link":
             # tolgo l'associazione a un viaggio da stazione/aeroporto
             # associando un viaggio da stazione/aeroporto
             if viaggio.da.speciale != "-" and not ABBUONI_LUOGO_ABBINATI:
-                logging.debug("Associo da un luogo speciale, tolgo l'eventuale abbuono speciale")
-                if viaggio.da.speciale == "A" and viaggio.abbuono_fisso == settings.ABBUONO_AEROPORTI:
+                logging.debug(
+                    "Associo da un luogo speciale, tolgo l'eventuale abbuono speciale"
+                )
+                if (
+                    viaggio.da.speciale == "A"
+                    and viaggio.abbuono_fisso == settings.ABBUONO_AEROPORTI
+                ):
                     if request:
-                        messages.info(request,
-                                      "Il {num}° viaggio è da un aeroporto tolgo l'abbuono di {abbuono}€.".format(
-                                          num=contatore, abbuono=settings.ABBUONO_STAZIONI)
-                                      )
+                        messages.info(
+                            request,
+                            "Il {num}° viaggio è da un aeroporto tolgo l'abbuono di {abbuono}€.".format(
+                                num=contatore, abbuono=settings.ABBUONO_STAZIONI
+                            ),
+                        )
                     viaggio.abbuono_fisso = 0
-                elif viaggio.da.speciale == "S" and viaggio.abbuono_fisso == settings.ABBUONO_STAZIONI:
+                elif (
+                    viaggio.da.speciale == "S"
+                    and viaggio.abbuono_fisso == settings.ABBUONO_STAZIONI
+                ):
                     if request:
-                        messages.info(request,
-                                      "Il {num}° viaggio è da una stazione tolgo l'abbuono di {abbuono}€.".format(
-                                          num=contatore, abbuono=settings.ABBUONO_STAZIONI)
-                                      )
+                        messages.info(
+                            request,
+                            "Il {num}° viaggio è da una stazione tolgo l'abbuono di {abbuono}€.".format(
+                                num=contatore, abbuono=settings.ABBUONO_STAZIONI
+                            ),
+                        )
                     viaggio.abbuono_fisso = 0
 
             if viaggio != primo:
                 viaggio.padre = primo
-                viaggio.is_abbinata = 'S'  # it's an abbinata!
+                viaggio.is_abbinata = "S"  # it's an abbinata!
             if contatore > 2:
                 if viaggio.abbuono_fisso != 5:
                     if request:
-                        messages.info(request,
-                                      "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€." % (
-                                          contatore, viaggio.abbuono_fisso))
+                        messages.info(
+                            request,
+                            "Do un abbuono di 5€ al %d° viaggio perché oltre la 2nda tappa, era di %s€."
+                            % (contatore, viaggio.abbuono_fisso),
+                        )
                     viaggio.abbuono_fisso = 5
 
         viaggio.save(updateViaggi=False)  # salvo i vari viaggi, poi farò il ricalcolo
@@ -1408,13 +1578,13 @@ def associate(assoType, viaggiIds, request=None):
 
 
 def gestisciAssociazioni(request, assoType, viaggiIds):
-    """ Gestisce l'associazione disassociazione
-        Riceve assoType con indicato cosa va fatto e una lista di viaggioId
-        Azioni: link, unlink e bus
+    """Gestisce l'associazione disassociazione
+    Riceve assoType con indicato cosa va fatto e una lista di viaggioId
+    Azioni: link, unlink e bus
     """
     viaggiIds = list(map(int, viaggiIds))
     user = request.user
-    if not user.has_perm('tam.change_viaggio'):
+    if not user.has_perm("tam.change_viaggio"):
         messages.error(request, "Non hai il permesso di modificare i viaggi.")
         return HttpResponseRedirect(reverse("tamCorse"))
     associate(assoType=assoType, viaggiIds=viaggiIds, request=request)
@@ -1422,31 +1592,31 @@ def gestisciAssociazioni(request, assoType, viaggiIds):
 
 def corsaCopy(request, id, template_name="corsa-copia.html"):
     user = request.user
-    if not user.has_perm('tam.add_viaggio'):
+    if not user.has_perm("tam.add_viaggio"):
         messages.error(request, "Non hai il permesso di creare i viaggi.")
         return HttpResponseRedirect(reverse("tamCorse"))
     corsa = get_object_or_404(Viaggio, pk=id)
-    if corsa.padre_id: corsa = corsa.padre
+    if corsa.padre_id:
+        corsa = corsa.padre
     if corsa.is_abbinata:
         figli = corsa.viaggio_set.all()  # ottengo anche i figli
 
     class RecurrenceForm(forms.Form):
-        repMode = forms.ChoiceField(label="Ricorrenza",
-                                    choices=[("m", "Mensile"),
-                                             ("w", "Settimanale"),
-                                             ("d", "Giornaliero")])
-        start = forms.DateField(label="Data iniziale",
-                                input_formats=[_('%d/%m/%Y')])
-        end = forms.DateField(label="Data finale",
-                              input_formats=[_('%d/%m/%Y')])
+        repMode = forms.ChoiceField(
+            label="Ricorrenza",
+            choices=[("m", "Mensile"), ("w", "Settimanale"), ("d", "Giornaliero")],
+        )
+        start = forms.DateField(label="Data iniziale", input_formats=[_("%d/%m/%Y")])
+        end = forms.DateField(label="Data finale", input_formats=[_("%d/%m/%Y")])
 
     form = RecurrenceForm(request.POST or None)
-    mediabundleJS = ('tamUI',)
-    mediabundleCSS = ('tamUI',)
+    mediabundleJS = ("tamUI",)
+    mediabundleCSS = ("tamUI",)
     dataIniziale = max(tamdates.ita_today(), corsa.data) + datetime.timedelta(
-        days=1)  # la data iniziale è quella della corsa + 1 e non prima di domani
-    form.initial["start"] = dataIniziale.strftime('%d/%m/%Y')
-    form.initial["end"] = dataIniziale.strftime('%d/%m/%Y')
+        days=1
+    )  # la data iniziale è quella della corsa + 1 e non prima di domani
+    form.initial["start"] = dataIniziale.strftime("%d/%m/%Y")
+    form.initial["end"] = dataIniziale.strftime("%d/%m/%Y")
     form.fields["start"].widget.attrs["id"] = "datastart"
     form.fields["end"].widget.attrs["id"] = "dataend"
     askForm = True
@@ -1473,14 +1643,18 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
                     try:
                         day = day.replace(month=newMonth)
                     except ValueError:
-                        messages.warning(request,
-                                         "Nel mese %d non c'è il giorno %d, mi fermo. Usa la copia per giorno se necessario." % (
-                                             newMonth, day.day))
+                        messages.warning(
+                            request,
+                            "Nel mese %d non c'è il giorno %d, mi fermo. Usa la copia per giorno se necessario."
+                            % (newMonth, day.day),
+                        )
                         break
                 occorrenze += 1
                 if occorrenze > 20:
-                    messages.error(request,
-                                   "Non puoi creare più di 20 copie in una volta sola (per evitarti di fare danni accidentali).")
+                    messages.error(
+                        request,
+                        "Non puoi creare più di 20 copie in una volta sola (per evitarti di fare danni accidentali).",
+                    )
                     break
 
             if "conferma" in request.POST:
@@ -1492,10 +1666,8 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
                 nuoviPadriCreati = []
                 for nuovoPadre in nuoviPadri:
                     deltaDays = nuovoPadre - corsa.data.date()
-                    logging.debug(
-                        "Copio la corsa e la traslo di %s" % deltaDays)
-                    logging.debug(
-                        "  ma le corse sono %d" % len(corseDaCopiare))
+                    logging.debug("Copio la corsa e la traslo di %s" % deltaDays)
+                    logging.debug("  ma le corse sono %d" % len(corseDaCopiare))
                     for corsaOrigine in corseDaCopiare:
                         nuovaCorsa = copy_model_instance(corsaOrigine)
                         if corsaOrigine.padre_id is None:
@@ -1506,15 +1678,20 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
                         nuovaCorsa.data += deltaDays
                         corseCreate += 1
 
-                        nuovaCorsa.conducente_confermato = False  # le corse copiate mancano di alcune cose
+                        nuovaCorsa.conducente_confermato = (
+                            False  # le corse copiate mancano di alcune cose
+                        )
                         nuovaCorsa.pagato = False
 
                         nuovaCorsa.save()
                         logging.debug(
-                            "Ho creato la corsa %s figlia di %s, %s" % (
+                            "Ho creato la corsa %s figlia di %s, %s"
+                            % (
                                 nuovaCorsa.pk,
                                 nuovaCorsa.padre and nuovaCorsa.padre.pk or "nissuni",
-                                nuovaCorsa.note))
+                                nuovaCorsa.note,
+                            )
+                        )
 
                         if nuovaCorsa.padre_id is None:
                             nuoviPadriCreati.append(nuovaCorsa)
@@ -1522,14 +1699,17 @@ def corsaCopy(request, id, template_name="corsa-copia.html"):
                     for nuovoPadre in nuoviPadriCreati:
                         nuovoPadre.updatePrecomp()  # aggiorno tutto alla fine
 
-                messages.success(request,
-                                 "Ho creato %s copie (%d corse in tutto)." % (
-                                     len(nuoviPadri), corseCreate))
+                messages.success(
+                    request,
+                    "Ho creato %s copie (%d corse in tutto)."
+                    % (len(nuoviPadri), corseCreate),
+                )
                 return HttpResponseRedirect(reverse("tamCorse"))
 
             for field in form.fields:
                 form.fields[
-                    field].widget = forms.widgets.HiddenInput()  # la form è tutta hidden
+                    field
+                ].widget = forms.widgets.HiddenInput()  # la form è tutta hidden
 
             askForm = False
 
@@ -1549,7 +1729,4 @@ def exportListino(request, id_listino):
         messages.error(request, "Questo listino non esiste.")
         return HttpResponseRedirect(reverse("tamListini"))
     profilo = ProfiloUtente.objects.get(user=request.user)
-    return pdfListino.export(
-        listino,
-        luogoDiRiferimento=profilo.luogo
-    )
+    return pdfListino.export(listino, luogoDiRiferimento=profilo.luogo)

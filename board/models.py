@@ -10,14 +10,14 @@ from future.utils import python_2_unicode_compatible
 from tam.models import UnSerializableFileSystemStorage
 
 fs = UnSerializableFileSystemStorage(
-    location=settings.SECURE_STORE_LOCATION,
-    base_url=settings.SECURE_URL)
+    location=settings.SECURE_STORE_LOCATION, base_url=settings.SECURE_URL
+)
 
 
 def get_secure_attachment_subfolder(filename, fs, timepath):
     secure_subfolder = settings.SECURE_STORE_CUSTOM_SUBFOLDER
     filename = os.path.normpath(fs.get_valid_name(os.path.basename(filename)))
-    result = timezone.now().strftime(timepath) + '/' + filename
+    result = timezone.now().strftime(timepath) + "/" + filename
     if secure_subfolder:
         return secure_subfolder + "/" + result
     else:
@@ -25,18 +25,18 @@ def get_secure_attachment_subfolder(filename, fs, timepath):
 
 
 def board_upload_to(instance, filename):
-    return get_secure_attachment_subfolder(filename, fs, 'board/%Y/%m')
+    return get_secure_attachment_subfolder(filename, fs, "board/%Y/%m")
 
 
 @python_2_unicode_compatible
 class BoardMessage(models.Model):
-    date = models.DateTimeField('Data di inserimento', null=False)
+    date = models.DateTimeField("Data di inserimento", null=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.TextField('Messaggio', blank=True, null=True)
-    attachment = models.FileField(storage=fs,
-                                  upload_to=board_upload_to,
-                                  null=True, blank=True)
-    active = models.BooleanField('Messaggio visibile', default=True)
+    message = models.TextField("Messaggio", blank=True, null=True)
+    attachment = models.FileField(
+        storage=fs, upload_to=board_upload_to, null=True, blank=True
+    )
+    active = models.BooleanField("Messaggio visibile", default=True)
 
     def attachment_name(self):
         if self.attachment is not None:
@@ -57,5 +57,5 @@ class BoardMessage(models.Model):
 
     class Meta:
         ordering = ["-date"]
-        permissions = (('view', 'Visualizzazione bacheca'),)
+        permissions = (("view", "Visualizzazione bacheca"),)
         app_label = "board"

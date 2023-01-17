@@ -18,15 +18,33 @@ class Migration(migrations.Migration):
     operations = [
         # CreateExtension('postgis'),
         migrations.CreateModel(
-            name='Positions',
+            name="Positions",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False,
-                                        verbose_name='ID')),
-                ('lat', models.FloatField(blank=True, null=True, verbose_name='Latitude')),
-                ('lon', models.FloatField(blank=True, null=True, verbose_name='Longitude')),
-                ('last_update', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
-                                           to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "lat",
+                    models.FloatField(blank=True, null=True, verbose_name="Latitude"),
+                ),
+                (
+                    "lon",
+                    models.FloatField(blank=True, null=True, verbose_name="Longitude"),
+                ),
+                ("last_update", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

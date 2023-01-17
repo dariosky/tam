@@ -17,7 +17,7 @@ from tam.views.tamviews import SmartPager
 
 
 def getTrace():
-    """ Return current traceback as a string """
+    """Return current traceback as a string"""
     import traceback
     from io import StringIO
 
@@ -27,13 +27,18 @@ def getTrace():
 
 
 def logAndCleanExpiredSessions():
-    """ Clear all the expired sessions and log the disconnection of the users """
+    """Clear all the expired sessions and log the disconnection of the users"""
     for s in Session.objects.filter(expire_date__lt=timezone.now()):
         data = s.get_decoded()
         try:
-            if '_auth_user_id' in data:
-                user = User.objects.get(id=data['_auth_user_id'])
-                logAction('O', user=user, description='Sessione scaduta', log_date=s.expire_date)
+            if "_auth_user_id" in data:
+                user = User.objects.get(id=data["_auth_user_id"])
+                logAction(
+                    "O",
+                    user=user,
+                    description="Sessione scaduta",
+                    log_date=s.expire_date,
+                )
         except:
             pass
         s.delete()
@@ -42,24 +47,32 @@ def logAndCleanExpiredSessions():
 def actionLog(request, template_name="actionLog.html"):
     logAndCleanExpiredSessions()
     from_a_superuser = request.user.is_superuser
-    utenti = User.objects.all().order_by('username')
+    utenti = User.objects.all().order_by("username")
     if not from_a_superuser:
         utenti = utenti.exclude(is_superuser=True)  # normal users don't see superusers
-    filterUtente = request.GET.get('user', '')
-    filterType = request.GET.get('type', '')
-    filterId = request.GET.get('id', '')
-    filterAction = request.GET.get('action', '')
-    filterPreInsert = 'preInsert' in request.GET.keys()  # se ho preinsert cerco tutte le inserite postume
+    filterUtente = request.GET.get("user", "")
+    filterType = request.GET.get("type", "")
+    filterId = request.GET.get("id", "")
+    filterAction = request.GET.get("action", "")
+    filterPreInsert = (
+        "preInsert" in request.GET.keys()
+    )  # se ho preinsert cerco tutte le inserite postume
     content_type = None
-    viaggioType = ContentType.objects.get(app_label="tam", model='viaggio')
+    viaggioType = ContentType.objects.get(app_label="tam", model="viaggio")
     if filterType:
-        if filterType == 'fattura':
-            content_type = ContentType.objects.get(app_label="fatturazione", model='fattura')
+        if filterType == "fattura":
+            content_type = ContentType.objects.get(
+                app_label="fatturazione", model="fattura"
+            )
         else:
             try:
-                content_type = ContentType.objects.get(app_label="tam", model=filterType)
+                content_type = ContentType.objects.get(
+                    app_label="tam", model=filterType
+                )
             except ContentType.DoesNotExist:
-                messages.error(request, "Tipo di oggetto da loggare non valido %s." % filterType)
+                messages.error(
+                    request, "Tipo di oggetto da loggare non valido %s." % filterType
+                )
 
     actions = ActionLog.objects.all()
     if filterUtente:  # rendo filterUtente un intero
@@ -86,12 +99,16 @@ def actionLog(request, template_name="actionLog.html"):
     if filterAction:
         actions = actions.filter(action_type=filterAction)
     if filterPreInsert:
-        actions = actions.filter(modelName='viaggio')
-        actions = actions.filter(action_type__in=('A', 'M'))
+        actions = actions.filter(modelName="viaggio")
+        actions = actions.filter(action_type__in=("A", "M"))
         actions = actions.filter(hilight=True)
     if not from_a_superuser:
-        superuser_ids = User.objects.filter(is_superuser=True).values_list('id', flat=True)
-        actions = actions.exclude(user_id__in=superuser_ids)  # hide superactions to normal
+        superuser_ids = User.objects.filter(is_superuser=True).values_list(
+            "id", flat=True
+        )
+        actions = actions.exclude(
+            user_id__in=superuser_ids
+        )  # hide superactions to normal
 
     # inserimento postumo se la data della corsa è precedente alla mezzanotte del
     # giorno di inserimento
@@ -110,28 +127,29 @@ def actionLog(request, template_name="actionLog.html"):
         thisPage = paginator.page(page)
         actions = thisPage.object_list
     # for action in actions:		# evidenzio tutti i viaggio "preInsert"
-    #			if action.modelName == 'viaggio':
-    #				action.preInsert = False
-    #				if action.action_type in ('A', 'M'):
-    #					viaggio = Viaggio.objects.get(id=action.instance_id)
-    #					action.preInsert = viaggio.data < action.data.replace(hour=0, minute=0)
+    # 			if action.modelName == 'viaggio':
+    # 				action.preInsert = False
+    # 				if action.action_type in ('A', 'M'):
+    # 					viaggio = Viaggio.objects.get(id=action.instance_id)
+    # 					action.preInsert = viaggio.data < action.data.replace(hour=0, minute=0)
     except Exception:
         messages.warning(request, "La pagina %d è vuota." % page)
         thisPage = None
         actions = []
 
-    return render(request,
-                  template_name,
-                  {
-                      "actions": actions,
-                      "today": tamdates.ita_today(),
-                      "thisPage": thisPage,
-                      "paginator": paginator,
-                      "utenti": utenti,
-                      'filterAction': filterAction,
-                      "filterUtente": filterUtente,
-                      "filterPreInsert": filterPreInsert,
-                      "viaggioType": viaggioType,
-                      "action_types": LOG_ACTION_TYPE,
-                  },
-                  )
+    return render(
+        request,
+        template_name,
+        {
+            "actions": actions,
+            "today": tamdates.ita_today(),
+            "thisPage": thisPage,
+            "paginator": paginator,
+            "utenti": utenti,
+            "filterAction": filterAction,
+            "filterUtente": filterUtente,
+            "filterPreInsert": filterPreInsert,
+            "viaggioType": viaggioType,
+            "action_types": LOG_ACTION_TYPE,
+        },
+    )

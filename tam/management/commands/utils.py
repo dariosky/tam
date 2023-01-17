@@ -4,7 +4,7 @@ import os
 
 import psutil
 
-logger = logging.getLogger('tam.deploy')
+logger = logging.getLogger("tam.deploy")
 
 
 def get_pid(pid_file):

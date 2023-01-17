@@ -7,13 +7,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fatturazione', '0001_initial'),
+        ("fatturazione", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='rigafattura',
-            name='fattura',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='righe', to='fatturazione.Fattura'),
+            model_name="rigafattura",
+            name="fattura",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="righe",
+                to="fatturazione.Fattura",
+            ),
         ),
     ]

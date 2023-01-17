@@ -26,8 +26,8 @@ MAX_QUEUE_TIME = 60 * 11  # max 11 hours (in minutes)
 
 
 def dequeue(currentPosition: CodaPresenze):
-    """ Dequeue from the current position
-        We leave the queue and add to the history
+    """Dequeue from the current position
+    We leave the queue and add to the history
     """
     currentPosition.delete()
     now = ita_now()
@@ -37,10 +37,14 @@ def dequeue(currentPosition: CodaPresenze):
         # minimum 60 seconds
         minutes = seconds // 60
         if minutes > MAX_QUEUE_TIME:
-            logger.warning(f'Cutting queue time to maximum: {MAX_QUEUE_TIME} instead of {minutes}')
+            logger.warning(
+                f"Cutting queue time to maximum: {MAX_QUEUE_TIME} instead of {minutes}"
+            )
             minutes = MAX_QUEUE_TIME
-        logger.debug(f"Queue history: {currentPosition.utente}"
-                     f" @{currentPosition.luogo} for {minutes} minutes")
+        logger.debug(
+            f"Queue history: {currentPosition.utente}"
+            f" @{currentPosition.luogo} for {minutes} minutes"
+        )
         story = StoricoPresenze(
             start_date=start,
             user=currentPosition.utente,
@@ -49,60 +53,70 @@ def dequeue(currentPosition: CodaPresenze):
         )
         story.save()
     else:
-        logger.debug(f"{currentPosition.utente} was only {seconds}s@{currentPosition.luogo}")
+        logger.debug(
+            f"{currentPosition.utente} was only {seconds}s@{currentPosition.luogo}"
+        )
 
 
-def coda(request, template_name='codapresenze/coda.html'):
-    if not request.user.has_perm('codapresenze.view'):
-        messages.error(request, 'Non hai accesso alla coda presenze.')
-        return HttpResponseRedirect(reverse('tamCorse'))
+def coda(request, template_name="codapresenze/coda.html"):
+    if not request.user.has_perm("codapresenze.view"):
+        messages.error(request, "Non hai accesso alla coda presenze.")
+        return HttpResponseRedirect(reverse("tamCorse"))
 
-    if request.method == 'POST':
+    if request.method == "POST":
         actinguser = request.user
-        if request.user.has_perm('codapresenze.editall') and 'user' in request.POST:
+        if request.user.has_perm("codapresenze.editall") and "user" in request.POST:
             try:
-                username = request.POST.get('user').strip()
+                username = request.POST.get("user").strip()
                 # print 'Changing user to %s' % username
                 actinguser = User.objects.get(username=username)
             except Exception:
                 raise Exception("Error changing user")
         posizioneCorrente = CodaPresenze.objects.filter(utente=actinguser)
         messageParts = []
-        if 'dequeue' in request.POST or 'place' in request.POST:
+        if "dequeue" in request.POST or "place" in request.POST:
             # mi disaccodo
             if posizioneCorrente:
                 posizioneCorrente = posizioneCorrente[0]
                 messageParts.append("Si disaccoda da %s." % posizioneCorrente.luogo)
                 dequeue(posizioneCorrente)
 
-        if 'place' in request.POST:
+        if "place" in request.POST:
             # mi riaccodo
             nuovaPosizione = CodaPresenze(
                 utente=actinguser,
-                luogo=request.POST.get('place'),
+                luogo=request.POST.get("place"),
             )
             messageParts.append("Si accoda a %s." % nuovaPosizione.luogo)
             nuovaPosizione.save()
 
         if messageParts:
             if actinguser != request.user:
-                messageParts.append('Effettuato da %s' % request.user)
-            logAction('Q', description=" ".join(messageParts), user=actinguser)
+                messageParts.append("Effettuato da %s" % request.user)
+            logAction("Q", description=" ".join(messageParts), user=actinguser)
 
-    presenzedb = CodaPresenze.objects.all() \
-        .values('id', 'utente__username', 'luogo', 'data_accodamento',
-                'utente__conducente__nick')
+    presenzedb = CodaPresenze.objects.all().values(
+        "id",
+        "utente__username",
+        "luogo",
+        "data_accodamento",
+        "utente__conducente__nick",
+    )
 
     def dthandler(obj):
         if isinstance(obj, datetime.datetime):
             return obj.astimezone(tz_italy).isoformat()
 
-    presenze = [{"luogo": u["luogo"],
-                 "utente": u["utente__username"],
-                 "conducente": u["utente__conducente__nick"],
-                 "data": u['data_accodamento'],
-                 "id": u['id']
-                 } for u in presenzedb]
+    presenze = [
+        {
+            "luogo": u["luogo"],
+            "utente": u["utente__username"],
+            "conducente": u["utente__conducente__nick"],
+            "data": u["data_accodamento"],
+            "id": u["id"],
+        }
+        for u in presenzedb
+    ]
     codajson = json.dumps(presenze, default=dthandler)
 
     if request.is_ajax():
@@ -110,11 +124,15 @@ def coda(request, template_name='codapresenze/coda.html'):
 
     utenti = User.objects.filter(prenotazioni__isnull=True, is_active=True)
     if not request.user.is_superuser:
-        utenti = utenti.filter(is_superuser=False)  # solo i superuser vedono i superuser
+        utenti = utenti.filter(
+            is_superuser=False
+        )  # solo i superuser vedono i superuser
     utenti = sorted(utenti, key=get_userkeys)
 
-    piazze = getattr(settings, "CODA_PIAZZE", ['Abano', 'Montegrotto'])
-    places = [(piazza, "other") if isinstance(piazza, str) else piazza for piazza in piazze]
+    piazze = getattr(settings, "CODA_PIAZZE", ["Abano", "Montegrotto"])
+    places = [
+        (piazza, "other") if isinstance(piazza, str) else piazza for piazza in piazze
+    ]
     queueGroupsJson = {}
     queues = []
 
@@ -128,41 +146,42 @@ def coda(request, template_name='codapresenze/coda.html'):
         request,
         template_name,
         {
-            'codajson': codajson,
-            'utenti': utenti,
-
+            "codajson": codajson,
+            "utenti": utenti,
             "places": places,  # the places
             "queues": queues,  # the groups
-            'queueGroupsJson': json.dumps(queueGroupsJson),  # the associations
+            "queueGroupsJson": json.dumps(queueGroupsJson),  # the associations
         },
     )
 
 
 def humanizeTime(minutes):
     r = minutes
-    unit = 'm'
+    unit = "m"
     if minutes > 60:
-        unit = 'h'
+        unit = "h"
         r /= 60
-    return f'{r:.1f}{unit}'
+    return f"{r:.1f}{unit}"
 
 
 class DriverMonthly:
-    def __init__(self,
-                 driver: Conducente = None,
-                 user: User = None) -> None:
+    def __init__(self, driver: Conducente = None, user: User = None) -> None:
         self.driver = driver
         self.user = user
         self.minutes = 0
         self.userWithNoDriver = driver is None
         self.worked_counters = defaultdict(int)
-        self.username = '-' if not user else user.username
+        self.username = "-" if not user else user.username
 
     def hours(self):
         result = defaultdict(int)
-        result.update({t: Decimal(minutes / 60) for t, minutes in self.worked_counters.items()})
-        result['tot'] = Decimal(self.minutes / 60)
-        result.update({k: round(v, 1) for k, v in result.items()})  # just a single decimal
+        result.update(
+            {t: Decimal(minutes / 60) for t, minutes in self.worked_counters.items()}
+        )
+        result["tot"] = Decimal(self.minutes / 60)
+        result.update(
+            {k: round(v, 1) for k, v in result.items()}
+        )  # just a single decimal
         return result
 
     def pretty_worked(self):
@@ -174,32 +193,31 @@ class DriverMonthly:
 
 
 class FerieView(TemplateView, ThreeMonthsView):
-    template_name = 'codapresenze/ferie.html'
+    template_name = "codapresenze/ferie.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         queue_history = StoricoPresenze.objects.all()
-        months = context['months']
+        months = context["months"]
         date_start, date_end = months.date_start, months.date_end
         # FIXME? start_date is deciding the month, should we count partially?
-        queue_history = queue_history.filter(start_date__gte=date_start,
-                                             start_date__lt=date_end)
-        queue_history = queue_history.order_by()  # remove existing order, or they'll be used as grouper
-        queue_history = queue_history.values('user').annotate(minutes=Sum('minutes'))
+        queue_history = queue_history.filter(
+            start_date__gte=date_start, start_date__lt=date_end
+        )
+        queue_history = (
+            queue_history.order_by()
+        )  # remove existing order, or they'll be used as grouper
+        queue_history = queue_history.values("user").annotate(minutes=Sum("minutes"))
 
         confirmed_history = Viaggio.objects.filter(
-            date_start__lt=date_end,
-            date_end__gt=date_start,
-            conducente_confermato=True
-        ).prefetch_related('conducente')
+            date_start__lt=date_end, date_end__gt=date_start, conducente_confermato=True
+        ).prefetch_related("conducente")
 
         users_data = {}
-        for driver in Conducente.objects.filter(attivo=True).prefetch_related('user'):
+        for driver in Conducente.objects.filter(attivo=True).prefetch_related("user"):
             user = driver.user
             # we list all users_data
-            users_data[user.id] = DriverMonthly(
-                driver=driver, user=user
-            )
+            users_data[user.id] = DriverMonthly(driver=driver, user=user)
 
         def add(user_id, worked_type, minutes):
             logger.debug(f"{user_id} add {humanizeTime(minutes)} {worked_type}")
@@ -210,7 +228,7 @@ class FerieView(TemplateView, ThreeMonthsView):
             users_data[user_id].add(minutes, worked_type)
 
         for work_record in queue_history:
-            add(work_record['user'], 'queue', work_record['minutes'])
+            add(work_record["user"], "queue", work_record["minutes"])
 
         for run in confirmed_history:
             user_id = run.conducente.user_id
@@ -219,9 +237,9 @@ class FerieView(TemplateView, ThreeMonthsView):
             run_end = min(run.date_end, date_end)
             minutes = (run_end - run_start).seconds / 60
 
-            add(user_id, 'run', minutes)
+            add(user_id, "run", minutes)
 
-        context['data'] = users_data
+        context["data"] = users_data
         # for d in users_data.values():
         #     d['worked'] = humanizeTime(d['minutes'])
         return context

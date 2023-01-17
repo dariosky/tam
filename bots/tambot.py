@@ -7,7 +7,7 @@ import django
 from django.conf import settings
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
-logger = logging.getLogger('tam.bot')
+logger = logging.getLogger("tam.bot")
 
 
 # Define a few command handlers. These usually take the two arguments bot and
@@ -17,24 +17,29 @@ logger = logging.getLogger('tam.bot')
 def about(bot, update):
     username = update.message.from_user.username
     logger.info("Help was asked by %s" % username)
-    bot.sendMessage(update.message.chat_id,
-                    text=("TAM bot - un aiuto digitale per le prenotazioni"
-                          "\n\n"
-                          "Tam invierà in questo canale le richieste di prenotazioni rapide.\n"
-                          "Si può confermare la propria disponibilità ed interagire con il cliente."
-                          )
-                    )
+    bot.sendMessage(
+        update.message.chat_id,
+        text=(
+            "TAM bot - un aiuto digitale per le prenotazioni"
+            "\n\n"
+            "Tam invierà in questo canale le richieste di prenotazioni rapide.\n"
+            "Si può confermare la propria disponibilità ed interagire con il cliente."
+        ),
+    )
 
 
 def message_handler(bot, update):
-    bot.sendMessage(update.message.chat_id, text="".join([x for x in update.message.text][::-1]))
+    bot.sendMessage(
+        update.message.chat_id, text="".join([x for x in update.message.text][::-1])
+    )
     text = update.message.text
     username = update.message.from_user.username
     chat_type = update.message.chat.type
-    logger.info("message from {username} in the {chat_type} chat".format(
-        username=username,
-        chat_type=chat_type
-    ))
+    logger.info(
+        "message from {username} in the {chat_type} chat".format(
+            username=username, chat_type=chat_type
+        )
+    )
 
 
 def error(bot, update, error):
@@ -66,8 +71,8 @@ def run_tambot():
     updater.idle()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     django.setup()
 
-    logger.info('TaM Telegram Bot is running ...')
+    logger.info("TaM Telegram Bot is running ...")
     run_tambot()

@@ -9,17 +9,21 @@ from tam import tamdates
 from tam.tamdates import MONTH_NAMES
 
 ThreeMonths = namedtuple(
-    'ThreeMonths',
-    ('currentName', 'prevName', 'prevprevName',  # the names of nearby months
-     'current',  # the current month as YYYY-mm
-     'date_start', 'date_end',  # selected date range
-     )
+    "ThreeMonths",
+    (
+        "currentName",
+        "prevName",
+        "prevprevName",  # the names of nearby months
+        "current",  # the current month as YYYY-mm
+        "date_start",
+        "date_end",  # selected date range
+    ),
 )
 
 
 class ThreeMonthsView(ContextMixin, View):
-    """ Enrich the context with threemonths object
-        uses request.GET['month'] to choose the selected month
+    """Enrich the context with threemonths object
+    uses request.GET['month'] to choose the selected month
     """
 
     def get_context_data(self, **kwargs):
@@ -28,16 +32,16 @@ class ThreeMonthsView(ContextMixin, View):
         delta_month = 0
         d = today.replace(day=1)
 
-        if 'month' in self.request.GET:
-            delta_requested = self.request.GET.get('month', None)
-            if delta_requested == 'cur':
+        if "month" in self.request.GET:
+            delta_requested = self.request.GET.get("month", None)
+            if delta_requested == "cur":
                 delta_month = 0
-            elif delta_requested == 'prev':
+            elif delta_requested == "prev":
                 delta_month = -1
-            elif delta_requested == 'prevprev':
+            elif delta_requested == "prevprev":
                 delta_month = -2
             else:
-                d = datetime.datetime.strptime(delta_requested, '%Y-%m')
+                d = datetime.datetime.strptime(delta_requested, "%Y-%m")
 
         # get the start-end dates
         for _ in range(0, delta_month, -1):
@@ -54,10 +58,12 @@ class ThreeMonthsView(ContextMixin, View):
             date_start=date_start,
             date_end=date_end,
         )
-        context.update({
-            "months": threemonths,
-            "mediabundleJS": ('tamUI',),
-            "mediabundleCSS": ('tamUI',),
-        })
+        context.update(
+            {
+                "months": threemonths,
+                "mediabundleJS": ("tamUI",),
+                "mediabundleCSS": ("tamUI",),
+            }
+        )
 
         return context

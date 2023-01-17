@@ -8,13 +8,15 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('board', '0002_auto_20160831_0011'),
+        ("board", "0002_auto_20160831_0011"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='boardmessage',
-            name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="boardmessage",
+            name="author",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
+            ),
         ),
     ]

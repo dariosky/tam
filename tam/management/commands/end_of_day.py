@@ -7,12 +7,12 @@ from codapresenze.models import CodaPresenze
 from codapresenze.views import dequeue
 from tam.tamdates import ita_now
 
-logger = logging.getLogger('tam.tasks.end_of_day')
+logger = logging.getLogger("tam.tasks.end_of_day")
 
 
 class Command(AppCommand):
-    help = 'Do the cleanup jobs for the end of the day'
-    name = 'End of day tasks'
+    help = "Do the cleanup jobs for the end of the day"
+    name = "End of day tasks"
 
     def handle(self, *app_labels, **options):
         logger.info("End of Day tasks: starting")

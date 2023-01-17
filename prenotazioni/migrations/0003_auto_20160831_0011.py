@@ -8,23 +8,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('prenotazioni', '0002_auto_20151107_2251'),
+        ("prenotazioni", "0002_auto_20151107_2251"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='utenteprenotazioni',
-            name='quick_book',
+            model_name="utenteprenotazioni",
+            name="quick_book",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='prenotazione',
-            name='had_attachment',
-            field=models.BooleanField(default=False, editable=False, verbose_name='Allegato passato'),
+            model_name="prenotazione",
+            name="had_attachment",
+            field=models.BooleanField(
+                default=False, editable=False, verbose_name="Allegato passato"
+            ),
         ),
         migrations.AlterField(
-            model_name='prenotazione',
-            name='pagamento',
-            field=models.CharField(choices=[('D', 'Diretto'), ('H', 'Hotel'), ('F', 'Fattura')], default='D', max_length=1, verbose_name='Pagamento'),
+            model_name="prenotazione",
+            name="pagamento",
+            field=models.CharField(
+                choices=[("D", "Diretto"), ("H", "Hotel"), ("F", "Fattura")],
+                default="D",
+                max_length=1,
+                verbose_name="Pagamento",
+            ),
         ),
     ]

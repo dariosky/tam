@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('calendariopresenze', '0004_auto_20160914_2329'),
+        ("calendariopresenze", "0004_auto_20160914_2329"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='calendar',
-            name='type',
-            field=models.IntegerField(choices=[(1, 'Ferie'), (2, 'Riposo')]),
+            model_name="calendar",
+            name="type",
+            field=models.IntegerField(choices=[(1, "Ferie"), (2, "Riposo")]),
         ),
     ]

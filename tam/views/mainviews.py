@@ -14,11 +14,11 @@ from prenotazioni.views.tam_email import ADMIN_MAIL, notifyByMail
 logger = logging.getLogger(__name__)
 
 
-def errors500(request, exception=None, template_name='500.html'):
+def errors500(request, exception=None, template_name="500.html"):
     return render(request, template_name, locals())
 
 
-def errors400(request, exception=None, template_name='404.html'):
+def errors400(request, exception=None, template_name="404.html"):
     return render(request, template_name, locals())
 
 
@@ -31,22 +31,28 @@ def errorview(request):
 
 def pingview(request):
     error = False
-    results = ['TAM for {} on {}'.format(settings.LICENSE_OWNER, settings.HOST),
-               "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
+    results = [
+        "TAM for {} on {}".format(settings.LICENSE_OWNER, settings.HOST),
+        "ok from django %s" % ".".join(map(str, django.VERSION[:3])),
+    ]
     results += ["Python {}".format(".".join(map(str, sys.version_info)))]
 
-    response = Template('\n'.join(results)).render(RequestContext(request))
-    return HttpResponse(response, status=200 if not error else 500, content_type='text/plain')
+    response = Template("\n".join(results)).render(RequestContext(request))
+    return HttpResponse(
+        response, status=200 if not error else 500, content_type="text/plain"
+    )
 
 
 @user_passes_test(lambda user: user.is_superuser)
 def email_test(request):
-    results = ["Email sent to admins: %s" % ADMIN_MAIL, "backend: %s" % settings.EMAIL_BACKEND]
+    results = [
+        "Email sent to admins: %s" % ADMIN_MAIL,
+        "backend: %s" % settings.EMAIL_BACKEND,
+    ]
     notifyByMail(
         to=[ADMIN_MAIL],
         subject="Test email with %s" % settings.EMAIL_BACKEND,
         body="This is the body of the message",
-
     )
-    response = Template('\n'.join(results)).render(RequestContext(request))
-    return HttpResponse(response, status=200, content_type='text/plain')
+    response = Template("\n".join(results)).render(RequestContext(request))
+    return HttpResponse(response, status=200, content_type="text/plain")

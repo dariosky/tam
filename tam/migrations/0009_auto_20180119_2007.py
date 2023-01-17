@@ -8,13 +8,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tam', '0008_conducente_user'),
+        ("tam", "0008_conducente_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='conducente',
-            name='user',
-            field=models.OneToOneField(limit_choices_to={'prenotazioni__isnull': True}, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL),
+            model_name="conducente",
+            name="user",
+            field=models.OneToOneField(
+                limit_choices_to={"prenotazioni__isnull": True},
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]

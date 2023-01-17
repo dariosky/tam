@@ -38,28 +38,31 @@ def reset_user_session(selectedUser):
 
     logging.debug("Cancello le sessioni dell'utente %s" % selectedUser.id)
     for ses in Session.objects.all():
-        if ses.get_decoded().get('_auth_user_id') == selectedUser.id:
+        if ses.get_decoded().get("_auth_user_id") == selectedUser.id:
             ses.delete()
 
 
 def get_userkeys(user):
-    """ Return the keys to order users """
+    """Return the keys to order users"""
     return hasattr(user, "prenotazioni"), user.username.lower()
 
 
 def permissions(request, username=None, template_name="utils/manageUsers.html"):
     user = request.user
-    quick_book = getattr(settings, 'PRENOTAZIONI_QUICK', False)
-    if not user.has_perm('auth.change_user'):
-        messages.error(request,
-                       "Non hai l'autorizzazione a modificare i permessi.")
+    quick_book = getattr(settings, "PRENOTAZIONI_QUICK", False)
+    if not user.has_perm("auth.change_user"):
+        messages.error(request, "Non hai l'autorizzazione a modificare i permessi.")
         return HttpResponseRedirect("/")
 
-    manage_prenotazioni = request.user.has_perm(
-        'prenotazioni.manage_permissions') and "prenotazioni" in settings.PLUGGABLE_APPS
-    users = User.objects.exclude(is_superuser=True) \
-        .exclude(id=user.id) \
+    manage_prenotazioni = (
+        request.user.has_perm("prenotazioni.manage_permissions")
+        and "prenotazioni" in settings.PLUGGABLE_APPS
+    )
+    users = (
+        User.objects.exclude(is_superuser=True)
+        .exclude(id=user.id)
         .exclude(is_active=False)
+    )
     users = sorted(users, key=get_userkeys)
 
     unassociated_drivers = Conducente.objects.filter(user__isnull=True, attivo=True)
@@ -67,7 +70,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
     getUsername = request.GET.get("selectedUser", None)
     if getUsername:
         return HttpResponseRedirect(
-            reverse("tamManage", kwargs={"username": getUsername}))
+            reverse("tamManage", kwargs={"username": getUsername})
+        )
     if username:
         selectedUser = User.objects.get(username=username)
         if user == selectedUser:
@@ -80,7 +84,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
         selectedGroups = selectedUser.groups.all()
         groups = Group.objects.all()
         for group in groups:
-            if group in selectedGroups: group.selected = True
+            if group in selectedGroups:
+                group.selected = True
 
         password = request.POST.get("password", None)
         passwordbis = request.POST.get("passwordbis", None)
@@ -88,22 +93,25 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
         if "change" in request.POST:  # effetto la modifica all'utente
             if password:
                 if password != passwordbis:
-                    errors['password'].append(_("Le due password non coincidono"))
+                    errors["password"].append(_("Le due password non coincidono"))
                 else:
                     try:
                         validate_password(password, user=selectedUser)
                     except ValidationError as e:
                         for message in e.messages:
-                            errors['password'].append(message)
+                            errors["password"].append(message)
                     else:
                         selectedUser.set_password(password)
                         selectedUser.save()
-                        messages.success(request,
-                                         "Modificata la password all'utente %s." % selectedUser.username)
+                        messages.success(
+                            request,
+                            "Modificata la password all'utente %s."
+                            % selectedUser.username,
+                        )
                         reset_user_session(selectedUser)
 
-            tipo_utente = request.POST.get('tipo_prenotazioni', 'c')
-            if tipo_utente == 'c':  # utente conducente
+            tipo_utente = request.POST.get("tipo_prenotazioni", "c")
+            if tipo_utente == "c":  # utente conducente
                 logging.debug("resetting groups for a normal user")
                 newGroups = request.POST.getlist("selectedGroup")
                 selectedUser.groups.clear()
@@ -111,12 +119,19 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
                     group = Group.objects.get(name=groupName)
                     selectedUser.groups.add(group)
 
-            if manage_prenotazioni:  # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
-                if tipo_utente == 'c':  # utente conducente
+            if (
+                manage_prenotazioni
+            ):  # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
+                if tipo_utente == "c":  # utente conducente
                     if utentePrenotazioni:
-                        messages.warning(request,
-                                         ("Faccio diventare l\'utente '%s' un conducente. "
-                                          "Attenzione se aveva accesso esterno.") % selectedUser)
+                        messages.warning(
+                            request,
+                            (
+                                "Faccio diventare l'utente '%s' un conducente. "
+                                "Attenzione se aveva accesso esterno."
+                            )
+                            % selectedUser,
+                        )
                         # elimino l'utente prenotazioni
                         utentePrenotazioni.delete()
                 else:
@@ -126,9 +141,11 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
                     logging.debug("clearing groups for user prenotazioni")
                     selectedUser.groups.clear()
                     if not utentePrenotazioni:
-                        messages.info(request,
-                                      "Faccio diventare il conducente"
-                                      " '%s' un utente per le prenotazioni." % selectedUser)
+                        messages.info(
+                            request,
+                            "Faccio diventare il conducente"
+                            " '%s' un utente per le prenotazioni." % selectedUser,
+                        )
                         utentePrenotazioni = UtentePrenotazioni()
                     else:
                         # era già un utente prenotazioni
@@ -136,18 +153,22 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
                         utentePrenotazioni.clienti.clear()
                     utentePrenotazioni.user = selectedUser
                     # attuale_prenotazione.cliente_id = request.POST.getlist('prenotazioni_clienti')
-                    utentePrenotazioni.luogo_id = request.POST.get('prenotazioni_luogo')
-                    utentePrenotazioni.nome_operatore = request.POST.get('operatore')
-                    utentePrenotazioni.email = request.POST.get('email')
-                    utentePrenotazioni.quick_book = request.POST.get('quickbook') and True or False
+                    utentePrenotazioni.luogo_id = request.POST.get("prenotazioni_luogo")
+                    utentePrenotazioni.nome_operatore = request.POST.get("operatore")
+                    utentePrenotazioni.email = request.POST.get("email")
+                    utentePrenotazioni.quick_book = (
+                        request.POST.get("quickbook") and True or False
+                    )
                     utentePrenotazioni.save()
                     logging.debug("Setting clients to user prenotazioni")
-                    for cliente_id in request.POST.getlist('prenotazioni_clienti'):
+                    for cliente_id in request.POST.getlist("prenotazioni_clienti"):
                         cliente = Cliente.objects.get(id=cliente_id)
                         utentePrenotazioni.clienti.add(cliente)
                         logging.debug("adding %s" % cliente)
             if not errors:
-                return HttpResponseRedirect(reverse("tamManage", kwargs={"username": username}))
+                return HttpResponseRedirect(
+                    reverse("tamManage", kwargs={"username": username})
+                )
         # fine delle azioni per il submit
 
         if manage_prenotazioni:
@@ -155,16 +176,18 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
             clienti = Cliente.objects.filter(attivo=True)
             luoghi = Luogo.objects.all()
 
-        if user.has_perm('tam.reset_sessions'):
+        if user.has_perm("tam.reset_sessions"):
             sessions = get_concurrent_sessions(request, selectedUser)
 
             if "resetSessions" in request.POST:
                 for session in sessions:
                     session.delete()
-                messages.success(request,
-                                 "L'utente {username} è stato disconnesso da ogni device".format(
-                                     username=username
-                                 ))
+                messages.success(
+                    request,
+                    "L'utente {username} è stato disconnesso da ogni device".format(
+                        username=username
+                    ),
+                )
 
     return render(request, template_name, locals())
 
@@ -172,9 +195,8 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
 def newUser(request, template_name="utils/newUser.html"):
     user = request.user
     profilo, created = ProfiloUtente.objects.get_or_create(user=user)
-    if not user.has_perm('auth.add_user'):
-        messages.error(request,
-                       "Non hai l'autorizzazione a creare nuovi utenti.")
+    if not user.has_perm("auth.add_user"):
+        messages.error(request, "Non hai l'autorizzazione a creare nuovi utenti.")
         return HttpResponseRedirect(reverse("tamUtil"))
 
     from django.contrib.auth.forms import UserCreationForm
@@ -183,24 +205,24 @@ def newUser(request, template_name="utils/newUser.html"):
 
     if form.is_valid():
         newUser = form.save()
-        nuovoProfilo, created = ProfiloUtente.objects.get_or_create(
-            user=newUser)
+        nuovoProfilo, created = ProfiloUtente.objects.get_or_create(user=newUser)
         # @type profilo tam.models.ProfiloUtente
         nuovoProfilo.luogo = profilo.luogo  # prendo il luogo predefinito del creatore
         nuovoProfilo.save()
-        messages.success(request,
-                         "Creato il nuovo utente in sola lettura %s." % newUser.username)
+        messages.success(
+            request, "Creato il nuovo utente in sola lettura %s." % newUser.username
+        )
         return HttpResponseRedirect(
-            reverse("tamManage", kwargs={"username": newUser.username}))
+            reverse("tamManage", kwargs={"username": newUser.username})
+        )
 
     return render(request, template_name, locals())
 
 
 def delUser(request, username, template_name="utils/delUser.html"):
     user = request.user
-    if not user.has_perm('auth.delete_user'):
-        messages.error(request,
-                       "Non hai l'autorizzazione per cancellare gli utenti.")
+    if not user.has_perm("auth.delete_user"):
+        messages.error(request, "Non hai l'autorizzazione per cancellare gli utenti.")
         return HttpResponseRedirect(reverse("tamUtil"))
     userToDelete = User.objects.get(username=username)
     if user == userToDelete:
@@ -208,8 +230,7 @@ def delUser(request, username, template_name="utils/delUser.html"):
         return HttpResponseRedirect(reverse("tamManage"))
     if "sure" in request.POST:
         userToDelete.delete()
-        messages.success(request,
-                         "Eliminato l'utente %s." % userToDelete.username)
+        messages.success(request, "Eliminato l'utente %s." % userToDelete.username)
         return HttpResponseRedirect(reverse("tamManage"))
     return render(request, template_name, locals())
 
@@ -220,16 +241,24 @@ def passwordChangeAndReset(request, template_name="utils/changePassword.html"):
         logging.debug("Changing password for %s" % request.user)
         form.save()
         reset_user_session(request.user)  # reset delle sessioni
-        return HttpResponseRedirect('/')
-    return render(request, template_name, {'form': form})
+        return HttpResponseRedirect("/")
+    return render(request, template_name, {"form": form})
 
 
 @prenotazioni
-def password_change_prenotazioni(request, template_name="prenotazioni/changePassword.html"):
+def password_change_prenotazioni(
+    request, template_name="prenotazioni/changePassword.html"
+):
     form = PasswordChangeForm(request.user, request.POST or None)
     if form.is_valid():
         logging.debug("Changing password for %s" % request.user)
         form.save()
-        return HttpResponseRedirect('/')
-    return render(request, template_name, {'form': form,
-                                           "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO, })
+        return HttpResponseRedirect("/")
+    return render(
+        request,
+        template_name,
+        {
+            "form": form,
+            "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+        },
+    )

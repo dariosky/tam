@@ -1,5 +1,5 @@
 # coding=utf-8
-from channels.routing import ProtocolTypeRouter ##route_class, route
+from channels.routing import ProtocolTypeRouter  ##route_class, route
 
 from django.conf import settings
 
@@ -15,6 +15,8 @@ channel_routing = []
 #     route('tam.quickbook', 'bots.quickbook.consumer')
 # )
 
-application = ProtocolTypeRouter({
-    # Empty for now (http->django views is added by default)
-})
+application = ProtocolTypeRouter(
+    {
+        # Empty for now (http->django views is added by default)
+    }
+)

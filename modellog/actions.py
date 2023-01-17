@@ -7,10 +7,10 @@ from modellog.models import ActionLog
 from tam.middleware import threadlocals
 import logging
 
-logger = logging.getLogger('tam.action')
+logger = logging.getLogger("tam.action")
 
 
-def logAction(action, instance=None, description=u'', user=None, log_date=None):
+def logAction(action, instance=None, description="", user=None, log_date=None):
     if instance:
         content_type = ContentType.objects.get_for_model(instance)
     else:
@@ -31,8 +31,11 @@ def logAction(action, instance=None, description=u'', user=None, log_date=None):
         modelName=content_type.model if instance else None,
         instance_id=instance.id if instance else None,
     )
-    if instance and modification.modelName == "viaggio" \
-        and instance.data < log_date.replace(hour=0, minute=0):
+    if (
+        instance
+        and modification.modelName == "viaggio"
+        and instance.data < log_date.replace(hour=0, minute=0)
+    ):
         modification.hilight = True
     logger.debug(modification)
     modification.save()
@@ -49,7 +52,7 @@ def traduci(v):
 
 
 def presave_logger(sender, instance, signal, **kwargs):
-    """ Log actions to db """
+    """Log actions to db"""
     # logging.debug( "PRESAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
     # logging.debug("********** ID: %s ********** "%instance.id)
     try:
@@ -68,51 +71,53 @@ def presave_logger(sender, instance, signal, **kwargs):
         if prevalue != newvalue:
             prevalue = traduci(prevalue)
             newvalue = traduci(newvalue)
-            instance._changeList.append(u"%s: da '%s' a '%s'" % (fieldname, prevalue, newvalue))
+            instance._changeList.append(
+                "%s: da '%s' a '%s'" % (fieldname, prevalue, newvalue)
+            )
 
 
 def postsave_logger(sender, instance, signal, **kwargs):
     # logging.debug( "POSTSAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
     if instance._changeList is None:
-        logAction('A', instance, u"%s" % instance)
+        logAction("A", instance, "%s" % instance)
     else:
         if instance._changeList:
-            logAction('M', instance, u"; ".join(instance._changeList))
+            logAction("M", instance, "; ".join(instance._changeList))
 
 
 def predelete_logger(sender, instance, signal, **kwargs):
     # logging.debug( "DELETE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
-    logAction('D', instance, u"%s" % instance)
+    logAction("D", instance, "%s" % instance)
 
 
 def startLog(ModelClass):
     signals.pre_save.connect(
         presave_logger,
         sender=ModelClass,
-        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_save')
+        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, "pre_save"),
     )
     signals.post_save.connect(
         postsave_logger,
         sender=ModelClass,
-        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'post_save')
+        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, "post_save"),
     )
     signals.pre_delete.connect(
         predelete_logger,
         sender=ModelClass,
-        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_delete')
+        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, "pre_delete"),
     )
 
 
 def stopLog(ModelClass):
     signals.pre_save.disconnect(
         sender=ModelClass,
-        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_save')
+        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, "pre_save"),
     )
     signals.post_save.disconnect(
         sender=ModelClass,
-        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'post_save')
+        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, "post_save"),
     )
     signals.pre_delete.disconnect(
         sender=ModelClass,
-        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, 'pre_delete')
+        dispatch_uid="%s.%s" % (ModelClass._meta.verbose_name, "pre_delete"),
     )

@@ -8,63 +8,109 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tam', '0006_auto_20170220_2055'),
+        ("tam", "0006_auto_20170220_2055"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='cliente',
-            name='listino',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='tam.Listino', verbose_name='Listino cliente'),
+            model_name="cliente",
+            name="listino",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="tam.Listino",
+                verbose_name="Listino cliente",
+            ),
         ),
         migrations.AlterField(
-            model_name='conducente',
-            name='has_bus',
-            field=models.BooleanField(default=False, editable=False, verbose_name='Ha un bus?'),
+            model_name="conducente",
+            name="has_bus",
+            field=models.BooleanField(
+                default=False, editable=False, verbose_name="Ha un bus?"
+            ),
         ),
         migrations.AlterField(
-            model_name='prezzolistino',
-            name='listino',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='tam.Listino'),
+            model_name="prezzolistino",
+            name="listino",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="tam.Listino"
+            ),
         ),
         migrations.AlterField(
-            model_name='profiloutente',
-            name='luogo',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to='tam.Luogo', verbose_name='Luogo di partenza'),
+            model_name="profiloutente",
+            name="luogo",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                to="tam.Luogo",
+                verbose_name="Luogo di partenza",
+            ),
         ),
         migrations.AlterField(
-            model_name='profiloutente',
-            name='user',
-            field=models.OneToOneField(editable=False, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+            model_name="profiloutente",
+            name="user",
+            field=models.OneToOneField(
+                editable=False,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterField(
-            model_name='tratta',
-            name='a',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tempo_a', to='tam.Luogo'),
+            model_name="tratta",
+            name="a",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tempo_a",
+                to="tam.Luogo",
+            ),
         ),
         migrations.AlterField(
-            model_name='tratta',
-            name='da',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tempo_da', to='tam.Luogo'),
+            model_name="tratta",
+            name="da",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tempo_da",
+                to="tam.Luogo",
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggio',
-            name='a',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='a', to='tam.Luogo'),
+            model_name="viaggio",
+            name="a",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="a",
+                to="tam.Luogo",
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggio',
-            name='conducente',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='tam.Conducente'),
+            model_name="viaggio",
+            name="conducente",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="tam.Conducente",
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggio',
-            name='da',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='da', to='tam.Luogo'),
+            model_name="viaggio",
+            name="da",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="da",
+                to="tam.Luogo",
+            ),
         ),
         migrations.AlterField(
-            model_name='viaggio',
-            name='padre',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='tam.Viaggio'),
+            model_name="viaggio",
+            name="padre",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="tam.Viaggio",
+            ),
         ),
     ]

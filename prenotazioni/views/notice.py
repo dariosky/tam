@@ -4,7 +4,7 @@ from datetime import timedelta
 
 
 def notice_required(run_date, working_hours=(7, 20), night_notice=12, work_notice=2):
-    """ Return the maximum datetime for make the intended booking at run_date
+    """Return the maximum datetime for make the intended booking at run_date
     Depending if the call arrive in working hour or not, the notice period is different
 
     @type run_date: datetime

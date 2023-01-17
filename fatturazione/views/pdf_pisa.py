@@ -10,15 +10,17 @@ def render_with_pisa(template_src, context_dict):
     from django.template.context import Context
     from io import StringIO
     import cgi
+
     template = get_template(template_src)
     context = Context(context_dict)
     html = template.render(context)
     result = StringIO()
-    pdf = pisa.pisaDocument(StringIO(html.encode("utf-8")), dest=result,
-                            link_callback=fetch_resources)
+    pdf = pisa.pisaDocument(
+        StringIO(html.encode("utf-8")), dest=result, link_callback=fetch_resources
+    )
     if not pdf.err:
-        return http.HttpResponse(result.getvalue(), content_type='application/pdf')
-    return http.HttpResponse('We had some errors<pre>%s</pre>' % cgi.escape(html))
+        return http.HttpResponse(result.getvalue(), content_type="application/pdf")
+    return http.HttpResponse("We had some errors<pre>%s</pre>" % cgi.escape(html))
 
 
 def fetch_resources(uri, rel):

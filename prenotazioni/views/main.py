@@ -45,15 +45,20 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
     else:
         raise Exception("Azione mail non valida %s" % azione)
 
-    context = {"prenotazione": prenotazione,
-               "azione": prenotazione_suffix,
-               }
+    context = {
+        "prenotazione": prenotazione,
+        "azione": prenotazione_suffix,
+    }
     if extra_context:
         context.update(extra_context)
 
-    from_email = getattr(settings, 'PRENOTAZIONI_FROM_EMAIL', None)
+    from_email = getattr(settings, "PRENOTAZIONI_FROM_EMAIL", None)
     if settings.DEBUG and False:
-        print("Sono in test. non invio la mail da {from_email}".format(from_email=from_email))
+        print(
+            "Sono in test. non invio la mail da {from_email}".format(
+                from_email=from_email
+            )
+        )
     else:
         notifyByMail(
             to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
@@ -69,71 +74,67 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
 
 @prenotazioni
 @transaction.atomic  # commit solo se tutto OK
-def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html'):
+def prenota(request, id_prenotazione=None, template_name="prenotazioni/main.html"):
     utentePrenotazioni = request.user.prenotazioni
-    QUICK_BOOK = getattr(settings, 'PRENOTAZIONI_QUICK', False)
+    QUICK_BOOK = getattr(settings, "PRENOTAZIONI_QUICK", False)
 
     previous_values = {}
     if id_prenotazione:
         try:
             prenotazione = Prenotazione.objects.get(id=id_prenotazione)
         except Prenotazione.DoesNotExist:
-            messages.error(
-                request,
-                _("La prenotazione non esiste.")
-            )
-            return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+            messages.error(request, _("La prenotazione non esiste."))
+            return HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
         if prenotazione.owner != utentePrenotazioni:
             messages.error(
                 request,
-                _("La prenotazione non è stata fatta da te, non puoi accedervi.")
+                _("La prenotazione non è stata fatta da te, non puoi accedervi."),
             )
-            return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+            return HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
         editable = prenotazione.is_editable()
         if not editable:
-            messages.warning(
-                request,
-                _("La prenotazione non è più modificabile.")
-            )
+            messages.warning(request, _("La prenotazione non è più modificabile."))
             # return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
     else:
         prenotazione = None
         editable = True
 
-    form = FormPrenotazioni(request.POST or None, request.FILES or None, instance=prenotazione)
+    form = FormPrenotazioni(
+        request.POST or None, request.FILES or None, instance=prenotazione
+    )
     if prenotazione:
         form.initial["data_corsa"] = prenotazione.data_corsa.astimezone(
-            tamdates.tz_italy)  # inizialmente forzo la corsa
+            tamdates.tz_italy
+        )  # inizialmente forzo la corsa
 
     # decido se mostrare o meno la scelta dei clienti:
     clienti_attivi = utentePrenotazioni.clienti
     if clienti_attivi.count() == 0:
-        messages.error(
-            request,
-            _("Non hai alcun cliente abilitato.")
-        )
-        return HttpResponseRedirect(reverse('login'))
+        messages.error(request, _("Non hai alcun cliente abilitato."))
+        return HttpResponseRedirect(reverse("login"))
 
     if clienti_attivi.count() > 1:
         form.fields["cliente"].editable = True
         form.fields["cliente"].queryset = utentePrenotazioni.clienti
-        form.fields["cliente"].label = ''
+        form.fields["cliente"].label = ""
         cliente_unico = None
     else:
         # del forms.fields['cliente']
-        del form.fields['cliente']
+        del form.fields["cliente"]
         cliente_unico = clienti_attivi.all()[0]
 
     adesso = tamdates.ita_now().replace(second=0, microsecond=0)
-    if not id_prenotazione and QUICK_BOOK and 'quickbook' in request.POST:
+    if not id_prenotazione and QUICK_BOOK and "quickbook" in request.POST:
         # we are going to do a QuickBOOK!
-        chosen_target = request.POST.get('quickbook')
-        targets = filter(lambda target: target['name'] == chosen_target, QUICK_BOOK['choices'])
+        chosen_target = request.POST.get("quickbook")
+        targets = filter(
+            lambda target: target["name"] == chosen_target, QUICK_BOOK["choices"]
+        )
         targets = list(targets)
         if not targets:
             raise Http404("Luogo non valido per la prenotazione rapida")
 
-        target_place_name = targets[0].get('place_name')
+        target_place_name = targets[0].get("place_name")
         if target_place_name:
             target_place = Luogo.objects.get(nome=target_place_name)
         else:
@@ -149,23 +150,21 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
             is_arrivo=False,
             # da=utentePrenotazioni.luogo,
             luogo=target_place,
-            **QUICK_BOOK['defaults']
+            **QUICK_BOOK["defaults"],
         )
         viaggio = prenotaCorsa(prenotazione)
         prenotazione.viaggio = viaggio
         prenotazione.save()
 
-        inviaMailPrenotazione(prenotazione,
-                              "create",
-                              attachments=[]
-                              )
+        inviaMailPrenotazione(prenotazione, "create", attachments=[])
         messages.success(
             request,
             _(
                 "Prenotazione rapida n° %d effettuata, a breve riceverai una mail di conferma."
-            ) % prenotazione.id
+            )
+            % prenotazione.id,
         )
-        return HttpResponseRedirect(reverse('tamPrenotazioni'))
+        return HttpResponseRedirect(reverse("tamPrenotazioni"))
 
     if request.method == "POST" and prenotazione:
         # salvo i valori precedenti e consento la cancellazione
@@ -177,33 +176,32 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
             inviaMailPrenotazione(prenotazione, "delete")
             id_prenotazione = prenotazione.id  # salvo per il messaggio finale
             prenotazione.delete()
-            messages.success(request, _("Prenotazione n°%d annullata.") % id_prenotazione)
-            return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+            messages.success(
+                request, _("Prenotazione n°%d annullata.") % id_prenotazione
+            )
+            return HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
 
     if form.is_valid() and editable:
-        request_attachment = form.cleaned_data['attachment']
+        request_attachment = form.cleaned_data["attachment"]
         attachment = None
         # del form.cleaned_data['attachment']
 
         if request_attachment:
             # destination = tempfile.NamedTemporaryFile(delete=False)
-            attachment = MIMEBase('application', "octet-stream")
+            attachment = MIMEBase("application", "octet-stream")
             # print "Write to %s" % destination.name
             attachment.set_payload(request_attachment.read())
             encode_base64(attachment)
             attachment.add_header(
-                'Content-Disposition',
-                'attachment; filename="%s"' % os.path.basename(request_attachment.name)
+                "Content-Disposition",
+                'attachment; filename="%s"' % os.path.basename(request_attachment.name),
             )
         # for chunk in attachment.chunks():
         # destination.write(chunk)
         # destination.close()
 
         if id_prenotazione is None:
-            prenotazione = Prenotazione(
-                owner=utentePrenotazioni,
-                **form.cleaned_data
-            )
+            prenotazione = Prenotazione(owner=utentePrenotazioni, **form.cleaned_data)
             if clienti_attivi.count() == 1:
                 prenotazione.cliente = cliente_unico
 
@@ -213,19 +211,21 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                 prenotazione.had_attachment = True  # creata con allegato
             prenotazione.save()
 
-            inviaMailPrenotazione(prenotazione,
-                                  "create",
-                                  attachments=[attachment] if attachment else []
-                                  )
+            inviaMailPrenotazione(
+                prenotazione, "create", attachments=[attachment] if attachment else []
+            )
             messages.success(
                 request,
                 _(
-                    "Prenotazione n° %d effettuata, a breve riceverai una mail di conferma.") % prenotazione.id
+                    "Prenotazione n° %d effettuata, a breve riceverai una mail di conferma."
+                )
+                % prenotazione.id,
             )
-            return HttpResponseRedirect(reverse('tamPrenotazioni'))
+            return HttpResponseRedirect(reverse("tamPrenotazioni"))
         else:  # salvo la modifica
             changes = {}  # dizionario con i cambiamenti al form
             for key in form.cleaned_data:
+
                 def humanValue(pythonValue, choices):
                     for k, v in choices:
                         if k == pythonValue:
@@ -252,42 +252,45 @@ def prenota(request, id_prenotazione=None, template_name='prenotazioni/main.html
                 for key in changes:
                     (label, oldValue, newValue) = changes[key]
                     stringhe_cambiamenti.append(
-                        "Cambiato %s da %s a %s" % (label, oldValue, newValue))
+                        "Cambiato %s da %s a %s" % (label, oldValue, newValue)
+                    )
 
                 cambiamenti = "\n".join(stringhe_cambiamenti)
-                inviaMailPrenotazione(prenotazione,
-                                      "update",
-                                      attachments=[attachment] if attachment else [],
-                                      extra_context={"cambiamenti": cambiamenti}
-                                      )
+                inviaMailPrenotazione(
+                    prenotazione,
+                    "update",
+                    attachments=[attachment] if attachment else [],
+                    extra_context={"cambiamenti": cambiamenti},
+                )
 
                 if request_attachment and not prenotazione.had_attachment:
                     prenotazione.had_attachment = True  # aggiunto l'allegato
                 prenotazione.save()
                 messages.success(request, _("Modifica eseguita."))
             return HttpResponseRedirect(
-                reverse('tamPrenotazioni-edit',
-                        kwargs={"id_prenotazione": prenotazione.id}
-                        ),
+                reverse(
+                    "tamPrenotazioni-edit", kwargs={"id_prenotazione": prenotazione.id}
+                ),
             )
 
-    return render(request,
-                  template_name,
-                  {
-                      "utentePrenotazioni": utentePrenotazioni,
-                      "form": form,
-                      "editable": editable,
-                      "prenotazione": prenotazione,
-                      "cliente_unico": cliente_unico,
-                      "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
-                      "quick_book": QUICK_BOOK,
-                  },
-                  )
+    return render(
+        request,
+        template_name,
+        {
+            "utentePrenotazioni": utentePrenotazioni,
+            "form": form,
+            "editable": editable,
+            "prenotazione": prenotazione,
+            "cliente_unico": cliente_unico,
+            "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
+            "quick_book": QUICK_BOOK,
+        },
+    )
 
 
 @prenotazioni
 def download_attachment(request, id_prenotazione):
-    redirect_page = HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+    redirect_page = HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
     try:
         prenotazione = Prenotazione.objects.get(id=id_prenotazione)
     except Prenotazione.DoesNotExist:
@@ -300,20 +303,17 @@ def download_attachment(request, id_prenotazione):
     if prenotazione and not prenotazione.attachment:
         prenotazione = None
     if prenotazione is None:
-        messages.error(
-            request,
-            _("Non puoi accedere a questo allegato")
-        )
+        messages.error(request, _("Non puoi accedere a questo allegato"))
         return redirect_page
     response = serve_secure_file(request, prenotazione.attachment.name)
-    response[
-        'Content-Disposition'] = 'attachment; ' \
-                                 f'filename="{os.path.basename(prenotazione.attachment.name)}"'
+    response["Content-Disposition"] = (
+        "attachment; " f'filename="{os.path.basename(prenotazione.attachment.name)}"'
+    )
     return response
 
 
 @prenotazioni
-def cronologia(request, template_name='prenotazioni/cronologia.html'):
+def cronologia(request, template_name="prenotazioni/cronologia.html"):
     utentePrenotazioni = request.user.prenotazioni
     clienti_attivi = utentePrenotazioni.clienti.all()
     if len(clienti_attivi) == 1:
@@ -321,7 +321,7 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
     else:
         cliente_unico = None
 
-    filtroCliente = request.GET.get('cliente', None)
+    filtroCliente = request.GET.get("cliente", None)
     cliente_selezionato = None
     if filtroCliente is not None:
         if filtroCliente != "all":
@@ -329,51 +329,59 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
                 codice_cliente = int(filtroCliente)
                 cliente_selezionato = Cliente.objects.get(id=codice_cliente)
                 if cliente_selezionato not in clienti_attivi:
-                    messages.error(request, _('Non sei abilitato a vedere questo cliente.'))
-                    return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+                    messages.error(
+                        request, _("Non sei abilitato a vedere questo cliente.")
+                    )
+                    return HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
             except ValueError:
                 filtroCliente = None
             except Cliente.DoesNotExist:
-                messages.error(request, _('Il cliente non esiste.'))
-                return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+                messages.error(request, _("Il cliente non esiste."))
+                return HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
 
     adesso = tamdates.ita_now().replace(second=0, microsecond=0)
     data_inizio = (adesso - datetime.timedelta(days=60)).replace(hour=0, minute=0)
     data_fine = None
 
-    filtroData = request.GET.get('data', 'next')
+    filtroData = request.GET.get("data", "next")
     if filtroData is not None:
-        if filtroData == 'cur':  # mese corrente
+        if filtroData == "cur":  # mese corrente
             data_inizio = adesso.replace(hour=0, minute=0, day=1)
-            data_fine = (data_inizio + datetime.timedelta(days=32)).replace(hour=0, minute=0, day=1)
-        elif filtroData == 'prev':  # mese precedente
+            data_fine = (data_inizio + datetime.timedelta(days=32)).replace(
+                hour=0, minute=0, day=1
+            )
+        elif filtroData == "prev":  # mese precedente
             data_fine = adesso.replace(hour=0, minute=0, day=1)  # vado a inizio mese
             data_inizio = (data_fine - datetime.timedelta(days=1)).replace(
-                day=1)  # vado a inizio del mese precedente
-        elif filtroData == 'day':  # tutta oggi
+                day=1
+            )  # vado a inizio del mese precedente
+        elif filtroData == "day":  # tutta oggi
             data_inizio = adesso.replace(hour=0, minute=0)  # da mezzanotte...
             data_fine = adesso.replace(hour=23, minute=59)  # fino a fine giornata
-        elif filtroData == 'next':  # prossime corse
+        elif filtroData == "next":  # prossime corse
             # prendo il minore tra 2 ore fa e mezzanotte scorsa e per i prossimi 15 giorni
             data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
             data_DueOreFa = adesso - datetime.timedelta(hours=2)
             data_inizio = min(data_ScorsaMezzanotte, data_DueOreFa)
             data_fine = adesso + datetime.timedelta(days=15)
-        elif filtroData == 'adv':  # filtro avanzato da data - a data
-            start_string = request.GET.get('dstart')
-            end_string = request.GET.get('dend')
+        elif filtroData == "adv":  # filtro avanzato da data - a data
+            start_string = request.GET.get("dstart")
+            end_string = request.GET.get("dend")
             try:
-                data_inizio = tamdates.parse_datestring(start_string).replace(hour=0, minute=0)
+                data_inizio = tamdates.parse_datestring(start_string).replace(
+                    hour=0, minute=0
+                )
                 data_fine = tamdates.parse_datestring(end_string).replace(
-                    hour=23, minute=59)  # fino a fine giornata
+                    hour=23, minute=59
+                )  # fino a fine giornata
             except AttributeError:
-                messages.warning(request,
-                                 _(
-                                     "Errore nel processare l'intervallo di date {start}-{end}."
-                                 ).format(
-                                     start=start_string, end=end_string)
-                                 )
-                return HttpResponseRedirect(reverse('tamCronoPrenotazioni'))
+                messages.warning(
+                    request,
+                    _(
+                        "Errore nel processare l'intervallo di date {start}-{end}."
+                    ).format(start=start_string, end=end_string),
+                )
+                return HttpResponseRedirect(reverse("tamCronoPrenotazioni"))
 
     viaggi = Viaggio.objects.filter(cliente__in=utentePrenotazioni.clienti.all())
 
@@ -415,11 +423,9 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
             "cliente_unico": cliente_unico,
             "clienti_attivi": clienti_attivi,
             "cliente_selezionato": cliente_selezionato,
-
             "current_date_filter": filtroData,
-            "data_inizio": data_inizio.strftime('%d/%m/%Y') if data_inizio else "",
-            "data_fine": data_fine.strftime('%d/%m/%Y') if data_fine else "",
-
+            "data_inizio": data_inizio.strftime("%d/%m/%Y") if data_inizio else "",
+            "data_fine": data_fine.strftime("%d/%m/%Y") if data_fine else "",
             "paginator": paginator,
             "thisPage": thisPage,
             "logo_consorzio": settings.TRANSPARENT_SMALL_LOGO,
@@ -428,25 +434,32 @@ def cronologia(request, template_name='prenotazioni/cronologia.html'):
 
 
 def attachments_list(request):
-    get_mese = request.GET.get('mese', None)
+    get_mese = request.GET.get("mese", None)
     oggi = tamdates.ita_today()
-    quick_month_names = [MONTH_NAMES[(oggi.month - 3) % 12],
-                         MONTH_NAMES[(oggi.month - 2) % 12],
-                         MONTH_NAMES[(oggi.month - 1) % 12]]  # current month
+    quick_month_names = [
+        MONTH_NAMES[(oggi.month - 3) % 12],
+        MONTH_NAMES[(oggi.month - 2) % 12],
+        MONTH_NAMES[(oggi.month - 1) % 12],
+    ]  # current month
     quick_month_names.reverse()
 
     if get_mese:
         if get_mese == "cur":
             data_start = oggi.replace(day=1)
             data_end = (data_start + datetime.timedelta(days=32)).replace(
-                day=1) - datetime.timedelta(days=1)
-        elif get_mese == 'prev':
-            data_end = oggi.replace(day=1) - datetime.timedelta(days=1)  # vado a fine mese scorso
+                day=1
+            ) - datetime.timedelta(days=1)
+        elif get_mese == "prev":
+            data_end = oggi.replace(day=1) - datetime.timedelta(
+                days=1
+            )  # vado a fine mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio del mese precedente
-        elif get_mese == 'prevprev':  # due mesi fa
+        elif get_mese == "prevprev":  # due mesi fa
             data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
-                day=1) - datetime.timedelta(
-                days=1)  # vado a inizio mese scorso
+                day=1
+            ) - datetime.timedelta(
+                days=1
+            )  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese)
@@ -454,31 +467,34 @@ def attachments_list(request):
         data_start = parse_datestring(  # dal primo del mese scorso
             request.GET.get("data_start"),
             default=(
-                tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)).replace(
-                day=1)
+                tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)
+            ).replace(day=1),
         )
         data_end = parse_datestring(  # all'ultimo del mese scorso
-            request.GET.get("data_end"),
-            default=tamdates.ita_today()
+            request.GET.get("data_end"), default=tamdates.ita_today()
         )
 
-    prenotazioni = Prenotazione.objects.filter(had_attachment=True, data_corsa__gte=data_start,
-                                               data_corsa__lt=data_end + datetime.timedelta(days=1))
+    prenotazioni = Prenotazione.objects.filter(
+        had_attachment=True,
+        data_corsa__gte=data_start,
+        data_corsa__lt=data_end + datetime.timedelta(days=1),
+    )
     gruppo_prenotazioni = OrderedDict()
     for prenotazione in prenotazioni:
         if prenotazione.cliente not in gruppo_prenotazioni:
             gruppo_prenotazioni[prenotazione.cliente] = []
         gruppo_prenotazioni[prenotazione.cliente].append(prenotazione)
 
-    return render(request,
-                  'attachments_list.html',
-                  {
-                      "data_start": data_start.date(),
-                      "data_end": data_end.date(),
-                      "quick_month_names": quick_month_names,
-                      "dontHilightFirst": True,
-                      "mediabundleJS": ('tamUI',),
-                      "mediabundleCSS": ('tamUI',),
-                      "gruppo_prenotazioni": gruppo_prenotazioni,
-                  },
-                  )
+    return render(
+        request,
+        "attachments_list.html",
+        {
+            "data_start": data_start.date(),
+            "data_end": data_end.date(),
+            "quick_month_names": quick_month_names,
+            "dontHilightFirst": True,
+            "mediabundleJS": ("tamUI",),
+            "mediabundleCSS": ("tamUI",),
+            "gruppo_prenotazioni": gruppo_prenotazioni,
+        },
+    )

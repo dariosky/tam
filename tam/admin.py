@@ -1,4 +1,4 @@
-from tam.models import * #@UnusedWildImport
+from tam.models import *  # @UnusedWildImport
 from django.contrib import admin
 
 admin.site.register(Luogo)

@@ -6,8 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 
 class Positions(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    lat = models.FloatField(_('Latitude'), blank=True, null=True)
-    lon = models.FloatField(_('Longitude'), blank=True, null=True)
+    lat = models.FloatField(_("Latitude"), blank=True, null=True)
+    lon = models.FloatField(_("Longitude"), blank=True, null=True)
     last_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):

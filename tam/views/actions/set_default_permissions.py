@@ -14,7 +14,8 @@ def create_missing_permissions():
 
 def create_missing_groups():
     from django.contrib.auth.models import Group
-    needed_groups = ['Normale', 'Potente']
+
+    needed_groups = ["Normale", "Potente"]
     for name in needed_groups:
         if not Group.objects.filter(name=name).exists():
             print("Creo il gruppo %s" % name)
@@ -24,28 +25,38 @@ def create_missing_groups():
 
 def delete_all_permissions():
     from django.contrib.auth.models import Permission
+
     Permission.objects.all().delete()
 
 
 def pretty_print_permissions():
     from django.contrib.auth.models import Group
+
     lines = []
     for gruppo in Group.objects.all():
         lines.append(str(gruppo))
         for permesso in gruppo.permissions.all():
-            lines.append("  %s" % "|".join(
-                [permesso.content_type.app_label, permesso.content_type.model, permesso.codename])
-                         )
+            lines.append(
+                "  %s"
+                % "|".join(
+                    [
+                        permesso.content_type.app_label,
+                        permesso.content_type.model,
+                        permesso.codename,
+                    ]
+                )
+            )
     return lines
 
 
 @transaction.atomic
 def set_permissions(groupName, permission_pretty):
     from django.contrib.auth.models import Permission, Group
+
     group = Group.objects.get(name=groupName)
-    permissions_codenames = filter(lambda s: s != '',
-                                   map(lambda s: s.strip(),
-                                       permission_pretty.split("\n")))
+    permissions_codenames = filter(
+        lambda s: s != "", map(lambda s: s.strip(), permission_pretty.split("\n"))
+    )
     print("Avevo %d permessi per il gruppo %s." % (group.permissions.count(), group))
     group.permissions.clear()
     for full_code_name in permissions_codenames:
@@ -60,7 +71,9 @@ def set_permissions(groupName, permission_pretty):
 
 
 def set_default_permissions():
-    set_permissions('Potente', """
+    set_permissions(
+        "Potente",
+        """
   auth|user|add_user
   auth|user|change_user
   board|boardmessage|view
@@ -106,8 +119,11 @@ def set_default_permissions():
   tam|viaggio|delete_viaggio
   tamArchive|viaggioarchive|archive
   tamArchive|viaggioarchive|flat
-""")
-    set_permissions('Normale', """
+""",
+    )
+    set_permissions(
+        "Normale",
+        """
   board|boardmessage|view
   codapresenze|codapresenze|editall
   codapresenze|codapresenze|view
@@ -125,10 +141,11 @@ def set_default_permissions():
   tam|viaggio|add_viaggio
   tam|viaggio|change_viaggio
   tam|viaggio|delete_viaggio
-""")
+""",
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     django.setup()
     # delete_all_permissions()
     # create_missing_permissions()

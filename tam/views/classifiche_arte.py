@@ -23,43 +23,51 @@ from decimal import Decimal
 import pytz
 from django.utils.safestring import mark_safe
 
-tz_italy = pytz.timezone('Europe/Rome')
-DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI = tz_italy.localize(datetime.datetime(2016, 4, 1, 0, 0))
+tz_italy = pytz.timezone("Europe/Rome")
+DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI = tz_italy.localize(
+    datetime.datetime(2016, 4, 1, 0, 0)
+)
 
 CLASSIFICHE = [
-    {"nome": "Supplementari mattutini",
-     "mapping_field": "puntiDiurni",
-     'type': 'supplementari',
-     'image': "morning",
-     'viaggio_field': 'punti_diurni',
-     },
-    {"nome": "Supplementari serali",
-     "mapping_field": "puntiNotturni",
-     'type': 'supplementari',
-     'image': "night",
-     'viaggio_field': 'punti_notturni',
-     },
-    {"nome": "Venezia",
-     "descrizione": ">=60km",
-     "mapping_field": "prezzoVenezia",
-     'viaggio_field': 'prezzoVenezia',
-     'ignore_if_field': 'punti_abbinata',
-     # ignoro questa classifica se ho dei punti abbinata
-     },
-    {"nome": "Doppi Venezia",
-     'type': 'punti',
-     "mapping_field": "punti_abbinata",
-     "viaggio_field": "punti_abbinata",
-     },
-    {"nome": "Doppi Padova",
-     "mapping_field": "prezzoDoppioPadova",
-     'viaggio_field': 'prezzoDoppioPadova',
-     },
-    {"nome": "Padova",
-     "descrizione": ">16€, <60km",
-     "mapping_field": "prezzoPadova",
-     'viaggio_field': 'prezzoPadova',
-     },
+    {
+        "nome": "Supplementari mattutini",
+        "mapping_field": "puntiDiurni",
+        "type": "supplementari",
+        "image": "morning",
+        "viaggio_field": "punti_diurni",
+    },
+    {
+        "nome": "Supplementari serali",
+        "mapping_field": "puntiNotturni",
+        "type": "supplementari",
+        "image": "night",
+        "viaggio_field": "punti_notturni",
+    },
+    {
+        "nome": "Venezia",
+        "descrizione": ">=60km",
+        "mapping_field": "prezzoVenezia",
+        "viaggio_field": "prezzoVenezia",
+        "ignore_if_field": "punti_abbinata",
+        # ignoro questa classifica se ho dei punti abbinata
+    },
+    {
+        "nome": "Doppi Venezia",
+        "type": "punti",
+        "mapping_field": "punti_abbinata",
+        "viaggio_field": "punti_abbinata",
+    },
+    {
+        "nome": "Doppi Padova",
+        "mapping_field": "prezzoDoppioPadova",
+        "viaggio_field": "prezzoDoppioPadova",
+    },
+    {
+        "nome": "Padova",
+        "descrizione": ">16€, <60km",
+        "mapping_field": "prezzoPadova",
+        "viaggio_field": "prezzoPadova",
+    },
 ]
 NOMI_CAMPI_CONDUCENTE = {}  # tutto dai modelli
 
@@ -68,11 +76,17 @@ COMMISSIONE_CARTA = 0
 
 
 def process_classifiche(viaggio, force_numDoppi=None):
-    KM_PER_LUNGHE = getattr(settings, 'KM_PER_LUNGHE', 50)
+    KM_PER_LUNGHE = getattr(settings, "KM_PER_LUNGHE", 50)
     if viaggio.is_abbinata and viaggio.padre is None:
-        da = dettagliAbbinamento(viaggio, force_numDoppi=force_numDoppi)  # trovo i dettagli
+        da = dettagliAbbinamento(
+            viaggio, force_numDoppi=force_numDoppi
+        )  # trovo i dettagli
 
-        if viaggio.is_abbinata == 'P' and da['scoreVersion'] and da['scoreVersion'] >= '2016-04-01':
+        if (
+            viaggio.is_abbinata == "P"
+            and da["scoreVersion"]
+            and da["scoreVersion"] >= "2016-04-01"
+        ):
             # le abbinate in partenza si comportano come delle corse normali (ma usando i valori globali del gruppo)
             prezzoNetto = da["valoreTotale"]
             if da["kmTotali"] >= KM_PER_LUNGHE:
@@ -95,7 +109,9 @@ def process_classifiche(viaggio, force_numDoppi=None):
                         viaggio.prezzoVenezia = prezzoNetto
                     elif 25 <= da["kmTotali"] < KM_PER_LUNGHE:
                         viaggio.prezzoPadova = prezzoNetto
-    elif viaggio.padre_id is None:  # corse non abbinate, o abbinate che non fanno alcun punto
+    elif (
+        viaggio.padre_id is None
+    ):  # corse non abbinate, o abbinate che non fanno alcun punto
         if viaggio.is_long():
             viaggio.prezzoVenezia = viaggio.prezzo_finale
         elif viaggio.is_medium():
@@ -111,9 +127,9 @@ def process_classifiche(viaggio, force_numDoppi=None):
 
 
 def dettagliAbbinamento(viaggio, force_numDoppi=None):
-    """ Restituisce un dizionario con i dettagli dell'abbinamento
-        la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
-        Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
+    """Restituisce un dizionario con i dettagli dell'abbinamento
+    la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
+    Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
     """
     from tam.views.tamUtils import conta_bacini_partenza
 
@@ -134,14 +150,23 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         return locals()
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
-    forzaSingolo = (force_numDoppi is 0)
-    baciniDiPartenza = conta_bacini_partenza([viaggio] + list(viaggio.viaggio_set.all()))
+    forzaSingolo = force_numDoppi is 0
+    baciniDiPartenza = conta_bacini_partenza(
+        [viaggio] + list(viaggio.viaggio_set.all())
+    )
 
-    scoreVersion = None  # We keep a progressive date 'yyyy-mm-dd-vv' to track version changes
-    if viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI and len(baciniDiPartenza) == 1:
-        scoreVersion = '2016-04-01'
+    scoreVersion = (
+        None  # We keep a progressive date 'yyyy-mm-dd-vv' to track version changes
+    )
+    if (
+        viaggio.data >= DATA_CALCOLO_DOPPIINPARTENZA_COME_SINGOLI
+        and len(baciniDiPartenza) == 1
+    ):
+        scoreVersion = "2016-04-01"
 
-    valoreTotale = viaggio.get_valuetot(forzaSingolo=forzaSingolo, scoreVersion=scoreVersion)
+    valoreTotale = viaggio.get_valuetot(
+        forzaSingolo=forzaSingolo, scoreVersion=scoreVersion
+    )
 
     # kmNonConguagliati= kmTotali - viaggio.km_conguagliati
     # valoreDaConguagliare = viaggio.get_valuetot(forzaSingolo=forzaSingolo) * (kmNonConguagliati) / kmTotali
@@ -163,7 +188,8 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
     if puntiAbbinamento:
         rimanenteInLunghe = kmRimanenti * Decimal(
-            "0.65")  # gli eccedenti li metto nei venezia a 0.65€/km
+            "0.65"
+        )  # gli eccedenti li metto nei venezia a 0.65€/km
         # logging.debug("Dei %skm totali: %s fuori abbinta a 0.65 a %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
         valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
         # valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
@@ -191,40 +217,45 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         #  quei punti li tolgo ai puntiAbbinamento
         # logging.debug("La corsa ha già %d km conguagliati, tolgo %d punti ai %d che avrebbe."  % (
         #               viaggio.km_conguagliati, viaggio.km_conguagliati/kmPuntoAbbinate, puntiAbbinamento) )
-        puntiAbbinamento -= (viaggio.km_conguagliati / kmPuntoAbbinate)
-    return dict(kmTotali=kmTotali,
-                puntiAbbinamento=puntiAbbinamento,
-                valorePunti=valorePunti,
-                rimanenteInLunghe=rimanenteInLunghe,
-                pricy=pricy,
-                valoreTotale=valoreTotale,
-                scoreVersion=scoreVersion,
-                )
+        puntiAbbinamento -= viaggio.km_conguagliati / kmPuntoAbbinate
+    return dict(
+        kmTotali=kmTotali,
+        puntiAbbinamento=puntiAbbinamento,
+        valorePunti=valorePunti,
+        rimanenteInLunghe=rimanenteInLunghe,
+        pricy=pricy,
+        valoreTotale=valoreTotale,
+        scoreVersion=scoreVersion,
+    )
 
 
 def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
-    """ Return the value of this trip on the scoreboard """
+    """Return the value of this trip on the scoreboard"""
     singolo = forzaSingolo or (not viaggio.is_abbinata)
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
     if viaggio.is_abbinata and viaggio.padre is not None:
         padre = viaggio.padre
-        if padre.is_abbinata == "P" and scoreVersion and scoreVersion >= '2016-04-01':
+        if padre.is_abbinata == "P" and scoreVersion and scoreVersion >= "2016-04-01":
             # i figli degli abbinati in partenza sono nulli
             return 0
 
     # logging.info("Using scoreVersion: %s" % scoreVersion)
-    if viaggio.is_abbinata == "P" and scoreVersion and scoreVersion >= '2016-04-01':
+    if viaggio.is_abbinata == "P" and scoreVersion and scoreVersion >= "2016-04-01":
         viaggi = [viaggio] + list(viaggio.viaggio_set.all())
-        importiViaggio = []  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
+        importiViaggio = (
+            []
+        )  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
         multiplier = 1
         for i, v in enumerate(viaggi):
             importo_riga = v.prezzo
             if COMMISSIONE_CARTA and viaggio.cartaDiCredito:
-                importo_riga *= Decimal((100 - COMMISSIONE_CARTA) / 100)  # tolgo il 2% al lordo per i pagamenti con carta di credito
+                importo_riga *= Decimal(
+                    (100 - COMMISSIONE_CARTA) / 100
+                )  # tolgo il 2% al lordo per i pagamenti con carta di credito
             if v.commissione:  # tolgo la commissione dal lordo
                 if v.tipo_commissione == "P":
                     # commissione in percentuale
-                    importo_riga *= (Decimal(1) - v.commissione / Decimal(100))
+                    importo_riga *= Decimal(1) - v.commissione / Decimal(100)
                 else:
                     importo_riga = importo_riga - v.commissione
 
@@ -237,12 +268,13 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
         else:
             renditaChilometrica = 0
 
-        if km >= getattr(settings, 'KM_PER_LUNGHE', 50):
+        if km >= getattr(settings, "KM_PER_LUNGHE", 50):
             if renditaChilometrica < Decimal("0.65"):
                 multiplier = renditaChilometrica / Decimal("0.65")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
-        elif 25 <= km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-            km < 25 and sum(importiViaggio) > 16):
+        elif 25 <= km < getattr(settings, "KM_PER_LUNGHE", 50) or (
+            km < 25 and sum(importiViaggio) > 16
+        ):
             if renditaChilometrica < Decimal("0.8"):
                 multiplier = renditaChilometrica / Decimal("0.8")
                 # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
@@ -251,20 +283,24 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             importoViaggio = importiViaggio[i]
             if (v.pagamento_differito or v.fatturazione) and settings.SCONTO_FATTURATE:
                 # tolgo gli abbuoni (per differito o altro)
-                importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+                importoViaggio = (
+                    importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+                )
             if v.abbuono_fisso:
                 importoViaggio -= v.abbuono_fisso
             if v.abbuono_percentuale:
                 # abbuono in percentuale
                 importoViaggio = importoViaggio * (
-                    Decimal(1) - v.abbuono_percentuale / Decimal(100))
+                    Decimal(1) - v.abbuono_percentuale / Decimal(100)
+                )
 
             importoViaggio = importoViaggio - v.costo_sosta
 
             if settings.SCONTO_SOSTA:
                 # aggiungo il prezzo della sosta scontato del 25%
                 importoViaggio += v.prezzo_sosta * (
-                    Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+                    Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
+                )
             else:
                 importoViaggio += v.prezzo_sosta  # prezzo sosta intero
             importiViaggio[i] = importoViaggio
@@ -275,11 +311,15 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
         # Viaggi singoli
         importoViaggio = viaggio.prezzo  # lordo
         if COMMISSIONE_CARTA and viaggio.cartaDiCredito:
-            importoViaggio *= Decimal((100 - COMMISSIONE_CARTA) / 100)  # tolgo il 2% al lordo per i pagamenti con carta di credito
+            importoViaggio *= Decimal(
+                (100 - COMMISSIONE_CARTA) / 100
+            )  # tolgo il 2% al lordo per i pagamenti con carta di credito
         if viaggio.commissione:  # tolgo la commissione dal lordo
             if viaggio.tipo_commissione == "P":
                 # commissione in percentuale
-                importoViaggio = importoViaggio * (Decimal(1) - viaggio.commissione / Decimal(100))
+                importoViaggio = importoViaggio * (
+                    Decimal(1) - viaggio.commissione / Decimal(100)
+                )
             else:
                 importoViaggio = importoViaggio - viaggio.commissione
 
@@ -302,25 +342,31 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                     importoViaggio *= renditaChilometrica / Decimal("0.8")
                     # logging.debug("Sconto Padova sotto rendita: %s" % renditaChilometrica)
 
-        if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:
+        if (
+            viaggio.pagamento_differito or viaggio.fatturazione
+        ) and settings.SCONTO_FATTURATE:
             # tolgo gli abbuoni (per differito o altro)
-            importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+            importoViaggio = (
+                importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+            )
         if viaggio.abbuono_fisso:
             importoViaggio -= viaggio.abbuono_fisso
         if viaggio.abbuono_percentuale:
             # abbuono in percentuale
             importoViaggio = importoViaggio * (
-                Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))
+                Decimal(1) - viaggio.abbuono_percentuale / Decimal(100)
+            )
         importoViaggio = importoViaggio - viaggio.costo_sosta
 
         if settings.SCONTO_SOSTA:
             # aggiungo il prezzo della sosta scontato del 25%
             importoViaggio += viaggio.prezzo_sosta * (
-                Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+                Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
+            )
         else:
             importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
 
-    return importoViaggio.quantize(Decimal('.01'))
+    return importoViaggio.quantize(Decimal(".01"))
 
 
 GET_VALUE_FUNCTION = get_value
@@ -330,7 +376,7 @@ KM_PUNTO_ABBINATE = kmPuntoAbbinate
 
 def gettoneDoppioSeFeriale(calendar):
     """
-        Restituisce il valore a gettoni, doppio se il calendario è in un giorno festivo o prefestivo
+    Restituisce il valore a gettoni, doppio se il calendario è in un giorno festivo o prefestivo
     """
     reference_date = calendar.date_start.astimezone(tz_italy)
     if reference_date.weekday() in (5, 6):
@@ -355,26 +401,26 @@ def gettoneDoppioSeFeriale(calendar):
 
 def cal_display_mattino_pomeriggio(calendar):
     reference_date = calendar.date_start.astimezone(tz_italy)
-    result = u""
+    result = ""
     if reference_date.hour <= 12:
-        result += u"mattino"
+        result += "mattino"
     else:
-        result += u"pomeriggio"
+        result += "pomeriggio"
     if calendar.value > 1:
-        result += u" x%d" % calendar.value
+        result += " x%d" % calendar.value
     return result
 
 
 def cal_display_allday2_halfday1(calendar):
     reference_date = calendar.date_start.astimezone(tz_italy)
-    result = u""
+    result = ""
     if calendar.minutes < 60 * 24:
         if reference_date.hour <= 12:
-            result += u"mattino"
+            result += "mattino"
         else:
-            result += u"pomeriggio"
+            result += "pomeriggio"
     else:
-        result += u"tutto il giorno"
+        result += "tutto il giorno"
     return result
 
 
@@ -387,7 +433,7 @@ def value_allday2_halday1(calendar):  # gettone di valore sempre unitario
 
 
 def cal_display_dimezzato(rank_total):
-    """ Visualizza il totale in giorni di una classifica a gettoni, dove ogni gettone è mezza giornata """
+    """Visualizza il totale in giorni di una classifica a gettoni, dove ogni gettone è mezza giornata"""
     result_int = 0
     if rank_total % 2 == 0:
         result_int = rank_total / 2
@@ -396,12 +442,12 @@ def cal_display_dimezzato(rank_total):
         result_int = int(rank_total / 2)
         fract = " &frac12;"
 
-    suffix = 'giorno' if result_int <= 1 else 'giorni'
+    suffix = "giorno" if result_int <= 1 else "giorni"
     if result_int == 0:
         result_int = ""
     return mark_safe(
-        u"{giorni}{fract} {suffix}".format(giorni=result_int, fract=fract,
-                                           suffix=suffix))
+        "{giorni}{fract} {suffix}".format(giorni=result_int, fract=fract, suffix=suffix)
+    )
 
 
 def toggle_1or2(calendar):

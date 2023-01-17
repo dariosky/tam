@@ -10,7 +10,7 @@ from django.core.management.base import AppCommand
 from tam.management.commands.utils import is_ps_running
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger('tam.deploy')
+logger = logging.getLogger("tam.deploy")
 
 
 def stop_process(pid):
@@ -27,41 +27,38 @@ def stop_process(pid):
 
 
 class RunnerCommand(AppCommand):
-    help = 'Manage a command to be start/restart/stop'
-    name = 'Process'
-    command = ['echo Hello world']
+    help = "Manage a command to be start/restart/stop"
+    name = "Process"
+    command = ["echo Hello world"]
     pid_file = None
 
     def add_arguments(self, parser):
         # Positional arguments
-        parser.add_argument('action', nargs='?', type=str,
-                            help="start, restart, stop")
+        parser.add_argument("action", nargs="?", type=str, help="start, restart, stop")
 
     def handle(self, *args, **options):
         if self.pid_file is None:
             print("Please add a pid_file location to the command instances")
             exit(1)
-        action_handler_name = 'handle_%s' % options['action']
+        action_handler_name = "handle_%s" % options["action"]
         handler = getattr(self, action_handler_name, None)
         if handler:
             handler()
         else:
-            logger.error("Unknown action %s" % options['action'])
+            logger.error("Unknown action %s" % options["action"])
             exit(1)
 
     def handle_start(self):
         running = is_ps_running(self.pid_file)
         if not running:
             logger.info("Starting {name}".format(name=self.name))
-            command = [
-                command_part.format(self) for command_part in self.command
-            ]
+            command = [command_part.format(self) for command_part in self.command]
             print(" ".join(command))
 
-            proc = subprocess.Popen(' '.join(command), shell=True,
-                                    stdin=None, stdout=None, stderr=None
-                                    )
-            with open(self.pid_file, 'w') as f:
+            proc = subprocess.Popen(
+                " ".join(command), shell=True, stdin=None, stdout=None, stderr=None
+            )
+            with open(self.pid_file, "w") as f:
                 f.write("%s\n" % proc.pid)
         else:
             logger.info("{name} is already running".format(name=self.name))

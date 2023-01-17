@@ -8,7 +8,7 @@ _thread_locals = local()
 
 
 def get_current_user():
-    return getattr(_thread_locals, 'user', None)
+    return getattr(_thread_locals, "user", None)
 
 
 class ThreadLocals:
@@ -23,4 +23,4 @@ class ThreadLocals:
         return response
 
     def process_request(self, request):
-        _thread_locals.user = getattr(request, 'user', None)
+        _thread_locals.user = getattr(request, "user", None)

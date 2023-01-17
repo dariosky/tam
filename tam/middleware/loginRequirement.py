@@ -9,7 +9,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-logger = logging.getLogger('tam.general')
+logger = logging.getLogger("tam.general")
 
 
 class RequireLoginMiddleware:
@@ -24,7 +24,7 @@ class RequireLoginMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
-        public_view = getattr(view_func, 'public', False)
+        public_view = getattr(view_func, "public", False)
 
         # public view or named "serve" <= (django.views.static.serve)
         if public_view or view_func.__name__ == "serve":
@@ -34,7 +34,7 @@ class RequireLoginMiddleware:
             if not request.user.is_authenticated:
                 return login_required(view_func)(request, *view_args, **view_kwargs)
 
-            prenotazioni_view = getattr(view_func, 'prenotazioni', False)
+            prenotazioni_view = getattr(view_func, "prenotazioni", False)
             try:
                 prenotazioni_user = request.user.prenotazioni
             except ObjectDoesNotExist:
@@ -42,11 +42,11 @@ class RequireLoginMiddleware:
 
             if prenotazioni_user and not prenotazioni_view:
                 # messages.error(request, "Gli utenti del servizio prenotazioni non hanno accesso a questa pagina.")
-                return HttpResponseRedirect(reverse('tamPrenotazioni'))
+                return HttpResponseRedirect(reverse("tamPrenotazioni"))
 
             elif not prenotazioni_user and prenotazioni_view:
                 # messages.error(request, "I conducenti non possono accedere alle prenotazioni.")
-                return HttpResponseRedirect(reverse('tamCorse'))
+                return HttpResponseRedirect(reverse("tamCorse"))
             else:
                 if request.user.is_authenticated:
                     # everything is OK proceed with other middlewares
@@ -56,21 +56,20 @@ class RequireLoginMiddleware:
                     return login_required(view_func)(request, *view_args, **view_kwargs)
 
 
-def csrf_failure_view(request, reason=''):
-    response = render(request, '403.html', {})
+def csrf_failure_view(request, reason=""):
+    response = render(request, "403.html", {})
     response.status_code = 403
-    message_tokens = [u"%s got hit in the face with Forbidden shovel" % request.user,
-                      "in: %s" % request.path]
+    message_tokens = [
+        "%s got hit in the face with Forbidden shovel" % request.user,
+        "in: %s" % request.path,
+    ]
     post_data = request.POST.copy()
-    if 'password' in post_data:
-        del post_data['password']
-    if 'HTTP_REFERER' in request.environ:
-        message_tokens.append("from: %s" % request.environ['HTTP_REFERER'])
+    if "password" in post_data:
+        del post_data["password"]
+    if "HTTP_REFERER" in request.environ:
+        message_tokens.append("from: %s" % request.environ["HTTP_REFERER"])
     message_tokens.append("POST: %s\n" % post_data)
     if False:  # ok, let's disable notifications of 403, if not settings.DEBUG
-        mail_admins(
-            "403 alert",
-            "\n".join(message_tokens)
-        )
+        mail_admins("403 alert", "\n".join(message_tokens))
     logger.warning("\n".join(message_tokens))
     return response
