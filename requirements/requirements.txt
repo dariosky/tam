@@ -12,17 +12,18 @@ jinja2
 # exports ***
 xlrd
 xlwt
-reportlab
+reportlab==3.5.55
 
 # date things ***
 pytz
 python-dateutil
 
 # DB ***
-psycopg2-binary==2.7.4
+psycopg2-binary==2.8.6
 
 # deployment ***
-gunicorn
+# gunicorn
+uwsgi
 # setproctitle to set the process title, doesn't work on Windows
 setproctitle
 psutil
@@ -31,7 +32,7 @@ requests
 # mails ***
 # djrill was for Mandrill, but their free tier has been suspended
 # djrill
-django-mailgun
+django-anymail[mailgun]==3.0
 
 # proper ssl connections ***
 pyopenssl
@@ -48,6 +49,6 @@ django-brake
 django-redis
 
 # webfaction cli
-wfcli
+# wfcli
 
 -r req-realtime.txt

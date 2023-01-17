@@ -32,10 +32,6 @@ class ModelloFattura(object):
         # esente_iva può essere True o False o un callable con parametro l'oggetto origine
 
 
-# @classmethod
-# 	def
-
-
 class FattureConsorzio(ModelloFattura):
     # Fatture consorzio: tutte le corse fatturabili, non fatturate con conducente confermato
 
@@ -50,7 +46,7 @@ class FattureConsorzio(ModelloFattura):
     keys = ["cliente"]  # come dividere una fattura dall'altra
     order_by = ["cliente", "data"]  # ordinamento per generazione
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
-    url_generazione = r"^genera/consorzio/$"  # ci si aggiunge $ per la generazione "manuale/" per la creazione
+    url_generazione = r'^genera/consorzio/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     ask_progressivo = True
     template_scelta = "1.perCliente.html"
     template_generazione = "2.perCliente.html"
@@ -58,7 +54,9 @@ class FattureConsorzio(ModelloFattura):
     codice_fattura = "FC"
     destinatario = "cliente"
     mittente = "consorzio"
-    note = "Pagamento: Bonifico bancario 30 giorni data fattura"
+    note = (
+        "Segue fattura elettronica\nPagamento: Bonifico bancario 30 giorni data fattura"
+    )
     esente_iva = False
 
     @staticmethod
@@ -81,12 +79,9 @@ class FattureNoIVA(ModelloFattura):
 				  """
     codice = "4"
     origine = Viaggio
-    filtro = Q(
-        pagamento_differito=True,
-        fatturazione=False,
-        conducente__isnull=False,
-        riga_fattura=None,
-    ) & ~(Q(conducente__nick__istartswith="ANNUL") | Q(annullato=True))
+    filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False,
+               riga_fattura=None) & \
+             ~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True))
     keys = ["cliente", "passeggero"]  # come dividere una fattura dall'altra
     order_by = ["cliente", "data"]  # ordinamento per generazione
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
@@ -99,6 +94,7 @@ class FattureNoIVA(ModelloFattura):
     destinatario = "cliente"
     mittente = "consorzio"
     note = (
+        "Segue fattura elettronica\n"
         "Pagamento: Bonifico bancario 30 giorni data fattura"
         + "\nServizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
     )

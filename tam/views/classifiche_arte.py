@@ -64,7 +64,7 @@ CLASSIFICHE = [
     },
     {
         "nome": "Padova",
-        "descrizione": ">16€, <60km",
+        "descrizione": ">18€, <60km",
         "mapping_field": "prezzoPadova",
         "viaggio_field": "prezzoPadova",
     },
@@ -150,7 +150,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         return locals()
 
     # logging.debug("kmNonConguagliati %s"%kmNonConguagliati)
-    forzaSingolo = force_numDoppi is 0
+    forzaSingolo = force_numDoppi == 0
     baciniDiPartenza = conta_bacini_partenza(
         [viaggio] + list(viaggio.viaggio_set.all())
     )
@@ -273,7 +273,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
                 multiplier = renditaChilometrica / Decimal("0.65")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
         elif 25 <= km < getattr(settings, "KM_PER_LUNGHE", 50) or (
-            km < 25 and sum(importiViaggio) > 16
+            km < 25 and sum(importiViaggio) > settings.IMPORTO_MASSIMO_CORTA
         ):
             if renditaChilometrica < Decimal("0.8"):
                 multiplier = renditaChilometrica / Decimal("0.8")

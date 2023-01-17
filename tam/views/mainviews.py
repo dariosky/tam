@@ -15,11 +15,12 @@ logger = logging.getLogger(__name__)
 
 
 def errors500(request, exception=None, template_name="500.html"):
+    exc_type, exc, trackback = sys.exc_info()
     return render(request, template_name, locals())
 
 
-def errors400(request, exception=None, template_name="404.html"):
-    return render(request, template_name, locals())
+def errors400(request, exception=None, template_name='404.html'):
+    return render(request, template_name, {})
 
 
 def errorview(request):

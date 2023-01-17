@@ -5,6 +5,7 @@ Created on 28/mar/2011
 @author: Dario
 """
 import os
+from functools import partial
 
 os.environ["DJANGO_SETTINGS_MODULE"] = "settings"
 import django
@@ -14,24 +15,15 @@ django.setup()
 import unittest
 import datetime
 from tam.disturbi import (
-    fascia_quarti_lineari,
     trovaDisturbi,
     fasce_lineari,
     fasce_uno_due,
-    fascia_uno_o_due_disturbi,
     fasce_semilineari,
+    fasce_semilineari_dal,
 )
-from tam.models import Viaggio, Tratta, Luogo
-from tam.models import reallySpaceless
 
 
-class TestLineari(unittest.TestCase):
-    def setUp(self):
-        self.giornoFeriale = datetime.datetime(2012, 2, 14, 0, 0)
-        self.sabato = datetime.datetime(2012, 2, 18, 0, 0)
-        self.domenica = datetime.datetime(2012, 2, 19, 0, 0)
-        self.disturbi = lambda *args: trovaDisturbi(*args, metodo=fasce_lineari)
-
+class DisturbiTest:
     def intervalli(self, oraInizio, minutoInizio, oraFine, minutoFine, giorno=None):
         """Restituisce due datetime del giorno indicato con le ore indicate, eventualmente spostando la fine al giorno seguente"""
         if giorno is None:
@@ -41,6 +33,14 @@ class TestLineari(unittest.TestCase):
         if fine < inizio:
             fine = fine + datetime.timedelta(days=1)
         return inizio, fine
+
+
+class TestLineari(unittest.TestCase, DisturbiTest):
+    def setUp(self):
+        self.giornoFeriale = datetime.datetime(2012, 2, 14, 0, 0)
+        self.sabato = datetime.datetime(2012, 2, 18, 0, 0)
+        self.domenica = datetime.datetime(2012, 2, 19, 0, 0)
+        self.disturbi = partial(trovaDisturbi, metodo=fasce_lineari)
 
     def test1AttornoAllaPrimaZonaBassa(self):
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 20, 29)), {})
@@ -127,7 +127,7 @@ class TestUnaDue(unittest.TestCase):
         self.giornoFeriale = datetime.datetime(2012, 2, 14, 0, 0)
         self.sabato = datetime.datetime(2012, 2, 18, 0, 0)
         self.domenica = datetime.datetime(2012, 2, 19, 0, 0)
-        self.disturbi = lambda *args: trovaDisturbi(*args, metodo=fasce_uno_due)
+        self.disturbi = partial(trovaDisturbi, metodo=fasce_uno_due)
 
     def intervalli(self, oraInizio, minutoInizio, oraFine, minutoFine, giorno=None):
         """Restituisce due datetime del giorno indicato con le ore indicate, eventualmente spostando la fine al giorno seguente"""
@@ -206,22 +206,12 @@ class TestUnaDue(unittest.TestCase):
         )
 
 
-class TestSemiLineare(unittest.TestCase):
+class TestSemiLineare(unittest.TestCase, DisturbiTest):
     def setUp(self):
         self.giornoFeriale = datetime.datetime(2012, 2, 14, 0, 0)
         self.sabato = datetime.datetime(2012, 2, 18, 0, 0)
         self.domenica = datetime.datetime(2012, 2, 19, 0, 0)
-        self.disturbi = lambda *args: trovaDisturbi(*args, metodo=fasce_semilineari)
-
-    def intervalli(self, oraInizio, minutoInizio, oraFine, minutoFine, giorno=None):
-        """Restituisce due datetime del giorno indicato con le ore indicate, eventualmente spostando la fine al giorno seguente"""
-        if giorno is None:
-            giorno = self.giornoFeriale
-        inizio = giorno.replace(hour=oraInizio, minute=minutoInizio)
-        fine = giorno.replace(hour=oraFine, minute=minutoFine)
-        if fine < inizio:
-            fine = fine + datetime.timedelta(days=1)
-        return inizio, fine
+        self.disturbi = partial(trovaDisturbi, metodo=fasce_semilineari)
 
     def test1AttornoAllaPrimaZonaBassa(self):
         self.assertEqual(self.disturbi(*self.intervalli(20, 0, 20, 29)), {})
@@ -319,26 +309,145 @@ class TestSemiLineare(unittest.TestCase):
             {"night": 0.5},
         )
 
+    def testLineari2022BeforeActivation(self):
+        self.assertEqual(
+            trovaDisturbi(*self.intervalli(20, 0, 20, 29), metodo=fasce_semilineari),
+            trovaDisturbi(
+                *self.intervalli(20, 0, 20, 29), metodo=fasce_semilineari_dal
+            ),
+        )
 
-if __name__ == "__main__":
-    # Spaceless test *****************
-    s = """ Questa è una prova
-					fatta da molti spazi
-			vorrei      ottimizzare un po' la cosa
-	"""
-    s = reallySpaceless(s)
-    print(s)
-    assert (
-        s == "Questa è una prova fatta da molti spazi vorrei ottimizzare un po' la cosa"
-    )
+    def testLineari2022EarlyNight(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2012, 12, 5, 19),
+                data_fine=datetime.datetime(2012, 12, 5, 22, 0),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1},
+        )
 
-    # data_inizio = datetime.datetime(2011, 2, 22, 5, 00)
-    # data_fine = datetime.datetime(2011, 2, 22, 7, 45)
+    def test_lineari_2022(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 21, 17),
+                data_fine=datetime.datetime(2022, 12, 21, 21, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 21, 17),
+                data_fine=datetime.datetime(2022, 12, 22, 0, 29),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 2},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 21, 17),
+                data_fine=datetime.datetime(2022, 12, 22, 3, 29),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 3.5},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 22, 4, 15),
+                data_fine=datetime.datetime(2022, 12, 22, 8, 0),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 2.75},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 22, 6, 40),
+                data_fine=datetime.datetime(2022, 12, 22, 8, 0),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 1},
+        )
 
-    corsa = Viaggio.objects.get(id=76235)
-    print("vecchio metodo: ", corsa.disturbi())
+    def test_lineari_2022_festivi(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 11, 18),
+                data_fine=datetime.datetime(2022, 12, 11, 20, 0),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 11, 19, 40),
+                data_fine=datetime.datetime(2022, 12, 11, 21, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1.25},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 11, 20, 40),
+                data_fine=datetime.datetime(2022, 12, 11, 22, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1.25},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 11, 21, 30),
+                data_fine=datetime.datetime(2022, 12, 11, 23, 00),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1.5},
+        )
 
-    print("\nnuovo metodo*****************")
-    trovaDisturbi(
-        corsa.date_start, corsa.get_date_end(recurse=True), metodo=fasce_semilineari
-    )
+    def test_lineari_2022_feriali(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 16, 18, 35),
+                data_fine=datetime.datetime(2022, 12, 16, 23, 17),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1.5},
+        )
+
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 16, 20, 00),
+                data_fine=datetime.datetime(2022, 12, 16, 22, 40),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 1.25},
+        )
+
+    def test_end_of_the_early_morning_festivo(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 1, 7, 45),
+                data_fine=datetime.datetime(2023, 1, 1, 9, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 0.5},
+        )
+
+    def test_end_of_the_early_morning_feriale(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 4, 7, 45),
+                data_fine=datetime.datetime(2023, 1, 4, 9, 30),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 0.5},
+        )
+
+    def test_disturbi_notte_giorno(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2022, 12, 28, 3, 15),
+                data_fine=datetime.datetime(2022, 12, 28, 5, 5),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 3.5},
+        )

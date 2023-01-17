@@ -221,10 +221,10 @@ def classificheconducenti(
                 & (Q(viaggio__fatturazione=True) | Q(viaggio__incassato_albergo=True))
             )
             .annotate(
-                invoice_count=Count("viaggio"),
-                invoice_val=Sum("viaggio__prezzo"),
+                count=Count("viaggio") + F("classifica_iniziale_fatture_corse"),
+                val=Sum("viaggio__prezzo") + F("classifica_iniziale_fatture_valore"),
             )
-            .order_by("invoice_val", "invoice_count")
+            .order_by("val", "count")
         )
         if classifica_fatture.count():
             max_val = classifica_fatture[0].invoice_val

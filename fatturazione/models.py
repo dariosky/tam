@@ -25,7 +25,7 @@ nomi_plurale = {
 }
 default_invoice_name = {
     "3": "Ricevuta servizio TAXI",  # Fatture consorzio e conducente si chiamano semplicemente FATTURA
-    "1": "Allegato Fattura",
+    "1": "Fattura proforma",
 }
 
 DATA_RICEVUTE_SDOPPIATE = getattr(settings, "DATA_RICEVUTE_SDOPPIATE", None)

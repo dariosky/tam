@@ -110,7 +110,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
             corse += 1
         messageLines.append("Corse aggiornate %d/%d" % (corseCambiate, corse))
 
-    if False:
+    if request.POST.get("fixDisturbi"):
         messageLines.append("Conguaglio completamente la corsa 35562")
         messageLines.append("e tolgo il conguaglio alle 38740 e 38887")
 
@@ -309,6 +309,19 @@ def fixAction(request, template_name="utils/fixAction.html"):
             else "Stats permissions created"
         )
 
+    if request.POST.get("consolidateLog"):
+        messageLines.append(
+            "Starting moving log files from SQLITE to the default connection"
+        )
+        sourceLogs = ActionLog.objects.using("modellog").all()
+            "Stats permissions where already there"
+            if not created
+            else "Stats permissions created"
+        )
+    if request.POST.get("noAnticipo"):
+        for luogo in Luogo.objects.all():
+            luogo.anticipo_servizio = 0
+            luogo.save()
     if request.POST.get("consolidateLog"):
         messageLines.append(
             "Starting moving log files from SQLITE to the default connection"

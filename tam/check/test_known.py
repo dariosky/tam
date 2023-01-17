@@ -22,7 +22,6 @@ class TestKnownTaxi2:
 
     @pytest.mark.django_db
     def test_known_taxi2(self):
-        print(Luogo.objects.all())
         tests = [
             partial(
                 arrivo_singolo_o_due_arrivi,

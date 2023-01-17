@@ -9,7 +9,7 @@ from django.db.models import Value
 from django.db.models import When
 
 from stats.views import Extract
-from tam.models import Viaggio, Conducente, Luogo
+from tam.models import Viaggio, Conducente, Luogo, reallySpaceless
 from tam.tamdates import date_enforce
 
 
@@ -121,5 +121,14 @@ def testing_annotations():
     assert anakin_runs[0]["month"] == 1 and anakin_runs[0]["tot"] == 30
 
 
-if __name__ == "__main__":
-    testing_annotations()
+def test_spaceless():
+    s = (
+        " Questa è una prova\n"
+        "    					fatta da molti spazi\n"
+        "    			vorrei      ottimizzare un po' la cosa\n"
+        "    	"
+    )
+    assert (
+        reallySpaceless(s)
+        == "Questa è una prova fatta da molti spazi vorrei ottimizzare un po' la cosa"
+    )

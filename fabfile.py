@@ -27,7 +27,12 @@ from fabric.operations import local
 from fabric.utils import puts
 from requests.auth import HTTPBasicAuth
 
-localfolder = os.path.realpath(os.path.dirname(__file__))
+env.localfolder = localfolder = os.path.realpath(os.path.dirname(__file__))
+env.port = 22
+if not env.get("NAME") and __name__ != "__main__":
+    print("Please call fab specifying a host config file.")
+    print("Example: fab -c host.ini")
+    sys.exit(1)
 sys.path.insert(1, localfolder)
 # print("Call fab s:<deployment_name> deploy")
 
@@ -176,6 +181,10 @@ def update_instance(do_update_requirements=True, justPull=False):
 
 def daphne(action):
     with virtualenv():
+            if env.UWSGI_START_COMMAND:
+                print("Starting UWSGI")
+                run(env.UWSGI_START_COMMAND)
+            else:
         with cd(env.REPOSITORY_FOLDER):
             run("python manage.py daphne %s" % action)
 
@@ -223,7 +232,9 @@ def deploy(justPull=False):
     Pull from git, update virtualenv, create static and restart the server
     """
     is_this_initial = False
-    if run("test -d %s/.git" % env.REPOSITORY_FOLDER, quiet=True).failed:
+    if run(
+        "test -d %s/.git" % env.REPOSITORY_FOLDER, quiet=True
+    ).failed:
         # destination folder to be created
         message = "Repository folder doesn't exists on destination. Proceed with initial deploy?"
         if not confirm(message):

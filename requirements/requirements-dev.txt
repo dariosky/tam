@@ -3,7 +3,7 @@
 django-debug-toolbar
 django-debug-toolbar-template-timings
 
-fabric3
+fabric3==1.14.post1
 
 #tests ***
-pytest-django
+pytest-django==3.10.0

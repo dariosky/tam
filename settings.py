@@ -13,7 +13,7 @@ from utils.env_subs import perform_dict_substitutions
 
 host = gethostname().lower()
 
-TAM_VERSION = "7.00"
+TAM_VERSION = "7.2"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
@@ -255,6 +255,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.admindocs",
     "django.contrib.humanize",
+    "anymail",
     # this assetmanager is not more developed
     # and since django 1.2 it requires nothreading
     # 'mediagenerator',
@@ -319,6 +320,7 @@ if DEBUG:
 
 TAM_VIAGGI_PAGINA = 100
 ATTESA_AEROPORTI = 30
+IMPORTO_MASSIMO_CORTA = 16
 
 # ******************* CACHE
 CACHES = {
@@ -507,3 +509,5 @@ ASGI_APPLICATION = "routing.application"
 perform_dict_substitutions(
     DEPLOYMENT
 )  # change the deployment string to use a kind of templates
+NIGHT_START = (22, 0)
+NIGHT_END = (6, 0)

@@ -21,11 +21,18 @@
 	{# *** TRATTA INIZIALE *** #}
     {% if tratta_start %}
     	{% if viaggio.prefratello %}{{ viaggio.prefratello.a }} <i class="sprite icon-arrow_right"></i>{% endif %}
-		{% if tratta_start.is_valid %}
-			partenza alle {{ viaggio.date_start|date:"H:i" }}
+		{% if tratta_start.is_valid or viaggio.date_start < viaggio.data %}
+			<div class="type-{{ viaggio.type_arrivo_partenza }}">
+				partenza alle {{ viaggio.date_start|date:"H:i" }}
+			</div>
 		{% else %}
 			<a href="{% url "tamTrattaId" tratta_start.id %}" class="errorlist">tratta {{tratta_start.da}}-{{tratta_start.a}} scononosciuta</a>
 		{% endif %}
+		<br/>
+	{% elif viaggio.date_start < viaggio.data %}
+		<div class="type-{{ viaggio.type_arrivo_partenza }}">
+			partenza alle {{ viaggio.date_start|date:"H:i" }}
+		</div>
 		<br/>
     {% endif %}
 
@@ -49,7 +56,9 @@
 	{# *** TRATTA FINALE *** #}
     {% if tratta_end %}
 		{% if tratta_end.is_valid %}
-		    {% if nextfratello %}arrivo alle {{ viaggio.get_date_end|date:"H:i" }}{% endif %}
+		    {% if nextfratello %}
+				arrivo alle {{ viaggio.get_date_end|date:"H:i" }}
+			{% endif %}
 		{% else %}
 			<a href="{% url "tamTrattaId" tratta_end.id %}" class="errorlist">tratta {{tratta_end.da}}-{{tratta_end.a}} scononosciuta</a>
 		{% endif %}

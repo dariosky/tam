@@ -442,11 +442,15 @@ def changeLog(request, template_name="static/changelog.html"):
             "3/6/2017",
             "Orologio permanente" if settings.TAM_PERMANENT_CLOCK else "",
         ),
-        ("6.94", "17/4/2018", "Utenti prenotazioni: download attachments"),
         ("6.94", "28/12/2018", "Fatture - tipo documento modificabile"),
         ("6.95", "24/2/2019", "Fatture - opzionabile IVA in pdf"),
         ("6.96", "25/5/2019", "Colonna prezzo nei permessi"),
         ("6.97", "2/11/2019", "Fatture - flag pagato e reportistica"),
+        ("6.98", "29/11/2020", "Supporto per flag manutenzione"),
+        ("6.99", "23/1/2021", "Ritardo partenza su ogni luogo"),
+        ("7.0", "16/4/2022", "Classifica fatture - valori iniziali di ogni utente")
+        if settings.TAM_SHOW_CLASSIFICA_FATTURE
+        else "",
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:

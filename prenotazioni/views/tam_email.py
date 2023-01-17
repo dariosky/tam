@@ -1,4 +1,8 @@
 # coding: utf-8
+from email.mime.image import MIMEImage
+
+from django.core.mail import EmailMultiAlternatives
+
 if __name__ == "__main__":
     import django
 
@@ -16,6 +20,7 @@ from django.utils.safestring import mark_safe
 
 ADMIN_MAIL = ",".join(["%s <%s>" % adm for adm in settings.ADMINS])
 logger = logging.getLogger("tam.mail")
+USE_MAILGUN_APIS = False
 
 
 def notifyByMail(
@@ -81,7 +86,7 @@ def notifyByMail(
             htmlMessage = htmlTemplate.render(
                 {
                     "message": messageText,  # generic html message
-                    "logofilename": os.path.basename(logo_filename),
+                    "logofilename": context_html["logofilename"],
                 }
             )
 
@@ -103,26 +108,50 @@ def notifyByMail(
         if value:
             mail_data[mail_field] = value
 
-    with open(logo_filename, "rb") as f:
-        files = [("inline", f)]
-        for attachment in attachments:
-            if isinstance(attachment, str):
-                # attachment is a filename
-                files.append(("attachment", open(attachment)))
-            elif isinstance(attachment, MIMEBase):
-                filename = attachment.get_filename()
-                content_type = attachment.get_content_type()
-                file_like = StringIO(attachment.get_payload())
-                files.append(("attachment", (filename, file_like)))
-            else:
-                raise Exception("What is this attachment? %s" % type(attachment))
+    if USE_MAILGUN_APIS:
+        with open(logo_filename, "rb") as f:
+            files = [("inline", f)]
+            for attachment in attachments:
+                if isinstance(attachment, str):
+                    # attachment is a filename
+                    files.append(("attachment", open(attachment)))
+                elif isinstance(attachment, MIMEBase):
+                    filename = attachment.get_filename()
+                    content_type = attachment.get_content_type()
+                    file_like = StringIO(attachment.get_payload())
+                    files.append(("attachment", (filename, file_like)))
+                else:
+                    raise Exception("What is this attachment? %s" % type(attachment))
 
-        requests.post(
-            "https://api.mailgun.net/v3/%s/messages" % settings.MAILGUN_SERVER_NAME,
-            auth=("api", settings.MAILGUN_ACCESS_KEY),
-            data=mail_data,
-            files=files,
+                requests.post(
+                    "https://api.mailgun.net/v3/%s/messages"
+                    % settings.ANYMAIL["MAILGUN_SENDER_DOMAIN"],
+                    auth=("api", settings.MAILGUN_ACCESS_KEY),
+                    data=mail_data,
+                    files=files,
+                )
+    else:
+        msg = EmailMultiAlternatives(
+            subject=subject,
+            body=messageText,
+            from_email=from_email,
+            to=to,
+            reply_to=[reply_to],
+            bcc=bcc,
+            attachments=attachments,
         )
+        if settings.MAIL_TAG:
+            msg.tags = [settings.MAIL_TAG]
+        if htmlMessage:
+            msg.attach_alternative(htmlMessage, "text/html")
+        with open(logo_filename, "rb") as logo:
+            logo_img = MIMEImage(logo.read())
+            content_id = context_html["logofilename"]
+            logo_img.add_header("Content-Disposition", "inline", filename=content_id)
+            logo_img.add_header("Content-ID", content_id)
+            msg.attach(logo_img)
+
+        msg.send()
 
 
 if __name__ == "__main__":

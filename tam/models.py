@@ -17,8 +17,11 @@ from django.utils.translation import ugettext_lazy as _
 from future.utils import python_2_unicode_compatible
 
 import tam.tamdates as tamdates
+from settings import NIGHT_START, NIGHT_END
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
+import logging
 
+logger = logging.getLogger("tam.models")
 Calendar = None
 if "calendariopresenze" in settings.INSTALLED_APPS:
     try:
@@ -80,12 +83,12 @@ def reallySpaceless(s):
 @python_2_unicode_compatible
 class Luogo(models.Model):
     """Indica un luogo, una destinazione conosciuta.
-    Ogni luogo appartiene ad un bacino all'interno del quale
+    Ogni luogo appartiene a un bacino all'interno del quale
      verrano cercati gli accoppiamenti.
     Al luogo afferiranno i listini, le corse e tutto il resto.
     """
 
-    nome = models.CharField("Località ", max_length=25, unique=True)
+    nome = models.CharField("Località", max_length=25, unique=True)
     bacino = models.ForeignKey(
         "Bacino",
         verbose_name="Bacino di appartenenza",
@@ -100,7 +103,11 @@ class Luogo(models.Model):
         choices=(("-", "-"), ("A", "Aeroporto"), ("S", "Stazione")),
     )
 
-    # una delle località sarà  la predefinita... tra le proprietà  dell'utente
+    anticipo_servizio = models.IntegerField(
+        "Anticipo servizio", default=0, validators=(MinValueValidator(0),)
+    )
+
+    # una delle località sarà la predefinita... tra le proprietà dell'utente
 
     class Meta:
         verbose_name_plural = _("Luoghi")
@@ -343,7 +350,7 @@ class Viaggio(models.Model):
     )
 
     # per i padri della abbinate conta quanti km di abbinata
-    # sono già  stati conguagliati
+    # sono già stati conguagliati
     km_conguagliati = models.IntegerField(
         "Km conguagliati", null=True, blank=True, default=0, editable=False
     )
@@ -695,6 +702,10 @@ class Viaggio(models.Model):
         tragitto = reallySpaceless(tragitto)
         return tragitto
 
+    @property
+    def type_arrivo_partenza(self):
+        return "arrivo" if self.arrivo else "partenza"
+
     def save(self, *args, **kwargs):
         """Ridefinisco il salvataggio dei VIAGGI
         per popolarmi i campi calcolati"""
@@ -871,6 +882,19 @@ class Viaggio(models.Model):
             minutes += int(sosta.seconds / 60)
         return minutes
 
+    def anticipo_servizio(self):
+        if self.id and not self.padre_id:  # itero sui figli
+            anticipo = max(self.da.anticipo_servizio, self.a.anticipo_servizio)
+            for figlio in self.viaggio_set.all():
+                anticipo = max(
+                    anticipo, figlio.da.anticipo_servizio, figlio.a.anticipo_servizio
+                )
+        else:
+            anticipo = 0
+        if anticipo:
+            logger.debug(f"Aggiungo un antipo di {anticipo} minuti")
+        return anticipo
+
     def _date_start(self):
         """Return the time to start to be there in time, looking Tratte
         if the start place is the same time is the time of the travel
@@ -879,6 +903,9 @@ class Viaggio(models.Model):
         anticipo = 0
         if tratta_start and tratta_start.is_valid():  # tratta iniziale
             anticipo += tratta_start.minuti
+
+        anticipo += self.anticipo_servizio()
+
         if anticipo:
             return self.data - datetime.timedelta(minutes=anticipo)
         else:
@@ -928,10 +955,12 @@ class Viaggio(models.Model):
             end = self.data + datetime.timedelta(minutes=tratta.minuti)
         else:
             end = self.data
-        inizioNotte = start.replace(hour=22, minute=0)
-        if start.hour < 6:
+        night_start_hour, night_start_minute = NIGHT_START
+        night_end_hour, night_end_minute = NIGHT_END
+        inizioNotte = start.replace(hour=night_start_hour, minute=night_start_minute)
+        if start.hour < night_end_hour:
             inizioNotte -= datetime.timedelta(days=1)
-        fineNotte = end.replace(hour=6, minute=0)
+        fineNotte = end.replace(hour=night_end_hour, minute=night_end_minute)
         if fineNotte < inizioNotte:
             fineNotte += datetime.timedelta(days=1)
         result = False
@@ -985,7 +1014,7 @@ class Viaggio(models.Model):
 
     def _is_collettivoInPartenza(self):
         """Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
-        Assieme si andrà  ad una destinazione comune
+        Assieme si andrà ad una destinazione comune
         """
         # logging.debug("Is collettivo in partenza %s" %self.id)
         nextbro = self.nextfratello()
@@ -1028,7 +1057,7 @@ class Viaggio(models.Model):
     def is_medium(self):
         """Ritorna vero se la tratta è media"""
         return 25 <= self.km < getattr(settings, "KM_PER_LUNGHE", 50) or (
-            self.km < 25 and self.prezzo > 16
+            self.km < 25 and self.prezzo > settings.IMPORTO_MASSIMO_CORTA
         )
 
     def _is_valid(self):
@@ -1197,14 +1226,26 @@ class Conducente(models.Model):
     )  # fino a 9999.99
     classifica_iniziale_doppiPadova = models.DecimalField(
         "Doppi Padova", max_digits=12, decimal_places=2, default=0
-    )  # fino a 9999.99
+    )  # in Euro
 
     classifica_iniziale_long = models.DecimalField(
         "Venezia", max_digits=12, decimal_places=2, default=0
-    )  # fino a 9999.99
+    )  # in Euro
     classifica_iniziale_medium = models.DecimalField(
         "Padova", max_digits=12, decimal_places=2, default=0
-    )  # fino a 9999.99
+    )  # in Euro
+    classifica_iniziale_fatture_corse = models.IntegerField(
+        "Classifica fatture - corse",
+        editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
+        default=0,
+    )
+    classifica_iniziale_fatture_valore = models.DecimalField(
+        "Classifica fatture - valore",
+        editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )  # in Euro fino a 9.999.999.999,99
 
     class Meta:
         verbose_name_plural = _("Conducenti")
