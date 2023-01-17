@@ -18,26 +18,28 @@ from tam import tamdates
 
 test = settings.DEBUG
 styles = getSampleStyleSheet()
-normalStyle = copy.deepcopy(styles['Normal'])
+normalStyle = copy.deepcopy(styles["Normal"])
 normalStyle.fontSize = 8
-normalStyle.fontName = 'Helvetica'
+normalStyle.fontName = "Helvetica"
 
 logoImage_path = os.path.join(settings.MEDIA_ROOT, settings.OWNER_LOGO)
 
-LISTINO_FOOTER = getattr(settings, 'LISTINO_FOOTER', None)
+LISTINO_FOOTER = getattr(settings, "LISTINO_FOOTER", None)
 
-normal_style = ParagraphStyle(name='Normal')
-normal_right_style = ParagraphStyle(name='NormalRight', alignment=TA_RIGHT)
-table_right = ParagraphStyle(name='TableBold', alignment=TA_RIGHT, fontSize=8)
-table_normal = ParagraphStyle(name='TableNormal', alignment=TA_LEFT, fontSize=8)
-table_normal_right = ParagraphStyle(name='TableNormalLeft', alignment=TA_RIGHT, fontSize=8)
+normal_style = ParagraphStyle(name="Normal")
+normal_right_style = ParagraphStyle(name="NormalRight", alignment=TA_RIGHT)
+table_right = ParagraphStyle(name="TableBold", alignment=TA_RIGHT, fontSize=8)
+table_normal = ParagraphStyle(name="TableNormal", alignment=TA_LEFT, fontSize=8)
+table_normal_right = ParagraphStyle(
+    name="TableNormalLeft", alignment=TA_RIGHT, fontSize=8
+)
 
 
 def onPageListino(canvas, doc):
     width, height = canvas._doctemplate.pagesize
     canvas.saveState()
     anno = tamdates.ita_today().year
-    setPdfProperties(canvas, 'Listino %d' % anno)
+    setPdfProperties(canvas, "Listino %d" % anno)
 
     # in alto a sinistra
     y1 = height - doc.topMargin
@@ -45,21 +47,26 @@ def onPageListino(canvas, doc):
 
     logo_height = 2.5 * cm
     y1 -= logo_height
-    if not test: canvas.drawImage(logoImage_path, x=x, y=y1, width=7 * cm, height=logo_height)
+    if not test:
+        canvas.drawImage(logoImage_path, x=x, y=y1, width=7 * cm, height=logo_height)
 
     # in alto a destra
     y2 = height - doc.topMargin
     x = width - 8 * cm - doc.rightMargin
 
     consorzio = Paragraph(
-        '<font size="8"><b>%s</b></font>' % settings.DATI_CONSORZIO.strip().replace('\n', '<br/>'),
-        normal_right_style)
+        '<font size="8"><b>%s</b></font>'
+        % settings.DATI_CONSORZIO.strip().replace("\n", "<br/>"),
+        normal_right_style,
+    )
     consorzio.wrapOn(canvas, 8 * cm, y2)
     consorzio.drawOn(canvas, x=x, y=y2 - consorzio.height)
     y2 -= consorzio.height + 10
 
-    descrittore = Paragraph('<font size="14"><b>Listino %s</b></font>' % doc.listino.nome,
-                            normal_right_style)
+    descrittore = Paragraph(
+        '<font size="14"><b>Listino %s</b></font>' % doc.listino.nome,
+        normal_right_style,
+    )
     descrittore.wrapOn(canvas, 8 * cm, y2)
     descrittore.drawOn(canvas, x=x, y=y2 - descrittore.height)
     y2 -= descrittore.height + 10
@@ -69,20 +76,24 @@ def onPageListino(canvas, doc):
     y = min(y1, y2)
 
     doc.pageTemplate.frames = [
-        Frame(doc.leftMargin, doc.bottomMargin,
-              width - (doc.leftMargin + doc.rightMargin), y - doc.bottomMargin,
-              showBoundary=test),  # x,y, width, height
+        Frame(
+            doc.leftMargin,
+            doc.bottomMargin,
+            width - (doc.leftMargin + doc.rightMargin),
+            y - doc.bottomMargin,
+            showBoundary=test,
+        ),  # x,y, width, height
     ]
     canvas.restoreState()
 
 
 def setPdfProperties(canvas, title):
     # set PDF properties ***************
-    canvas.setFont('Helvetica', 8)
+    canvas.setFont("Helvetica", 8)
     canvas.setAuthor(settings.LICENSE_OWNER)
-    canvas.setCreator('TaM v.%s' % settings.TAM_VERSION)
-    canvas._doc.info.producer = ('TaM')
-    canvas.setSubject(u"%s" % title)
+    canvas.setCreator("TaM v.%s" % settings.TAM_VERSION)
+    canvas._doc.info.producer = "TaM"
+    canvas.setSubject("%s" % title)
     canvas.setTitle(title)
 
 
@@ -92,44 +103,62 @@ def getTabellaListino(doc, righe_prezzo, tipo_servizio, luogoDiRiferimento):
     prezzi = sorted(
         righe_prezzo,
         key=lambda p: (
-            p.tipo_servizio, p.tratta.da.nome.lower(), p.tratta.a.nome.lower(), p.max_pax)
+            p.tipo_servizio,
+            p.tratta.da.nome.lower(),
+            p.tratta.a.nome.lower(),
+            p.max_pax,
+        ),
     )
 
     for prezzo in prezzi:
-        if prezzo.tipo_servizio != tipo_servizio: continue  # skip collettivi
+        if prezzo.tipo_servizio != tipo_servizio:
+            continue  # skip collettivi
         da, a = prezzo.tratta.da, prezzo.tratta.a
         if da == luogoDiRiferimento:
             tratta = a
         else:
             tratta = "%s - %s" % (da, a)
 
-        if a.nome[0] == '.':  # tratta in evidenza
+        if a.nome[0] == ".":  # tratta in evidenza
             tratta = "<b>%s</b>" % tratta
 
-        tabellaListino.append([
-            tratta,
-            prezzo.prezzo_diurno,
-            prezzo.prezzo_notturno,
-            prezzo.max_pax,  # aggiungo i pax
-        ])
+        tabellaListino.append(
+            [
+                tratta,
+                prezzo.prezzo_diurno,
+                prezzo.prezzo_notturno,
+                prezzo.max_pax,  # aggiungo i pax
+            ]
+        )
 
     # -------- Creo la nuova Tabella Listino con i pax se necessari ------------------
-    nuovaTabellaListino = [('Destinazione o presa', 'Importo', Paragraph(
-        '<b><font size="10">Notturno</font><br/>(dalle 22 alle 6)</b>', table_right))]
+    nuovaTabellaListino = [
+        (
+            "Destinazione o presa",
+            "Importo",
+            Paragraph(
+                '<b><font size="10">Notturno</font><br/>(dalle 22 alle 6)</b>',
+                table_right,
+            ),
+        )
+    ]
     precedente = None
     sottoTratte = 0
-    for riga in tabellaListino:  # ripasso il listino, aggiungo il numero di pax se necessario
+    for (
+        riga
+    ) in tabellaListino:  # ripasso il listino, aggiungo il numero di pax se necessario
         nome_tratta, diurno, notturno, pax = riga
         if nome_tratta == precedente:
             if sottoTratte == 0:  # prima sottotratta, divido
                 primaRiga = nuovaTabellaListino[-1]
                 # creo una nuova riga uguale alla prima, ma senza prezzi
-                nuovaTabellaListino.append([
-                    Paragraph("%s pax" % primaRiga[3], table_right),  # metto i pax
-                    primaRiga[1],
-                    primaRiga[2],
-                    primaRiga[3]
-                ]
+                nuovaTabellaListino.append(
+                    [
+                        Paragraph("%s pax" % primaRiga[3], table_right),  # metto i pax
+                        primaRiga[1],
+                        primaRiga[2],
+                        primaRiga[3],
+                    ]
                 )
                 # e tolgo i prezzi dalla prima
                 primaRiga[1] = primaRiga[2] = primaRiga[3] = ""
@@ -139,43 +168,53 @@ def getTabellaListino(doc, righe_prezzo, tipo_servizio, luogoDiRiferimento):
             sottoTratte += 1
         else:
             sottoTratte = 0
-            tratta_da_scrivere = Paragraph("%s" % nome_tratta, table_normal) if nome_tratta else "",
+            tratta_da_scrivere = (
+                Paragraph("%s" % nome_tratta, table_normal) if nome_tratta else "",
+            )
         precedente = nome_tratta
-        nuovaTabellaListino.append([
-            tratta_da_scrivere,
-            Paragraph("€ %s" % moneyfmt(diurno), table_normal_right),
-            Paragraph("€ %s" % moneyfmt(notturno), table_normal_right),
-            pax
-        ]
+        nuovaTabellaListino.append(
+            [
+                tratta_da_scrivere,
+                Paragraph("€ %s" % moneyfmt(diurno), table_normal_right),
+                Paragraph("€ %s" % moneyfmt(notturno), table_normal_right),
+                pax,
+            ]
         )
 
-    taxiStyle = TableStyle([
-        ('VALIGN', (0, 0), (-1, -1), 'TOP'),
-        ('ALIGN', (0, 0), (-1, -1), 'RIGHT'),  # globalmente allineato a destra...
-        ('ALIGN', (0, 0), (1, -1), 'LEFT'),  # tranne la prima colonna (con la descrizione)
-        ('GRID', (0, 1), (-1, -1), 0.1, colors.grey),
-        ('FACE', (0, 0), (-1, -1), 'Helvetica'),
-
-        ('FACE', (0, 0), (-1, 0), 'Helvetica-Bold'),  # header
-        ('SIZE', (0, 0), (-1, -1), 10),
-
-    ])
-    colWidths = ((width - doc.leftMargin - doc.rightMargin) - (3 * cm) * 2,) + (3 * cm,) * 2
+    taxiStyle = TableStyle(
+        [
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("ALIGN", (0, 0), (-1, -1), "RIGHT"),  # globalmente allineato a destra...
+            (
+                "ALIGN",
+                (0, 0),
+                (1, -1),
+                "LEFT",
+            ),  # tranne la prima colonna (con la descrizione)
+            ("GRID", (0, 1), (-1, -1), 0.1, colors.grey),
+            ("FACE", (0, 0), (-1, -1), "Helvetica"),
+            ("FACE", (0, 0), (-1, 0), "Helvetica-Bold"),  # header
+            ("SIZE", (0, 0), (-1, -1), 10),
+        ]
+    )
+    colWidths = ((width - doc.leftMargin - doc.rightMargin) - (3 * cm) * 2,) + (
+        3 * cm,
+    ) * 2
     if len(nuovaTabellaListino) > 1:
         return Table(
             [riga[:3] for riga in nuovaTabellaListino],
             style=taxiStyle,
             colWidths=colWidths,
-            repeatRows=1
+            repeatRows=1,
         )  # , style=righeStyle, repeatRows=1, colWidths=colWidths)
 
 
 def export(listino, luogoDiRiferimento):
-    response = http.HttpResponse(content_type='application/pdf')
+    response = http.HttpResponse(content_type="application/pdf")
     width, height = portrait(A4)
 
     pageTemplates = [
-        PageTemplate(id='Listino', onPage=onPageListino),
+        PageTemplate(id="Listino", onPage=onPageListino),
     ]
 
     doc = BaseDocTemplate(
@@ -195,13 +234,13 @@ def export(listino, luogoDiRiferimento):
 
     story = []
 
-    listinoEsclusivo = getTabellaListino(doc, righe_prezzo, 'T', luogoDiRiferimento)
+    listinoEsclusivo = getTabellaListino(doc, righe_prezzo, "T", luogoDiRiferimento)
     if listinoEsclusivo:
         title = Paragraph("SERVIZIO TAXI ESCLUSIVO", normalStyle)
         story.append(title)
         story.append(listinoEsclusivo)
 
-    listinoCollettivo = getTabellaListino(doc, righe_prezzo, 'C', luogoDiRiferimento)
+    listinoCollettivo = getTabellaListino(doc, righe_prezzo, "C", luogoDiRiferimento)
     if listinoEsclusivo and listinoCollettivo:
         story.append(Spacer(1, 1.5 * cm))
     if listinoCollettivo:
@@ -210,17 +249,18 @@ def export(listino, luogoDiRiferimento):
 
     if not listinoCollettivo and not listinoEsclusivo:
         story.append(
-            Paragraph("Non abbiamo nessuna corsa specificata nel listino.", normal_style)
+            Paragraph(
+                "Non abbiamo nessuna corsa specificata nel listino.", normal_style
+            )
         )
 
     # footer
-    footer_style = ParagraphStyle(name='Justify', alignment=TA_JUSTIFY, fontSize=8)
+    footer_style = ParagraphStyle(name="Justify", alignment=TA_JUSTIFY, fontSize=8)
     # footer_height = 0
     if LISTINO_FOOTER:
         note_finali_lines = [LISTINO_FOOTER]
         story.append(Spacer(1, 1 * cm))
-        note_finali = Paragraph("<br/>".join(note_finali_lines),
-                                footer_style)
+        note_finali = Paragraph("<br/>".join(note_finali_lines), footer_style)
         # note_finali.wrap(width - doc.rightMargin - doc.leftMargin, 5 * cm)
         # note_finali.drawOn(canvas, doc.leftMargin, doc.bottomMargin)
         # footer_height = note_finali.height

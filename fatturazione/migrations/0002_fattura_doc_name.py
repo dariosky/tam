@@ -8,13 +8,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('fatturazione', '0001_initial'),
+        ("fatturazione", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fattura',
-            name='doc_name',
+            model_name="fattura",
+            name="doc_name",
             field=models.CharField(max_length=32, null=True),
         ),
     ]

@@ -6,30 +6,30 @@ from django.conf import settings
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('tam', '0001_initial'),
+        ("tam", "0001_initial"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='taskarchive',
-            name='user',
+            model_name="taskarchive",
+            name="user",
         ),
         migrations.RemoveField(
-            model_name='taskbackup',
-            name='user',
+            model_name="taskbackup",
+            name="user",
         ),
         migrations.DeleteModel(
-            name='TaskMovelog',
+            name="TaskMovelog",
         ),
         migrations.AlterField(
-            model_name='profiloutente',
-            name='user',
+            model_name="profiloutente",
+            name="user",
             field=models.OneToOneField(editable=False, to=settings.AUTH_USER_MODEL),
         ),
         migrations.DeleteModel(
-            name='TaskArchive',
+            name="TaskArchive",
         ),
         migrations.DeleteModel(
-            name='TaskBackup',
+            name="TaskBackup",
         ),
     ]

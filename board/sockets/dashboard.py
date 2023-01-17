@@ -10,13 +10,13 @@ from board.models import BoardMessage
 
 
 def getUserFromSession(sid):
-    """ Find the session if not expired and return the corresponding user
-        or None if none can be found
+    """Find the session if not expired and return the corresponding user
+    or None if none can be found
     """
     try:
         s = Session.objects.get(pk=sid, expire_date__gte=timezone.now())
         # print "Session", s.get_decoded()
-        uid = s.get_decoded()['_auth_user_id']
+        uid = s.get_decoded()["_auth_user_id"]
         # print "UID:", uid
         user = User.objects.get(pk=uid)
         return user
@@ -26,7 +26,7 @@ def getUserFromSession(sid):
 
 def getUserFromEnviron(environ):
     cookies = Cookie.SimpleCookie()
-    cookies.load(environ['HTTP_COOKIE'])
+    cookies.load(environ["HTTP_COOKIE"])
     sid = cookies[settings.SESSION_COOKIE_NAME].value
     print(sid)
     user = getUserFromSession(sid)
@@ -34,7 +34,8 @@ def getUserFromEnviron(environ):
 
 
 class MessageBoardNamespace(BaseNamespace):
-    """ This is a sort of controller for the messageboard """
+    """This is a sort of controller for the messageboard"""
+
     _registry = {}
     _users = {}
 
@@ -45,31 +46,38 @@ class MessageBoardNamespace(BaseNamespace):
         if user:
             self._users[id(self)] = user
             self._registry[id(self)] = self
-            self.emit('protocol',
-                      [
-                          {"successMessage": "Connesso come %s" % user.username},
-                          # {'enableSubmit': 1}
-                      ],
-                      )  # tell the client we are connected
+            self.emit(
+                "protocol",
+                [
+                    {"successMessage": "Connesso come %s" % user.username},
+                    # {'enableSubmit': 1}
+                ],
+            )  # tell the client we are connected
         else:
-            self.emit('protocol',
-                      [
-                          {"errorMessage": "Credenziali di accesso errate."},
-                          # {'disableSubmit': 1}
-                      ])
+            self.emit(
+                "protocol",
+                [
+                    {"errorMessage": "Credenziali di accesso errate."},
+                    # {'disableSubmit': 1}
+                ],
+            )
 
     def disconnect(self, *args, **kwargs):
         ids = id(self)
-        if ids in self._registry: del (self._registry[ids])
-        if ids in self._users: del (self._users[ids])
+        if ids in self._registry:
+            del self._registry[ids]
+        if ids in self._users:
+            del self._users[ids]
         super(MessageBoardNamespace, self).disconnect(*args, **kwargs)
 
     def on_deleteMessage(self, message_id, *args, **kwargs):
         print("deletemessage", message_id)
         ids = id(self)
         if not ids in self._users:
-            self.emit('protocol',
-                      [{"errorMessage", "Devi essere autenticato per mandare messaggi."}])
+            self.emit(
+                "protocol",
+                [{"errorMessage", "Devi essere autenticato per mandare messaggi."}],
+            )
             return
         user = self._users[ids]
         message = BoardMessage.objects.get(id=message_id)
@@ -79,31 +87,43 @@ class MessageBoardNamespace(BaseNamespace):
         messageSelector = "#message-%s" % message_id
         if message.author != user:
             print("cancellazione non permessa")
-            self.emit('protocol',
-                      [{"errorMessage": "Puoi cancellare solo i tuoi messaggi."},
-                       {"show": messageSelector}])
+            self.emit(
+                "protocol",
+                [
+                    {"errorMessage": "Puoi cancellare solo i tuoi messaggi."},
+                    {"show": messageSelector},
+                ],
+            )
             return
         # time.sleep(3)
         print("cancello")
-        self._broadcast('protocol', [{"remove": messageSelector}])
+        self._broadcast("protocol", [{"remove": messageSelector}])
         message.delete()
         # self.emit('protocol', [{"remove": messageSelector}])
 
     def broadcastNewMessage(self, message):
         print("broadcasting '%s' from %s" % (message.message, message.author))
-        self._broadcast('message', dict(author=message.author.username,
-                                        message=message.message,
-                                        id=message.id,
-                                        date=message.date.strftime("%d/%m/%Y"),
-                                        attachment={"name": message.attachment_name(),
-                                                    "url": message.attachment.url} if message.attachment else None,
-                                        ))
+        self._broadcast(
+            "message",
+            dict(
+                author=message.author.username,
+                message=message.message,
+                id=message.id,
+                date=message.date.strftime("%d/%m/%Y"),
+                attachment={
+                    "name": message.attachment_name(),
+                    "url": message.attachment.url,
+                }
+                if message.attachment
+                else None,
+            ),
+        )
 
     def on_message(self, message):
         print("MESSAGE: %s" % message)
         ids = id(self)
         if not ids in self._users:
-            self.emit('error', "Devi essere autenticato per mandare messaggi.")
+            self.emit("error", "Devi essere autenticato per mandare messaggi.")
             return
         user = self._users[ids]
         newMessage = BoardMessage(

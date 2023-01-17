@@ -15,12 +15,12 @@ class ModelloFattura(object):
 
     @classmethod
     def urlname_generazione(cls):
-        """ Restituisce il nome dell'url che rimanda alla generazione di queste fatture"""
+        """Restituisce il nome dell'url che rimanda alla generazione di queste fatture"""
         return "tamFatGenerazione%s" % cls.codice
 
     @classmethod
     def urlname_manuale(cls):
-        """ Restituisce il nome dell'url che rimanda alla generazione manuale di una fattura"""
+        """Restituisce il nome dell'url che rimanda alla generazione manuale di una fattura"""
         return "tamFatManuale%s" % cls.codice
 
     @staticmethod
@@ -33,7 +33,7 @@ class ModelloFattura(object):
 
 
 # @classmethod
-#	def 
+# 	def
 
 
 class FattureConsorzio(ModelloFattura):
@@ -44,13 +44,13 @@ class FattureConsorzio(ModelloFattura):
 					 Dai viaggi confermati con il flag della fatturazione richiesta."""
     codice = "1"
     origine = Viaggio
-    filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & \
-             ~ (Q(conducente__nick__istartswith='ANNUL') | Q(
-                 annullato=True))  # tolgo le corse assegnate al conducente annullato
+    filtro = Q(fatturazione=True, conducente__isnull=False, riga_fattura=None) & ~(
+        Q(conducente__nick__istartswith="ANNUL") | Q(annullato=True)
+    )  # tolgo le corse assegnate al conducente annullato
     keys = ["cliente"]  # come dividere una fattura dall'altra
     order_by = ["cliente", "data"]  # ordinamento per generazione
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
-    url_generazione = r'^genera/consorzio/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
+    url_generazione = r"^genera/consorzio/$"  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     ask_progressivo = True
     template_scelta = "1.perCliente.html"
     template_generazione = "2.perCliente.html"
@@ -58,15 +58,18 @@ class FattureConsorzio(ModelloFattura):
     codice_fattura = "FC"
     destinatario = "cliente"
     mittente = "consorzio"
-    note = 'Segue fattura elettronica\nPagamento: Bonifico bancario 30 giorni data fattura'
+    note = (
+        "Segue fattura elettronica\nPagamento: Bonifico bancario 30 giorni data fattura"
+    )
     esente_iva = False
 
     @staticmethod
     def update_context(data_start, data_end):
         result = ModelloFattura.update_context(data_start, data_end)
         result["anno_consorzio"] = data_end.year
-        result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"],
-                                                         "1") + 1  # ultimo progressivo '1'
+        result["progressivo"] = (
+            ultimoProgressivoFattura(result["anno_consorzio"], "1") + 1
+        )  # ultimo progressivo '1'
         return result
 
 
@@ -80,13 +83,16 @@ class FattureNoIVA(ModelloFattura):
 				  """
     codice = "4"
     origine = Viaggio
-    filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False,
-               riga_fattura=None) & \
-             ~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True))
+    filtro = Q(
+        pagamento_differito=True,
+        fatturazione=False,
+        conducente__isnull=False,
+        riga_fattura=None,
+    ) & ~(Q(conducente__nick__istartswith="ANNUL") | Q(annullato=True))
     keys = ["cliente", "passeggero"]  # come dividere una fattura dall'altra
     order_by = ["cliente", "data"]  # ordinamento per generazione
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
-    url_generazione = r'^genera/esentiIVA/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
+    url_generazione = r"^genera/esentiIVA/$"  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     ask_progressivo = True
     template_scelta = "1.perCliente.html"
     template_generazione = "2.perCliente.html"
@@ -94,17 +100,20 @@ class FattureNoIVA(ModelloFattura):
     codice_fattura = "FE"
     destinatario = "cliente"
     mittente = "consorzio"
-    note = 'Segue fattura elettronica\n' \
-           'Pagamento: Bonifico bancario 30 giorni data fattura' + \
-           "\nServizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
+    note = (
+        "Segue fattura elettronica\n"
+        "Pagamento: Bonifico bancario 30 giorni data fattura"
+        + "\nServizio trasporto emodializzato da Sua abitazione al centro emodialisi assistito e viceversa come da distinta."
+    )
     esente_iva = True
 
     @staticmethod
     def update_context(data_start, data_end):
         result = ModelloFattura.update_context(data_start, data_end)
         result["anno_consorzio"] = data_end.year
-        result["progressivo"] = ultimoProgressivoFattura(result["anno_consorzio"],
-                                                         "4") + 1  # ultimo progressivo '4'
+        result["progressivo"] = (
+            ultimoProgressivoFattura(result["anno_consorzio"], "4") + 1
+        )  # ultimo progressivo '4'
         return result
 
 
@@ -116,11 +125,12 @@ class FattureConducente(ModelloFattura):
 					 Generate dalle fatture consorzio."""
     codice = "2"
     origine = RigaFattura
-    filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None) & \
-             ~ Q(conducente__nick__istartswith='ANNUL')
+    filtro = Q(fattura__tipo="1", fattura_conducente_collegata=None) & ~Q(
+        conducente__nick__istartswith="ANNUL"
+    )
     keys = ["conducente"]  # come dividere una fattura dall'altra
     order_by = ["conducente", "viaggio__data", "viaggio__cliente"]  # ordinamento
-    url_generazione = r'^genera/conducente/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
+    url_generazione = r"^genera/conducente/$"  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     template_scelta = "1.perConducente.html"
     template_generazione = "2.perConducente.html"
     template_visualizzazione = "5.perConducente.html"
@@ -137,11 +147,17 @@ class FattureConducenteNoIva(ModelloFattura):
 					 Generate dalle fatture consorzio esenti IVA."""
     codice = "5"
     origine = RigaFattura
-    filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & \
-             ~ Q(conducente__nick__istartswith='ANNUL')
+    filtro = Q(fattura__tipo="4", fattura_conducente_collegata=None) & ~Q(
+        conducente__nick__istartswith="ANNUL"
+    )
     keys = ["conducente"]  # come dividere una fattura dall'altra
-    order_by = ["conducente", "fattura__data", "viaggio__data", "viaggio__cliente"]  # ordinamento
-    url_generazione = r'^genera/conducenteNoIVA/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
+    order_by = [
+        "conducente",
+        "fattura__data",
+        "viaggio__data",
+        "viaggio__cliente",
+    ]  # ordinamento
+    url_generazione = r"^genera/conducenteNoIVA/$"  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     template_scelta = "1.perConducente.html"
     template_generazione = "2.perConducente.html"
     template_visualizzazione = "5.perConducente.html"
@@ -163,8 +179,8 @@ class FattureConducenteNoIvaSenzaFiltri(FattureConducenteNoIva):
 
 
 class Ricevute(ModelloFattura):
-    """ Le ricevute, ora non più generabili
-        producevano una ricevuta divisa a livello di PDF da consorzio a cliente, e da conducente a consorzio
+    """Le ricevute, ora non più generabili
+    producevano una ricevuta divisa a livello di PDF da consorzio a cliente, e da conducente a consorzio
     """
 
     nome = "Ricevute"

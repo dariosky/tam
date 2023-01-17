@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 
 class TamhooksConfig(AppConfig):
-    name = 'tamhooks'
+    name = "tamhooks"

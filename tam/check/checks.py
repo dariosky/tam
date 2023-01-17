@@ -11,8 +11,8 @@ from django.db import transaction
 from tam.models import Viaggio
 from tam.views.tamviews import associate
 
-tz_italy = pytz.timezone('Europe/Rome')
-logger = logging.getLogger('tam.checks')
+tz_italy = pytz.timezone("Europe/Rome")
+logger = logging.getLogger("tam.checks")
 
 
 class EndOfTestExeption(Exception):
@@ -28,14 +28,17 @@ def classifica_assertion(classifica, assertions, message=""):
     errors = []
     for key, expected in assertions.items():
         if classifica[key] != expected:
-            errors.append("{key} is {val} instead of {expected}".format(
-                key=key, val=classifica[key], expected=expected
-            ))
+            errors.append(
+                "{key} is {val} instead of {expected}".format(
+                    key=key, val=classifica[key], expected=expected
+                )
+            )
     assert errors == [], "\n".join(errors) + (("\n" + message) if message else "")
 
 
 def arrivo_singolo_o_due_arrivi(
-    da, a,
+    da,
+    a,
     riferimento,
     prezzo_singolo=Decimal(30),
     data=None,
@@ -45,7 +48,7 @@ def arrivo_singolo_o_due_arrivi(
     check_equality=True,  # if False, don't check sigle1+single2=double
 ):
     """
-        Test congruenza mail Rob. Lup. 26/6/2015
+    Test congruenza mail Rob. Lup. 26/6/2015
     """
     if data is None:
         data = datetime.datetime(2020, 6, 27, 10, 0)
@@ -64,10 +67,7 @@ def arrivo_singolo_o_due_arrivi(
             # doppio.abbuono_fisso = settings.ABBUONO_AEROPORTI
             doppio.updatePrecomp(force_save=True)
             if expected_double:
-                classifica_assertion(
-                    doppio.classifiche(),
-                    expected_double
-                )
+                classifica_assertion(doppio.classifiche(), expected_double)
 
             singolo_v1 = Viaggio(
                 data=tz_italy.localize(data),
@@ -82,10 +82,7 @@ def arrivo_singolo_o_due_arrivi(
             singolo_v1.abbuono_fisso = 0
             singolo_v1.updatePrecomp(force_save=True)
             if expected_single1:
-                classifica_assertion(
-                    singolo_v1.classifiche(),
-                    expected_single1
-                )
+                classifica_assertion(singolo_v1.classifiche(), expected_single1)
 
             singolo_v2 = Viaggio(
                 data=tz_italy.localize(data),
@@ -105,7 +102,7 @@ def arrivo_singolo_o_due_arrivi(
                     expected_single2,
                 )
 
-            associate(assoType='link', viaggiIds=[singolo_v1.id, singolo_v2.id])
+            associate(assoType="link", viaggiIds=[singolo_v1.id, singolo_v2.id])
 
             # I have to retake the objects from the db
             singolo_v1.refresh_from_db()
@@ -118,21 +115,25 @@ def arrivo_singolo_o_due_arrivi(
                 classifica_assertion(
                     singolo_v1.classifiche(),
                     doppio.classifiche(),
-                    "Due singoli in arrivo dovrebbe avere le stesse caratteristiche di arrivo singolo"
+                    "Due singoli in arrivo dovrebbe avere le stesse caratteristiche di arrivo singolo",
                 )
             raise EndOfTestExeption
     except EndOfTestExeption:
         logger.info("Ok.")
 
 
-def check_associata(da, a, riferimento, prezzo,
-                    expect_andata=None,
-                    expect_ritorno=None,
-                    expect_associata=None,
-                    data=None
-                    ):
+def check_associata(
+    da,
+    a,
+    riferimento,
+    prezzo,
+    expect_andata=None,
+    expect_ritorno=None,
+    expect_associata=None,
+    data=None,
+):
     """
-        Test congruenza mail Rob. Lup. 26/6/2015
+    Test congruenza mail Rob. Lup. 26/6/2015
     """
     if data is None:
         data = datetime.datetime(2020, 6, 27, 10, 0)
@@ -150,11 +151,7 @@ def check_associata(da, a, riferimento, prezzo,
             andata.costo_autostrada = andata.costo_autostrada_default()
             andata.updatePrecomp(force_save=True)
             if expect_andata:
-                classifica_assertion(
-                    andata.classifiche(),
-                    expect_andata,
-                    "Andata"
-                )
+                classifica_assertion(andata.classifiche(), expect_andata, "Andata")
 
             ritorno = Viaggio(
                 data=tz_italy.localize(data + datetime.timedelta(hours=1)),
@@ -170,13 +167,9 @@ def check_associata(da, a, riferimento, prezzo,
             ritorno.updatePrecomp(force_save=True)
 
             if expect_ritorno:
-                classifica_assertion(
-                    ritorno.classifiche(),
-                    expect_ritorno,
-                    "Ritorno"
-                )
+                classifica_assertion(ritorno.classifiche(), expect_ritorno, "Ritorno")
 
-            associate(assoType='link', viaggiIds=[andata.id, ritorno.id])
+            associate(assoType="link", viaggiIds=[andata.id, ritorno.id])
 
             # I have to retake the objects from the db
             andata.refresh_from_db()
@@ -184,9 +177,7 @@ def check_associata(da, a, riferimento, prezzo,
 
             if expect_associata:
                 classifica_assertion(
-                    andata.classifiche(),
-                    expect_associata,
-                    "Associata"
+                    andata.classifiche(), expect_associata, "Associata"
                 )
             raise EndOfTestExeption
     except EndOfTestExeption:
@@ -251,8 +242,10 @@ def bus_1go_3back(abano, venezia, riferimento, expected, data=None):
             ritorno3.abbuono_fisso = settings.ABBUONO_AEROPORTI
             ritorno3.updatePrecomp(force_save=True)
 
-            associate(assoType='link', viaggiIds=[andata.id, ritorno1.id
-                , ritorno2.id, ritorno3.id])
+            associate(
+                assoType="link",
+                viaggiIds=[andata.id, ritorno1.id, ritorno2.id, ritorno3.id],
+            )
             ritorno2.abbuono_fisso = 0
 
             # I have to retake the objects from the db
@@ -262,11 +255,7 @@ def bus_1go_3back(abano, venezia, riferimento, expected, data=None):
             ritorno3.refresh_from_db()
 
             if expected:
-                classifica_assertion(
-                    andata.classifiche(),
-                    expected,
-                    "Associata"
-                )
+                classifica_assertion(andata.classifiche(), expected, "Associata")
             raise EndOfTestExeption
     except EndOfTestExeption:
         logger.info("Ok.")
@@ -314,7 +303,9 @@ def abbinata_con_abbuoni(abano, venezia, riferimento, expected, data=None):
             ritorno3.costo_autostrada = ritorno1.costo_autostrada_default()
             ritorno3.updatePrecomp(force_save=True)
 
-            associate(assoType='link', viaggiIds=[ritorno1.id, ritorno2.id, ritorno3.id])
+            associate(
+                assoType="link", viaggiIds=[ritorno1.id, ritorno2.id, ritorno3.id]
+            )
 
             ritorno1.refresh_from_db()
             ritorno2.refresh_from_db()
@@ -327,11 +318,7 @@ def abbinata_con_abbuoni(abano, venezia, riferimento, expected, data=None):
             ritorno1.refresh_from_db()
 
             if expected:
-                classifica_assertion(
-                    ritorno1.classifiche(),
-                    expected,
-                    "Associata"
-                )
+                classifica_assertion(ritorno1.classifiche(), expected, "Associata")
             raise EndOfTestExeption
     except EndOfTestExeption:
         logger.info("Ok.")

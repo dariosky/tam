@@ -14,12 +14,12 @@ from prenotazioni.views.tam_email import ADMIN_MAIL, notifyByMail
 logger = logging.getLogger(__name__)
 
 
-def errors500(request, template_name='500.html'):
+def errors500(request, template_name="500.html"):
     exc_type, exc, trackback = sys.exc_info()
     return render(request, template_name, locals())
 
 
-def errors400(request, template_name='404.html'):
+def errors400(request, template_name="404.html"):
     return render(request, template_name, {})
 
 
@@ -32,20 +32,24 @@ def errorview(request):
 
 def pingview(request):
     error = False
-    results = ['{{host}}', "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
+    results = ["{{host}}", "ok from django %s" % ".".join(map(str, django.VERSION[:3]))]
 
-    response = Template('\n'.join(results)).render(RequestContext(request))
-    return HttpResponse(response, status=200 if not error else 500, content_type='text/plain')
+    response = Template("\n".join(results)).render(RequestContext(request))
+    return HttpResponse(
+        response, status=200 if not error else 500, content_type="text/plain"
+    )
 
 
 @user_passes_test(lambda user: user.is_superuser)
 def email_test(request):
-    results = ["Email sent to admins: %s" % ADMIN_MAIL, "backend: %s" % settings.EMAIL_BACKEND]
+    results = [
+        "Email sent to admins: %s" % ADMIN_MAIL,
+        "backend: %s" % settings.EMAIL_BACKEND,
+    ]
     notifyByMail(
         to=[ADMIN_MAIL],
         subject="Test email with %s" % settings.EMAIL_BACKEND,
         body="This is the body of the message",
-
     )
-    response = Template('\n'.join(results)).render(RequestContext(request))
-    return HttpResponse(response, status=200, content_type='text/plain')
+    response = Template("\n".join(results)).render(RequestContext(request))
+    return HttpResponse(response, status=200, content_type="text/plain")

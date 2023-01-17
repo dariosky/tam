@@ -12,21 +12,23 @@ from django.conf import settings
 import logging
 import re
 
-logger = logging.getLogger('tam.dates')
+logger = logging.getLogger("tam.dates")
 
 MONTH_TRANSLATIONS = OrderedDict(
-    [("gennaio", "january"),
-     ("febbraio", "february"),
-     ("marzo", "march"),
-     ("aprile", "april"),
-     ("maggio", "may"),
-     ("giugno", "june"),
-     ("luglio", "july"),
-     ("agosto", "august"),
-     ("settembre", "september"),
-     ("ottobre", "october"),
-     ("novembre", "november"),
-     ("dicembre", "december")]
+    [
+        ("gennaio", "january"),
+        ("febbraio", "february"),
+        ("marzo", "march"),
+        ("aprile", "april"),
+        ("maggio", "may"),
+        ("giugno", "june"),
+        ("luglio", "july"),
+        ("agosto", "august"),
+        ("settembre", "september"),
+        ("ottobre", "october"),
+        ("novembre", "november"),
+        ("dicembre", "december"),
+    ]
 )
 MONTH_NAMES = list(map(str.capitalize, MONTH_TRANSLATIONS.keys()))
 
@@ -41,17 +43,17 @@ def normalizeTimeString(time_string):
     r = time_string
     if not r:
         return None
-    if len(r) < 2 or r[1] == ':':
-        r = '0' + r
+    if len(r) < 2 or r[1] == ":":
+        r = "0" + r
     if len(r) < 3:
         r += ":"
     if len(r) < 5:
-        r += '0' * (5 - len(r))
+        r += "0" * (5 - len(r))
     return r
 
 
 def parse_datestring(s, default=None):
-    """ Parse datestring as it was in Italy trying some format """
+    """Parse datestring as it was in Italy trying some format"""
     if not s:
         return default
     s = s.replace(",", "").replace("  ", " ").lower()
@@ -59,7 +61,7 @@ def parse_datestring(s, default=None):
         s = s.replace(m_ita, m_eng)  # bring the eventual months in English
 
     naive_date_time = None
-    for time_format in ('%d/%m/%Y', "%d %B %Y", "%B %d %Y"):
+    for time_format in ("%d/%m/%Y", "%d %B %Y", "%B %d %Y"):
         try:
             naive_date_time = datetime.datetime.strptime(s, time_format)
             break
@@ -80,12 +82,12 @@ def ita_now():
 
 
 def ita_today():
-    """ Use a localize datetime (at midnight) instead of a date """
+    """Use a localize datetime (at midnight) instead of a date"""
     return ita_now().replace(hour=0, minute=0, second=0, microsecond=0)
 
 
 def get_prossime_inizio():
-    """ Restituisce la data di inizio delle prossime corse """
+    """Restituisce la data di inizio delle prossime corse"""
     adesso = ita_now()
     data_ScorsaMezzanotte = adesso.replace(hour=0, minute=0)
     data_DueOreFa = adesso - datetime.timedelta(hours=2)
@@ -93,8 +95,9 @@ def get_prossime_inizio():
 
 
 def date_enforce(data):
-    """ Ensure the date is timezone aware """
-    if not data: return
+    """Ensure the date is timezone aware"""
+    if not data:
+        return
     if isinstance(data, datetime.date):
         data = datetime.datetime(*data.timetuple()[:3])  # converto da date a datetime
     if settings.USE_TZ:
@@ -111,11 +114,11 @@ def date_enforce(data):
 
 
 def date2datetime(day):
-    """ Convert the date to datetime, keeping its timezone
+    """Convert the date to datetime, keeping its timezone
     @param day: datetime.date
     @return: datetime.datetime
     """
-    if hasattr(day, 'tzinfo'):
+    if hasattr(day, "tzinfo"):
         dtime = datetime.time(tzinfo=day.tzinfo)
     else:
         dtime = datetime.time()
@@ -146,18 +149,20 @@ def appendTimeFromRegex(day, timedelta_string):
         day = date2datetime(day)
     m = re.match(timedelta_re, timedelta_string)
     assert m is not None
-    timeparts = {key: int(value) for key, value in m.groupdict().items() if value is not None}
+    timeparts = {
+        key: int(value) for key, value in m.groupdict().items() if value is not None
+    }
     delta = datetime.timedelta(**timeparts)
     return day + delta
 
 
-if settings.DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+if settings.DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
     # if we are on sqlite, dates on DB are expressed as CET ...
     # where they should be UTC (or tz aware), so, let's stick to UTC
     logging.debug("using UTC to show CET (a bad hack)")
-    tz_italy = pytz.timezone('UTC')
+    tz_italy = pytz.timezone("UTC")
 else:
     # Tutto in UTC, ma reinterpreto come CET
     # logging.debug("in DB everything is TZ aware")
-    tz_italy = pytz.timezone('Europe/Rome')
+    tz_italy = pytz.timezone("Europe/Rome")
 timezone.activate(tz_italy)

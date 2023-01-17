@@ -3,11 +3,11 @@ import logging
 
 from django.apps import AppConfig
 
-logger = logging.getLogger('tam.appconfig')
+logger = logging.getLogger("tam.appconfig")
 
 
 class TamConfig(AppConfig):
-    name = 'tam'
+    name = "tam"
     verbose_name = "TAM Taxi Manager"
 
     def ready(self):

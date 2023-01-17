@@ -10,13 +10,13 @@ class SQLLogMiddleware:
             raise MiddlewareNotUsed()
 
     def process_response(self, request, response):
-        if connections['default'].queries:
-            #			time = 0.0
+        if connections["default"].queries:
+            # 			time = 0.0
             qfile = open("querylog.sql", "w")
             rows = []
-            for q in connections['default'].queries:
-                sql = q['sql']
-                time = q['time']
+            for q in connections["default"].queries:
+                sql = q["sql"]
+                time = q["time"]
                 rows.append((time, sql))
 
             rows.sort(reverse=True)

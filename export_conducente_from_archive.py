@@ -17,23 +17,23 @@ def export_conducente(conducente_id):
     corse_archiviate = ViaggioArchive.objects.filter(conducente=c)
     print(f"{corse_archiviate.count()} corse")
 
-    headers = [
-        "data", "da", "a", "cliente", "pezzo", "dettagli prezzo"
-    ]
-    with open(f'{c.nome}_archive.csv', 'w', newline='') as csvfile:
+    headers = ["data", "da", "a", "cliente", "pezzo", "dettagli prezzo"]
+    with open(f"{c.nome}_archive.csv", "w", newline="") as csvfile:
         csvwriter = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
         csvwriter.writerow(headers)
 
         for v in corse_archiviate.all():
-            details = re.sub(r"[\s\n\t]+", " ", v.prezzo_detail, flags=re.DOTALL | re.MULTILINE)
+            details = re.sub(
+                r"[\s\n\t]+", " ", v.prezzo_detail, flags=re.DOTALL | re.MULTILINE
+            )
             details = re.sub(r"<(.*?)>(.*?)</\1>", r"\2", details)
-            details = re.sub(r"[\s\n\t]+", " ", details, flags=re.DOTALL | re.MULTILINE).strip()
-            row = [
-                v.data, v.da, v.a, v.cliente, v.prezzo, details
-            ]
+            details = re.sub(
+                r"[\s\n\t]+", " ", details, flags=re.DOTALL | re.MULTILINE
+            ).strip()
+            row = [v.data, v.da, v.a, v.cliente, v.prezzo, details]
             csvwriter.writerow(row)
             # print(row)
 
 
-if __name__ == '__main__':
-    export_conducente('09')
+if __name__ == "__main__":
+    export_conducente("09")

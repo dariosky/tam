@@ -8,13 +8,25 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('modellog', '0001_initial'),
+        ("modellog", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='actionlog',
-            name='action_type',
-            field=models.CharField(choices=[('A', 'Creazione'), ('M', 'Modifica'), ('D', 'Cancellazione'), ('L', 'Login'), ('O', 'Logout'), ('K', 'Archiviazione'), ('F', 'Appianamento'), ('X', 'Export Excel')], max_length=1),
+            model_name="actionlog",
+            name="action_type",
+            field=models.CharField(
+                choices=[
+                    ("A", "Creazione"),
+                    ("M", "Modifica"),
+                    ("D", "Cancellazione"),
+                    ("L", "Login"),
+                    ("O", "Logout"),
+                    ("K", "Archiviazione"),
+                    ("F", "Appianamento"),
+                    ("X", "Export Excel"),
+                ],
+                max_length=1,
+            ),
         ),
     ]

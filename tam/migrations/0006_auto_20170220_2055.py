@@ -7,19 +7,23 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('tam', '0005_viaggio_additional_stop'),
+        ("tam", "0005_viaggio_additional_stop"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='conducente',
-            name='has_bus',
+            model_name="conducente",
+            name="has_bus",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='viaggio',
-            name='prezzo_sosta',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=9,
-                                      verbose_name='Prezzo sosta addizionale'),
+            model_name="viaggio",
+            name="prezzo_sosta",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                max_digits=9,
+                verbose_name="Prezzo sosta addizionale",
+            ),
         ),
     ]

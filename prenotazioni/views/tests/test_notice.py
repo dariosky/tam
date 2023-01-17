@@ -6,7 +6,9 @@ from prenotazioni.views.notice import notice_required
 
 rundate = datetime.datetime(2016, 8, 14, 8, 0)
 
-notice = lambda d: notice_required(d, working_hours=(7, 20), night_notice=12, work_notice=2)
+notice = lambda d: notice_required(
+    d, working_hours=(7, 20), night_notice=12, work_notice=2
+)
 work_delta = timedelta(hours=2)
 night_delta = timedelta(hours=12)
 

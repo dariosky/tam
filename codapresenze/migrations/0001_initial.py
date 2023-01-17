@@ -13,17 +13,28 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CodaPresenze',
+            name="CodaPresenze",
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('data_accodamento', models.DateTimeField(auto_now_add=True)),
-                ('luogo', models.TextField(max_length=30)),
-                ('utente', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        verbose_name="ID",
+                        serialize=False,
+                        auto_created=True,
+                        primary_key=True,
+                    ),
+                ),
+                ("data_accodamento", models.DateTimeField(auto_now_add=True)),
+                ("luogo", models.TextField(max_length=30)),
+                ("utente", models.ForeignKey(to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'ordering': ['data_accodamento'],
-                'verbose_name_plural': 'Coda Presenze',
-                'permissions': (('view', 'Visualizzazione coda'), ('editall', 'Coda di tutti')),
+                "ordering": ["data_accodamento"],
+                "verbose_name_plural": "Coda Presenze",
+                "permissions": (
+                    ("view", "Visualizzazione coda"),
+                    ("editall", "Coda di tutti"),
+                ),
             },
             bases=(models.Model,),
         ),

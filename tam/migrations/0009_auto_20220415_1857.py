@@ -8,23 +8,30 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tam', '0008_luogo_anticipo_servizio'),
+        ("tam", "0008_luogo_anticipo_servizio"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='conducente',
-            name='classifica_iniziale_fatture_corse',
-            field=models.IntegerField(default=0, verbose_name='Classifica fatture - corse'),
+            model_name="conducente",
+            name="classifica_iniziale_fatture_corse",
+            field=models.IntegerField(
+                default=0, verbose_name="Classifica fatture - corse"
+            ),
         ),
         migrations.AddField(
-            model_name='conducente',
-            name='classifica_iniziale_fatture_valore',
-            field=models.DecimalField(decimal_places=2, default=0, max_digits=12, verbose_name='Classifica fatture - valore'),
+            model_name="conducente",
+            name="classifica_iniziale_fatture_valore",
+            field=models.DecimalField(
+                decimal_places=2,
+                default=0,
+                max_digits=12,
+                verbose_name="Classifica fatture - valore",
+            ),
         ),
         migrations.AlterField(
-            model_name='luogo',
-            name='nome',
-            field=models.CharField(max_length=25, unique=True, verbose_name='Località'),
+            model_name="luogo",
+            name="nome",
+            field=models.CharField(max_length=25, unique=True, verbose_name="Località"),
         ),
     ]

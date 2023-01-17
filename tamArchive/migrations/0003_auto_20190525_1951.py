@@ -8,12 +8,20 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tamArchive', '0002_auto_20160831_0011'),
+        ("tamArchive", "0002_auto_20160831_0011"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='viaggioarchive',
-            options={'ordering': ['data'], 'permissions': (('flat', "Esegue l'appianamento"), ('archive', "Esegue l'archiviazione"), ('view', "Visualizza l'archiviazione")), 'verbose_name_plural': 'Archivi'},
+            name="viaggioarchive",
+            options={
+                "ordering": ["data"],
+                "permissions": (
+                    ("flat", "Esegue l'appianamento"),
+                    ("archive", "Esegue l'archiviazione"),
+                    ("view", "Visualizza l'archiviazione"),
+                ),
+                "verbose_name_plural": "Archivi",
+            },
         ),
     ]

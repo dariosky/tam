@@ -9,13 +9,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tam', '0007_auto_20190525_1951'),
+        ("tam", "0007_auto_20190525_1951"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='luogo',
-            name='anticipo_servizio',
-            field=models.IntegerField(default=0, validators=(django.core.validators.MinValueValidator(0),), verbose_name='Anticipo servizio'),
+            model_name="luogo",
+            name="anticipo_servizio",
+            field=models.IntegerField(
+                default=0,
+                validators=(django.core.validators.MinValueValidator(0),),
+                verbose_name="Anticipo servizio",
+            ),
         ),
     ]

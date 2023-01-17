@@ -2,35 +2,39 @@
 from django.conf import settings
 
 CLASSIFICHE = [
-    {"nome": "Supplementari serali",
-     "mapping_field": "puntiNotturni",
-     'type': 'supplementari',
-     'image': "night",
-     'viaggio_field': 'punti_notturni',
-     },
-    {"nome": "Venezia-Treviso",
-     'type': 'punti',
-     "mapping_field": "punti_abbinata",
-     'viaggio_field': 'punti_abbinata',
-     },
-    {"nome": "Lunghe",
-     "prefix": "nelle",
-     "descrizione": ">30km non abbinati",
-     "mapping_field": "prezzoVenezia",
-     'viaggio_field': 'prezzoVenezia',
-     },
-
-    {"nome": "Doppi Padova",
-     "prefix": "nelle",
-     "mapping_field": "prezzoDoppioPadova",
-     'viaggio_field': 'prezzoDoppioPadova',
-     },
-    {"nome": "Corte",
-     "prefix": "nelle",
-     "descrizione": "Padova, <=30km",
-     "mapping_field": "prezzoPadova",
-     "viaggio_field": "prezzoPadova",
-     },
+    {
+        "nome": "Supplementari serali",
+        "mapping_field": "puntiNotturni",
+        "type": "supplementari",
+        "image": "night",
+        "viaggio_field": "punti_notturni",
+    },
+    {
+        "nome": "Venezia-Treviso",
+        "type": "punti",
+        "mapping_field": "punti_abbinata",
+        "viaggio_field": "punti_abbinata",
+    },
+    {
+        "nome": "Lunghe",
+        "prefix": "nelle",
+        "descrizione": ">30km non abbinati",
+        "mapping_field": "prezzoVenezia",
+        "viaggio_field": "prezzoVenezia",
+    },
+    {
+        "nome": "Doppi Padova",
+        "prefix": "nelle",
+        "mapping_field": "prezzoDoppioPadova",
+        "viaggio_field": "prezzoDoppioPadova",
+    },
+    {
+        "nome": "Corte",
+        "prefix": "nelle",
+        "descrizione": "Padova, <=30km",
+        "mapping_field": "prezzoPadova",
+        "viaggio_field": "prezzoPadova",
+    },
 ]
 
 NOMI_CAMPI_CONDUCENTE = {
@@ -96,9 +100,9 @@ def process_classifiche(viaggio, force_numDoppi=None):
 
 
 def dettagliAbbinamento(viaggio, force_numDoppi=None):
-    """ Restituisce un dizionario con i dettagli dell'abbinamento
-        la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
-        Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
+    """Restituisce un dizionario con i dettagli dell'abbinamento
+    la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
+    Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
     """
     kmTotali = viaggio.get_kmtot()
     # logging.debug("Km totali di %s: %s"%(viaggio.pk, kmTotali))
@@ -108,7 +112,7 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
     def specialPlace(luogo):
         nome = luogo.nome.lower()
-        return ("venezia" in nome or "treviso" in nome)
+        return "venezia" in nome or "treviso" in nome
 
     total_pax = 0
     for cursore in [viaggio] + list(viaggio.viaggio_set.all()):
@@ -132,45 +136,57 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
 
 def get_value(viaggio, **kwargs):
-    """ Return the value of this trip on the scoreboard """
+    """Return the value of this trip on the scoreboard"""
     importoViaggio = viaggio.prezzo  # lordo
     forzaSingolo = False
     singolo = forzaSingolo or (not viaggio.is_abbinata)
     # logging.debug("Forzo la corsa come fosse un singolo:%s" % singolo)
 
     if viaggio.cartaDiCredito:
-        importoViaggio *= Decimal(0.98)  # tolgo il 2% al lordo per i pagamenti con carta di credito
+        importoViaggio *= Decimal(
+            0.98
+        )  # tolgo il 2% al lordo per i pagamenti con carta di credito
 
     if viaggio.commissione:  # tolgo la commissione dal lordo
         if viaggio.tipo_commissione == "P":
             importoViaggio = importoViaggio * (
-                Decimal(1) - viaggio.commissione / Decimal(100))  # commissione in percentuale
+                Decimal(1) - viaggio.commissione / Decimal(100)
+            )  # commissione in percentuale
         else:
             importoViaggio = importoViaggio - viaggio.commissione
 
     importoViaggio = importoViaggio - viaggio.costo_autostrada
 
     #   Taxiabano non hanno abbuono per pagamento differito o fatturato
-    if (viaggio.pagamento_differito or viaggio.fatturazione) and settings.SCONTO_FATTURATE:
+    if (
+        viaggio.pagamento_differito or viaggio.fatturazione
+    ) and settings.SCONTO_FATTURATE:
         # tolgo gli abbuoni (per differito o altro)
-        importoViaggio = importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+        importoViaggio = (
+            importoViaggio * (100 - settings.SCONTO_FATTURATE) / Decimal(100)
+        )
 
-    ABBUONO_SOLO_SE_IMPORTO = getattr(settings, 'ABBUONO_SOLO_SE_IMPORTO', False)
-    if ABBUONO_SOLO_SE_IMPORTO and importoViaggio > 0:  # non do l'abbuono se non ho importo
+    ABBUONO_SOLO_SE_IMPORTO = getattr(settings, "ABBUONO_SOLO_SE_IMPORTO", False)
+    if (
+        ABBUONO_SOLO_SE_IMPORTO and importoViaggio > 0
+    ):  # non do l'abbuono se non ho importo
         if viaggio.abbuono_fisso:
             importoViaggio -= viaggio.abbuono_fisso
         if viaggio.abbuono_percentuale:
             importoViaggio = importoViaggio * (
-                Decimal(1) - viaggio.abbuono_percentuale / Decimal(100))  # abbuono in percentuale
+                Decimal(1) - viaggio.abbuono_percentuale / Decimal(100)
+            )  # abbuono in percentuale
 
     importoViaggio = importoViaggio - viaggio.costo_sosta
 
     if settings.SCONTO_SOSTA:
         # aggiungo il prezzo della sosta scontato del SCONTO_SOSTA%
-        importoViaggio += viaggio.prezzo_sosta * (Decimal(1) - settings.SCONTO_SOSTA / Decimal(100))
+        importoViaggio += viaggio.prezzo_sosta * (
+            Decimal(1) - settings.SCONTO_SOSTA / Decimal(100)
+        )
     else:
         importoViaggio += viaggio.prezzo_sosta  # prezzo sosta intero
-    return importoViaggio.quantize(Decimal('.01'))
+    return importoViaggio.quantize(Decimal(".01"))
 
 
 GET_VALUE_FUNCTION = get_value

@@ -4,8 +4,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 
 
-def moneyfmt(value, places=2, curr='', sep='.', dp=',',
-             pos='', neg='-', trailneg=''):
+def moneyfmt(value, places=2, curr="", sep=".", dp=",", pos="", neg="-", trailneg=""):
     """Convert Decimal to a money formatted string.
 
     places:  required number of places after the decimal point
@@ -38,10 +37,10 @@ def moneyfmt(value, places=2, curr='', sep='.', dp=',',
     if sign:
         build(trailneg)
     for i in range(places):
-        build(next() if digits else '0')
+        build(next() if digits else "0")
     build(dp)
     if not digits:
-        build('0')
+        build("0")
     i = 0
     while digits:
         build(next())
@@ -51,7 +50,7 @@ def moneyfmt(value, places=2, curr='', sep='.', dp=',',
             build(sep)
     build(curr)
     build(neg if sign else pos)
-    return ''.join(reversed(result))
+    return "".join(reversed(result))
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -81,7 +80,7 @@ class NumberedCanvas(canvas.Canvas):
         self._saved_page_states = []
 
     def save(self):
-        """ add page info to each page (page x of y) if y>1 """
+        """add page info to each page (page x of y) if y>1"""
         self.apply_page_numbers()
 
         canvas.Canvas.save(self)
@@ -89,5 +88,6 @@ class NumberedCanvas(canvas.Canvas):
     def draw_page_number(self, pagenum, page_count):
         self.setFont("Helvetica", 7)
         width = self._pagesize[0]
-        self.drawRightString(width / 2, 1 * cm,
-                             "Pagina %d di %d" % (pagenum, page_count))
+        self.drawRightString(
+            width / 2, 1 * cm, "Pagina %d di %d" % (pagenum, page_count)
+        )

@@ -6,15 +6,17 @@ from django.core.management.color import no_style
 
 
 class Command(AppCommand):
-    args = ''
-    help = 'Check all indexes suggested from models exists and create them if needed.'  # @ReservedAssignment
+    args = ""
+    help = "Check all indexes suggested from models exists and create them if needed."  # @ReservedAssignment
 
     def handle_app(self, app, **options):
         self.stdout.write("Checking indexes for %s.\n" % app.__name__)
         all_suggested_indexes = []
         models_list = models.get_models(app)
         for model in models_list:
-            suggested_indexes = connection.creation.sql_indexes_for_model(model, no_style())
+            suggested_indexes = connection.creation.sql_indexes_for_model(
+                model, no_style()
+            )
             for index_creation_string in suggested_indexes:
                 all_suggested_indexes.append(index_creation_string)
 
@@ -37,7 +39,8 @@ class Command(AppCommand):
                 missing_indexes.append(index)
         if missing_indexes:
             create_input = input(
-                "Create all missing suggested indexes in %s [y,N]? " % app.__name__)
+                "Create all missing suggested indexes in %s [y,N]? " % app.__name__
+            )
             if create_input.strip().lower() == "y":
                 self.stdout.write("Creating missing indexes... ")
                 for index_creation_query in missing_indexes:

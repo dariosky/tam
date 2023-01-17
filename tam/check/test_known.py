@@ -13,7 +13,7 @@ from tam.models import Luogo
 logger = logging.getLogger("tam.tests.known")
 
 
-class TestKnownTaxi2():
+class TestKnownTaxi2:
     @pytest.fixture(autouse=True)
     def initialize(self):
         logger.debug("Creating a couple of places")
@@ -23,26 +23,34 @@ class TestKnownTaxi2():
     @pytest.mark.django_db
     def test_known_taxi2(self):
         tests = [
-            partial(arrivo_singolo_o_due_arrivi,
-                    da=self.venezia, a=self.abano, riferimento=self.abano,
-                    prezzo_singolo=30,
-                    expected_single1=dict(prezzoPunti=Decimal("24.20"), puntiAbbinata=1),
-                    expected_double=dict(prezzoPunti=Decimal("54.20"), puntiAbbinata=1),
-                    ),
-            partial(arrivo_singolo_o_due_arrivi,
-                    da=self.abano, a=self.venezia, riferimento=self.abano,
-                    prezzo_singolo=30,
-                    expected_single1=dict(prezzoPunti=Decimal("24.20"), puntiAbbinata=1),
-                    expected_double=dict(prezzoPunti=Decimal("54.20"), puntiAbbinata=1),
-                    ),
-            partial(check_associata,
-                    da=self.abano, a=self.venezia, riferimento=self.abano,
-                    prezzo=30,
-
-                    expect_andata=dict(prezzoPunti=Decimal("24.20"), puntiAbbinata=1),
-                    expect_ritorno=dict(prezzoPunti=Decimal("18.20"), puntiAbbinata=1),
-                    expect_associata=dict(prezzoPunti=Decimal("416.20"), puntiAbbinata=1),
-                    )
+            partial(
+                arrivo_singolo_o_due_arrivi,
+                da=self.venezia,
+                a=self.abano,
+                riferimento=self.abano,
+                prezzo_singolo=30,
+                expected_single1=dict(prezzoPunti=Decimal("24.20"), puntiAbbinata=1),
+                expected_double=dict(prezzoPunti=Decimal("54.20"), puntiAbbinata=1),
+            ),
+            partial(
+                arrivo_singolo_o_due_arrivi,
+                da=self.abano,
+                a=self.venezia,
+                riferimento=self.abano,
+                prezzo_singolo=30,
+                expected_single1=dict(prezzoPunti=Decimal("24.20"), puntiAbbinata=1),
+                expected_double=dict(prezzoPunti=Decimal("54.20"), puntiAbbinata=1),
+            ),
+            partial(
+                check_associata,
+                da=self.abano,
+                a=self.venezia,
+                riferimento=self.abano,
+                prezzo=30,
+                expect_andata=dict(prezzoPunti=Decimal("24.20"), puntiAbbinata=1),
+                expect_ritorno=dict(prezzoPunti=Decimal("18.20"), puntiAbbinata=1),
+                expect_associata=dict(prezzoPunti=Decimal("416.20"), puntiAbbinata=1),
+            ),
         ]
 
         run_tests(tests)

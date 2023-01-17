@@ -1,9 +1,9 @@
 # encoding: utf-8
-'''
+"""
 Created on 11/set/2011
 
 @author: Dario
-'''
+"""
 import datetime
 import json
 from decimal import Decimal
@@ -15,8 +15,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.http import HttpResponseRedirect, HttpResponse
 
-from fatturazione.models import (Fattura, RigaFattura, nomi_fatture,
-                                 nomi_plurale)
+from fatturazione.models import Fattura, RigaFattura, nomi_fatture, nomi_plurale
 from fatturazione.views.util import ultimoProgressivoFattura
 from modellog.actions import logAction
 from tam.models import Viaggio, ProfiloUtente
@@ -50,8 +49,8 @@ from tam.tamdates import parse_datestring
 from django.conf import settings
 import tam.tamdates as tamdates
 
-PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
-NOMI_DEFINIZIONE_FATTURE = getattr(settings, 'NOMI_DEFINIZIONE_FATTURE')
+PREZZO_VIAGGIO_NETTO = getattr(settings, "PREZZO_VIAGGIO_NETTO", True)
+NOMI_DEFINIZIONE_FATTURE = getattr(settings, "NOMI_DEFINIZIONE_FATTURE")
 
 DEFINIZIONE_FATTURE = []
 for nome_classe in NOMI_DEFINIZIONE_FATTURE:
@@ -62,40 +61,46 @@ for fatturazione in DEFINIZIONE_FATTURE:
     FATTURE_PER_TIPO[fatturazione.codice] = fatturazione
 
 
-@permission_required('fatturazione.generate', '/')
+@permission_required("fatturazione.generate", "/")
 def lista_fatture_generabili(request, template_name="1_scelta_fatture.html"):
-    get_mese_fatture = request.GET.get('mese', None)
+    get_mese_fatture = request.GET.get("mese", None)
     oggi = tamdates.ita_today()
-    quick_month_names = [MONTH_NAMES[(oggi.month - 3) % 12],
-                         MONTH_NAMES[(oggi.month - 2) % 12],
-                         MONTH_NAMES[(oggi.month - 1) % 12]]  # current month
+    quick_month_names = [
+        MONTH_NAMES[(oggi.month - 3) % 12],
+        MONTH_NAMES[(oggi.month - 2) % 12],
+        MONTH_NAMES[(oggi.month - 1) % 12],
+    ]  # current month
     quick_month_names.reverse()
     if get_mese_fatture:
         if get_mese_fatture == "cur":
             data_start = oggi.replace(day=1)
             data_end = (data_start + datetime.timedelta(days=32)).replace(
-                day=1) - datetime.timedelta(days=1)
-        elif get_mese_fatture == 'prev':
-            data_end = oggi.replace(day=1) - datetime.timedelta(days=1)  # vado a fine mese scorso
+                day=1
+            ) - datetime.timedelta(days=1)
+        elif get_mese_fatture == "prev":
+            data_end = oggi.replace(day=1) - datetime.timedelta(
+                days=1
+            )  # vado a fine mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio del mese precedente
-        elif get_mese_fatture == 'prevprev':  # due mesi fa
+        elif get_mese_fatture == "prevprev":  # due mesi fa
             data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
-                day=1) - datetime.timedelta(
-                days=1)  # vado a inizio mese scorso
+                day=1
+            ) - datetime.timedelta(
+                days=1
+            )  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese_fatture)
     else:
         data_start = parse_datestring(  # dal primo del mese scorso
             request.GET.get("data_start"),
-            default=(tamdates.ita_today().replace(
-                day=1) - datetime.timedelta(
-                days=1)).replace(day=1)
+            default=(
+                tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1)
+            ).replace(day=1),
         )
         data_end = parse_datestring(  # all'ultimo del mese scorso
             request.GET.get("data_end"),
-            default=tamdates.ita_today().replace(
-                day=1) - datetime.timedelta(days=1)
+            default=tamdates.ita_today().replace(day=1) - datetime.timedelta(days=1),
         )
 
     # prendo i viaggi da fatturare
@@ -103,38 +108,47 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.html"):
     gruppo_fatture = []
 
     for fatturazione in DEFINIZIONE_FATTURE:
-        if not fatturazione.generabile: continue
+        if not fatturazione.generabile:
+            continue
         selezione = fatturazione.origine.objects
         selezione = selezione.filter(fatturazione.filtro)
 
         if fatturazione.origine == Viaggio:
-            #			selezione = selezione.filter(id=81833)	#DEBUG:
-            selezione = selezione.filter(data__gte=data_start,
-                                         data__lt=data_end + datetime.timedelta(
-                                             days=1))
+            # 			selezione = selezione.filter(id=81833)	#DEBUG:
+            selezione = selezione.filter(
+                data__gte=data_start, data__lt=data_end + datetime.timedelta(days=1)
+            )
 
-            selezione = selezione.select_related("da", "a", "cliente",
-                                                 "conducente", "passeggero",
-                                                 "padre")
+            selezione = selezione.select_related(
+                "da", "a", "cliente", "conducente", "passeggero", "padre"
+            )
         if fatturazione.origine == RigaFattura:
-            selezione = selezione.filter(viaggio__data__gte=data_start,
-                                         viaggio__data__lte=data_end + datetime.timedelta(
-                                             days=1))
-            selezione = selezione.select_related("viaggio__da", "viaggio__a",
-                                                 "viaggio__cliente",
-                                                 "viaggio__conducente",
-                                                 "viaggio__passeggero",
-                                                 'fattura', 'conducente')
+            selezione = selezione.filter(
+                viaggio__data__gte=data_start,
+                viaggio__data__lte=data_end + datetime.timedelta(days=1),
+            )
+            selezione = selezione.select_related(
+                "viaggio__da",
+                "viaggio__a",
+                "viaggio__cliente",
+                "viaggio__conducente",
+                "viaggio__passeggero",
+                "fattura",
+                "conducente",
+            )
         selezione = selezione.order_by(*fatturazione.order_by)
 
-        dictFatturazione = {"d": fatturazione,
-                            # la definizione della fatturazione
-                            "lista": selezione,
-                            }
+        dictFatturazione = {
+            "d": fatturazione,
+            # la definizione della fatturazione
+            "lista": selezione,
+        }
         if hasattr(fatturazione, "update_context"):
-            dictFatturazione["parametri"] = fatturazione.update_context(
-                data_start, data_end) if hasattr(fatturazione,
-                                                 "update_context") else {}
+            dictFatturazione["parametri"] = (
+                fatturazione.update_context(data_start, data_end)
+                if hasattr(fatturazione, "update_context")
+                else {}
+            )
         else:
             dictFatturazione["parametri"] = {}
         gruppo_fatture.append(dictFatturazione)
@@ -151,11 +165,10 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.html"):
             "data_start": data_start,
             "data_end": data_end,
             "dontHilightFirst": True,
-            "mediabundleJS": ('tamUI',),
-            "mediabundleCSS": ('tamUI',),
-
+            "mediabundleJS": ("tamUI",),
+            "mediabundleCSS": ("tamUI",),
             "gruppo_fatture": gruppo_fatture,
-            'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
+            "PREZZO_VIAGGIO_NETTO": PREZZO_VIAGGIO_NETTO,
             "quick_month_names": quick_month_names,
         },
     )
@@ -165,17 +178,21 @@ def on_fattura_end(fattura, esente_iva):
     # add the tax stamp if needed at the end of the invoice
     if esente_iva and fattura.val_totale() >= settings.MIN_PRICE_FOR_TAXSTAMP:
         # alle esenti IVA metto l'imposta di bollo
-        aggregation = fattura.righe.aggregate(Max('riga'))
-        num_riga = aggregation.get('riga__max', 0) + 10
+        aggregation = fattura.righe.aggregate(Max("riga"))
+        num_riga = aggregation.get("riga__max", 0) + 10
         riga_fattura = RigaFattura(
-            descrizione="Imposta di bollo", qta=1, iva=0,
-            prezzo=Decimal("2.00"), riga=num_riga)
+            descrizione="Imposta di bollo",
+            qta=1,
+            iva=0,
+            prezzo=Decimal("2.00"),
+            riga=num_riga,
+        )
         riga_fattura.fattura = fattura
         riga_fattura.save()
 
 
 @transaction.atomic
-@permission_required('fatturazione.generate', '/')
+@permission_required("fatturazione.generate", "/")
 # template_name, tipo, filtro, keys, order_by, manager
 def genera_fatture(request, fatturazione):
     tipo = fatturazione.codice
@@ -194,8 +211,10 @@ def genera_fatture(request, fatturazione):
         messages.error(request, "Devi selezionare qualche corsa da fatturare.")
         return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
-    data_generazione = parse_datestring(request.POST['data_generazione'])
-    if fatturazione.ask_progressivo:  # la generazione fatture consorzio richiede anno e progressivo - li controllo
+    data_generazione = parse_datestring(request.POST["data_generazione"])
+    if (
+        fatturazione.ask_progressivo
+    ):  # la generazione fatture consorzio richiede anno e progressivo - li controllo
         try:
             anno = int(request.POST.get("anno"))
         except:
@@ -204,14 +223,15 @@ def genera_fatture(request, fatturazione):
         try:
             progressivo = int(request.POST.get("progressivo", 1))
         except:
-            messages.error(request,
-                           "Ho bisogno di un progressivo iniziale numerico.")
+            messages.error(request, "Ho bisogno di un progressivo iniziale numerico.")
             return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
         ultimo_progressivo = ultimoProgressivoFattura(anno, tipo)
         if ultimo_progressivo >= progressivo:
-            messages.error(request,
-                           "Il progressivo è troppo piccolo, ho già la %s %s/%s." % (
-                               nomi_fatture[tipo], anno, ultimo_progressivo))
+            messages.error(
+                request,
+                "Il progressivo è troppo piccolo, ho già la %s %s/%s."
+                % (nomi_fatture[tipo], anno, ultimo_progressivo),
+            )
             return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
     else:
         progressivo = 0  # nelle ricevute lo uso per ciclare
@@ -220,19 +240,26 @@ def genera_fatture(request, fatturazione):
     lista = manager.filter(id__in=ids)
     lista = lista.filter(filtro)
     if manager.model == Viaggio:
-        lista = lista.select_related("da", "a", "cliente", "conducente",
-                                     "passeggero", "padre")
+        lista = lista.select_related(
+            "da", "a", "cliente", "conducente", "passeggero", "padre"
+        )
     elif manager.model == RigaFattura:
-        lista = lista.select_related("viaggio__da", "viaggio__a",
-                                     "viaggio__cliente", "viaggio__conducente",
-                                     "viaggio__passeggero",
-                                     'fattura', 'conducente')
+        lista = lista.select_related(
+            "viaggio__da",
+            "viaggio__a",
+            "viaggio__cliente",
+            "viaggio__conducente",
+            "viaggio__passeggero",
+            "fattura",
+            "conducente",
+        )
     if order_by is None:
         order_by = keys + ["data"]  # ordino per chiave - quindi per data
     lista = lista.order_by(*order_by).all()
     if not lista:
-        messages.error(request,
-                       "Tutte le %s selezionate sono già state fatturate." % plurale)
+        messages.error(
+            request, "Tutte le %s selezionate sono già state fatturate." % plurale
+        )
         return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
     fatture = 0
 
@@ -278,26 +305,35 @@ def genera_fatture(request, fatturazione):
                         # popolo il destinatario della fattura
                         if viaggio.cliente:
                             fattura.cliente = viaggio.cliente
-                            fattura.emessa_a = viaggio.cliente.dati or viaggio.cliente.nome
+                            fattura.emessa_a = (
+                                viaggio.cliente.dati or viaggio.cliente.nome
+                            )
                         elif viaggio.passeggero:
                             fattura.passeggero = viaggio.passeggero
-                            fattura.emessa_a = viaggio.passeggero.dati or viaggio.passeggero.nome
+                            fattura.emessa_a = (
+                                viaggio.passeggero.dati or viaggio.passeggero.nome
+                            )
                     elif fatturazione.destinatario == "consorzio":
                         fattura.emessa_a = settings.DATI_CONSORZIO
                     else:
                         raise Exception(
-                            "%s non è un valido destinatario." % fatturazione.destinatario)
+                            "%s non è un valido destinatario."
+                            % fatturazione.destinatario
+                        )
 
-                    if getattr(fatturazione, 'note', ""):
+                    if getattr(fatturazione, "note", ""):
                         fattura.note = fatturazione.note
 
                     if fatturazione.mittente == "consorzio":
                         fattura.emessa_da = settings.DATI_CONSORZIO
                     elif fatturazione.mittente == "conducente":
-                        fattura.emessa_da = viaggio.conducente.dati or viaggio.conducente.nome
+                        fattura.emessa_da = (
+                            viaggio.conducente.dati or viaggio.conducente.nome
+                        )
                     else:
                         raise Exception(
-                            "%s non è un valido mittente." % fatturazione.mittente)
+                            "%s non è un valido mittente." % fatturazione.mittente
+                        )
                     fattura.save()
                     fatture_generate += 1
                     riga = 10
@@ -319,7 +355,7 @@ def genera_fatture(request, fatturazione):
                     for campo in campi_da_riportare:
                         setattr(riga_fattura, campo, getattr(elemento, campo))
 
-                    if not esente_iva and hasattr(fatturazione, 'iva_forzata'):
+                    if not esente_iva and hasattr(fatturazione, "iva_forzata"):
                         # le fatture senza IVA per i conducenti che non le emettono, hanno IVA comunque
                         riga_fattura.iva = fatturazione.iva_forzata
                     else:
@@ -328,8 +364,7 @@ def genera_fatture(request, fatturazione):
 
                     if viaggio:
                         # us price of the run if we have it
-                        riga_fattura.prezzo = viaggio.prezzo_netto(
-                            riga_fattura.iva)
+                        riga_fattura.prezzo = viaggio.prezzo_netto(riga_fattura.iva)
                         if viaggio.prezzo_sosta > 0:
                             # se ho una sosta, aggiungo il prezzo della sosta in fattura
                             riga_fattura.prezzo += viaggio.prezzo_sosta
@@ -339,22 +374,23 @@ def genera_fatture(request, fatturazione):
                         elif viaggio.passeggero:
                             riga_fattura.note = viaggio.passeggero.nome
                     else:
-                        riga_fattura.prezzo = elemento.prezzo  # ... if or price of the item
+                        riga_fattura.prezzo = (
+                            elemento.prezzo
+                        )  # ... if or price of the item
                     riga_fattura.riga_fattura_consorzio = elemento
 
                 else:  # fattura da un viaggio
 
-                    riga_fattura.descrizione = "%s-%s %s %dpax %s" % \
-                                               (viaggio.da, viaggio.a,
-                                                viaggio.data.astimezone(
-                                                    tamdates.tz_italy).strftime(
-                                                    "%d/%m/%Y"),
-                                                viaggio.numero_passeggeri,
-                                                "taxi" if viaggio.esclusivo else "collettivo")
+                    riga_fattura.descrizione = "%s-%s %s %dpax %s" % (
+                        viaggio.da,
+                        viaggio.a,
+                        viaggio.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y"),
+                        viaggio.numero_passeggeri,
+                        "taxi" if viaggio.esclusivo else "collettivo",
+                    )
                     riga_fattura.qta = 1
                     riga_fattura.iva = 0 if fatturazione.esente_iva else 10
-                    riga_fattura.prezzo = viaggio.prezzo_netto(
-                        riga_fattura.iva)
+                    riga_fattura.prezzo = viaggio.prezzo_netto(riga_fattura.iva)
 
                     if viaggio.prezzo_sosta > 0:
                         # se ho una sosta, aggiungo il prezzo della sosta in fattura
@@ -371,44 +407,47 @@ def genera_fatture(request, fatturazione):
                 on_fattura_end(fattura, esente_iva)
             message = "Generate %d %s." % (fatture_generate, plurale)
             messages.success(request, message)
-            logAction('C', description=message, user=request.user)
+            logAction("C", description=message, user=request.user)
             return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
-    return render(request,
-                  template_name,
-                  {
-                      # riporto i valori che mi arrivano dalla selezione
-                      "anno": anno,
-                      "progressivo_iniziale": progressivo_iniziale,
-
-                      "lista": lista,
-                      "mediabundleJS": ('tamUI',),
-                      "mediabundleCSS": ('tamUI',),
-                      "singolare": nomi_fatture[tipo],
-                      "fatture": fatture,
-                      "plurale": plurale,
-                      #								"error_message":error_message,
-                      'conducenti_ricevute': conducenti_ricevute,
-                      'data_generazione': data_generazione,
-                      'fatturazione': fatturazione,
-                      'PREZZO_VIAGGIO_NETTO': PREZZO_VIAGGIO_NETTO,
-                  },
-                  )
+    return render(
+        request,
+        template_name,
+        {
+            # riporto i valori che mi arrivano dalla selezione
+            "anno": anno,
+            "progressivo_iniziale": progressivo_iniziale,
+            "lista": lista,
+            "mediabundleJS": ("tamUI",),
+            "mediabundleCSS": ("tamUI",),
+            "singolare": nomi_fatture[tipo],
+            "fatture": fatture,
+            "plurale": plurale,
+            # 								"error_message":error_message,
+            "conducenti_ricevute": conducenti_ricevute,
+            "data_generazione": data_generazione,
+            "fatturazione": fatturazione,
+            "PREZZO_VIAGGIO_NETTO": PREZZO_VIAGGIO_NETTO,
+        },
+    )
 
 
 @transaction.atomic
-@permission_required('fatturazione.generate', '/')
+@permission_required("fatturazione.generate", "/")
 def setPagato(request):
-    if request.method != 'POST':
-        return HttpResponse(json.dumps({"error": "Method not allowed"}), status=405,
-                            content_type="application/json")
-    fattura = get_object_or_404(Fattura, id=request.POST['id'])
-    pagato = request.POST['pagato'] == 'true'
+    if request.method != "POST":
+        return HttpResponse(
+            json.dumps({"error": "Method not allowed"}),
+            status=405,
+            content_type="application/json",
+        )
+    fattura = get_object_or_404(Fattura, id=request.POST["id"])
+    pagato = request.POST["pagato"] == "true"
     fattura.pagata = pagato
     fattura.save()
-    result = {"ok": True,
-              "fattura": fattura.id,
-              "pagato": pagato,
-              }
-    return HttpResponse(json.dumps(result),
-                        content_type="application/json")
+    result = {
+        "ok": True,
+        "fattura": fattura.id,
+        "pagato": pagato,
+    }
+    return HttpResponse(json.dumps(result), content_type="application/json")

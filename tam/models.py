@@ -24,25 +24,28 @@ import logging
 
 logger = logging.getLogger("tam.models")
 Calendar = None
-if 'calendariopresenze' in settings.INSTALLED_APPS:
+if "calendariopresenze" in settings.INSTALLED_APPS:
     try:
         from calendariopresenze.models import Calendar
     except ImportError:
         Calendar = None
 
-TIPICLIENTE = (("H", "Hotel"), ("A", "Agenzia"),
-               ("D", "Ditta"))  # se null nelle corse è un privato
+TIPICLIENTE = (
+    ("H", "Hotel"),
+    ("A", "Agenzia"),
+    ("D", "Ditta"),
+)  # se null nelle corse è un privato
 TIPICOMMISSIONE = [("F", "€"), ("P", "%")]
 TIPISERVIZIO = [("T", "Taxi"), ("C", "Collettivo")]
 
 
 def get_classifiche():
-    """	Restituisco le classifiche globali (per le corse confermate)
-        Restituisce una lista di dizionari, ognuna con i valori del conducente.
-        Utilizzo una query fuori dall'ORM di Django per migliorare le prestazioni.
+    """Restituisco le classifiche globali (per le corse confermate)
+    Restituisce una lista di dizionari, ognuna con i valori del conducente.
+    Utilizzo una query fuori dall'ORM di Django per migliorare le prestazioni.
     """
     # logging.debug("Ottengo le classifiche globali.")
-    cursor = connections['default'].cursor()
+    cursor = connections["default"].cursor()
     query = """
         SELECT
             c.id AS conducente_id, c.nick AS conducente_nick, c.max_persone AS max_persone,
@@ -73,28 +76,33 @@ def get_classifiche():
 
 
 def reallySpaceless(s):
-    """ Given a string, removes all double spaces and tab """
-    s = re.sub('[\s\t][\s\t]+', " ", s, flags=re.DOTALL).strip()
+    """Given a string, removes all double spaces and tab"""
+    s = re.sub("[\s\t][\s\t]+", " ", s, flags=re.DOTALL).strip()
     return s
 
 
 @python_2_unicode_compatible
 class Luogo(models.Model):
-    """ Indica un luogo, una destinazione conosciuta.
-        Ogni luogo appartiene a un bacino all'interno del quale
-         verrano cercati gli accoppiamenti.
-        Al luogo afferiranno i listini, le corse e tutto il resto.
+    """Indica un luogo, una destinazione conosciuta.
+    Ogni luogo appartiene a un bacino all'interno del quale
+     verrano cercati gli accoppiamenti.
+    Al luogo afferiranno i listini, le corse e tutto il resto.
     """
-    nome = models.CharField("Località", max_length=25, unique=True)
-    bacino = models.ForeignKey("Bacino", verbose_name="Bacino di appartenenza",
-                               null=True, blank=True)
-    speciale = models.CharField("Luogo particolare", max_length=1,
-                                default="",
-                                choices=(("-", "-"), ("A", "Aeroporto"),
-                                         ("S", "Stazione")))
 
-    anticipo_servizio = models.IntegerField("Anticipo servizio", default=0,
-                                            validators=(MinValueValidator(0),))
+    nome = models.CharField("Località", max_length=25, unique=True)
+    bacino = models.ForeignKey(
+        "Bacino", verbose_name="Bacino di appartenenza", null=True, blank=True
+    )
+    speciale = models.CharField(
+        "Luogo particolare",
+        max_length=1,
+        default="",
+        choices=(("-", "-"), ("A", "Aeroporto"), ("S", "Stazione")),
+    )
+
+    anticipo_servizio = models.IntegerField(
+        "Anticipo servizio", default=0, validators=(MinValueValidator(0),)
+    )
 
     # una delle localitàsarà la predefinita... tra le proprietà dell'utente
 
@@ -111,34 +119,35 @@ class Luogo(models.Model):
         return reverse("tamLuogoIdDel", kwargs={"id": self.id})
 
     def save(self, *args, **kwargs):
-        if 'updateViaggi' in kwargs:
-            updateViaggi = kwargs['updateViaggi']
-            del (kwargs['updateViaggi'])
+        if "updateViaggi" in kwargs:
+            updateViaggi = kwargs["updateViaggi"]
+            del kwargs["updateViaggi"]
         else:
             updateViaggi = True
         super(Luogo, self).save(*args, **kwargs)
         if not updateViaggi:
             return
         # aggiorno tutte le corse precalcolate con quel luogo
-        viaggiCoinvolti = Viaggio.objects.filter(
-            tratta_start__da=self) | Viaggio.objects.filter(
-            tratta_start__a=self) | \
-                          Viaggio.objects.filter(
-                              tratta__da=self) | Viaggio.objects.filter(
-            tratta__a=self) | \
-                          Viaggio.objects.filter(
-                              tratta_end__da=self) | Viaggio.objects.filter(
-            tratta_end__a=self)
+        viaggiCoinvolti = (
+            Viaggio.objects.filter(tratta_start__da=self)
+            | Viaggio.objects.filter(tratta_start__a=self)
+            | Viaggio.objects.filter(tratta__da=self)
+            | Viaggio.objects.filter(tratta__a=self)
+            | Viaggio.objects.filter(tratta_end__da=self)
+            | Viaggio.objects.filter(tratta_end__a=self)
+        )
         viaggiCoinvolti = viaggiCoinvolti.filter(
-            conducente_confermato=False)  # ricalcolo tutti i non confermati
+            conducente_confermato=False
+        )  # ricalcolo tutti i non confermati
         for viaggio in viaggiCoinvolti:
             viaggio.updatePrecomp()
 
 
 @python_2_unicode_compatible
 class Bacino(models.Model):
-    """ I bacini sono dei gruppi di luoghi da cercare
-        di accorpare nelle corse abbinate """
+    """I bacini sono dei gruppi di luoghi da cercare
+    di accorpare nelle corse abbinate"""
+
     nome = models.CharField(max_length=20, unique=True)
 
     class Meta:
@@ -154,15 +163,16 @@ class Bacino(models.Model):
 
 @python_2_unicode_compatible
 class Tratta(models.Model):
-    """ Indica un tragitto, con indicati i default
-        di tempo, spazio e spese di autostrada """
+    """Indica un tragitto, con indicati i default
+    di tempo, spazio e spese di autostrada"""
+
     da = models.ForeignKey(Luogo, related_name="tempo_da")
     a = models.ForeignKey(Luogo, related_name="tempo_a")
-    minuti = models.IntegerField(
-        default=0)  # tempo di viaggio espresso in minuti
+    minuti = models.IntegerField(default=0)  # tempo di viaggio espresso in minuti
     km = models.IntegerField(default=0)
-    costo_autostrada = models.DecimalField(max_digits=9, decimal_places=2,
-                                           default=0)  # fino a 9.999.999,99
+    costo_autostrada = models.DecimalField(
+        max_digits=9, decimal_places=2, default=0
+    )  # fino a 9.999.999,99
 
     class Meta:
         verbose_name_plural = _("Tratte")
@@ -170,20 +180,20 @@ class Tratta(models.Model):
         ordering = ["da", "a"]
 
     def __str__(self):
-        return u"%s - %s: %dm., %dkm" % (self.da, self.a, self.minuti, self.km)
+        return "%s - %s: %dm., %dkm" % (self.da, self.a, self.minuti, self.km)
 
     def is_valid(self):
-        """ Return true if the path have all it's information completed """
+        """Return true if the path have all it's information completed"""
         return self.minuti and self.km
 
     def delete_url(self):
         return reverse("tamTrattaIdDel", kwargs={"id": self.id})
 
     def save(self, *args, **kwargs):
-        """ Salvo la tratta """
-        if 'updateViaggi' in kwargs:
-            updateViaggi = kwargs['updateViaggi']
-            del (kwargs['updateViaggi'])
+        """Salvo la tratta"""
+        if "updateViaggi" in kwargs:
+            updateViaggi = kwargs["updateViaggi"]
+            del kwargs["updateViaggi"]
         else:
             updateViaggi = True
         super(Tratta, self).save(*args, **kwargs)
@@ -193,17 +203,20 @@ class Tratta(models.Model):
 
         if updateViaggi:
             # aggiorno tutte le corse precalcolate con questa tratta
-            viaggiCoinvolti = Viaggio.objects.filter(tratta_start=self) | \
-                              Viaggio.objects.filter(tratta=self) | \
-                              Viaggio.objects.filter(tratta_end=self)
+            viaggiCoinvolti = (
+                Viaggio.objects.filter(tratta_start=self)
+                | Viaggio.objects.filter(tratta=self)
+                | Viaggio.objects.filter(tratta_end=self)
+            )
             viaggiCoinvolti = viaggiCoinvolti.filter(
-                conducente_confermato=False)  # ricalcolo tutti i non confermati
+                conducente_confermato=False
+            )  # ricalcolo tutti i non confermati
             for viaggio in viaggiCoinvolti:
                 viaggio.updatePrecomp()
 
 
 def get_tratta(da, a):
-    """ Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea """
+    """Ritorna una data DA-A, se non esiste, A-DA, se non esiste la crea"""
     if not da or not a:
         return
     keyword = ("tratta%s-%s" % (da.id, a.id)).replace(" ", "")
@@ -228,8 +241,9 @@ def get_tratta(da, a):
 
 @python_2_unicode_compatible
 class Viaggio(models.Model):
-    """ Questa è una corsa, vecchia o nuova che sia.
-        Tabella chiave di tutto. """
+    """Questa è una corsa, vecchia o nuova che sia.
+    Tabella chiave di tutto."""
+
     # nell'inserimento chiedo inizialmente le basi
     data = models.DateTimeField("Data e ora", db_index=True)
     da = models.ForeignKey(Luogo, related_name="da")
@@ -238,35 +252,43 @@ class Viaggio(models.Model):
     # se non è consentito il raggruppamento contemporaneo
     esclusivo = models.BooleanField("Servizio taxi", default=True)
 
-    cliente = models.ForeignKey("Cliente", null=True, blank=True,
-                                db_index=True,
-                                on_delete=PROTECT)  # se null è un privato
+    cliente = models.ForeignKey(
+        "Cliente", null=True, blank=True, db_index=True, on_delete=PROTECT
+    )  # se null è un privato
 
     # eventuale passeggero se cliente 'Privato'
-    passeggero = models.ForeignKey("Passeggero", null=True, blank=True,
-                                   on_delete=SET_NULL)
+    passeggero = models.ForeignKey(
+        "Passeggero", null=True, blank=True, on_delete=SET_NULL
+    )
 
-    prezzo = models.DecimalField(max_digits=9, decimal_places=2,
-                                 default=0)  # fino a 9999.99
-    costo_autostrada = models.DecimalField(max_digits=9, decimal_places=2,
-                                           default=0)  # fino a 9999.99
+    prezzo = models.DecimalField(
+        max_digits=9, decimal_places=2, default=0
+    )  # fino a 9999.99
+    costo_autostrada = models.DecimalField(
+        max_digits=9, decimal_places=2, default=0
+    )  # fino a 9999.99
 
     costo_sosta = models.DecimalField(
         # This is the total price of the stop (when the driver should wait before another
         # ride (with a constante rate per hour)
-        max_digits=9, decimal_places=2,
-        default=0)  # fino a 9999.99
+        max_digits=9,
+        decimal_places=2,
+        default=0,
+    )  # fino a 9999.99
 
-    abbuono_fisso = models.DecimalField(max_digits=9, decimal_places=2,
-                                        default=0)  # fino a 9999.99
+    abbuono_fisso = models.DecimalField(
+        max_digits=9, decimal_places=2, default=0
+    )  # fino a 9999.99
     abbuono_percentuale = models.IntegerField(default=0)  # abbuono percentuale
 
     prezzo_sosta = models.DecimalField(
         # an additional fixed price that is added to the price (for the stop)
         # there's some automatic-thing that add it on stations/airports
-        _('Prezzo sosta addizionale'),
-        max_digits=9, decimal_places=2,
-        default=0)
+        _("Prezzo sosta addizionale"),
+        max_digits=9,
+        decimal_places=2,
+        default=0,
+    )
     additional_stop = models.IntegerField(
         # this will be manually added to tell that the ride will last something more
         # ... no prices are involved (they should be added to prezzo_sosta)
@@ -276,69 +298,74 @@ class Viaggio(models.Model):
 
     # flag per indicare se la corsa è incassata dall'albergo
     #  (sarà utile per reportistica)
-    incassato_albergo = models.BooleanField("Conto fine mese",
-                                            default=False)
+    incassato_albergo = models.BooleanField("Conto fine mese", default=False)
 
     fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
-    pagamento_differito = models.BooleanField("Fatturazione esente IVA",
-                                              default=False)
-    cartaDiCredito = models.BooleanField("Pagamento con carta di credito",
-                                         default=False)
-    commissione = models.DecimalField("Quota consorzio", max_digits=9,
-                                      decimal_places=2,
-                                      default=0)  # in euro o percentuale, a seconda del tipo
-    tipo_commissione = models.CharField("Tipo di quota", max_length=1,
-                                        choices=TIPICOMMISSIONE, default="F")
+    pagamento_differito = models.BooleanField("Fatturazione esente IVA", default=False)
+    cartaDiCredito = models.BooleanField(
+        "Pagamento con carta di credito", default=False
+    )
+    commissione = models.DecimalField(
+        "Quota consorzio", max_digits=9, decimal_places=2, default=0
+    )  # in euro o percentuale, a seconda del tipo
+    tipo_commissione = models.CharField(
+        "Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F"
+    )
     numero_pratica = models.CharField(max_length=20, null=True, blank=True)
 
     # l'eventuale viaggio padre nei raggruppamenti
     padre = models.ForeignKey("Viaggio", null=True, blank=True)
 
-    data_padre = models.DateTimeField("Data e ora padre", db_index=True,
-                                      null=True, editable=False)
-    id_padre = models.PositiveIntegerField("ID Gruppo", db_index=True,
-                                           null=True, editable=False)
+    data_padre = models.DateTimeField(
+        "Data e ora padre", db_index=True, null=True, editable=False
+    )
+    id_padre = models.PositiveIntegerField(
+        "ID Gruppo", db_index=True, null=True, editable=False
+    )
 
     # True quando il conducente è fissato
-    conducente_richiesto = models.BooleanField("Escluso dai supplementari",
-                                               default=False)
+    conducente_richiesto = models.BooleanField(
+        "Escluso dai supplementari", default=False
+    )
 
     # conducente (proposto o fissato)
-    conducente = models.ForeignKey("Conducente", null=True, blank=True,
-                                   db_index=True)
+    conducente = models.ForeignKey("Conducente", null=True, blank=True, db_index=True)
 
     # True quando il conducente è fissato
-    conducente_confermato = models.BooleanField("Conducente confermato",
-                                                default=False)
+    conducente_confermato = models.BooleanField("Conducente confermato", default=False)
 
     note = models.TextField(blank=True)
     pagato = models.BooleanField(default=False)
 
     # Luogo to calculate stats, in instance, should be populated on creation
-    luogoDiRiferimento = models.ForeignKey(Luogo, related_name="riferimento",
-                                           null=True)
+    luogoDiRiferimento = models.ForeignKey(Luogo, related_name="riferimento", null=True)
 
     # per i padri della abbinate conta quanti km di abbinata
     # sono già stati conguagliati
-    km_conguagliati = models.IntegerField("Km conguagliati", null=True,
-                                          blank=True, default=0,
-                                          editable=False)
+    km_conguagliati = models.IntegerField(
+        "Km conguagliati", null=True, blank=True, default=0, editable=False
+    )
 
     html_tragitto = models.TextField(blank=True, editable=False)
-    tratta = models.ForeignKey(Tratta, null=True, blank=True, default=None,
-                               editable=False)
-    tratta_start = models.ForeignKey(Tratta, null=True, blank=True,
-                                     related_name='viaggio_start_set',
-                                     editable=False)
-    tratta_end = models.ForeignKey(Tratta, null=True, blank=True,
-                                   related_name='viaggio_end_set',
-                                   editable=False)
+    tratta = models.ForeignKey(
+        Tratta, null=True, blank=True, default=None, editable=False
+    )
+    tratta_start = models.ForeignKey(
+        Tratta, null=True, blank=True, related_name="viaggio_start_set", editable=False
+    )
+    tratta_end = models.ForeignKey(
+        Tratta, null=True, blank=True, related_name="viaggio_end_set", editable=False
+    )
 
     # tipo (null: non è abbinata, P: partenza, successiva altrimenti)
     is_abbinata = models.CharField(max_length=1, null=True, blank=True, editable=False)
 
-    punti_notturni = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False)
-    punti_diurni = models.DecimalField(max_digits=6, decimal_places=2, default=0, editable=False)
+    punti_notturni = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0, editable=False
+    )
+    punti_diurni = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0, editable=False
+    )
 
     # numero di chilometri per la riga (le 3 tratte)
     km = models.IntegerField(default=0, editable=False)
@@ -350,26 +377,38 @@ class Viaggio(models.Model):
     is_valid = models.BooleanField(default=True, editable=False)
 
     punti_abbinata = models.IntegerField(default=0, editable=False)
-    prezzoPunti = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
+    prezzoPunti = models.DecimalField(
+        max_digits=9, decimal_places=2, editable=False, default=0
+    )
 
-    prezzoVenezia = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
-    prezzoPadova = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
-    prezzoDoppioPadova = models.DecimalField(max_digits=9, decimal_places=2,
-                                             editable=False, default=0)
-    prezzo_finale = models.DecimalField(max_digits=9, decimal_places=2, editable=False, default=0)
-    date_start = models.DateTimeField(editable=False,
-                                      default=tamdates.date_enforce(
-                                          datetime.datetime(2009, 1, 1, 0, 0, 0)),
-                                      db_index=True)
+    prezzoVenezia = models.DecimalField(
+        max_digits=9, decimal_places=2, editable=False, default=0
+    )
+    prezzoPadova = models.DecimalField(
+        max_digits=9, decimal_places=2, editable=False, default=0
+    )
+    prezzoDoppioPadova = models.DecimalField(
+        max_digits=9, decimal_places=2, editable=False, default=0
+    )
+    prezzo_finale = models.DecimalField(
+        max_digits=9, decimal_places=2, editable=False, default=0
+    )
+    date_start = models.DateTimeField(
+        editable=False,
+        default=tamdates.date_enforce(datetime.datetime(2009, 1, 1, 0, 0, 0)),
+        db_index=True,
+    )
     # la data finale, di tutto il gruppo di corse, per trovare intersezioni
     date_end = models.DateTimeField(editable=False, null=True, db_index=True)
-    annullato = models.BooleanField('Corsa annullata', default=False,
-                                    editable=True, db_index=True)
+    annullato = models.BooleanField(
+        "Corsa annullata", default=False, editable=True, db_index=True
+    )
 
     # per non dover fare query quando visualizzo il viaggio,
     #  mi imposto che deriva da una prenotazione
-    is_prenotazione = models.BooleanField('Derivato da prenotazione',
-                                          default=False, editable=False)
+    is_prenotazione = models.BooleanField(
+        "Derivato da prenotazione", default=False, editable=False
+    )
 
     """ Nel listare i viaggi, mostro solo quelli padre,
         con sottolistati i loro eventuali viaggi figli """
@@ -377,32 +416,35 @@ class Viaggio(models.Model):
     class Meta:
         verbose_name_plural = _("Viaggi")
         permissions = (
-            ('change_oldviaggio', 'Cambia vecchio viaggio'),
-            ('change_doppi', 'Cambia il numero di casette'),
-            ('disableviewprice', 'Disable view of the price column'),
+            ("change_oldviaggio", "Cambia vecchio viaggio"),
+            ("change_doppi", "Cambia il numero di casette"),
+            ("disableviewprice", "Disable view of the price column"),
         )
-        ordering = ("data_padre", "id_padre", "data", 'id')
+        ordering = ("data_padre", "id_padre", "data", "id")
 
     def url(self):
         return reverse("tamNuovaCorsaId", kwargs={"id": self.id})
 
     def __str__(self):
-        result = u"%s da %s a %s." % (
+        result = "%s da %s a %s." % (
             self.data.astimezone(tamdates.tz_italy).strftime("%d/%m/%Y %H:%M"),
-            self.da, self.a)
+            self.da,
+            self.a,
+        )
         if self.cliente:
-            result += u" Per %s:" % self.cliente
+            result += " Per %s:" % self.cliente
         else:
-            result += u" Per privato:"
-        result += u" %spax %s." % (
+            result += " Per privato:"
+        result += " %spax %s." % (
             self.numero_passeggeri,
-            self.esclusivo and u"taxi" or u"collettivo")
+            self.esclusivo and "taxi" or "collettivo",
+        )
         if self.conducente:
-            result += u" Assegnato a %s." % self.conducente
+            result += " Assegnato a %s." % self.conducente
         return result
 
     def descrizioneDivisioneClassifiche(self):
-        """ Restituisco come il viaggio si divide nelle classifiche """
+        """Restituisco come il viaggio si divide nelle classifiche"""
         return descrizioneDivisioneClassifiche(self)
 
     def classifiche(self):
@@ -421,14 +463,15 @@ class Viaggio(models.Model):
             prezzoPunti=self.prezzoPunti,
         )
 
-    def updatePrecomp(self, doitOnFather=True, force_save=False,
-                      forceDontSave=False, numDoppi=None):
-        """ Aggiorna tutti i campi precalcolati del viaggio.
-            Se il tragitto è cambiato e il viaggio era già salvato lo aggiorna
-            Se il viaggio ha un padre ricorre sul padre.
-            Se il viaggio ha figli ricorre sui figli.
-            numDoppi se è diverso da None forza al numero di doppi indicato
-            con forceDontSave indico l'id che sto già salvando, e che non c'è bisogno di risalvare anche se cambia
+    def updatePrecomp(
+        self, doitOnFather=True, force_save=False, forceDontSave=False, numDoppi=None
+    ):
+        """Aggiorna tutti i campi precalcolati del viaggio.
+        Se il tragitto è cambiato e il viaggio era già salvato lo aggiorna
+        Se il viaggio ha un padre ricorre sul padre.
+        Se il viaggio ha figli ricorre sui figli.
+        numDoppi se è diverso da None forza al numero di doppi indicato
+        con forceDontSave indico l'id che sto già salvando, e che non c'è bisogno di risalvare anche se cambia
         """
         # print "updateprecomp:", self.id
         if doitOnFather and self.padre_id:
@@ -436,15 +479,18 @@ class Viaggio(models.Model):
             if force_save:
                 self.save()
             self.padre.updatePrecomp(
-                forceDontSave=forceDontSave)  # run update on father instead
+                forceDontSave=forceDontSave
+            )  # run update on father instead
             return
         changed = False
 
         # lista dei campi che vengono ricalcolati
         fields = [
             "html_tragitto",
-            "prezzo_finale", "km",
-            "prezzoVenezia", "prezzoPadova",
+            "prezzo_finale",
+            "km",
+            "prezzoVenezia",
+            "prezzoPadova",
             "prezzoDoppioPadova",
             "punti_abbinata",
             "arrivo",
@@ -474,7 +520,7 @@ class Viaggio(models.Model):
         self.is_abbinata = self._is_abbinata()
         self.is_valid = self._is_valid()  # richiede le tratte
 
-        forzaSingolo = (numDoppi is 0)
+        forzaSingolo = numDoppi is 0
         # richiede le tratte
         self.prezzo_finale = self.get_value(forzaSingolo=forzaSingolo)
 
@@ -485,8 +531,9 @@ class Viaggio(models.Model):
 
         if self.id:  # itero sui figli
             for figlio in self.viaggio_set.all():
-                figlio.updatePrecomp(doitOnFather=False, numDoppi=numDoppi,
-                                     forceDontSave=forceDontSave)
+                figlio.updatePrecomp(
+                    doitOnFather=False, numDoppi=numDoppi, forceDontSave=forceDontSave
+                )
 
         process_classifiche(viaggio=self, force_numDoppi=numDoppi)
 
@@ -522,15 +569,18 @@ class Viaggio(models.Model):
             # Metto in cache la lista dei clienti
             #  che possono portare almeno X persone
             conducentiConCapienza = Conducente.objects.filter(
-                max_persone__gte=self.numero_passeggeri)
+                max_persone__gte=self.numero_passeggeri
+            )
             conducentiPerCapienza[self.numero_passeggeri] = conducentiConCapienza
         # ***************************************************
 
         # {conducente.id: [list of caltoken (name, available, tags)]}
         c_byid = {}
-        if 'calendariopresenze' in settings.INSTALLED_APPS:
+        if "calendariopresenze" in settings.INSTALLED_APPS:
             if self.date_end is None:
-                print("date_end non dovrebbe essere mai null per il calcolo delle classifiche")
+                print(
+                    "date_end non dovrebbe essere mai null per il calcolo delle classifiche"
+                )
             else:
                 calendarizzati = Calendar.objects.filter(
                     date_start__lt=self.date_end,
@@ -543,9 +593,9 @@ class Viaggio(models.Model):
 
                 for calendario in calendarizzati:
                     cid = calendario.conducente.id
-                    c_byid[cid] = c_byid.get(cid, []) + [(calendario.name,
-                                                          calendario.available,
-                                                          calendario.tags)]
+                    c_byid[cid] = c_byid.get(cid, []) + [
+                        (calendario.name, calendario.available, calendario.tags)
+                    ]
                 viaggi_contemporanei = Viaggio.objects.filter(
                     padre_id=None,  # I figli non hanno date_end
                     date_start__lt=self.date_end,
@@ -556,26 +606,30 @@ class Viaggio(models.Model):
                 for viaggio in viaggi_contemporanei:
                     cid = viaggio.conducente.id
                     # name, available, tags
-                    c_byid[cid] = c_byid.get(cid, []) + [('in viaggio', False,
-                                                          "cal_travel")]
+                    c_byid[cid] = c_byid.get(cid, []) + [
+                        ("in viaggio", False, "cal_travel")
+                    ]
 
         # listo i conducenti attivi che parteciperanno
         for conducente in conducentiConCapienza:
             if conducente.attivo is False:
                 fondo_classifica.append(
-                    (conducente, '*inattivo*', False, 'cal_inactive'))
+                    (conducente, "*inattivo*", False, "cal_inactive")
+                )
                 continue
             if conducente.id in c_byid:
                 cal = c_byid[conducente.id]
                 # disponibile solo se tutti gli appuntamenti sono disponibili
-                available = all([c[1] for c in
-                                 cal])
+                available = all([c[1] for c in cal])
                 if not available:
-                    occupati.append((conducente,
-                                     ", ".join(c[0] for c in cal),  # names
-                                     available,
-                                     " ".join(c[2] for c in cal))  # tags
-                                    )
+                    occupati.append(
+                        (
+                            conducente,
+                            ", ".join(c[0] for c in cal),  # names
+                            available,
+                            " ".join(c[2] for c in cal),
+                        )  # tags
+                    )
                     continue
                     # se ho appuntamenti ma sono disponibile continuo
                     # (e inserisco in classifica conducenti)
@@ -589,37 +643,38 @@ class Viaggio(models.Model):
 
             keys = []  # da priorità alle classifiche così come nei settings
             for desc_classifica in settings.CLASSIFICHE:
-                punti_viaggio = getattr(self, desc_classifica['viaggio_field'])
+                punti_viaggio = getattr(self, desc_classifica["viaggio_field"])
                 if punti_viaggio:
-                    ignore_if_field = desc_classifica.get('ignore_if_field',
-                                                          None)
-                    if ignore_if_field is not None and getattr(self,
-                                                               ignore_if_field):
+                    ignore_if_field = desc_classifica.get("ignore_if_field", None)
+                    if ignore_if_field is not None and getattr(self, ignore_if_field):
                         # print "ho punti in %s, salto %s" %
                         #  (ignore_if_field, desc_classifica['mapping_field'])
                         continue
-                    chiave.append(classid[conducente.id][
-                                      desc_classifica['mapping_field']])
-                    keys.append(desc_classifica['mapping_field'])
+                    chiave.append(
+                        classid[conducente.id][desc_classifica["mapping_field"]]
+                    )
+                    keys.append(desc_classifica["mapping_field"])
 
-            chiave.append(
-                conducente.nick)  # nei pari-meriti metto i nick in ordine
+            chiave.append(conducente.nick)  # nei pari-meriti metto i nick in ordine
 
-            conducenti.append((chiave, conducente,
-                               ", ".join(c[0] for c in cal),  # names
-                               available,
-                               " ".join(c[2] for c in cal))  # tags
-                              )
+            conducenti.append(
+                (
+                    chiave,
+                    conducente,
+                    ", ".join(c[0] for c in cal),  # names
+                    available,
+                    " ".join(c[2] for c in cal),
+                )  # tags
+            )
         conducenti.sort()
-        return itertools.chain([c[1:] for c in conducenti], occupati,
-                               fondo_classifica)
+        return itertools.chain([c[1:] for c in conducenti], occupati, fondo_classifica)
 
     def get_html_tragitto(self):
-        """ Ritorna il tragitto da template togliendogli tutti gli spazi """
-        tragitto = render_to_string('corse/dettagli_viaggio.inc.html',
-                                    {"viaggio": self,
-                                     "settings": settings,
-                                     "STATIC_URL": settings.STATIC_URL})
+        """Ritorna il tragitto da template togliendogli tutti gli spazi"""
+        tragitto = render_to_string(
+            "corse/dettagli_viaggio.inc.html",
+            {"viaggio": self, "settings": settings, "STATIC_URL": settings.STATIC_URL},
+        )
         tragitto = reallySpaceless(tragitto)
         return tragitto
 
@@ -629,11 +684,11 @@ class Viaggio(models.Model):
 
     def save(self, *args, **kwargs):
         """Ridefinisco il salvataggio dei VIAGGI
-            per popolarmi i campi calcolati"""
+        per popolarmi i campi calcolati"""
         assert self.luogoDiRiferimento is not None, "Missing reference place"
-        if 'updateViaggi' in kwargs:
-            updateViaggi = kwargs['updateViaggi']
-            del (kwargs['updateViaggi'])
+        if "updateViaggi" in kwargs:
+            updateViaggi = kwargs["updateViaggi"]
+            del kwargs["updateViaggi"]
         else:
             updateViaggi = True
         if not updateViaggi:
@@ -680,7 +735,7 @@ class Viaggio(models.Model):
         return reverse("tamCorsaIdDel", kwargs={"id": self.id})
 
     def is_arrivo(self):
-        """ Return True if travel is an ARRIVO referring to luogo """
+        """Return True if travel is an ARRIVO referring to luogo"""
         # logging.debug("is_arrivo")
         luogo = self.luogoDiRiferimento
         if not luogo:
@@ -696,7 +751,7 @@ class Viaggio(models.Model):
             return luogo != self.da
 
     def _get_prefratello(self):
-        """ Per i figli restituisco il fratello precedente (o il padre) """
+        """Per i figli restituisco il fratello precedente (o il padre)"""
         # logging.debug("Trovo il pre fratello per %s"%self.id)
         if self.padre_id is None:
             return
@@ -710,8 +765,8 @@ class Viaggio(models.Model):
     prefratello = property(_get_prefratello)
 
     def nextfratello(self):
-        """ Per le abbinate restituisco il prossimo fratello
-            (Niente se è l'ultimo) """
+        """Per le abbinate restituisco il prossimo fratello
+        (Niente se è l'ultimo)"""
         # print "Trovo il next fratello per %d" % self.id
         if self.padre_id is None:
             if not self._is_abbinata(simpleOne=True):
@@ -728,7 +783,7 @@ class Viaggio(models.Model):
             lastbro = fratello
 
     def lastfratello(self):
-        """ Restituisco l'ultimo viaggio del gruppo """
+        """Restituisco l'ultimo viaggio del gruppo"""
         logging.debug("Trovo l'ultimo fratello per %s" % self.id)
         lastone = self
         if self.padre_id:  # vado al padre
@@ -738,8 +793,8 @@ class Viaggio(models.Model):
         return lastone
 
     def _tratta_start(self):
-        """ Restituisce la tratta dal luogo di riferimento
-            all'inizio della corsa """
+        """Restituisce la tratta dal luogo di riferimento
+        all'inizio della corsa"""
         # logging.debug("Trovo la tratta start %s" % self.id)
         # per singoli o padri parto dal luogo di riferimento
         if self.padre_id is None:
@@ -748,8 +803,8 @@ class Viaggio(models.Model):
                 return get_tratta(luogoDa, self.da)
 
     def _tratta(self):
-        """ Normalmente è la tratta vera e propria, ma per le associazioni
-            potrebbe essere una tratta intermedia, o addirittura essere nulla
+        """Normalmente è la tratta vera e propria, ma per le associazioni
+        potrebbe essere una tratta intermedia, o addirittura essere nulla
         """
         # logging.debug("Trovo la tratta middle %s" % self.id)
         if self._is_abbinata() == "P":
@@ -758,8 +813,8 @@ class Viaggio(models.Model):
             return get_tratta(self.da, self.a)
 
     def _tratta_end(self):
-        """ Restituisce la tratta dalla fine della corsa
-            al luogo di riferimento
+        """Restituisce la tratta dalla fine della corsa
+        al luogo di riferimento
         """
         # logging.debug("Trovo la tratta end %s" % self.id)
         nextbro = self.nextfratello()
@@ -780,7 +835,7 @@ class Viaggio(models.Model):
             return get_tratta(da, a)
 
     def sostaFinale(self):
-        """ Return a timedelta with the time between the time of the end of the ride
+        """Return a timedelta with the time between the time of the end of the ride
         and the beginning of the return or the next brother
         """
         result = datetime.timedelta()
@@ -793,7 +848,7 @@ class Viaggio(models.Model):
         #     this_end += manual_stop
         if nextbro:
             if nextbro.data > this_end:
-                result += (nextbro.data - this_end)
+                result += nextbro.data - this_end
         return result
 
     def sostaFinaleMinuti(self):
@@ -807,7 +862,9 @@ class Viaggio(models.Model):
         if self.id and not self.padre_id:  # itero sui figli
             anticipo = max(self.da.anticipo_servizio, self.a.anticipo_servizio)
             for figlio in self.viaggio_set.all():
-                anticipo = max(anticipo, figlio.da.anticipo_servizio, figlio.a.anticipo_servizio)
+                anticipo = max(
+                    anticipo, figlio.da.anticipo_servizio, figlio.a.anticipo_servizio
+                )
         else:
             anticipo = 0
         if anticipo:
@@ -815,8 +872,8 @@ class Viaggio(models.Model):
         return anticipo
 
     def _date_start(self):
-        """ Return the time to start to be there in time, looking Tratte
-            if the start place is the same time is the time of the travel
+        """Return the time to start to be there in time, looking Tratte
+        if the start place is the same time is the time of the travel
         """
         tratta_start = self.tratta_start
         anticipo = 0
@@ -831,8 +888,8 @@ class Viaggio(models.Model):
             return self.data
 
     def get_date_end(self, recurse=False):
-        """ Ritorno il tempo finale di tutta la corsa
-            (compresi eventuali figli se recurse) """
+        """Ritorno il tempo finale di tutta la corsa
+        (compresi eventuali figli se recurse)"""
         # logging.debug("Data finale di %s. Recurse:%s"%(self.id, recurse))
         # se devo ancora salvare non cerco figli
         if not recurse or not self.id:
@@ -850,7 +907,7 @@ class Viaggio(models.Model):
         # quando parto da un aeroporto la corsa dura X minuti di più
         # non quando sono in sosta, arrivato in un aereoporto,
         # in modo che gli X minuti in più siano alla ripartenza
-        if ultimaCorsa.da.speciale == 'A' and tratta:
+        if ultimaCorsa.da.speciale == "A" and tratta:
             end_time += datetime.timedelta(minutes=settings.ATTESA_AEROPORTI)
 
         if self.additional_stop:
@@ -866,8 +923,8 @@ class Viaggio(models.Model):
         return end_time
 
     def trattaInNotturna(self):
-        """ Restituisce True se la sola tratta considerata (non i figli e non le pre_tratte post_tratte
-         sono in fascia [22-6) """
+        """Restituisce True se la sola tratta considerata (non i figli e non le pre_tratte post_tratte
+        sono in fascia [22-6)"""
         start = self.data
         tratta = self._tratta()
         if tratta:
@@ -892,24 +949,24 @@ class Viaggio(models.Model):
         return result
 
     def disturbi(self, date_start=None, date_end=None):
-        """ Restituisce un dizionario di "codiceFascia":punti con le fasce e i punti disturbo relativi.
-            Ho due fasce mattutine 4-6, 6-7:45 di due e un punto
-            due fasce serali 20-22:30, 22:30-4
-            a due a due hanno lo stesso codice prefissato con la data in cui la fascia comincia
-            Il disturbo finale per una fascia è il massimo del valore di tutte le se sottofascie componenti
+        """Restituisce un dizionario di "codiceFascia":punti con le fasce e i punti disturbo relativi.
+        Ho due fasce mattutine 4-6, 6-7:45 di due e un punto
+        due fasce serali 20-22:30, 22:30-4
+        a due a due hanno lo stesso codice prefissato con la data in cui la fascia comincia
+        Il disturbo finale per una fascia è il massimo del valore di tutte le se sottofascie componenti
         """
         if self.conducente_richiesto:
             return {}
-        if self.date_start < tamdates.date_enforce(
-            datetime.datetime(2012, 3, 1)):
+        if self.date_start < tamdates.date_enforce(datetime.datetime(2012, 3, 1)):
             metodo = fasce_uno_due
         else:
             metodo = getattr(settings, "METODO_FASCE", fasce_semilineari)
-        return trovaDisturbi(self.date_start, self.get_date_end(recurse=True),
-                             metodo=metodo)
+        return trovaDisturbi(
+            self.date_start, self.get_date_end(recurse=True), metodo=metodo
+        )
 
     def get_kmrow(self):
-        """ Restituisce il N° di KM totali di corsa con andata, corsa e ritorno """
+        """Restituisce il N° di KM totali di corsa con andata, corsa e ritorno"""
         tratta_start = self._tratta_start()
         tratta = self._tratta()
         tratta_end = self._tratta_end()
@@ -923,7 +980,7 @@ class Viaggio(models.Model):
         return result
 
     def get_kmtot(self):
-        """ Restituisce il N° di KM totali di corsa con andata, corsa, figli e ritorno """
+        """Restituisce il N° di KM totali di corsa con andata, corsa, figli e ritorno"""
         result = self.get_kmrow()
         if self.id is None:
             return result
@@ -932,18 +989,18 @@ class Viaggio(models.Model):
         return result
 
     def _is_collettivoInPartenza(self):
-        """	Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
-            Assieme si andrà ad una destinazione comune
+        """Vero se questo viaggio va dalla partenza alla partenza del fratello successivo.
+        Assieme si andrà ad una destinazione comune
         """
         # logging.debug("Is collettivo in partenza %s" %self.id)
         nextbro = self.nextfratello()
         if nextbro and nextbro.da == self.a:
             # se il successivo parte da dove arrivo è sicuramente un collettivo in successione
             return False
-        if nextbro and nextbro.data < \
-            self.data + datetime.timedelta(
-            minutes=get_tratta(self.da, self.a).minuti + (
-                30 if self.da.speciale == "A" else 0)):
+        if nextbro and nextbro.data < self.data + datetime.timedelta(
+            minutes=get_tratta(self.da, self.a).minuti
+            + (30 if self.da.speciale == "A" else 0)
+        ):
             # tengo conto che questa corsa dura 30 minuti in più se parte da un aereoporto
             # logging.debug("%s e' prima delle %s" % (nextbro.id, self.data+datetime.timedelta(minutes=get_tratta(self.da, self.a).minuti*0.5)) )
             return True
@@ -951,9 +1008,9 @@ class Viaggio(models.Model):
             return False
 
     def _is_abbinata(self, simpleOne=False):
-        """ True se la corsa un'abbinata (padre o figlio)
-            se simpleOne==False controllo anche le differenze
-            tra abbinata in Successione e abbinata in Partenza
+        """True se la corsa un'abbinata (padre o figlio)
+        se simpleOne==False controllo anche le differenze
+        tra abbinata in Successione e abbinata in Partenza
         """
         # print("Abbinata? %s" % self.id)
         if self.id is None:
@@ -970,44 +1027,49 @@ class Viaggio(models.Model):
             return ""  # non abbinata
 
     def is_long(self):
-        """ Ritorna vero se la tratta, andando e tornando è lunga """
-        return self.km >= getattr(settings, 'KM_PER_LUNGHE', 50)
+        """Ritorna vero se la tratta, andando e tornando è lunga"""
+        return self.km >= getattr(settings, "KM_PER_LUNGHE", 50)
 
     def is_medium(self):
-        """ Ritorna vero se la tratta è media """
-        return 25 <= self.km < getattr(settings, 'KM_PER_LUNGHE', 50) or (
-            self.km < 25 and self.prezzo > settings.IMPORTO_MASSIMO_CORTA)
+        """Ritorna vero se la tratta è media"""
+        return 25 <= self.km < getattr(settings, "KM_PER_LUNGHE", 50) or (
+            self.km < 25 and self.prezzo > settings.IMPORTO_MASSIMO_CORTA
+        )
 
     def _is_valid(self):
         """Controlla che il viaggio abbia tutte le tratte definite"""
         tratta_start = self.tratta_start
         tratta = self.tratta
         tratta_end = self.tratta_end
-        if (tratta_start is None or tratta_start.is_valid()) and (
-            tratta is None or tratta.is_valid()) and (
-            tratta_end is None or tratta_end.is_valid()):
+        if (
+            (tratta_start is None or tratta_start.is_valid())
+            and (tratta is None or tratta.is_valid())
+            and (tratta_end is None or tratta_end.is_valid())
+        ):
             return True
         else:
             return False
 
     def vecchioConfermato(self):
-        return self.conducente_confermato and self.date_start < tamdates.ita_now().replace(
-            hour=0, minute=0)
+        return (
+            self.conducente_confermato
+            and self.date_start < tamdates.ita_now().replace(hour=0, minute=0)
+        )
 
     def prezzo_commissione(self):
-        """ Restituisce il valore in euro della commissione """
+        """Restituisce il valore in euro della commissione"""
         if not self.commissione:
             return 0
         else:
             if self.tipo_commissione == "P":
                 return self.prezzo * (
-                    self.commissione / Decimal(
-                    100))  # commissione in percentuale
+                    self.commissione / Decimal(100)
+                )  # commissione in percentuale
             else:
                 return self.commissione
 
     def get_value(self, **kwargs):
-        """ Return the value of this trip on the scoreboard """
+        """Return the value of this trip on the scoreboard"""
         return process_value(self, **kwargs)
 
     def get_valuetot(self, **kwargs):
@@ -1017,23 +1079,25 @@ class Viaggio(models.Model):
         return result
 
     def lordo(self):
-        """ Il lordo vero e proprio """
+        """Il lordo vero e proprio"""
         result = self.prezzo
         for figlio in self.viaggio_set.all():
             result += figlio.prezzo
         return result
 
     def get_lordotot(self):
-        """ Restituisce il lordo, tolto di autostrada e commissione """
+        """Restituisce il lordo, tolto di autostrada e commissione"""
         result = self.prezzo - self.costo_autostrada - self.prezzo_commissione()
         # logging.debug("Corsa padre: %s" % result )
         for figlio in self.viaggio_set.all():
             # logging.debug("	 figlio: %s" % (figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()))
-            result += figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()
+            result += (
+                figlio.prezzo - figlio.costo_autostrada - figlio.prezzo_commissione()
+            )
         return result
 
     def costo_autostrada_default(self):
-        """ Restituisce il costo totale dell'autostrada, in modo da suggerirlo """
+        """Restituisce il costo totale dell'autostrada, in modo da suggerirlo"""
         # print "Ricalcolo autostrada per %d" % self.pk    #TMP:
         tratta_start = self._tratta_start()
         tratta = self._tratta()
@@ -1051,37 +1115,38 @@ class Viaggio(models.Model):
         return result
 
     def confirmed(self):
-        """ True se il conducente è confermato... nel qual caso poi lo conto in classifica """
+        """True se il conducente è confermato... nel qual caso poi lo conto in classifica"""
         return self.conducente_confermato
 
     def warning(self):
-        """ True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza """
-        return (not self.conducente_confermato
-                and (self.date_start - datetime.timedelta(hours=2) < tamdates.ita_now()))
+        """True se la corsa va evidenziata perché non ancora confermata se manca poco alla partenza"""
+        return not self.conducente_confermato and (
+            self.date_start - datetime.timedelta(hours=2) < tamdates.ita_now()
+        )
 
     def punti_notturni_interi_list(self):
         return range(int(self.punti_notturni))
 
     def punti_notturni_quarti(self):
-        """ Restituisce la parte frazionaria dei notturni """
+        """Restituisce la parte frazionaria dei notturni"""
         return self.punti_notturni % 1
 
     def punti_diurni_interi_list(self):
         return range(int(self.punti_diurni))
 
     def punti_diurni_quarti(self):
-        """ Restituisce la parte frazionaria dei notturni """
+        """Restituisce la parte frazionaria dei notturni"""
         return self.punti_diurni % 1
 
     def incidenza_prezzo_sosta(self):
-        """ Stringa che aggiungo alla descrizione dei prezzi per indicare che la sosta viene scontata """
+        """Stringa che aggiungo alla descrizione dei prezzi per indicare che la sosta viene scontata"""
         if settings.SCONTO_SOSTA:
             return "al %d%%" % (100 - settings.SCONTO_SOSTA)
         else:
             return ""
 
     def incidenza_differto(self):
-        """ Stringa che aggiungo alla descrizione dei prezzi per indicare che il prezzo viene scontato perché differto """
+        """Stringa che aggiungo alla descrizione dei prezzi per indicare che il prezzo viene scontato perché differto"""
         if settings.SCONTO_FATTURATE:
             return "- p%d%%" % settings.SCONTO_FATTURATE
         else:
@@ -1096,66 +1161,70 @@ class Viaggio(models.Model):
 
 @python_2_unicode_compatible
 class Conducente(models.Model):
-    """ I conducuenti, ogni conducente avrà la propria classifica, ed una propria vettura.
-        Ogni conducente può essere in servizio o meno.
+    """I conducuenti, ogni conducente avrà la propria classifica, ed una propria vettura.
+    Ogni conducente può essere in servizio o meno.
     """
+
     nome = models.CharField("Nome", max_length=40, unique=True)
-    dati = models.TextField(null=True, blank=True,
-                            help_text='Stampati nelle fattura conducente')
+    dati = models.TextField(
+        null=True, blank=True, help_text="Stampati nelle fattura conducente"
+    )
     nick = models.CharField("Sigla", max_length=5, blank=True, null=True)
     max_persone = models.IntegerField(default=4)
     attivo = models.BooleanField(default=True, db_index=True)
-    emette_ricevute = models.BooleanField("Emette senza IVA?",
-                                          help_text="Il conducente può emettere fatture senza IVA?",
-                                          default=True)
-    has_bus = models.BooleanField("Ha un bus?",
-                                  editable=False,
-                                  default=False)
+    emette_ricevute = models.BooleanField(
+        "Emette senza IVA?",
+        help_text="Il conducente può emettere fatture senza IVA?",
+        default=True,
+    )
+    has_bus = models.BooleanField("Ha un bus?", editable=False, default=False)
     assente = models.BooleanField(default=False)
 
-    classifica_iniziale_diurni = models.DecimalField("Supplementari diurni",
-                                                     max_digits=12,
-                                                     decimal_places=2,
-                                                     default=0)
+    classifica_iniziale_diurni = models.DecimalField(
+        "Supplementari diurni", max_digits=12, decimal_places=2, default=0
+    )
     classifica_iniziale_notturni = models.DecimalField(
-        "Supplementari notturni", max_digits=12, decimal_places=2,
-        default=0)
+        "Supplementari notturni", max_digits=12, decimal_places=2, default=0
+    )
 
     classifica_iniziale_puntiDoppiVenezia = models.IntegerField(
-        "Punti Doppi Venezia", default=0)
+        "Punti Doppi Venezia", default=0
+    )
     classifica_iniziale_prezzoDoppiVenezia = models.DecimalField(
-        "Valore Doppi Venezia", max_digits=12,
-        decimal_places=2, default=0)  # fino a 9999.99
-    classifica_iniziale_doppiPadova = models.DecimalField("Doppi Padova",
-                                                          max_digits=12,
-                                                          decimal_places=2,
-                                                          default=0)  # in Euro
+        "Valore Doppi Venezia", max_digits=12, decimal_places=2, default=0
+    )  # fino a 9999.99
+    classifica_iniziale_doppiPadova = models.DecimalField(
+        "Doppi Padova", max_digits=12, decimal_places=2, default=0
+    )  # in Euro
 
-    classifica_iniziale_long = models.DecimalField("Venezia", max_digits=12,
-                                                   decimal_places=2,
-                                                   default=0)  # in Euro
-    classifica_iniziale_medium = models.DecimalField("Padova", max_digits=12,
-                                                     decimal_places=2,
-                                                     default=0)  # in Euro
-    classifica_iniziale_fatture_corse = models.IntegerField("Classifica fatture - corse",
-                                                            editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
-                                                            default=0)
-    classifica_iniziale_fatture_valore = models.DecimalField("Classifica fatture - valore",
-                                                             editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
-                                                             max_digits=12,
-                                                             decimal_places=2,
-                                                             default=0)  # in Euro fino a 9.999.999.999,99
+    classifica_iniziale_long = models.DecimalField(
+        "Venezia", max_digits=12, decimal_places=2, default=0
+    )  # in Euro
+    classifica_iniziale_medium = models.DecimalField(
+        "Padova", max_digits=12, decimal_places=2, default=0
+    )  # in Euro
+    classifica_iniziale_fatture_corse = models.IntegerField(
+        "Classifica fatture - corse",
+        editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
+        default=0,
+    )
+    classifica_iniziale_fatture_valore = models.DecimalField(
+        "Classifica fatture - valore",
+        editable=settings.TAM_SHOW_CLASSIFICA_FATTURE,
+        max_digits=12,
+        decimal_places=2,
+        default=0,
+    )  # in Euro fino a 9.999.999.999,99
 
     class Meta:
         verbose_name_plural = _("Conducenti")
         ordering = ["-attivo", "nick", "nome"]
-        permissions = (
-            ('change_classifiche_iniziali', 'Cambia classifiche iniziali'),)
+        permissions = (("change_classifiche_iniziali", "Cambia classifiche iniziali"),)
 
     def save(self, *args, **kwargs):
         # global cache_conducentiPerPersona
         # cache_conducentiPerPersona = {}	# cancello la cache dei conducenti con capienza
-        cache.delete('conducentiPerPersona')
+        cache.delete("conducentiPerPersona")
         super(Conducente, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -1180,31 +1249,34 @@ class Conducente(models.Model):
         return reverse("tamConducenteId", kwargs={"id": self.id})
 
     def ricevute(self):
-        """ Ritorno le ricevute emesse da questo conducente """
+        """Ritorno le ricevute emesse da questo conducente"""
         from fatturazione.models import Fattura
 
-        ricevute = Fattura.objects.filter(tipo='3', righe__conducente=self)
+        ricevute = Fattura.objects.filter(tipo="3", righe__conducente=self)
         return ricevute.distinct()
 
 
 @python_2_unicode_compatible
 class Cliente(models.Model):
-    """ Ogni cliente ha le sue caratteristiche, ed eventualmente un suo listino """
+    """Ogni cliente ha le sue caratteristiche, ed eventualmente un suo listino"""
+
     nome = models.CharField("Nome cliente", max_length=40, unique=True)
-    dati = models.TextField(null=True, blank=True,
-                            help_text='Stampati nelle fattura conducente')
+    dati = models.TextField(
+        null=True, blank=True, help_text="Stampati nelle fattura conducente"
+    )
     tipo = models.CharField("Tipo cliente", max_length=1, choices=TIPICLIENTE)
     fatturazione = models.BooleanField("Fatturazione richiesta", default=False)
-    pagamento_differito = models.BooleanField("Fatturazione esente IVA",
-                                              default=False)
+    pagamento_differito = models.BooleanField("Fatturazione esente IVA", default=False)
     incassato_albergo = models.BooleanField("Conto fine mese", default=False)
-    listino = models.ForeignKey("Listino", verbose_name="Listino cliente",
-                                null=True, blank=True)
-    commissione = models.DecimalField("Quota consorzio", max_digits=9,
-                                      decimal_places=2,
-                                      default=0)  # in euro o percentuale, a seconda del tipo
-    tipo_commissione = models.CharField("Tipo di quota", max_length=1,
-                                        choices=TIPICOMMISSIONE, default="F")
+    listino = models.ForeignKey(
+        "Listino", verbose_name="Listino cliente", null=True, blank=True
+    )
+    commissione = models.DecimalField(
+        "Quota consorzio", max_digits=9, decimal_places=2, default=0
+    )  # in euro o percentuale, a seconda del tipo
+    tipo_commissione = models.CharField(
+        "Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F"
+    )
     attivo = models.BooleanField(default=True)
     note = models.TextField(null=True, blank=True)
 
@@ -1227,21 +1299,22 @@ class Cliente(models.Model):
     def save(self, *args, **kwargs):
         if self.nome.lower() == "privato":
             raise Exception(
-                "Scusa ma non puoi chiamarlo PRIVATO... è un nome riservato")
+                "Scusa ma non puoi chiamarlo PRIVATO... è un nome riservato"
+            )
         super(Cliente, self).save(*args, **kwargs)
 
 
 @python_2_unicode_compatible
 class Passeggero(models.Model):
-    """ I passeggeri sono clienti particolari con meno caratteristiche """
+    """I passeggeri sono clienti particolari con meno caratteristiche"""
+
     nome = models.CharField(max_length=40, unique=True)
     dati = models.TextField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = _("Passeggeri")
         ordering = ["nome"]
-        permissions = (
-            ('fastinsert_passenger', 'Inserimento passeggero veloce'),)
+        permissions = (("fastinsert_passenger", "Inserimento passeggero veloce"),)
 
     def __str__(self):
         return self.nome
@@ -1255,9 +1328,10 @@ class Passeggero(models.Model):
 
 @python_2_unicode_compatible
 class Listino(models.Model):
-    """ Ogni listino ha un suo nome ed una serie di tratte collegate.
-        È indipendente dal cliente.
+    """Ogni listino ha un suo nome ed una serie di tratte collegate.
+    È indipendente dal cliente.
     """
+
     nome = models.CharField(max_length=30, unique=True)
 
     class Meta:
@@ -1268,11 +1342,10 @@ class Listino(models.Model):
         return self.nome
 
     def get_prezzo(self, da, a, tipo_servizio="T", pax=3, tryReverse=True):
-        """ Cerca il prezzo del listino DA-A o A-DA, e restituisce None se non esiste """
-        prezziDiretti = self.prezzolistino_set.filter(tratta__da=da,
-                                                      tratta__a=a,
-                                                      max_pax__gte=pax,
-                                                      tipo_servizio=tipo_servizio)
+        """Cerca il prezzo del listino DA-A o A-DA, e restituisce None se non esiste"""
+        prezziDiretti = self.prezzolistino_set.filter(
+            tratta__da=da, tratta__a=a, max_pax__gte=pax, tipo_servizio=tipo_servizio
+        )
         choosenResult = None  # scelgo il prezzo adeguato con meno passeggeri max
         for prezzoPossibile in prezziDiretti:
             if choosenResult:
@@ -1283,43 +1356,49 @@ class Listino(models.Model):
         if choosenResult:
             return choosenResult
         if tryReverse:
-            return self.get_prezzo(a, da, tipo_servizio, pax,
-                                   tryReverse=False)  # provo a tornare il prezzo inverso
+            return self.get_prezzo(
+                a, da, tipo_servizio, pax, tryReverse=False
+            )  # provo a tornare il prezzo inverso
 
 
 @python_2_unicode_compatible
 class PrezzoListino(models.Model):
-    """ Ogni tratta del listino ha due prezzi, una per la fascia diurna e una per la fascia notturna """
+    """Ogni tratta del listino ha due prezzi, una per la fascia diurna e una per la fascia notturna"""
+
     listino = models.ForeignKey(Listino)
     tratta = models.ForeignKey(Tratta)
-    prezzo_diurno = models.DecimalField(max_digits=9, decimal_places=2,
-                                        default=10)  # fino a 9999.99
-    prezzo_notturno = models.DecimalField(max_digits=9, decimal_places=2,
-                                          default=10)  # fino a 9999.99
+    prezzo_diurno = models.DecimalField(
+        max_digits=9, decimal_places=2, default=10
+    )  # fino a 9999.99
+    prezzo_notturno = models.DecimalField(
+        max_digits=9, decimal_places=2, default=10
+    )  # fino a 9999.99
 
-    commissione = models.DecimalField("Quota consorzio", max_digits=9,
-                                      decimal_places=2, null=True,
-                                      default=0)  # in euro o percentuale, a seconda del tipo
-    tipo_commissione = models.CharField("Tipo di quota", max_length=1,
-                                        choices=TIPICOMMISSIONE, default="F")
+    commissione = models.DecimalField(
+        "Quota consorzio", max_digits=9, decimal_places=2, null=True, default=0
+    )  # in euro o percentuale, a seconda del tipo
+    tipo_commissione = models.CharField(
+        "Tipo di quota", max_length=1, choices=TIPICOMMISSIONE, default="F"
+    )
     ultima_modifica = models.DateField(auto_now=True)
 
-    tipo_servizio = models.CharField(choices=TIPISERVIZIO, max_length=1,
-                                     default="T")  # Collettivo o Taxi
+    tipo_servizio = models.CharField(
+        choices=TIPISERVIZIO, max_length=1, default="T"
+    )  # Collettivo o Taxi
     max_pax = models.IntegerField("Pax Massimi", default=4)
 
-    flag_fatturazione = models.CharField("Fatturazione forzata",
-                                         max_length=1,
-                                         choices=[
-                                             ('S', 'Fatturazione richiesta'),
-                                             ('N',
-                                              'Fatturazione non richiesta'),
-                                             ('-',
-                                              'Usa impostazioni del cliente'),
-                                         ],
-                                         default='-',
-                                         blank=False, null=False,
-                                         )
+    flag_fatturazione = models.CharField(
+        "Fatturazione forzata",
+        max_length=1,
+        choices=[
+            ("S", "Fatturazione richiesta"),
+            ("N", "Fatturazione non richiesta"),
+            ("-", "Usa impostazioni del cliente"),
+        ],
+        default="-",
+        blank=False,
+        null=False,
+    )
 
     class Meta:
         verbose_name_plural = _("Prezzi Listino")
@@ -1335,14 +1414,18 @@ class PrezzoListino(models.Model):
             return "taxi fino a %d pax" % self.max_pax
 
     def __str__(self):
-        result = u"%s. Da %s a %s. %s [%s] " % (
-            self.listino, self.tratta.da, self.tratta.a, self.prezzo_diurno,
-            self.prezzo_notturno)
+        result = "%s. Da %s a %s. %s [%s] " % (
+            self.listino,
+            self.tratta.da,
+            self.tratta.a,
+            self.prezzo_diurno,
+            self.prezzo_notturno,
+        )
         if self.commissione:
             if self.tipo_commissione == "P":
-                result += u"con quota del %d%% " % self.commissione
+                result += "con quota del %d%% " % self.commissione
             else:
-                result += u"con quota di %d€ " % self.commissione
+                result += "con quota di %d€ " % self.commissione
         result += self.stringa_dettaglio()
         return result
 
@@ -1350,13 +1433,16 @@ class PrezzoListino(models.Model):
 @python_2_unicode_compatible
 class ProfiloUtente(models.Model):
     user = models.OneToOneField(User, unique=True, editable=False)
-    luogo = models.ForeignKey(Luogo, verbose_name="Luogo di partenza", null=True, blank=True)
+    luogo = models.ForeignKey(
+        Luogo, verbose_name="Luogo di partenza", null=True, blank=True
+    )
 
     class Meta:
-        permissions = (('can_backup', 'Richiede un backup'),
-                       ('get_backup', 'Scarica un backup'),
-                       ('reset_sessions', _('Can reset session')),
-                       )
+        permissions = (
+            ("can_backup", "Richiede un backup"),
+            ("get_backup", "Scarica un backup"),
+            ("reset_sessions", _("Can reset session")),
+        )
         verbose_name_plural = _("Profili utente")
 
     def __str__(self):
@@ -1365,11 +1451,13 @@ class ProfiloUtente(models.Model):
 
 @python_2_unicode_compatible
 class Conguaglio(models.Model):
-    """ Memorizza tutti i conguagli effettuati tra i conducenti """
+    """Memorizza tutti i conguagli effettuati tra i conducenti"""
+
     data = models.DateTimeField(auto_now=True)
     conducente = models.ForeignKey(Conducente)
-    dare = models.DecimalField(max_digits=9, decimal_places=2,
-                               default=10)  # fino a 9999.99
+    dare = models.DecimalField(
+        max_digits=9, decimal_places=2, default=10
+    )  # fino a 9999.99
 
     class Meta:
         verbose_name_plural = _("Conguagli")
@@ -1381,8 +1469,7 @@ class Conguaglio(models.Model):
 # Comincia a loggare i cambiamenti a questi Modelli
 from modellog.actions import startLog, stopLog
 
-models_to_log = (Viaggio, Cliente, Passeggero,
-                 Conducente, Tratta, PrezzoListino)
+models_to_log = (Viaggio, Cliente, Passeggero, Conducente, Tratta, PrezzoListino)
 
 
 def startAllLog():
@@ -1403,7 +1490,7 @@ from tam.views.classifiche import descrizioneDivisioneClassifiche
 process_classifiche = settings.PROCESS_CLASSIFICHE_FUNCTION
 process_value = settings.GET_VALUE_FUNCTION
 
-PREZZO_VIAGGIO_NETTO = getattr(settings, 'PREZZO_VIAGGIO_NETTO', True)
+PREZZO_VIAGGIO_NETTO = getattr(settings, "PREZZO_VIAGGIO_NETTO", True)
 
 
 # load models required for the tasks

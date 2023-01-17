@@ -6,10 +6,14 @@ from django.utils.translation import ugettext_lazy as _
 from future.utils import python_2_unicode_compatible
 
 LOG_ACTION_TYPE = [
-    ("A", "Creazione"), ("M", "Modifica"), ("D", "Cancellazione"),
-    ('L', "Login"), ("O", "Logout"),
-    ("K", "Archiviazione"), ("F", "Appianamento"),
-    ('X', "Export Excel"),
+    ("A", "Creazione"),
+    ("M", "Modifica"),
+    ("D", "Cancellazione"),
+    ("L", "Login"),
+    ("O", "Logout"),
+    ("K", "Archiviazione"),
+    ("F", "Appianamento"),
+    ("X", "Export Excel"),
 ]
 
 
@@ -20,8 +24,7 @@ class ActionLog(models.Model):
     # user = models.ForeignKey(User, null=True, blank=True, default=None)
     action_type = models.CharField(max_length=1, choices=LOG_ACTION_TYPE)
 
-    modelName = models.CharField(max_length=20, null=True, blank=True,
-                                 default=None)
+    modelName = models.CharField(max_length=20, null=True, blank=True, default=None)
     instance_id = models.IntegerField(null=True, blank=True, default=None)
 
     # why the hell I stopped using contentTypes?
@@ -38,24 +41,28 @@ class ActionLog(models.Model):
 
     def __str__(self):
         longName = {"A": "Creazione", "M": "Modifica", "D": "Cancellazione"}[
-            self.action_type]
+            self.action_type
+        ]
         return "%s di un %s - %s.\n  %s" % (
-            longName, self.content_type, self.user, self.description)
+            longName,
+            self.content_type,
+            self.user,
+            self.description,
+        )
 
     def user(self):
-        """ The user who made the action """
+        """The user who made the action"""
         if self.user_id:
             return User.objects.get(id=self.user_id)
 
     def obj(self):
-        """ Return the related object from tam.models """
+        """Return the related object from tam.models"""
         import tam.models as tamModels
 
         guessed_modelname = self.modelName
         if not guessed_modelname:
             return None
-        guessed_modelname = guessed_modelname[0].upper() + guessed_modelname[
-                                                           1:]
+        guessed_modelname = guessed_modelname[0].upper() + guessed_modelname[1:]
         result = None
         try:
             class_name = getattr(tamModels, guessed_modelname)
@@ -71,5 +78,5 @@ class ActionLog(models.Model):
         return result
 
     def icon(self):
-        """ Ritorno l'icona associata al tipo cliente """
-        return staticfiles_storage.url('actionIcons/%s.png' % self.action_type)
+        """Ritorno l'icona associata al tipo cliente"""
+        return staticfiles_storage.url("actionIcons/%s.png" % self.action_type)

@@ -15,12 +15,13 @@ from tam.models import Viaggio, Conducente
 from tam.tasks import print_timing, single_instance_task
 from tamArchive.models import ViaggioArchive
 
-logger = logging.getLogger('tam.archive')
+logger = logging.getLogger("tam.archive")
 
 
 # ===============================================================================
 
-def vacuum_db(using='default'):
+
+def vacuum_db(using="default"):
     from django.db import connections
 
     cursor = connections[using].cursor()
@@ -29,7 +30,7 @@ def vacuum_db(using='default'):
 
 
 def archiveFromViaggio(viaggio):
-    """ Crea una voce di archivio dato un viaggio
+    """Crea una voce di archivio dato un viaggio
     @rtype : ViaggioArchive
     """
     # try:
@@ -38,7 +39,6 @@ def archiveFromViaggio(viaggio):
     # path = "invalid path"
     # 	print path
 
-
     voceArchivio = ViaggioArchive(
         data=viaggio.data,
         da=viaggio.da,
@@ -46,13 +46,14 @@ def archiveFromViaggio(viaggio):
         path=viaggio.html_tragitto,
         pax=viaggio.numero_passeggeri,
         flag_esclusivo=viaggio.esclusivo,
-        conducente=u"%s" % viaggio.conducente,
+        conducente="%s" % viaggio.conducente,
         flag_richiesto=viaggio.conducente_richiesto,
-        cliente=(viaggio.cliente and viaggio.cliente.nome) or (
-            viaggio.passeggero and viaggio.passeggero.nome),
+        cliente=(viaggio.cliente and viaggio.cliente.nome)
+        or (viaggio.passeggero and viaggio.passeggero.nome),
         prezzo=viaggio.prezzo,
-        prezzo_detail=render_to_string('corse/corse_prezzo_viaggio.inc.html',
-                                       {"viaggio": viaggio, "nolink": True}),
+        prezzo_detail=render_to_string(
+            "corse/corse_prezzo_viaggio.inc.html", {"viaggio": viaggio, "nolink": True}
+        ),
         flag_fineMese=viaggio.incassato_albergo,
         flag_fatturazione=viaggio.fatturazione,
         flag_cartaDiCredito=viaggio.cartaDiCredito,
@@ -66,16 +67,21 @@ def archiveFromViaggio(viaggio):
 
 
 def daRicordareDelViaggio(ricordi, viaggio):
-    """ Ricorda quello che serve dalle classifiche di un viaggio """
+    """Ricorda quello che serve dalle classifiche di un viaggio"""
     if not viaggio.annullato:
         if not viaggio.conducente:
             logger.warning("Il viaggio %d non ha un conducente." % viaggio.id)
             return ricordi
         conducente_id = viaggio.conducente.id
         ricordiConducente = ricordi.get(conducente_id, {})
-        campiMemoria = ('punti_diurni', 'punti_notturni',
-                        'prezzoVenezia', 'prezzoPadova', 'prezzoDoppioPadova',
-                        'punti_abbinata')
+        campiMemoria = (
+            "punti_diurni",
+            "punti_notturni",
+            "prezzoVenezia",
+            "prezzoPadova",
+            "prezzoDoppioPadova",
+            "punti_abbinata",
+        )
         for nome_campo in campiMemoria:
             esistente = ricordiConducente.get(nome_campo, 0)
             ricordiConducente[nome_campo] = esistente + getattr(viaggio, nome_campo)
@@ -85,31 +91,33 @@ def daRicordareDelViaggio(ricordi, viaggio):
 
 # ===============================================================================
 
+
 def spawn_thread(target, *args, **kwargs):
-    t = Thread(target=target,
-               args=args,
-               kwargs=kwargs,
-               daemon=True,
-               )
+    t = Thread(
+        target=target,
+        args=args,
+        kwargs=kwargs,
+        daemon=True,
+    )
     t.start()
 
 
 def do_archiviazioneTask(user, end_date):
-    """ run an archive task in a separate thread """
+    """run an archive task in a separate thread"""
     spawn_thread(target=do_archiviazione, user=user, end_date=end_date)
 
 
 def applyRicordi(ricordi):
-    """ Cambia le statistiche dei conducenti per riflettere i viaggi archiviati """
+    """Cambia le statistiche dei conducenti per riflettere i viaggi archiviati"""
     for conducente_id, classifica in ricordi.items():
         conducente = Conducente.objects.get(pk=conducente_id)
-        conducente.classifica_iniziale_diurni += classifica['punti_diurni']
-        conducente.classifica_iniziale_notturni += classifica['punti_notturni']
+        conducente.classifica_iniziale_diurni += classifica["punti_diurni"]
+        conducente.classifica_iniziale_notturni += classifica["punti_notturni"]
 
-        conducente.classifica_iniziale_long += classifica['prezzoVenezia']
-        conducente.classifica_iniziale_medium += classifica['prezzoPadova']
-        conducente.classifica_iniziale_doppiPadova += classifica['prezzoDoppioPadova']
-        conducente.classifica_iniziale_puntiDoppiVenezia += classifica['punti_abbinata']
+        conducente.classifica_iniziale_long += classifica["prezzoVenezia"]
+        conducente.classifica_iniziale_medium += classifica["prezzoPadova"]
+        conducente.classifica_iniziale_doppiPadova += classifica["prezzoDoppioPadova"]
+        conducente.classifica_iniziale_puntiDoppiVenezia += classifica["punti_abbinata"]
         conducente.save()
     ricordi.clear()
 
@@ -121,14 +129,14 @@ def do_archiviazione(user, end_date):
     # raise Exception("Per archiviare devi uscire dal DEBUG mode.")
 
     filtroViaggi = Q(data__lt=end_date, padre__isnull=True)
-    to_archive = Viaggio.objects.select_related("da", "a", "cliente", "conducente",
-                                                "passeggero").filter(filtroViaggi)
+    to_archive = Viaggio.objects.select_related(
+        "da", "a", "cliente", "conducente", "passeggero"
+    ).filter(filtroViaggi)
     # Optimizations: mi faccio dare solo i modelli che mi interessano
     # Rimovo l'ordinamento di default
-    logAction("K",
-              instance=user,
-              description="Archiviazione fino al %s" % end_date,
-              user=user)
+    logAction(
+        "K", instance=user, description="Archiviazione fino al %s" % end_date, user=user
+    )
     logger.debug("Archiviazione fino al %s cominciata" % end_date)
 
     # disabilita il log delle operazioni: cancello viaggi e cambio conducenti
@@ -139,21 +147,25 @@ def do_archiviazione(user, end_date):
     chunkSize = 500
     total = to_archive.count()
 
-    logger.debug(u"Archivio %d viaggi padre." % total)
+    logger.debug("Archivio %d viaggi padre." % total)
     while to_archive:
         # split viaggi padre in chucks
         viaggi_chunk, to_archive = to_archive[:chunkSize], to_archive[chunkSize:]
         with transaction.atomic():
-            with transaction.atomic(using='archive'):
+            with transaction.atomic(using="archive"):
                 for viaggiopadre in viaggi_chunk:
                     archivio_viaggiopadre = archiveFromViaggio(viaggiopadre)
                     daRicordareDelViaggio(ricordi, viaggiopadre)
                     archivio_viaggiopadre.save()
                     archiviati += 1
 
-                    for figlio in viaggiopadre.viaggio_set.select_related("da", "a", "cliente",
-                                                                          "conducente",
-                                                                          "passeggero").order_by().all():
+                    for figlio in (
+                        viaggiopadre.viaggio_set.select_related(
+                            "da", "a", "cliente", "conducente", "passeggero"
+                        )
+                        .order_by()
+                        .all()
+                    ):
                         archivio_viaggiofiglio = archiveFromViaggio(figlio)
                         archivio_viaggiofiglio.padre = archivio_viaggiopadre
                         daRicordareDelViaggio(ricordi, figlio)
@@ -161,7 +173,9 @@ def do_archiviazione(user, end_date):
                     # archiviati += 1
                     viaggiopadre.delete()
 
-                logger.debug("Modifico le classifiche e commit %d/%d" % (archiviati, total))
+                logger.debug(
+                    "Modifico le classifiche e commit %d/%d" % (archiviati, total)
+                )
                 applyRicordi(ricordi)
 
     logger.debug("fine archiviazione")
@@ -173,7 +187,7 @@ def do_archiviazione(user, end_date):
     if contaLog:
         logger.debug("Ora cancello tutti i vecchi LOG.")
         logDaEliminare.delete()
-        vacuum_db(using='modellog')
+        vacuum_db(using="modellog")
 
     # riabilita il log delle operazioni
     startLog(Conducente)
@@ -182,7 +196,9 @@ def do_archiviazione(user, end_date):
     logger.debug("Archiviazione fino al %s completata." % end_date.strftime("%d/%m/%Y"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logger.setLevel(logging.DEBUG)
-    do_archiviazione(User.objects.get(id=1),
-                     timezone('Europe/Rome').localize(datetime.datetime(2014, 2, 1)))
+    do_archiviazione(
+        User.objects.get(id=1),
+        timezone("Europe/Rome").localize(datetime.datetime(2014, 2, 1)),
+    )

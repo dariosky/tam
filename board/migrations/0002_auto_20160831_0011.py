@@ -8,23 +8,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('board', '0001_initial'),
+        ("board", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='boardmessage',
-            name='active',
-            field=models.BooleanField(default=True, verbose_name='Messaggio visibile'),
+            model_name="boardmessage",
+            name="active",
+            field=models.BooleanField(default=True, verbose_name="Messaggio visibile"),
         ),
         migrations.AlterField(
-            model_name='boardmessage',
-            name='date',
-            field=models.DateTimeField(verbose_name='Data di inserimento'),
+            model_name="boardmessage",
+            name="date",
+            field=models.DateTimeField(verbose_name="Data di inserimento"),
         ),
         migrations.AlterField(
-            model_name='boardmessage',
-            name='message',
-            field=models.TextField(blank=True, null=True, verbose_name='Messaggio'),
+            model_name="boardmessage",
+            name="message",
+            field=models.TextField(blank=True, null=True, verbose_name="Messaggio"),
         ),
     ]
