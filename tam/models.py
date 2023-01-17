@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.core.files.storage import FileSystemStorage
+from django.core.validators import MinValueValidator
 from django.db import connections, models
 from django.db.models.deletion import SET_NULL, PROTECT
 from django.template.loader import render_to_string
@@ -19,7 +20,6 @@ from future.utils import python_2_unicode_compatible
 import tam.tamdates as tamdates
 from settings import NIGHT_START, NIGHT_END
 from tam.disturbi import fasce_semilineari, trovaDisturbi, fasce_uno_due
-import logging
 
 logger = logging.getLogger("tam.models")
 Calendar = None

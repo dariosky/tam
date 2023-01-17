@@ -12,6 +12,7 @@ class ModelloFattura(object):
     ask_progressivo = False
     generabile = True
     order_by = []
+    codice = None
 
     @classmethod
     def urlname_generazione(cls):
@@ -46,7 +47,7 @@ class FattureConsorzio(ModelloFattura):
     keys = ["cliente"]  # come dividere una fattura dall'altra
     order_by = ["cliente", "data"]  # ordinamento per generazione
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione
-    url_generazione = r'^genera/consorzio/$'  # ci si aggiunge $ per la generazione "manuale/" per la creazione
+    url_generazione = r"^genera/consorzio/$"  # ci si aggiunge $ per la generazione "manuale/" per la creazione
     ask_progressivo = True
     template_scelta = "1.perCliente.html"
     template_generazione = "2.perCliente.html"
@@ -79,9 +80,12 @@ class FattureNoIVA(ModelloFattura):
 				  """
     codice = "4"
     origine = Viaggio
-    filtro = Q(pagamento_differito=True, fatturazione=False, conducente__isnull=False,
-               riga_fattura=None) & \
-             ~ (Q(conducente__nick__istartswith='ANNUL') | Q(annullato=True))
+    filtro = Q(
+        pagamento_differito=True,
+        fatturazione=False,
+        conducente__isnull=False,
+        riga_fattura=None,
+    ) & ~(Q(conducente__nick__istartswith="ANNUL") | Q(annullato=True))
     keys = ["cliente", "passeggero"]  # come dividere una fattura dall'altra
     order_by = ["cliente", "data"]  # ordinamento per generazione
     order_on_view = ["anno", "progressivo"]  # ordinamento in visualizzazione

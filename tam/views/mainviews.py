@@ -19,7 +19,7 @@ def errors500(request, exception=None, template_name="500.html"):
     return render(request, template_name, locals())
 
 
-def errors400(request, exception=None, template_name='404.html'):
+def errors400(request, exception=None, template_name="404.html"):
     return render(request, template_name, {})
 
 

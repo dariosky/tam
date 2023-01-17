@@ -308,16 +308,6 @@ def fixAction(request, template_name="utils/fixAction.html"):
             if not created
             else "Stats permissions created"
         )
-
-    if request.POST.get("consolidateLog"):
-        messageLines.append(
-            "Starting moving log files from SQLITE to the default connection"
-        )
-        sourceLogs = ActionLog.objects.using("modellog").all()
-            "Stats permissions where already there"
-            if not created
-            else "Stats permissions created"
-        )
     if request.POST.get("noAnticipo"):
         for luogo in Luogo.objects.all():
             luogo.anticipo_servizio = 0

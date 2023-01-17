@@ -1,5 +1,6 @@
 # Django related ***
 Django==2.0.4
+channels[daphne]
 pyyaml
 
 # security
