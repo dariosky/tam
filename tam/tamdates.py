@@ -8,7 +8,6 @@ from collections import OrderedDict
 from django.utils import timezone
 import datetime
 import pytz
-from django.conf import settings
 import logging
 import re
 
@@ -75,10 +74,7 @@ def parse_datestring(s, default=None):
 
 
 def ita_now():
-    if settings.USE_TZ:
-        return timezone.now().astimezone(tz_italy)
-    else:
-        return timezone.now()
+    return timezone.now().astimezone(tz_italy)
 
 
 def ita_today():
@@ -98,19 +94,13 @@ def date_enforce(data):
     """Ensure the date is timezone aware"""
     if not data:
         return
-    if isinstance(data, datetime.date):
+    if isinstance(data, datetime.date) and not isinstance(data, datetime.datetime):
         data = datetime.datetime(*data.timetuple()[:3])  # converto da date a datetime
-    if settings.USE_TZ:
-        if timezone.is_naive(data):  # nella sessione ho salvato una data naive
-            data = tz_italy.localize(data)
-            return data
-        else:
-            return data.astimezone(tz_italy)
+    if timezone.is_naive(data):  # nella sessione ho salvato una data naive
+        data = tz_italy.localize(data)
+        return data
     else:
-        if timezone.is_naive(data):
-            return data
-        else:  # strip datetime timezone
-            return datetime.datetime(*data.timetuple()[:5])
+        return data.astimezone(tz_italy)
 
 
 def date2datetime(day):
@@ -133,7 +123,7 @@ def appendTimeToDate(day, time_string):
     @param time_string: string
     @return: datetime
     """
-    if isinstance(day, datetime.date):
+    if isinstance(day, datetime.date) and not isinstance(day, datetime.datetime):
         day = date2datetime(day)
     h_string, m_string = time_string.split(":")
     return day + datetime.timedelta(hours=int(h_string), minutes=int(m_string))
@@ -145,7 +135,7 @@ timedelta_re = re.compile(r"((?P<days>\d+)d)?((?P<hours>\d+)h)?((?P<minutes>\d+)
 def appendTimeFromRegex(day, timedelta_string):
     # parse the string with a regex that will represent a timedelta (to span easly across days)
     # I put it here http://regex101.com/r/zK7uZ9
-    if isinstance(day, datetime.date):
+    if isinstance(day, datetime.date) and not isinstance(day, datetime.datetime):
         day = date2datetime(day)
     m = re.match(timedelta_re, timedelta_string)
     assert m is not None
@@ -156,13 +146,5 @@ def appendTimeFromRegex(day, timedelta_string):
     return day + delta
 
 
-if settings.DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
-    # if we are on sqlite, dates on DB are expressed as CET ...
-    # where they should be UTC (or tz aware), so, let's stick to UTC
-    logging.debug("using UTC to show CET (a bad hack)")
-    tz_italy = pytz.timezone("UTC")
-else:
-    # Tutto in UTC, ma reinterpreto come CET
-    # logging.debug("in DB everything is TZ aware")
-    tz_italy = pytz.timezone("Europe/Rome")
+tz_italy = pytz.timezone("Europe/Rome")
 timezone.activate(tz_italy)

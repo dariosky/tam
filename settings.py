@@ -184,7 +184,7 @@ if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
 
 LOGGING_CONFIG = None
 
-with open("logging_config.yaml", "rt") as f:
+with open(os.path.join(PROJECT_PATH, "logging_config.yaml"), "rt") as f:
     config = yaml.safe_load(f)
     # config['handlers']['production_file']['filename'] = os.path.join(PROJECT_PATH, 'logs',
     #                                                                  'main.log')

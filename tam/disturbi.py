@@ -5,6 +5,8 @@ from math import ceil, floor
 from decimal import Decimal
 from django.utils import timezone
 
+from tam.tamdates import date_enforce
+
 
 def fascia_uno_o_due_disturbi(
     fascia_start, fascia_end, date_start, date_end, punti_fascia, tipo, results={}
@@ -533,6 +535,7 @@ def trovaDisturbi(data_inizio, data_fine, metodo=fasce_lineari):
     """Itero tra giorni e fasce chiamando il metodo di calcolo dei punti supplementari"""
     results = {}
     # faccio si che data_inizio e fine siano entrambe in TZ italiana:
+    data_inizio, data_fine = date_enforce(data_inizio), date_enforce(data_fine)
     data_inizio, data_fine = timezone.localtime(data_inizio), timezone.localtime(
         data_fine
     )
