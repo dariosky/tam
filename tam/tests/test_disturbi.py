@@ -451,3 +451,37 @@ class TestSemiLineare(unittest.TestCase, DisturbiTest):
             ),
             {"night": 3.5},
         )
+
+    def test_disturbi_notte(self):
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 24, 3, 45),
+                data_fine=datetime.datetime(2023, 1, 24, 5, 35),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 3},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 24, 3, 45),
+                data_fine=datetime.datetime(2023, 1, 24, 5, 35),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 3},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 24, 3, 59),
+                data_fine=datetime.datetime(2023, 1, 24, 6, 0),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"night": 3},
+        )
+        self.assertEqual(
+            trovaDisturbi(
+                data_inizio=datetime.datetime(2023, 1, 24, 4, 0),
+                data_fine=datetime.datetime(2023, 1, 24, 4, 1),
+                metodo=fasce_semilineari_dal,
+            ),
+            {"morning": 2.75},
+        )

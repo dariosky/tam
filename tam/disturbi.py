@@ -335,12 +335,23 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         )
         fascia_semilineari(
             dayMarker.replace(hour=3, minute=30),
-            dayMarker.replace(hour=5, minute=59),
+            dayMarker.replace(hour=3, minute=59),
             # la mattina scendo
             data_inizio,
             data_fine,
             minuti_per_quarto=-30,
             punti_partenza=3,
+            tipo="night",
+            results=results,
+        )
+        fascia_semilineari(
+            dayMarker.replace(hour=4, minute=0),
+            dayMarker.replace(hour=5, minute=59),
+            # la mattina scendo
+            data_inizio,
+            data_fine,
+            minuti_per_quarto=-30,
+            punti_partenza=2.75,
             tipo="morning",
             results=results,
         )
@@ -384,12 +395,23 @@ def fasce_semilineari_2022(dayMarker, data_inizio, data_fine, results):
         )
         fascia_semilineari(
             dayMarker.replace(hour=3, minute=30),
-            dayMarker.replace(hour=5, minute=59),
+            dayMarker.replace(hour=3, minute=59),
             # la mattina scendo
             data_inizio,
             data_fine,
             minuti_per_quarto=-30,
             punti_partenza=3.0,
+            tipo="night",
+            results=results,
+        )
+        fascia_semilineari(
+            dayMarker.replace(hour=4, minute=0),
+            dayMarker.replace(hour=5, minute=59),
+            # la mattina scendo
+            data_inizio,
+            data_fine,
+            minuti_per_quarto=-30,
+            punti_partenza=2.75,
             tipo="morning",
             results=results,
         )
