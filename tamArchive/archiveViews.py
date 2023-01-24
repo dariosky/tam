@@ -15,7 +15,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
-from modellog.actions import logAction, stopLog, startLog
+from modellog.actions import log_action, stopLog, startLog
 from modellog.models import ActionLog
 from tam import tamdates
 from tam.models import Viaggio, ProfiloUtente, Conducente, get_classifiche
@@ -191,7 +191,7 @@ def flat(request, template_name="archive/flat.html"):
     # controllo che ci sia qualche minimo da togliere
     flat_needed = max(minimi.values()) > 0
     if "flat" in request.POST and flat_needed:
-        logAction(
+        log_action(
             "F",
             instance=request.user,
             description="Appianamento delle classifiche",

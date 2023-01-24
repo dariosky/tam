@@ -1,5 +1,5 @@
 {% load utilTag %}
-{% load staticfiles %}
+{% load static %}
 <tr class='{% if viaggio.warning and not viaggio.annullato %}warning {% elif viaggio.annullato %}annullato {% endif %}{{ back_class }}'>
 	<td>
 		{% if not distinct %}

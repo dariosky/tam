@@ -1,5 +1,6 @@
 # coding=utf-8
-from past.builtins import basestring
+
+basestring = (str, bytes)
 
 
 def perform_dict_substitutions(d):

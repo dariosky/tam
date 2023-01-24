@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.views.generic import TemplateView
 
 from codapresenze.models import CodaPresenze, StoricoPresenze
-from modellog.actions import logAction
+from modellog.actions import log_action
 from tam.models import Conducente, Viaggio
 from tam.tamdates import tz_italy, ita_now
 from tam.views.users import get_userkeys
@@ -93,7 +93,7 @@ def coda(request, template_name="codapresenze/coda.html"):
         if messageParts:
             if actinguser != request.user:
                 messageParts.append("Effettuato da %s" % request.user)
-            logAction("Q", description=" ".join(messageParts), user=actinguser)
+            log_action("Q", description=" ".join(messageParts), user=actinguser)
 
     presenzedb = CodaPresenze.objects.all().values(
         "id",

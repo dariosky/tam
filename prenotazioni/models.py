@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from future.utils import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from board.models import fs, get_secure_attachment_subfolder
 from prenotazioni.util import prenotaCorsa

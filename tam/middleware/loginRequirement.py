@@ -8,20 +8,14 @@ from django.core.mail import mail_admins
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger("tam.general")
 
 
-class RequireLoginMiddleware:
+class RequireLoginMiddleware(MiddlewareMixin):
     """Middleware that gets various objects from the
     request object and saves them in thread local storage."""
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-
-    def __call__(self, request):
-        response = self.get_response(request)
-        return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         public_view = getattr(view_func, "public", False)

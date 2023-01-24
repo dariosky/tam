@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.http import HttpResponse, HttpResponseRedirect
 
-from modellog.actions import logAction
+from modellog.actions import log_action
 from tam.views import xlsUtil
 
 corseField = OrderedDict()
@@ -100,7 +100,7 @@ def xlsResponse(request, querySet):
         response = HttpResponse(output.getvalue(), content_type="application/excel")
 
         response["Content-Disposition"] = 'attachment; filename="%s"' % "tamExport.xls"
-        logAction(
+        log_action(
             action="X",
             description="Export in Excel di %d corse." % numViaggi,
             user=request.user,

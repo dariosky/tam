@@ -5,7 +5,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.db import models
 from django.utils.safestring import mark_safe
-from future.utils import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from tam.models import Viaggio, Conducente, Cliente, Passeggero
 

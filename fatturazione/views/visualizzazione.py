@@ -17,7 +17,7 @@ from fatturazione.models import Fattura, RigaFattura
 from fatturazione.views.generazione import DEFINIZIONE_FATTURE, FATTURE_PER_TIPO
 from fatturazione.views.pdf import render_to_reportlab
 from fatturazione.views.util import ultimoProgressivoFattura
-from modellog.actions import logAction
+from modellog.actions import log_action
 from tam.tamdates import parse_datestring, MONTH_NAMES
 
 
@@ -144,7 +144,9 @@ def fattura(
             # se ho successo, restituisco l'url a cui andare
             message = "%s eliminata." % fattura.nome_fattura()
             try:
-                logAction("C", instance=fattura, description=message, user=request.user)
+                log_action(
+                    "C", instance=fattura, description=message, user=request.user
+                )
                 fattura.delete()
             except:
                 return HttpResponse(
@@ -163,7 +165,7 @@ def fattura(
                 rowid = int(request.POST.get("row"))
                 # if rowid in fattura.righe.values_list('id', flat=True):
                 riga = fattura.righe.get(id=rowid)
-                logAction(
+                log_action(
                     "C",
                     instance=fattura,
                     description="Riga eliminata.",
@@ -190,7 +192,7 @@ def fattura(
             )
             riga.fattura = fattura
             riga.save()
-            logAction(
+            log_action(
                 "C",
                 instance=fattura,
                 description="Riga inserita manualmente.",
@@ -238,7 +240,7 @@ def fattura(
                 "fat_title": "doc_name",
             }
             header_numerici = ["fat_anno", "fat_progressivo"]
-            logAction(
+            log_action(
                 "C",
                 instance=fattura,
                 description="%s modificato in %s." % (object_id, object_value),
@@ -376,7 +378,7 @@ def nuova_fattura(request, fatturazione):
     fattura.save()
     message = "Creata la %s %s." % (fattura.nome_fattura(), fattura.descrittore())
     messages.success(request, message)
-    logAction("C", instance=fattura, description=message, user=request.user)
+    log_action("C", instance=fattura, description=message, user=request.user)
     return HttpResponseRedirect(fattura.url())
 
 

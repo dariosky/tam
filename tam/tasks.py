@@ -74,7 +74,7 @@ def single_instance_task(timeout=60 * 60 * 2):  # 2 hour of default timeout
 def moveLogs(name="movelogs.job"):
     from django.contrib.contenttypes.models import ContentType
     from django.db import connections
-    from modellog.actions import logAction
+    from modellog.actions import log_action
 
     print("Cominciamo a spostare")
     con = connections["default"]
@@ -130,7 +130,7 @@ def moveLogs(name="movelogs.job"):
                 instance = ct_class.objects.get(id=object_id)
             except ct_class.DoesNotExist:
                 instance = None
-            logAction(
+            log_action(
                 action=action_type,
                 instance=instance,
                 description=description,

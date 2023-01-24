@@ -7,11 +7,11 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.views import LoginView, logout_then_login as django_logout
 from django.forms import forms
 from django.http import HttpResponseServerError
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.utils.translation import ugettext_lazy as _
 
 from markViews import public
-from modellog.actions import logAction
+from modellog.actions import log_action
 from tam.middleware.prevent_multisession import get_concurrent_sessions
 from tam.ratelimit import get_client_ip
 
@@ -40,7 +40,7 @@ class AuthenticationFormWrapped(AuthenticationForm):
                 concurrent_sessions = get_concurrent_sessions(request, user)
                 if concurrent_sessions:
                     logger.warning("We have concurrent sessions: login forbidden")
-                    logAction(
+                    log_action(
                         "L", description="Accesso proibito - multisessione", user=user
                     )
                     raise forms.ValidationError(
@@ -62,7 +62,7 @@ def login(request):
         if request.method == "POST" and request.POST.get("username"):
             messages.append("Last try with username: %s" % request.POST.get("username"))
         logger.error("\n".join(messages))
-        return render_to_response("429-limited.html", status=429)
+        return render(request, "429-limited.html", status=429)
 
     logged = request.user.is_authenticated and request.user.username
 
@@ -80,7 +80,7 @@ def login(request):
     ):  # just logged in
         request.session["userAgent"] = request.META.get("HTTP_USER_AGENT")
         logger.debug("Login for %s" % request.user)
-        logAction("L", description="Accesso effettuato", user=request.user)
+        log_action("L", description="Accesso effettuato", user=request.user)
     else:
         if request.method == "POST":
             logger.debug("Login attempt failed")
@@ -96,5 +96,5 @@ def logout(request):
     response = django_logout(request, login_url="/")
     if not request.user.is_authenticated and logged:  # just logged out
         logger.debug("Logout user %s" % logged)
-        logAction("O", description="Disconnesso", user=logged)
+        log_action("O", description="Disconnesso", user=logged)
     return response

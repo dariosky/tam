@@ -10,7 +10,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.utils import timezone
 
-from modellog.actions import logAction
+from modellog.actions import log_action
 from modellog.models import ActionLog, LOG_ACTION_TYPE
 from tam import tamdates
 from tam.views.tamviews import SmartPager
@@ -33,7 +33,7 @@ def logAndCleanExpiredSessions():
         try:
             if "_auth_user_id" in data:
                 user = User.objects.get(id=data["_auth_user_id"])
-                logAction(
+                log_action(
                     "O",
                     user=user,
                     description="Sessione scaduta",

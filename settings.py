@@ -30,7 +30,7 @@ if DEBUG:
     warnings.simplefilter("always", DeprecationWarning)
     warnings.filterwarnings(
         "error",
-        r"DateTimeField received a naive datetime",
+        "DateTimeField received a naive datetime",
         RuntimeWarning,
         r"django\.db\.models\.fields",
     )
@@ -370,9 +370,9 @@ GOOGLE_ANALYTICS_ID = None
 
 # set password hasher, we use Argon as default
 PASSWORD_HASHERS = [
-    "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2PasswordHasher",
     "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
     "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     "django.contrib.auth.hashers.BCryptPasswordHasher",
 ]

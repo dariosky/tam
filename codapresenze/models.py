@@ -1,7 +1,7 @@
 # coding=utf-8
 from django.db import models
 from django.contrib.auth.models import User
-from future.utils import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 
 # l'utente potente potrà rimettere in fondo alla coda e cancellare

@@ -1,4 +1,4 @@
-{% load staticfiles %}
+{% load static %}
 <div><a href='{% url "tamNuovaCorsaId" viaggio.id %}'>{{viaggio.da}}-{{viaggio.a}}</a></div>
 {% include "corse/cella_ora_e_percorso.inc.html" %}
 <div>

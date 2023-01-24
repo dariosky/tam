@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, render
 from glob import glob
-from modellog.actions import logAction
+from modellog.actions import log_action
 import datetime
 import gzip
 import logging
@@ -90,7 +90,7 @@ def getbackup(request, backupdate):
     backupInfo = getBackupInfo(doCleanup=True)
     for backup in backupInfo["backups"]:
         if backup["date"].timetuple()[:5] == dataScelta.timetuple()[:5]:
-            logAction(
+            log_action(
                 "G",
                 description="Backup del %s scaricato" % backupdate,
                 user=request.user,
@@ -159,7 +159,7 @@ def doBackupPostgre(
 def doBackup(user):
     backupInfo = getBackupInfo(doCleanup=True)
 
-    logAction("B", description="Backup richiesto", user=user)
+    log_action("B", description="Backup richiesto", user=user)
     username = user.username
 
     dbType = settings.DATABASES["default"]["ENGINE"]

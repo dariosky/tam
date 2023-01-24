@@ -1,16 +1,17 @@
 # coding=utf-8
+import logging
+
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import signals
 from django.utils import timezone
 
 from modellog.models import ActionLog
 from tam.middleware import threadlocals
-import logging
 
 logger = logging.getLogger("tam.action")
 
 
-def logAction(action, instance=None, description="", user=None, log_date=None):
+def log_action(action, instance=None, description="", user=None, log_date=None):
     if instance:
         content_type = ContentType.objects.get_for_model(instance)
     else:
@@ -79,15 +80,15 @@ def presave_logger(sender, instance, signal, **kwargs):
 def postsave_logger(sender, instance, signal, **kwargs):
     # logging.debug( "POSTSAVE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
     if instance._changeList is None:
-        logAction("A", instance, "%s" % instance)
+        log_action("A", instance, "%s" % instance)
     else:
         if instance._changeList:
-            logAction("M", instance, "; ".join(instance._changeList))
+            log_action("M", instance, "; ".join(instance._changeList))
 
 
 def predelete_logger(sender, instance, signal, **kwargs):
     # logging.debug( "DELETE: sender:%s. instance:%s" % (sender._meta.verbose_name, instance) )
-    logAction("D", instance, "%s" % instance)
+    log_action("D", instance, "%s" % instance)
 
 
 def startLog(ModelClass):

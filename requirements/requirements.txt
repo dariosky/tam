@@ -1,13 +1,13 @@
 # Django related ***
-Django==2.0.4
-channels[daphne]
+Django==3.0.14
+channels
 pyyaml
 
 # security
 argon2-cffi
 
 # static files ***
-django-pipeline==1.6.13
+django-pipeline==2.0.8
 jinja2
 
 # exports ***
@@ -39,9 +39,6 @@ django-anymail[mailgun]==3.0
 pyopenssl
 ndg-httpsclient
 pyasn1
-
-# python3 compatibility ***
-future
 
 # request throttling
 django-brake

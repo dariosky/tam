@@ -3,7 +3,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
 from django.utils.translation import ungettext
-from future.utils import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 
 from tam.tamdates import tz_italy
 

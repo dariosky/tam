@@ -9,7 +9,7 @@ from django.db.models.query_utils import Q
 from django.template.loader import render_to_string
 from pytz import timezone
 
-from modellog.actions import logAction, stopLog, startLog
+from modellog.actions import log_action, stopLog, startLog
 from modellog.models import ActionLog
 from tam.models import Viaggio, Conducente
 from tam.tasks import print_timing, single_instance_task
@@ -134,7 +134,7 @@ def do_archiviazione(user, end_date):
     ).filter(filtroViaggi)
     # Optimizations: mi faccio dare solo i modelli che mi interessano
     # Rimovo l'ordinamento di default
-    logAction(
+    log_action(
         "K", instance=user, description="Archiviazione fino al %s" % end_date, user=user
     )
     logger.debug("Archiviazione fino al %s cominciata" % end_date)

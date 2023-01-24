@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.views.generic.base import TemplateView
 
 from calendariopresenze.models import Calendar, pretty_duration
-from modellog.actions import logAction
+from modellog.actions import log_action
 from tam import tamdates
 from tam.models import Conducente
 from tam.tamdates import ita_today, appendTimeToDate, appendTimeFromRegex
@@ -182,7 +182,7 @@ class CalendarManage(AjaxableResponseMixin):
                 date_end=date_end,
             )
             calendar.save()
-            logAction(
+            log_action(
                 "P",
                 instance=calendar,
                 description="Presenze: aggiunto {name} {calendar}".format(
@@ -227,7 +227,7 @@ class CalendarManage(AjaxableResponseMixin):
                     )
                 )
             caldesc = settings.CALENDAR_DESC[calendar.type]
-            logAction(
+            log_action(
                 "P",
                 instance=calendar,
                 description="Presenze: cancellato {name} {calendar}".format(
@@ -269,7 +269,7 @@ class CalendarManage(AjaxableResponseMixin):
             caldesc["toggle"](calendar)
             new_value = calendar.value
 
-            logAction(
+            log_action(
                 "P",
                 instance=calendar,
                 description="Presenze: variato {name} {calendar} da {old} a {new}".format(

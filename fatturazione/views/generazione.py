@@ -17,7 +17,7 @@ from django.http import HttpResponseRedirect, HttpResponse
 
 from fatturazione.models import Fattura, RigaFattura, nomi_fatture, nomi_plurale
 from fatturazione.views.util import ultimoProgressivoFattura
-from modellog.actions import logAction
+from modellog.actions import log_action
 from tam.models import Viaggio, ProfiloUtente
 from tam.tamdates import MONTH_NAMES
 from . import tipi_fatturazione
@@ -407,7 +407,7 @@ def genera_fatture(request, fatturazione):
                 on_fattura_end(fattura, esente_iva)
             message = "Generate %d %s." % (fatture_generate, plurale)
             messages.success(request, message)
-            logAction("C", description=message, user=request.user)
+            log_action("C", description=message, user=request.user)
             return HttpResponseRedirect(reverse("tamGenerazioneFatture"))
 
     return render(
