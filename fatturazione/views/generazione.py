@@ -445,6 +445,12 @@ def setPagato(request):
     pagato = request.POST["pagato"] == "true"
     fattura.pagata = pagato
     fattura.save()
+    logAction(
+        "C",
+        instance=fattura,
+        description="%s flag: %s." % (fattura, "pagato" if pagato else "non pagato"),
+        user=request.user,
+    )
     result = {
         "ok": True,
         "fattura": fattura.id,
