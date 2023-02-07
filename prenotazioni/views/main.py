@@ -22,7 +22,7 @@ from markViews import prenotazioni
 from prenotazioni.models import Prenotazione
 from prenotazioni.util import prenotaCorsa
 from prenotazioni.views.forms import FormPrenotazioni
-from prenotazioni.views.tam_email import notifyByMail
+from prenotazioni.views.tam_email import notify_by_email
 from securestore.views import serve_secure_file
 from tam import tamdates
 from tam.models import Viaggio, Cliente, Luogo
@@ -60,7 +60,7 @@ def inviaMailPrenotazione(prenotazione, azione, attachments=None, extra_context=
             )
         )
     else:
-        notifyByMail(
+        notify_by_email(
             to=[prenotazione.owner.email, settings.EMAIL_CONSORZIO],
             from_email=from_email,
             subject=subject,

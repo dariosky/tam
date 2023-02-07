@@ -9,7 +9,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import Template, RequestContext
 
-from prenotazioni.views.tam_email import ADMIN_MAIL, notifyByMail
+from prenotazioni.views.tam_email import ADMIN_MAIL, notify_by_email
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ def email_test(request):
         "Email sent to admins: %s" % ADMIN_MAIL,
         "backend: %s" % settings.EMAIL_BACKEND,
     ]
-    notifyByMail(
+    notify_by_email(
         to=[ADMIN_MAIL],
         subject="Test email with %s" % settings.EMAIL_BACKEND,
         body="This is the body of the message",
