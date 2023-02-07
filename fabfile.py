@@ -181,12 +181,13 @@ def update_instance(do_update_requirements=True, justPull=False):
 
 def daphne(action):
     with virtualenv():
-            if env.UWSGI_START_COMMAND:
-                print("Starting UWSGI")
-                run(env.UWSGI_START_COMMAND)
-            else:
-        with cd(env.REPOSITORY_FOLDER):
-            run("python manage.py daphne %s" % action)
+        if env.UWSGI_START_COMMAND:
+            print("Starting UWSGI")
+            run(env.UWSGI_START_COMMAND)
+        else:
+            raise RuntimeError("Give me the UWSGI_START_COMMAND to run Daphne")
+    with cd(env.REPOSITORY_FOLDER):
+        run("python manage.py daphne %s" % action)
 
 
 @task
@@ -232,9 +233,7 @@ def deploy(justPull=False):
     Pull from git, update virtualenv, create static and restart the server
     """
     is_this_initial = False
-    if run(
-        "test -d %s/.git" % env.REPOSITORY_FOLDER, quiet=True
-    ).failed:
+    if run("test -d %s/.git" % env.REPOSITORY_FOLDER, quiet=True).failed:
         # destination folder to be created
         message = "Repository folder doesn't exists on destination. Proceed with initial deploy?"
         if not confirm(message):

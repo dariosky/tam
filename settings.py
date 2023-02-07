@@ -96,7 +96,7 @@ STATICFILES_FINDERS = (
     "pipeline.finders.PipelineFinder",
     # 'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
-STATICFILES_STORAGE = "tam.storage.PipelineCachedStorage"
+STATICFILES_STORAGE = "pipeline.storage.PipelineManifestStorage"
 
 jqueryURL = (
     "js/jquery.min.js"  # 1.7.2, port no newer one should need change autocomplete
@@ -183,12 +183,6 @@ if not os.path.isdir(os.path.join(PROJECT_PATH, "logs")):
     os.mkdir(os.path.join(PROJECT_PATH, "logs"))
 
 LOGGING_CONFIG = None
-
-with open(os.path.join(PROJECT_PATH, "logging_config.yaml"), "rt") as f:
-    config = yaml.safe_load(f)
-    # config['handlers']['production_file']['filename'] = os.path.join(PROJECT_PATH, 'logs',
-    #                                                                  'main.log')
-logging.config.dictConfig(config)
 
 MIDDLEWARE = (
     # 'mediagenerator.middleware.MediaMiddleware',
@@ -511,3 +505,7 @@ perform_dict_substitutions(
 )  # change the deployment string to use a kind of templates
 NIGHT_START = (22, 0)
 NIGHT_END = (6, 0)
+
+with open(os.path.join(PROJECT_PATH, "logging_config.yaml"), "rt") as f:
+    config = yaml.safe_load(f)
+logging.config.dictConfig(config)

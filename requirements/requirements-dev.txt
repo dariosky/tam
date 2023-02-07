@@ -8,4 +8,4 @@ django-debug-toolbar-template-timings
 fabric3==1.14.post1
 
 #tests ***
-pytest-django==3.10.0
+pytest-django

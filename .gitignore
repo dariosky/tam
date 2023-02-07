@@ -36,9 +36,6 @@ run_server.sh
 !/static/.htaccess
 !/static/robots.txt
 /media/brand
-/media_secured/
-
-/node_modules
 
 /logs
 /_dev/

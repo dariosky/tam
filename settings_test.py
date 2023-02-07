@@ -1,8 +1,7 @@
 # coding=utf-8
-# noinspection PyUnresolvedReferences
-from settings import *
-
 SECRET_KEY = "TestTestTestTest"
+
+from settings import *  # noqa
 
 DATABASES = {
     "default": {
