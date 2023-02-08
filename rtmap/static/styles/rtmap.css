@@ -1,2 +1,1 @@
-body{display:flex;flex-direction:column}.content{flex-grow:1;position:relative}.footer,.navBar{flex-grow:0}#mapid{top:0;left:0;position:absolute;right:0;bottom:0}.tam-marker{background-image:url(../img/marker-highlighted.png)}.tam-marker.current{background-image:url(../img/marker.png)}
-/*# sourceMappingURL=rtmap.css.map */
+body{display:flex;flex-direction:column}.content{flex-grow:1;position:relative}.footer,.navBar{flex-grow:0}#mapid{top:0;left:0;position:absolute;right:0;bottom:0}.tam-marker{background-image:url(../img/marker-highlighted.png)}.tam-marker.current{background-image:url(../img/marker.png)}/*# sourceMappingURL=rtmap.css.map */

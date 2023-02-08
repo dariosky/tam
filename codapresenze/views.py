@@ -79,7 +79,7 @@ def coda(request, template_name="codapresenze/coda.html"):
             # mi disaccodo
             if posizioneCorrente:
                 posizioneCorrente = posizioneCorrente[0]
-                messageParts.append("Si disaccoda da %s." % posizioneCorrente.luogo)
+                messageParts.append(f"Si disaccoda da {posizioneCorrente.luogo}.")
                 dequeue(posizioneCorrente)
 
         if "place" in request.POST:

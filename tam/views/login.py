@@ -96,6 +96,6 @@ def logout(request):
     logged = request.user.is_authenticated and request.user
     response = django_logout(request, login_url="/")
     if not request.user.is_authenticated and logged:  # just logged out
-        logger.debug("Logout user %s" % logged)
+        logger.debug(f"Logout user {logged}")
         log_action("O", description="Disconnesso", user=logged)
     return response

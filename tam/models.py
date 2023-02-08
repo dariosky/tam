@@ -1098,7 +1098,8 @@ class Viaggio(models.Model):
 
     def get_valuetot(self, **kwargs):
         result = self.get_value(**kwargs)
-        for figlio in self.viaggio_set.all():
+        figli = self.viaggio_set.all() if self.id is not None else []
+        for figlio in figli:
             result += figlio.get_value(**kwargs)
         return result
 

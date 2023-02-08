@@ -115,7 +115,9 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
         return "venezia" in nome or "treviso" in nome
 
     total_pax = 0
-    for cursore in [viaggio] + list(viaggio.viaggio_set.all()):
+    for cursore in [viaggio] + (
+        [] if not viaggio.id else list(viaggio.viaggio_set.all())
+    ):
         if VEorTV is False and (specialPlace(cursore.da) or specialPlace(cursore.a)):
             VEorTV = True
         bacino = cursore.da

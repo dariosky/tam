@@ -418,17 +418,12 @@ td img {
 }
 
 #esclusivoBlock {
-  display: inline;
-}
-
-#esclusivoBlock ul {
-  /* la choice blocco esclusivo */
-  list-style-type: none;
-}
-
-#esclusivoBlock li {
-  /* la choice blocco esclusivo */
-  display: inline;
+  #id_esclusivo {
+    div {
+      /* la choice blocco esclusivo */
+      display: inline;
+    }
+  }
 }
 
 .btnbox {
@@ -834,7 +829,7 @@ input[type="button"], input[type="submit"], input[type="reset"], input[type="fil
 }
 
 .hasDatepicker, .time-widget {
-  width: 6em;
+  width: 68px;
 }
 
 .accordion-content {

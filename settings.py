@@ -511,3 +511,4 @@ with open(os.path.join(PROJECT_PATH, "logging_config.yaml"), "rt") as f:
 logging.config.dictConfig(config)
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+FORM_RENDERER = "django.forms.renderers.DjangoDivFormRenderer"
