@@ -2,7 +2,7 @@
 <div class='lordo{% if viaggio.prezzo == 0 %} error{% endif %}'>{{ viaggio.prezzo }}</div>
 {% if viaggio.annullato  %}<br/>{% if nolink %}ANNULLATO{% else %}<a href="{% url "tamNuovaCorsa2Id" viaggio.id %}">ANNULLATO</a>{% endif %}{% else %}
 <div class="pricedetail">
-{% if viaggio.commissione %}- c{{ viaggio.commissione }}{% ifequal viaggio.tipo_commissione "P" %}%{% endifequal %}{% endif %}
+{% if viaggio.commissione %}- c{{ viaggio.commissione }}{% if viaggio.tipo_commissione == "P" %}%{% endif %}{% endif %}
 {% if viaggio.costo_autostrada %}- a{{ viaggio.costo_autostrada }}{% endif %}
 {% if viaggio.pagamento_differito or viaggio.fatturazione%}{{viaggio.incidenza_differto}}{% endif %}
 {% if viaggio.abbuono_fisso %}- b{{viaggio.abbuono_fisso}}{% endif %}

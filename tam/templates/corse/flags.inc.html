@@ -3,4 +3,4 @@
 {% if viaggio.pagamento_differito %}<i class="sprite icon-timedelta"></i>{% endif %}
 {% if viaggio.cartaDiCredito %}<i class="sprite icon-card"></i>{% endif %}
 {% if viaggio.incassato_albergo %}<div>CONTO FINE MESE</div>{% endif %}
-{% ifequal viaggio.is_abbinata "P" %}<div>collettivo in partenza</div>{% endifequal %}
+{% if viaggio.is_abbinata == "P" %}<div>collettivo in partenza</div>{% endif %}

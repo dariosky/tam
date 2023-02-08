@@ -19,7 +19,7 @@
         {% if form.non_field_errors %}
 			{{ form.non_field_errors }}
 		{% endif %}
-        {% ifequal step 1 %}
+        {% if step == 1 %}
 			<p> <label for="id_data_0">Data e ora</label> {{ form.data|safe }} {% if form.data.errors %}<br/> <span class="errorlist">{% for error in form.data.errors %}{{ error }}{% endfor %}</span> {% endif %}	</p>
 
 	        <p> {{ form.da.label_tag }} {{ form.da }}
@@ -80,11 +80,11 @@
 					</tr>
 				{% endif %}
 			</table>
-        {% endifequal %}
+        {% endif %}
 
 
 		<p class="buttons">
-		    {% ifnotequal step 1 %}
+		    {% if step != 1 %}
 		        {% if not id or not viaggio.padre_id %}
 					{% if not  viaggio.conducente_confermato %}
 						<a href="?back">dettagli precedenti</a>
@@ -92,13 +92,13 @@
 				{% endif %}
             {% else %}
                 {% if new %}<input type="button" id="clear" name="clear" value="Reset"/>{% endif %}
-			{% endifnotequal %}
+			{% endif %}
 			<input type="submit" id="actionButton" name="proceed" value="{{ continue_title }}" />
             {% if not new %}
-				{% ifnotequal step 1 %}
+				{% if step != 1 %}
 					<a href="{% url "tamCorsaCopy" viaggio.pk %}">copia</a>
 					<a href="{% url "actionLog" %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
-				{% endifnotequal %}
+				{% endif %}
                 {% with viaggio.delete_url as deleteUrl %}
                     {% if deleteUrl and perms.tam.delete_viaggio %}
 							<br/>
@@ -111,7 +111,7 @@
 		</p>
 
 	</form>
-		{% ifequal step 2 %}
+		{% if step == 2 %}
 			<div>
 				<div style="font-family:monospace; ">
 						{% if viaggio.cliente %}
@@ -125,7 +125,7 @@
 
 				</div>
 			</div>
-		{% endifequal %}
+		{% endif %}
 	{% endif %}
 </div>
 {% endblock content %}

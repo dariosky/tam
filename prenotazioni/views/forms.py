@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.forms.widgets import Input
-from django.utils.translation import ugettext as _, ungettext
+from django.utils.translation import gettext as _, ngettext
 
 from prenotazioni.models import Prenotazione
 from tam import tamdates
@@ -47,7 +47,7 @@ class FormPrenotazioni(forms.ModelForm):
                 delta = rdate - notice_max
                 hours = delta.seconds / 60 / 60 + delta.days * 24
                 raise forms.ValidationError(
-                    ungettext(
+                    ngettext(
                         "Il preavviso minimo per questa corsa è di un'ora",
                         "Il preavviso minimo per questa corsa è di {hours} ore",
                         hours,

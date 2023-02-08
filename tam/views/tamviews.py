@@ -16,7 +16,7 @@ from django.db.models.deletion import ProtectedError
 from django.db.models.query_utils import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import HttpResponse, get_object_or_404, render
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from tam import tamdates
 from tam.models import (
@@ -1152,9 +1152,6 @@ def bacino(
     excludedFields=None,
     fields_descriptions=None,
 ):
-    """
-    @param extra_dict:  Addictional var to give to response
-    """
     if "next" in request.GET:
         redirectOk = request.GET["next"]
     nuovo = id is None

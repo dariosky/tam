@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.db import transaction
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from modellog.actions import log_action, stopLog, startLog
 from modellog.models import ActionLog

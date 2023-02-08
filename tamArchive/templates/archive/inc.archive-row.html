@@ -13,19 +13,19 @@
 	</td>
 	{% if viaggio.flag_arrivo %}
 		<td class="arrivo">
-			{% ifequal viaggio.a luogoRiferimento %}
+			{% if viaggio.a == luogoRiferimento %}
 				ARRIVO {{ viaggio.da }}
 			{% else %}
 				{{ viaggio.da }}<img src="{% static "img/fout.png" %}" alt="Arrivo" />{{ viaggio.a }}
-			{% endifequal %}
+			{% endif %}
 		</td>
 	{% else %}
 		<td class="partenza">
-			{% ifequal viaggio.da luogoRiferimento %}
+			{% if viaggio.da == luogoRiferimento %}
 				PARTENZA {{ viaggio.a }}
 			{% else %}
 				{{ viaggio.da }}<img src="{% static "img/fin.png" %}" alt="Partenza" />{{ viaggio.a }}
-			{% endifequal %}
+			{% endif %}
 		</td>
 	{% endif %}
 	<td>

@@ -25,7 +25,7 @@
 			<label for="selectedUser">Seleziona l'utente da gestire.</label>
 			<select name="selectedUser" id="selectedUser">
 				{% for iterUser in users %}
-					<option{% ifequal selectedUser iterUser %} selected="selected"{% endifequal %}
+					<option{% if selectedUser == iterUser %} selected="selected"{% endif %}
 															   value="{{ iterUser.username }}">
 						{{ iterUser.username }}{% if iterUser.prenotazioni %} -
 							prenotazioni{% endif %}

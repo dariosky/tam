@@ -19,6 +19,7 @@ from fatturazione.views.pdf import render_to_reportlab
 from fatturazione.views.util import ultimoProgressivoFattura
 from modellog.actions import log_action
 from tam.tamdates import parse_datestring, MONTH_NAMES
+from utils.django_utils import is_ajax
 
 
 @permission_required("fatturazione.view", "/")
@@ -117,7 +118,7 @@ def fattura(
         else:
             fattura = Fattura.objects.get(tipo=tipo, anno=anno, progressivo=progressivo)
     except Fattura.DoesNotExist:
-        if request.is_ajax():
+        if is_ajax(request):
             return HttpResponse("Questa fattura non esiste più.", status=400)
         else:
             messages.error(request, "Fattura non trovata.")
@@ -133,7 +134,7 @@ def fattura(
     editable = bigEdit or smallEdit
     readonly = not editable
 
-    if request.is_ajax():
+    if is_ajax(request):
         action = request.POST.get("action")
         if action == "delete-fat":
             if not bigEdit:

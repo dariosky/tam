@@ -64,7 +64,7 @@
 		{% endif %}
     {% endif %}
 {% if nextfratello %}
-    {% with viaggio.sostaFinaleMinuti as minutifermo  %}{% ifnotequal minutifermo 0 %}sosta di {{ minutifermo }} m.{% endifnotequal %}{% endwith %}
+    {% with viaggio.sostaFinaleMinuti as minutifermo  %}{% if minutifermo != 0 %}sosta di {{ minutifermo }} m.{% endif %}{% endwith %}
 	<i class="sprite icon-arrow_right"></i>
 {% else %}
 	ritorno alle {{ viaggio.get_date_end|date:"H:i" }}

@@ -6,38 +6,38 @@
             {% if clienteFiltrato %}
                 <option value="{{ clienteFiltrato.id }}" selected>{{ clienteFiltrato.nome }}</option>{% endif %}
             <option value="">Tutti i clienti</option>
-            <option value="Privato"{% ifequal "Privato" filterCliente %} selected="selected"{% endifequal %}>Privato
+            <option value="Privato"{% if "Privato" == filterCliente %} selected="selected"{% endif %}>Privato
             </option>
         </select>
         <select name="filterConducente" class="selectFilter" id='select_conducenti'>
             {% if conducenteFiltrato %}
                 <option value="{{ conducenteFiltrato.id }}" selected>{{ conducenteFiltrato.nick }}</option>{% endif %}
             <option value="">Tutti i soci</option>
-            <option value="Non confermate"{% ifequal "Non confermate" filterConducente %}
-                    selected="selected"{% endifequal %}>Non confermate
+            <option value="Non confermate"{% if "Non confermate" == filterConducente %}
+                    selected="selected"{% endif %}>Non confermate
             </option>
             {% if TAM.SPECIAL_FILTERS.BUS %}
-                <option value="bus"{% ifequal "bus" filterConducente %}
-                        selected="selected"{% endifequal %}>BUS
+                <option value="bus"{% if "bus" == filterConducente %}
+                        selected="selected"{% endif %}>BUS
                 </option>
             {% endif %}
         </select>
         <select name="filterType" class="selectFilter">
             <option value="Tutti i tipi">Tutti i tipi</option>
             {% for valore in filtriTipo %}
-                <option value="{{ valore }}"{% ifequal valore filterType %}
-                        selected="selected"{% endifequal %}>{{ valore }}</option>{% endfor %}
+                <option value="{{ valore }}"{% if valore == filterType %}
+                        selected="selected"{% endif %}>{{ valore }}</option>{% endfor %}
         </select>
         <select name="filterFlag" class="selectFilter">
             <option value="Tutti i flag">Tutti i flag</option>
             {% for valore in filtriFlag %}
-                <option value="{{ valore }}"{% ifequal valore filterFlag %}
-                        selected="selected"{% endifequal %}>{{ valore }}</option>{% endfor %}
+                <option value="{{ valore }}"{% if valore == filterFlag %}
+                        selected="selected"{% endif %}>{{ valore }}</option>{% endfor %}
         </select>
         <select name="filterWhen" id="whenSelect" class="selectFilter">
             {% for filterValue, desc in filtriWhen %}
-                <option value="{{ filterValue }}"{% ifequal filterValue filterWhen %}
-                        selected="selected"{% endifequal %}>{{ desc }}</option>{% endfor %}
+                <option value="{{ filterValue }}"{% if filterValue == filterWhen %}
+                        selected="selected"{% endif %}>{{ desc }}</option>{% endfor %}
             <option value="advanced" id="advDateFilter"{% if filtroWhenAvanzato %} selected="selected"{% endif %}>Filtro
                 avanzato...
             </option>

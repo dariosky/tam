@@ -22,8 +22,8 @@
 			<select name="user" class="selectFilter" title="Utenti">
 				<option value="">Tutti gli utenti</option>
 				{% for utente in utenti %}
-					<option value="{{ utente.id }}"{% ifequal utente.id filterUtente %}
-							selected="selected"{% endifequal %}>{{ utente }}</option>
+					<option value="{{ utente.id }}"{% if utente.id == filterUtente %}
+							selected="selected"{% endif %}>{{ utente }}</option>
 				{% endfor %}
 			</select>
 			<input class="filterOkBTN" type="submit" value="Filtra" style="padding:0 15px; margin:0;"/>
@@ -45,13 +45,13 @@
 
 		{% for action in actions %}
 			<tr>
-				<td {% ifequal action.modelName "viaggio" %}{% if action.hilight %}style="background-color:orange;"
-				{% endif %}{% endifequal %}>
-					{% ifequal action.data.date today %}
+				<td {% if action.modelName == "viaggio" %}{% if action.hilight %}style="background-color:orange;"
+				{% endif %}{% endif %}>
+					{% if action.data.date == today %}
 						<span class="today">{{ action.data|date:"H:i" }}</span>
 					{% else %}
 						<span class="date">{{ action.data|date:"D d M, Y H:i" }}</span>
-					{% endifequal %}
+					{% endif %}
 
 				</td>
 				<td>{{ action.user }}</td>

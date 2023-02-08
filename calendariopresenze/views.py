@@ -18,6 +18,7 @@ from modellog.actions import log_action
 from tam import tamdates
 from tam.models import Conducente
 from tam.tamdates import ita_today, appendTimeToDate, appendTimeFromRegex
+from utils.django_utils import is_ajax
 
 
 class CalendarForm(forms.Form):
@@ -47,7 +48,7 @@ class AjaxableResponseMixin(TemplateView):
         redirect_url = context.get("redirect_url")
         message = context.get("message")
         status = context.get("status")
-        if self.request.is_ajax() and message and status:
+        if is_ajax(self.request) and message and status:
             return HttpResponse(message, status=status)
         if redirect_url:
             if message and 400 <= status < 600:
@@ -189,7 +190,7 @@ class CalendarManage(AjaxableResponseMixin):
                     name=subname or caldesc["name"], calendar=calendar
                 ),
             )
-            if request.is_ajax():
+            if is_ajax(request):
                 row_template = get_template("calendar/cal_row.html")
 
                 # I use the context view, adding the things to render the row
@@ -279,7 +280,7 @@ class CalendarManage(AjaxableResponseMixin):
                     new=new_value,
                 ),
             )
-            if request.is_ajax():
+            if is_ajax(request):
                 row_template = get_template("calendar/cal_row.html")
 
                 # I use the context view, adding the things to rendere the row

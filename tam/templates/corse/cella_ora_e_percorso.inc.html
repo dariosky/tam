@@ -1,5 +1,5 @@
 {% if not viaggio.padre_id and not viaggio.conducente_confermato  %}<a href="{% url "tamNuovaCorsaId" viaggio.id %}">{% endif %}
-{% ifequal viaggio.data.date today %}
+{% if viaggio.data.date == today %}
 	<span class="bighour">{{ viaggio.data|date:"H:i" }}</span>
 {% else %}
 	<span class="middlehour">
@@ -9,7 +9,7 @@
 		{{ viaggio.data|date:"D j F Y, H:i"}}
 	{% endif %}
 	</span>
-{% endifequal %}
+{% endif %}
 {% if not viaggio.padre_id and not viaggio.conducente_confermato %}</a>{% endif %}
 <br/>
 {{ viaggio.html_tragitto|safe }}

@@ -4,7 +4,7 @@ Created on 11/set/2011
 
 @author: Dario Varotto
 """
-from django.conf.urls import re_path
+from django.urls import re_path
 
 from fatturazione.views import (
     view_fatture,

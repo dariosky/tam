@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models.deletion import CASCADE
-from django.utils.translation import ungettext
+from django.utils.translation import ngettext
 from six import python_2_unicode_compatible
 
 from tam.tamdates import tz_italy
@@ -14,16 +14,16 @@ def pretty_duration(minutes):
     a_day = 24 * 60
     if remainder >= a_day:
         days = remainder / a_day
-        results.append(ungettext("%d giorno", "%d giorni", days) % days)
+        results.append(ngettext("%d giorno", "%d giorni", days) % days)
         remainder %= a_day
     an_hour = 60
     if remainder > an_hour:
         hours = remainder / an_hour
-        results.append(ungettext("%d ora", "%d ore", hours) % hours)
+        results.append(ngettext("%d ora", "%d ore", hours) % hours)
         remainder %= an_hour
     if remainder:
         minutes = remainder
-        results.append(ungettext("%d minuto", "%d minuti", minutes) % minutes)
+        results.append(ngettext("%d minuto", "%d minuti", minutes) % minutes)
     return " ".join(results)
 
 

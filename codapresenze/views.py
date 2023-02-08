@@ -20,6 +20,7 @@ from tam.models import Conducente, Viaggio
 from tam.tamdates import tz_italy, ita_now
 from tam.views.users import get_userkeys
 from utils.date_views import ThreeMonthsView
+from utils.django_utils import is_ajax
 
 logger = logging.getLogger("tam.codapresenze")
 MAX_QUEUE_TIME = 60 * 11  # max 11 hours (in minutes)
@@ -119,7 +120,7 @@ def coda(request, template_name="codapresenze/coda.html"):
     ]
     codajson = json.dumps(presenze, default=dthandler)
 
-    if request.is_ajax():
+    if is_ajax(request):
         return HttpResponse(codajson, content_type="application/json")
 
     utenti = User.objects.filter(prenotazioni__isnull=True, is_active=True)

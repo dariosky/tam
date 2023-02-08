@@ -1,5 +1,5 @@
 # Django related ***
-Django~=3.2
+Django~=4.0.0
 channels
 pyyaml
 
@@ -13,14 +13,14 @@ jinja2
 # exports ***
 xlrd
 xlwt
-reportlab==3.5.55
+reportlab
 
 # date things ***
 pytz
 python-dateutil
 
 # DB ***
-psycopg2-binary==2.8.6
+psycopg2-binary
 
 # deployment ***
 # gunicorn
@@ -33,7 +33,7 @@ requests
 # mails ***
 # djrill was for Mandrill, but their free tier has been suspended
 # djrill
-django-anymail[mailgun]==3.0
+django-anymail[mailgun]
 
 # proper ssl connections ***
 pyopenssl

@@ -1,5 +1,5 @@
 # coding=utf-8
-from django.utils.http import urlquote
+from urllib.parse import quote
 
 __author__ = "Dario Varotto"
 __date__ = "$30-dic-2010 17.04.59$"
@@ -18,7 +18,7 @@ def license_details(request):
         # Aggiungo al contesto il percorso completo della richiesta (mi serve per i "?next=")
         if request.META["QUERY_STRING"]:
             result["full_request_path"] = (
-                request.path + "?" + urlquote(request.META["QUERY_STRING"])
+                request.path + "?" + quote(request.META["QUERY_STRING"])
             )
         else:
             result["full_request_path"] = request.path

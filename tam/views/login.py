@@ -14,6 +14,7 @@ from markViews import public
 from modellog.actions import log_action
 from tam.middleware.prevent_multisession import get_concurrent_sessions
 from tam.ratelimit import get_client_ip
+from utils.django_utils import is_ajax
 
 logger = logging.getLogger("tam.login")
 
@@ -84,7 +85,7 @@ def login(request):
     else:
         if request.method == "POST":
             logger.debug("Login attempt failed")
-        if request.is_ajax():
+        if is_ajax(request):
             return HttpResponseServerError("Please login")
 
     return response

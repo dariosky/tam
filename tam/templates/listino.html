@@ -72,15 +72,15 @@
 			    {{ prezzo.prezzo_diurno }}€ / {{ prezzo.prezzo_notturno }}€
 			    {% if prezzo.commissione %}
 				    commissione: {{ prezzo.commissione }}
-				    {% ifequal prezzo.tipo_commissione "P" %}%{% else %}€{% endifequal %}
+				    {% if prezzo.tipo_commissione == "P" %}%{% else %}€{% endif %}
 			    {% endif %}
 		    </td>
 		    <td>
-				{% ifequal prezzo.tipo_servizio "C" %}
+				{% if prezzo.tipo_servizio == "C" %}
 					<i title="collettivo" class="sprite icon-c"></i>
 				{% else %}
 					<i title="taxi" class="sprite icon-t"></i>
-				{% endifequal %}
+				{% endif %}
 				{{ prezzo.max_pax }}pax
 				{% if prezzo.flag_fatturazione == 'S' %}<img src='{% static 'flag/fat_on.png' %}' title='Fatturazione forzata da listino' />{% endif %}
 				{% if prezzo.flag_fatturazione == 'N' %}<img src='{% static 'flag/fat_off.png' %}' title='Fatturazione disattivata da listino'/>{% endif %}
