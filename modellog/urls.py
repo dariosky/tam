@@ -1,7 +1,7 @@
 # coding=utf-8
-from django.conf.urls import url
+from django.conf.urls import re_path
 from .views import actionLog
 
 urlpatterns = [
-    url(r"^log/$", actionLog, name="actionLog"),
+    re_path(r"^log/$", actionLog, name="actionLog"),
 ]

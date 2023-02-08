@@ -509,3 +509,5 @@ NIGHT_END = (6, 0)
 with open(os.path.join(PROJECT_PATH, "logging_config.yaml"), "rt") as f:
     config = yaml.safe_load(f)
 logging.config.dictConfig(config)
+
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

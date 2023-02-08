@@ -1,8 +1,8 @@
 # coding=utf-8
-from django.conf.urls import url
+from django.conf.urls import re_path
 
 from rtmap.views import Overview
 
 urlpatterns = [
-    url(r"^$", Overview.as_view(), name="rtmap-overview"),
+    re_path(r"^$", Overview.as_view(), name="rtmap-overview"),
 ]

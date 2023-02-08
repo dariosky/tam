@@ -8,7 +8,7 @@ from django.contrib.auth.views import LoginView, logout_then_login as django_log
 from django.forms import forms
 from django.http import HttpResponseServerError
 from django.shortcuts import render
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from markViews import public
 from modellog.actions import log_action

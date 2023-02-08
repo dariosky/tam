@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.conf.urls import re_path
 
 from .views import main
 
 urlpatterns = [
-    url(r"", main, name="board-home"),
+    re_path(r"", main, name="board-home"),
     # url(r'socket\.io', 'socketio')
 ]

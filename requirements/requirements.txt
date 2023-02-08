@@ -1,5 +1,5 @@
 # Django related ***
-Django==3.1.14
+Django~=3.2
 channels
 pyyaml
 

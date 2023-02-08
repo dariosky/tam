@@ -1,10 +1,10 @@
 # coding=utf-8
-from django.conf.urls import url
+from django.conf.urls import re_path
 from .archiveViews import menu, action, flat, view
 
 urlpatterns = [
-    url(r"^panel/$", menu, name="tamArchiveUtil"),
-    url(r"^doArchive/$", action, name="tamArchiveAction"),
-    url(r"^flat/$", flat, name="tamArchiveFlat"),
-    url(r"^view/$", view, name="tamArchiveView"),
+    re_path(r"^panel/$", menu, name="tamArchiveUtil"),
+    re_path(r"^doArchive/$", action, name="tamArchiveAction"),
+    re_path(r"^flat/$", flat, name="tamArchiveFlat"),
+    re_path(r"^view/$", view, name="tamArchiveView"),
 ]

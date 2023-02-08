@@ -14,7 +14,7 @@ from django.db import connections, models
 from django.db.models.deletion import SET_NULL, PROTECT
 from django.template.loader import render_to_string
 from django.urls import reverse  # to resolve named urls
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from six import python_2_unicode_compatible
 
 import tam.tamdates as tamdates

@@ -2,8 +2,7 @@
 from django.contrib.auth.models import User
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from six import python_2_unicode_compatible
+from django.utils.translation import gettext_lazy as _
 
 LOG_ACTION_TYPE = [
     ("A", "Creazione"),

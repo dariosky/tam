@@ -1,7 +1,7 @@
 # coding=utf-8
-from django.conf.urls import url
+from django.conf.urls import re_path
 from .views import mail_report
 
 urlpatterns = [
-    url(r"^email/$", mail_report, name="tamWebhookEmail"),
+    re_path(r"^email/$", mail_report, name="tamWebhookEmail"),
 ]

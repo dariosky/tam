@@ -1,8 +1,8 @@
 # coding=utf-8
-from django.conf.urls import url
+from django.conf.urls import re_path
 
 from stats.views import StatsView
 
 urlpatterns = [
-    url(r"^$", StatsView.as_view(), name="tamStats"),
+    re_path(r"^$", StatsView.as_view(), name="tamStats"),
 ]
