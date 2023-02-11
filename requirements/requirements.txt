@@ -1,6 +1,7 @@
 # Django related ***
 Django~=4.1.0
-channels
+channels[daphne]
+channels-redis
 pyyaml
 
 # security
