@@ -126,7 +126,7 @@ def notifyByMail(
                 requests.post(
                     "https://api.mailgun.net/v3/%s/messages"
                     % settings.ANYMAIL["MAILGUN_SENDER_DOMAIN"],
-                    auth=("api", settings.MAILGUN_ACCESS_KEY),
+                    auth=("api", settings.ANYMAIL["MAILGUN_API_KEY"]),
                     data=mail_data,
                     files=files,
                 )

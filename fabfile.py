@@ -477,7 +477,7 @@ def set_mailgun_webhooks():
         raise EnvironmentError("Please define WEBHOST to set MailGun webhooks")
     API_BASE_URL = "https://api.mailgun.net/v3"
     domain = settings.MAILGUN_SERVER_NAME
-    auth = HTTPBasicAuth("api", settings.MAILGUN_ACCESS_KEY)
+    auth = HTTPBasicAuth("api", settings.ANYMAIL["MAILGUN_API_KEY"])
     for hook in ["drop", "spam"]:
         response = requests.post(
             "{base}/domains/{domain}/webhooks".format(base=API_BASE_URL, domain=domain),
