@@ -334,7 +334,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             else:
                 renditaChilometrica = 0
             if viaggio.is_long():
-                if renditaChilometrica < Decimal("0.65"):
+                if renditaChilometrica < Decimal("0.79"):
                     importoViaggio *= renditaChilometrica / Decimal("0.65")
                     # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
             elif viaggio.is_medium():
