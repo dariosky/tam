@@ -188,9 +188,9 @@ def dettagliAbbinamento(viaggio, force_numDoppi=None):
 
     if puntiAbbinamento:
         rimanenteInLunghe = kmRimanenti * Decimal(
-            "0.65"
-        )  # gli eccedenti li metto nei venezia a 0.65€/km
-        # logging.debug("Dei %skm totali: %s fuori abbinta a 0.65 a %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
+            "0.79"
+        )  # gli eccedenti li metto nei venezia a 0.79€/km
+        # logging.debug("Dei %skm totali: %s fuori abbinta a 0.79 a %s "%(kmTotali, kmRimanenti, rimanenteInLunghe) )
         valorePunti = (valoreTotale - rimanenteInLunghe) / puntiAbbinamento
         # valorePunti = int(valoreDaConguagliare/partiAbbinamento)	# vecchio modo: valore punti in proporzioned
         valoreAbbinate = puntiAbbinamento * valorePunti
@@ -269,8 +269,8 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             renditaChilometrica = 0
 
         if km >= getattr(settings, "KM_PER_LUNGHE", 50):
-            if renditaChilometrica < Decimal("0.65"):
-                multiplier = renditaChilometrica / Decimal("0.65")
+            if renditaChilometrica < Decimal("0.79"):
+                multiplier = renditaChilometrica / Decimal("0.79")
                 # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
         elif 25 <= km < getattr(settings, "KM_PER_LUNGHE", 50) or (
             km < 25 and sum(importiViaggio) > settings.IMPORTO_MASSIMO_CORTA
@@ -334,8 +334,8 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
             else:
                 renditaChilometrica = 0
             if viaggio.is_long():
-                if renditaChilometrica < Decimal("0.65"):
-                    importoViaggio *= renditaChilometrica / Decimal("0.65")
+                if renditaChilometrica < Decimal("0.79"):
+                    importoViaggio *= renditaChilometrica / Decimal("0.79")
                     # logging.debug("Sconto Venezia sotto rendita: %s" % renditaChilometrica)
             elif viaggio.is_medium():
                 if renditaChilometrica < Decimal("0.8"):

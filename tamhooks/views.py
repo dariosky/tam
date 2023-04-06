@@ -26,14 +26,12 @@ def verify(api_key, token, timestamp, signature):
 @public
 @csrf_exempt
 def mail_report(request):
-    # print verify(api_key=settings.MAILGUN_ACCESS_KEY,
-    #              )
     status = 400
     response = "Hi"
     if request.method == "POST":
         g = request.POST.get
         timestamp, token, signature = g("timestamp"), g("token"), g("signature")
-        if verify(settings.MAILGUN_ACCESS_KEY, token, timestamp, signature):
+        if verify(settings.ANYMAIL["MAILGUN_API_KEY"], token, timestamp, signature):
             status = 200
             event, recipient, reason = g("event"), g("recipient"), g("reason")
             logger.error(
