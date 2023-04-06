@@ -13,7 +13,7 @@ from utils.env_subs import perform_dict_substitutions
 
 host = gethostname().lower()
 
-TAM_VERSION = "7.2"
+TAM_VERSION = "8.0"
 PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 logger = logging.getLogger("tam.settings")
 
@@ -57,7 +57,6 @@ USE_TZ = True
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = "it-it"
-USE_L10N = True
 # USE_THOUSAND_SEPARATOR = True # mi incasina gli invii delle form
 
 # If you set this to False, Django will make some optimizations so as not

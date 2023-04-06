@@ -544,7 +544,7 @@ class Viaggio(models.Model):
         self.is_abbinata = self._is_abbinata()
         self.is_valid = self._is_valid()  # richiede le tratte
 
-        forzaSingolo = numDoppi is 0
+        forzaSingolo = numDoppi == 0
         # richiede le tratte
         self.prezzo_finale = self.get_value(forzaSingolo=forzaSingolo)
 

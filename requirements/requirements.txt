@@ -1,5 +1,5 @@
 # Django related ***
-Django~=4.1.0
+Django~=4.2
 channels[daphne]
 channels-redis
 pyyaml
@@ -8,7 +8,7 @@ pyyaml
 argon2-cffi
 
 # static files ***
-django-pipeline==2.0.9
+django-pipeline==2.1.0
 jinja2
 
 # exports ***
@@ -21,7 +21,7 @@ pytz
 python-dateutil
 
 # DB ***
-psycopg2-binary
+psycopg==3.1.8
 
 # deployment ***
 # gunicorn
