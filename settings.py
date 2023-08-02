@@ -518,7 +518,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 RATELIMIT_CACHE_BACKEND = "tam.ratelimit.RateCache"
 
-# This are all settings for the deployment ***
+# These are all settings for the deployment ***
 WEBHOST = "www.hostname.com"  # the main hostname serving the site
 
 DEPLOYMENT = dict(  # defining parameters for the deployment
@@ -604,3 +604,4 @@ for app, desc in PLUGGABLE_APPS.items():
 WSGI_APPLICATION = "wsgi.application"
 NIGHT_START = (22, 0)
 NIGHT_END = (6, 0)
+KM_PER_CORTE = 30

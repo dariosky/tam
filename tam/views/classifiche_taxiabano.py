@@ -83,7 +83,7 @@ def process_classifiche(viaggio, force_numDoppi=None):
         if da["num_bacini"] > 1:
             viaggio.prezzoDoppioPadova = valoreTotale  # corsa abbinata
         else:
-            if da["kmTotali"] <= 30:
+            if da["kmTotali"] <= settings.KM_PER_CORTE:
                 viaggio.prezzoPadova = valoreTotale
             else:
                 viaggio.prezzoVenezia = valoreTotale
