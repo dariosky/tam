@@ -514,8 +514,10 @@ class Viaggio(models.Model):
 
         self.km = self.get_kmrow()  # richiede le tratte
 
-        # costo della sosta 12€/h, richiede tratte, usa _isabbinata e nexbro
-        self.costo_sosta = Decimal(self.sostaFinaleMinuti()) * 12 / 60
+        # costo della sosta: richiede tratte, usa _isabbinata e nexbro
+        self.costo_sosta = (
+            Decimal(self.sostaFinaleMinuti()) * settings.COSTO_ORARIO_SOSTA / 60
+        )
 
         self.is_abbinata = self._is_abbinata()
         self.is_valid = self._is_valid()  # richiede le tratte
