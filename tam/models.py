@@ -473,7 +473,6 @@ class Viaggio(models.Model):
         numDoppi se è diverso da None forza al numero di doppi indicato
         con forceDontSave indico l'id che sto già salvando, e che non c'è bisogno di risalvare anche se cambia
         """
-        # print "updateprecomp:", self.id
         if doitOnFather and self.padre_id:
             # logging.debug("Ricorro al padre di %s: %s" % (self.pk, self.padre.pk))
             if force_save:
@@ -515,6 +514,7 @@ class Viaggio(models.Model):
         self.km = self.get_kmrow()  # richiede le tratte
 
         # costo della sosta: richiede tratte, usa _isabbinata e nexbro
+        # print(f"costo sosta: {settings.COSTO_ORARIO_SOSTA}", self.sostaFinaleMinuti())
         self.costo_sosta = (
             Decimal(self.sostaFinaleMinuti()) * settings.COSTO_ORARIO_SOSTA / 60
         )
