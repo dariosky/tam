@@ -154,6 +154,15 @@ def do_archiviazione(user, end_date):
         with transaction.atomic():
             with transaction.atomic(using="archive"):
                 for viaggiopadre in viaggi_chunk:
+                    if (
+                        viaggiopadre.is_abbinata
+                        and viaggiopadre.punti_abbinata
+                        and viaggiopadre.get_kmtot() > viaggiopadre.km_conguagliati
+                    ):
+                        logger.debug(
+                            f"Skipping abbinata not conguagliata {viaggiopadre.id}"
+                        )
+                        continue
                     archivio_viaggiopadre = archiveFromViaggio(viaggiopadre)
                     daRicordareDelViaggio(ricordi, viaggiopadre)
                     archivio_viaggiopadre.save()
