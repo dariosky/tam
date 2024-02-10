@@ -85,6 +85,11 @@ def daRicordareDelViaggio(ricordi, viaggio):
         for nome_campo in campiMemoria:
             esistente = ricordiConducente.get(nome_campo, 0)
             ricordiConducente[nome_campo] = esistente + getattr(viaggio, nome_campo)
+        if viaggio.fatturazione or viaggio.incassato_albergo:
+            for field, increment in (('fattura_corse', 1),
+                                     ('fattura_valore', viaggio.prezzo)):
+                esistente = ricordiConducente.get(field, 0)
+                ricordiConducente[field] = esistente + increment
         ricordi[conducente_id] = ricordiConducente
     return ricordi
 
@@ -110,15 +115,18 @@ def do_archiviazioneTask(user, end_date):
 def applyRicordi(ricordi):
     """Cambia le statistiche dei conducenti per riflettere i viaggi archiviati"""
     for conducente_id, classifica in ricordi.items():
-        conducente = Conducente.objects.get(pk=conducente_id)
-        conducente.classifica_iniziale_diurni += classifica["punti_diurni"]
-        conducente.classifica_iniziale_notturni += classifica["punti_notturni"]
+        c = Conducente.objects.get(pk=conducente_id)
+        c.classifica_iniziale_diurni += classifica["punti_diurni"]
+        c.classifica_iniziale_notturni += classifica["punti_notturni"]
 
-        conducente.classifica_iniziale_long += classifica["prezzoVenezia"]
-        conducente.classifica_iniziale_medium += classifica["prezzoPadova"]
-        conducente.classifica_iniziale_doppiPadova += classifica["prezzoDoppioPadova"]
-        conducente.classifica_iniziale_puntiDoppiVenezia += classifica["punti_abbinata"]
-        conducente.save()
+        c.classifica_iniziale_long += classifica["prezzoVenezia"]
+        c.classifica_iniziale_medium += classifica["prezzoPadova"]
+        c.classifica_iniziale_doppiPadova += classifica["prezzoDoppioPadova"]
+        c.classifica_iniziale_puntiDoppiVenezia += classifica["punti_abbinata"]
+
+        c.classifica_iniziale_fatture_corse += classifica.get('fattura_corse', 0)
+        c.classifica_iniziale_fatture_valore += classifica.get('fattura_valore', 0)
+        c.save()
     ricordi.clear()
 
 

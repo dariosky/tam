@@ -168,7 +168,7 @@ def flat(request, template_name="archive/flat.html"):
 
     classifiche = get_classifiche()
 
-    def trovaMinimi(c1, c2):
+    def trova_minimi(c1, c2):
         """Date due classifiche (2 conducenti) ritorna il minimo"""
         keys = (
             "puntiDiurni",
@@ -180,14 +180,14 @@ def flat(request, template_name="archive/flat.html"):
         results = OrderedDict()
         for key in keys:
             v1, v2 = c1[key], c2[key]
-            if type(v1) is float:
+            if isinstance(v1, float):
                 v1 = Decimal("%.2f" % v1)  # converto i float in Decimal
-            if type(v2) is float:
+            if isinstance(v2, float):
                 v2 = Decimal("%.2f" % v2)
             results[key] = min(v1, v2)
         return results
 
-    minimi = reduce(trovaMinimi, classifiche)
+    minimi = reduce(trova_minimi, classifiche)
     # controllo che ci sia qualche minimo da togliere
     flat_needed = max(minimi.values()) > 0
     if "flat" in request.POST and flat_needed:
