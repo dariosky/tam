@@ -22,7 +22,7 @@ psycopg2-binary==2.8.6
 
 # deployment ***
 # gunicorn
-uwsgi
+uwsgi==2.0.22
 # setproctitle to set the process title, doesn't work on Windows
 setproctitle
 requests
