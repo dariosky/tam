@@ -119,6 +119,19 @@ class FormPrenotazioni(forms.ModelForm):
                     ).format(hours=int(hours))
                 )
 
+    def clean_note_arrivo(self):
+        nota = self.cleaned_data["note_arrivo"].strip()
+        if settings.PRENOTAZIONI_REQUIRED_ARRIVAL_NOTES:
+            luogo = self.cleaned_data["luogo"]
+            print(luogo, luogo.speciale)
+            if luogo and luogo.speciale in {"A", "S"} and not nota:
+                raise forms.ValidationError(
+                    _(
+                        "Aereoporti e stazioni richiedo i dettagli sull'arrivo",
+                    )
+                )
+        return nota
+
     def __init__(self, *args, **kwargs):
         super(FormPrenotazioni, self).__init__(*args, **kwargs)
         # self.fields['attachment'] = forms.FileField(
@@ -158,6 +171,7 @@ class FormPrenotazioni(forms.ModelForm):
             "pagamento",
             "note_camera",
             "note_cliente",
+            "note_arrivo",
             "note",
             "attachment",
         ]

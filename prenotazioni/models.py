@@ -83,6 +83,7 @@ class Prenotazione(models.Model):
 
     note_camera = models.CharField(_("Numero di camera"), max_length=20, blank=True)
     note_cliente = models.CharField(_("Nome del cliente"), max_length=40, blank=True)
+    note_arrivo = models.CharField(_("Dettagli arrivo"), max_length=40, blank=True)
     note = models.TextField(_("Note"), blank=True)
 
     viaggio = models.OneToOneField(

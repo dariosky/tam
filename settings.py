@@ -584,6 +584,7 @@ def preavviso_necessario(requested_date, prenotazione=None):
 
 
 PRENOTAZIONI_PREAVVISO_NEEDED_FUNC = preavviso_necessario
+PRENOTAZIONI_REQUIRED_ARRIVAL_NOTES = False
 
 # END OF DEFAULTS **************************************************************
 
