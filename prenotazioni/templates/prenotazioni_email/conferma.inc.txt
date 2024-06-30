@@ -6,6 +6,7 @@ I dettagli della corsa:
 
 {% if prenotazione.note_camera %}Numero di camera: {{ prenotazione.note_camera }}{% endif %}
 {% if prenotazione.note_cliente %}Nome del cliente: {{ prenotazione.note_cliente }}{% endif %}
+{% if prenotazione.note_arrivo %}Note arrivo: {{ prenotazione.note_arrivo }}{% endif %}
 {% if prenotazione.note %}Note:
 {{ prenotazione.note }}{% endif %}
 
