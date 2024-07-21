@@ -55,13 +55,14 @@ class AuthenticationFormWrapped(AuthenticationForm):
 @public
 @ratelimit(method="POST")
 def login(request):
+    username = request.POST.get("username")
     if getattr(request, "limited", False):
         messages = [
-            "Too many requests on {path}. Page forbidden.".format(path=request.path),
-            "From IP: %s" % get_client_ip(request),
+            f"Too many requests on {request.path}. Page forbidden.",
+            f"From IP: {get_client_ip(request)}",
         ]
-        if request.method == "POST" and request.POST.get("username"):
-            messages.append("Last try with username: %s" % request.POST.get("username"))
+        if request.method == "POST" and username:
+            messages.append(f"Last try with username: {username}")
         logger.error("\n".join(messages))
         return render_to_response("429-limited.html", status=429)
 
@@ -83,7 +84,7 @@ def login(request):
         logAction("L", description="Accesso effettuato", user=request.user)
     else:
         if request.method == "POST":
-            logger.debug("Login attempt failed")
+            logger.debug(f"Login attempt failed for user {username}")
         if request.is_ajax():
             return HttpResponseServerError("Please login")
 

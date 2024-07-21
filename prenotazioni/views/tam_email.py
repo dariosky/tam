@@ -60,10 +60,12 @@ def notifyByMail(
     if bcc is None:
         bcc = []
     if settings.DEBUG:
-        logger.debug("In test, send mail only to ADMIN instead of %s" % to)
+        logger.debug(f"In test, send mail only to ADMIN instead of {to}")
         to = [ADMIN_MAIL]
         bcc = []
         subject = "[TEST] " + subject
+        logger.debug("Actually - we can skip sending at all")
+        return
     context_html = context
     if contextText is None:
         context_text = context_html

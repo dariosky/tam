@@ -2,6 +2,7 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.forms import forms
 from django.utils.translation import ugettext_lazy as _
 from future.utils import python_2_unicode_compatible
 
@@ -124,7 +125,10 @@ class Prenotazione(models.Model):
         """True se la corsa è ancora modificabile"""
         ora = tamdates.ita_now()
         notice_func = settings.PRENOTAZIONI_PREAVVISO_NEEDED_FUNC
-        notice_max = notice_func(self.data_corsa)
+        try:
+            notice_max = notice_func(self.data_corsa)
+        except forms.ValidationError:
+            return False
         inTempo = ora <= notice_max
         if not inTempo:
             return False

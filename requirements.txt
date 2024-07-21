@@ -11,7 +11,7 @@ jinja2
 # exports ***
 xlrd
 xlwt
-reportlab==3.5.55
+reportlab==3.6.8
 
 # date things ***
 pytz
