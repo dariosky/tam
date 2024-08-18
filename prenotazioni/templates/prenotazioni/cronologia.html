@@ -85,6 +85,8 @@
 								{% if prenotazione.note_camera %}{% trans "Camera:" %} {{ prenotazione.note_camera }}<br/>{% endif %}
 								{% if prenotazione.note_cliente %}{% trans "Cliente:" %}
 									{{ prenotazione.note_cliente }}<br/>{% endif %}
+							    {% if prenotazione.note_arrivo %}{% trans "Note arrivo:" %}
+									{{ prenotazione.note_arrivo }}<br/>{% endif %}
 								{% if prenotazione.note %}{{ prenotazione.note }}{% endif %}
 							</td>
 							{% if prenotazione.owner == request.user.prenotazioni %}
