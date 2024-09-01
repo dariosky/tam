@@ -1,5 +1,9 @@
 # coding: utf-8
+import datetime
+from decimal import Decimal
+
 from django.conf import settings
+
 
 CLASSIFICHE = [
     {
@@ -47,10 +51,8 @@ NOMI_CAMPI_CONDUCENTE = {
     "classifica_iniziale_medium": "Valore Corte (Padova)",
 }
 
-from decimal import Decimal
 
 kmPuntoAbbinate = Decimal(120)
-
 
 def process_classifiche(viaggio, force_numDoppi=None):
     #    print "%d *****" % viaggio.id
@@ -89,8 +91,9 @@ def process_classifiche(viaggio, force_numDoppi=None):
                 viaggio.prezzoVenezia = valoreTotale
 
     if viaggio.padre is None and valoreTotale > 0:
-        # padri e singoli possono avere i supplementi
-        # 27/1/2014 le corse al di sotto dei 27euro non generano supplementari. 13/3/2014 Abbasso i 27 a 0 euro
+        # Padri e singoli possono avere i supplementi
+        # 27/1/2014 le corse al di sotto dei 27euro non generano supplementari.
+        # 13/3/2014 Abbasso i 27 a 0 euro
         # i 27 dovevano essere solo per il cliente fittizio
         for fascia, points in viaggio.disturbi().items():
             if fascia == "night":
@@ -102,7 +105,8 @@ def process_classifiche(viaggio, force_numDoppi=None):
 def dettagliAbbinamento(viaggio, force_numDoppi=None):
     """Restituisce un dizionario con i dettagli dell'abbinamento
     la funzione viene usata solo nel caso la corsa sia un abbinamento (per il padre)
-    Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km alle Venezia altrimenti
+    Il rimanenteInLunghe va aggiunto alle Abbinate Padova se fa più di 1.25€/km
+     alle Venezia altrimenti
     """
     kmTotali = viaggio.get_kmtot()
     # logging.debug("Km totali di %s: %s"%(viaggio.pk, kmTotali))
@@ -147,7 +151,12 @@ def get_value(viaggio, **kwargs):
             0.98
         )  # tolgo il 2% al lordo per i pagamenti con carta di credito
 
-    if viaggio.commissione:  # tolgo la commissione dal lordo
+    from tam.tamdates import tz_italy
+    DATA_COMMISSIONE_IN_CLASSIFICHE_START = tz_italy.localize(
+        datetime.datetime(2024, 9, 1, 0, 0)
+    )
+    if viaggio.commissione and viaggio.data < DATA_COMMISSIONE_IN_CLASSIFICHE_START:
+        # tolgo la commissione dal lordo
         if viaggio.tipo_commissione == "P":
             importoViaggio = importoViaggio * (
                 Decimal(1) - viaggio.commissione / Decimal(100)
