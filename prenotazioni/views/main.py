@@ -312,6 +312,23 @@ def prenota(request, id_prenotazione=None, template_name="prenotazioni/main.html
         # destination.close()
 
         if id_prenotazione is None:
+            existing_prenotazione = Prenotazione.objects.filter(
+                data_corsa=form.cleaned_data["data_corsa"],
+                luogo=form.cleaned_data["luogo"],
+                cliente=cliente_unico,
+                is_arrivo=form.cleaned_data["is_arrivo"],
+            ).first()
+            if existing_prenotazione:
+                messages.warning(
+                    request, _("Esiste già una prenotazione con questi dati")
+                )
+                return HttpResponseRedirect(
+                    reverse(
+                        "tamPrenotazioni-edit",
+                        kwargs={"id_prenotazione": existing_prenotazione.id},
+                    ),
+                )
+
             prenotazione = Prenotazione(owner=utentePrenotazioni, **form.cleaned_data)
             if clienti_attivi.count() == 1:
                 prenotazione.cliente = cliente_unico
