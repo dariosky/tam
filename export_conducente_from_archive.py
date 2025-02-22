@@ -1,6 +1,7 @@
 # coding: utf-8
 
-""" Controlla che le funzionalità richieste dal server siano rispettate """
+"""Controlla che le funzionalità richieste dal server siano rispettate"""
+
 import re
 
 import django

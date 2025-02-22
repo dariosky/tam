@@ -7,12 +7,10 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Deleting model 'Ferie'
         db.delete_table("tam_ferie")
 
     def backwards(self, orm):
-
         # Adding model 'Ferie'
         db.create_table(
             "tam_ferie",

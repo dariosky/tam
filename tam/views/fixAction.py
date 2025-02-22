@@ -105,7 +105,6 @@ def fixAction(request, template_name="utils/fixAction.html"):
         for viaggio in viaggi:
             ultimaCorsa = viaggio.lastfratello()
             if ultimaCorsa.da.speciale == "A":
-
                 disturbiGiusti = trovaDisturbi(
                     viaggio.date_start,
                     viaggio.get_date_end(recurse=True),
@@ -205,9 +204,7 @@ def fixAction(request, template_name="utils/fixAction.html"):
                             SET html_tragitto = regexp_replace(html_tragitto, '/mediaprod/(flag/luogo-airport[\d]*)-[a-z0-9]*\.png', '/static/\1.png', 'g')
                             WHERE html_tragitto LIKE '%/mediaprod/flag/%' AND html_tragitto LIKE '%luogo-airport%';
 
-                          """.replace(
-            "%", "%%"
-        )
+                          """.replace("%", "%%")
         from django.db import connection
 
         cursor = connection.cursor()

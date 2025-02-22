@@ -1,5 +1,5 @@
 # coding: utf-8
-""" Definizione delle CLASSIFICHE
+"""Definizione delle CLASSIFICHE
 È una lista ordinata di dizionari
 nome
 descrizione (facoltativa)
@@ -17,6 +17,7 @@ verranno aggiungi in visualizzazione:
              'min', 'max': con i valori chiave massimi e minimi
 
 """
+
 import datetime
 from decimal import Decimal
 
@@ -242,9 +243,7 @@ def get_value(viaggio, forzaSingolo=False, scoreVersion=None):
     # logging.info("Using scoreVersion: %s" % scoreVersion)
     if viaggio.is_abbinata == "P" and scoreVersion and scoreVersion >= "2016-04-01":
         viaggi = [viaggio] + list(viaggio.viaggio_set.all())
-        importiViaggio = (
-            []
-        )  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
+        importiViaggio = []  # tengo gli importi viaggi distinti (per poter poi calcolarne le commissioni individuali)
         multiplier = 1
         for i, v in enumerate(viaggi):
             importo_riga = v.prezzo

@@ -4,6 +4,7 @@ Created on 11/set/2011
 
 @author: Dario
 """
+
 import datetime
 import json
 from decimal import Decimal
@@ -85,9 +86,7 @@ def lista_fatture_generabili(request, template_name="1_scelta_fatture.html"):
         elif get_mese_fatture == "prevprev":  # due mesi fa
             data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
                 day=1
-            ) - datetime.timedelta(
-                days=1
-            )  # vado a inizio mese scorso
+            ) - datetime.timedelta(days=1)  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese_fatture)
@@ -380,7 +379,6 @@ def genera_fatture(request, fatturazione):
                     riga_fattura.riga_fattura_consorzio = elemento
 
                 else:  # fattura da un viaggio
-
                     riga_fattura.descrizione = "%s-%s %s %dpax %s" % (
                         viaggio.da,
                         viaggio.a,

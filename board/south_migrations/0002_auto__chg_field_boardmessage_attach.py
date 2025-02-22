@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Changing field 'BoardMessage.attach'
         db.alter_column(
             "board_boardmessage",
@@ -18,7 +17,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # User chose to not deal with backwards NULL issues for 'BoardMessage.attach'
         raise RuntimeError(
             "Cannot reverse this migration. 'BoardMessage.attach' and its values cannot be restored."

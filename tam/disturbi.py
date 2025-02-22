@@ -555,8 +555,9 @@ def trovaDisturbi(data_inizio, data_fine, metodo=fasce_lineari):
     """Itero tra giorni e fasce chiamando il metodo di calcolo dei punti supplementari"""
     results = {}
     # faccio si che data_inizio e fine siano entrambe in TZ italiana:
-    data_inizio, data_fine = timezone.localtime(data_inizio), timezone.localtime(
-        data_fine
+    data_inizio, data_fine = (
+        timezone.localtime(data_inizio),
+        timezone.localtime(data_fine),
     )
 
     giorno_fine = data_fine.date()

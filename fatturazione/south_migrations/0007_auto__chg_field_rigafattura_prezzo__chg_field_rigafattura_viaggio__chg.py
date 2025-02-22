@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Changing field 'RigaFattura.prezzo'
         db.alter_column(
             "fatturazione_rigafattura",

@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Adding field 'RigaFattura.conducente'
         db.add_column(
             "fatturazione_rigafattura",
@@ -19,7 +18,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # Deleting field 'RigaFattura.conducente'
         db.delete_column("fatturazione_rigafattura", "conducente_id")
 

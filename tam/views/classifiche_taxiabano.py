@@ -54,6 +54,7 @@ NOMI_CAMPI_CONDUCENTE = {
 
 kmPuntoAbbinate = Decimal(120)
 
+
 def process_classifiche(viaggio, force_numDoppi=None):
     #    print "%d *****" % viaggio.id
     #
@@ -152,6 +153,7 @@ def get_value(viaggio, **kwargs):
         )  # tolgo il 2% al lordo per i pagamenti con carta di credito
 
     from tam.tamdates import tz_italy
+
     DATA_COMMISSIONE_IN_CLASSIFICHE_START = tz_italy.localize(
         datetime.datetime(2024, 9, 1, 0, 0)
     )

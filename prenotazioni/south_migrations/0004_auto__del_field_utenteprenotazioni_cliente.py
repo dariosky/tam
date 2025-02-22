@@ -11,7 +11,6 @@ class Migration(SchemaMigration):
         db.delete_column("prenotazioni_utenteprenotazioni", "cliente_id")
 
     def backwards(self, orm):
-
         # User chose to not deal with backwards NULL issues for 'UtentePrenotazioni.cliente'
         raise RuntimeError(
             "Cannot reverse this migration. 'UtentePrenotazioni.cliente' and its values cannot be restored."

@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Adding field 'Viaggio.data_padre'
         db.add_column(
             "tam_viaggio",
@@ -27,7 +26,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # Deleting field 'Viaggio.data_padre'
         db.delete_column("tam_viaggio", "data_padre")
 

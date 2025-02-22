@@ -273,7 +273,7 @@ class Sql2xls(object):
         query=None,
         processRowCallback=None,
         additionalHeaders=None,
-        **kwargs
+        **kwargs,
     ):
         self.sheetCount = 0
         self.query = query

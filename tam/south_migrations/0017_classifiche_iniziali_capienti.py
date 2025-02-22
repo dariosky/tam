@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Changing field 'Conducente.classifica_iniziale_doppiPadova'
         db.alter_column(
             "tam_conducente",
@@ -63,7 +62,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # Changing field 'Conducente.classifica_iniziale_doppiPadova'
         db.alter_column(
             "tam_conducente",

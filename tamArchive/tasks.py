@@ -86,8 +86,10 @@ def daRicordareDelViaggio(ricordi, viaggio):
             esistente = ricordiConducente.get(nome_campo, 0)
             ricordiConducente[nome_campo] = esistente + getattr(viaggio, nome_campo)
         if viaggio.fatturazione or viaggio.incassato_albergo:
-            for field, increment in (('fattura_corse', 1),
-                                     ('fattura_valore', viaggio.prezzo)):
+            for field, increment in (
+                ("fattura_corse", 1),
+                ("fattura_valore", viaggio.prezzo),
+            ):
                 esistente = ricordiConducente.get(field, 0)
                 ricordiConducente[field] = esistente + increment
         ricordi[conducente_id] = ricordiConducente
@@ -124,8 +126,8 @@ def applyRicordi(ricordi):
         c.classifica_iniziale_doppiPadova += classifica["prezzoDoppioPadova"]
         c.classifica_iniziale_puntiDoppiVenezia += classifica["punti_abbinata"]
 
-        c.classifica_iniziale_fatture_corse += classifica.get('fattura_corse', 0)
-        c.classifica_iniziale_fatture_valore += classifica.get('fattura_valore', 0)
+        c.classifica_iniziale_fatture_corse += classifica.get("fattura_corse", 0)
+        c.classifica_iniziale_fatture_valore += classifica.get("fattura_valore", 0)
         c.save()
     ricordi.clear()
 

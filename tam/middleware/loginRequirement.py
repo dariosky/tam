@@ -1,5 +1,6 @@
 # coding=utf-8
-""" Each request needs an authenticathed user """
+"""Each request needs an authenticathed user"""
+
 import logging
 
 from django.contrib.auth.decorators import login_required

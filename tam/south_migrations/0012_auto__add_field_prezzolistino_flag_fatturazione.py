@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Adding index on 'ActionLog', fields ['data']
         db.create_index("tam_actionlog", ["data"])
 
@@ -23,7 +22,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # Removing index on 'Conducente', fields ['attivo']
         db.delete_index("tam_conducente", ["attivo"])
 

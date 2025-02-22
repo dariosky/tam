@@ -35,7 +35,7 @@ def notifyByMail(
     reply_to=None,
     attachments=None,
     from_email=None,
-    **kwargs
+    **kwargs,
 ):
     """Warn with a mail when some event occour"""
     if not context:

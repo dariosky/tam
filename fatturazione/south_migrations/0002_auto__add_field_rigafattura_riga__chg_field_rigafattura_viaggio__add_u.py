@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Adding field 'RigaFattura.riga'
         db.add_column(
             "fatturazione_rigafattura",
@@ -29,7 +28,6 @@ class Migration(SchemaMigration):
         db.create_unique("fatturazione_rigafattura", ["viaggio_id"])
 
     def backwards(self, orm):
-
         # Removing unique constraint on 'RigaFattura', fields ['viaggio']
         db.delete_unique("fatturazione_rigafattura", ["viaggio_id"])
 

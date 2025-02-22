@@ -1,5 +1,5 @@
 # coding: utf-8
-""" Definizione per classi dei vari tipi di fatturazione """
+"""Definizione per classi dei vari tipi di fatturazione"""
 
 from django.db.models.query_utils import Q
 

@@ -452,6 +452,7 @@ def changeLog(request, template_name="static/changelog.html"):
         if settings.TAM_SHOW_CLASSIFICA_FATTURE
         else "",
         ("7.0.3", "30/6/2024", "Prenotazioni - note arrivo"),
+        ("7.0.4", "22/2/2025", "Prenotazioni - evita duplicati"),
     ]
     # ('', '', mark_safe('''''')),
     for version in known_changes[::-1]:

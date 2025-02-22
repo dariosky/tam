@@ -65,9 +65,9 @@ class CalendarManage(AjaxableResponseMixin):
         day = tamdates.parse_datestring(day_string, default=ita_today())
         # this filter is valid until the next day
         nextday = day + datetime.timedelta(days=1)
-        context[
-            "nextday"
-        ] = nextday  # I'll use this to check if the range goes ahead on days
+        context["nextday"] = (
+            nextday  # I'll use this to check if the range goes ahead on days
+        )
         context["day"] = day
         context["selected_day"] = day.strftime("%d/%m/%Y")
         calendars = copy.copy(settings.CALENDAR_DESC)

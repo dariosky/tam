@@ -117,9 +117,7 @@ def permissions(request, username=None, template_name="utils/manageUsers.html"):
                     group = Group.objects.get(name=groupName)
                     selectedUser.groups.add(group)
 
-            if (
-                manage_prenotazioni
-            ):  # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
+            if manage_prenotazioni:  # se posso gestire gli utenti prenotazioni, altrimenti ignoro le richieste eventuali
                 if tipo_utente == "c":  # utente conducente
                     if utentePrenotazioni:
                         messages.warning(

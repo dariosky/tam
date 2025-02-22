@@ -46,9 +46,7 @@ def view_fatture(request, template_name="5_lista-fatture.html"):
         elif get_mese_fatture == "prevprev":  # due mesi fa
             data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
                 day=1
-            ) - datetime.timedelta(
-                days=1
-            )  # vado a inizio mese scorso
+            ) - datetime.timedelta(days=1)  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese_fatture)

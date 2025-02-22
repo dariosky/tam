@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Changing field 'Listino.nome'
         db.alter_column(
             "tam_listino",
@@ -16,7 +15,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # Changing field 'Listino.nome'
         db.alter_column(
             "tam_listino",

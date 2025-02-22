@@ -100,9 +100,9 @@ def classificheconducenti(
     # prendo le classifiche definite e le mappo per ID
     classifiche_definite_byId = {}
     for classifica_definita in classifiche_definite:
-        classifiche_definite_byId[
-            classifica_definita.get("mapping_field")
-        ] = classifica_definita
+        classifiche_definite_byId[classifica_definita.get("mapping_field")] = (
+            classifica_definita
+        )
         classifica_definita["dati"] = []
 
     if (
@@ -114,9 +114,9 @@ def classificheconducenti(
         conducente = conducente_byId[
             classifica["conducente_id"]
         ]  # prendo il conducente
-        classifica[
-            "conducente"
-        ] = conducente  # aggiungo alle classifiche il campo conducente
+        classifica["conducente"] = (
+            conducente  # aggiungo alle classifiche il campo conducente
+        )
 
         for key in (
             "puntiDiurni",

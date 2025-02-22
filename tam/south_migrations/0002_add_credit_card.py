@@ -7,14 +7,12 @@ from tam.models import *
 
 class Migration:
     def forwards(self, orm):
-
         # Adding field 'Viaggio.cartaDiCredito'
         db.add_column(
             "tam_viaggio", "cartaDiCredito", orm["tam.viaggio:cartaDiCredito"]
         )
 
     def backwards(self, orm):
-
         # Deleting field 'Viaggio.cartaDiCredito'
         db.delete_column("tam_viaggio", "cartaDiCredito")
 

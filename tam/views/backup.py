@@ -101,9 +101,9 @@ def getbackup(request, backupdate):
             response = HttpResponse(
                 responseFile.read(), content_type="application/octet-stream"
             )  # 'application/gzip'
-            response[
-                "Content-Disposition"
-            ] = 'attachment; filename="%s"' % os.path.basename(backup_filename)
+            response["Content-Disposition"] = (
+                'attachment; filename="%s"' % os.path.basename(backup_filename)
+            )
             return response
     else:
         messages.error(request, "Backup del %s non trovato." % dataScelta)

@@ -7,7 +7,6 @@ from django.db import models
 
 class Migration(SchemaMigration):
     def forwards(self, orm):
-
         # Deleting model 'TamLicense'
         db.delete_table("tam_tamlicense")
 
@@ -29,7 +28,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # Adding model 'TamLicense'
         db.create_table(
             "tam_tamlicense",

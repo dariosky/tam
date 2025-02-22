@@ -235,6 +235,7 @@ def prenota(request, id_prenotazione=None, template_name="prenotazioni/main.html
         cliente_unico = clienti_attivi.all()[0]
 
     adesso = tamdates.ita_now().replace(second=0, microsecond=0)
+
     if not id_prenotazione and QUICK_BOOK and "quickbook" in request.POST:
         chosen_target = request.POST.get("quickbook")
         targets = filter(
@@ -260,7 +261,7 @@ def prenota(request, id_prenotazione=None, template_name="prenotazioni/main.html
             is_arrivo=False,
             # da=utentePrenotazioni.luogo,
             luogo=target_place,
-            **QUICK_BOOK["defaults"]
+            **QUICK_BOOK["defaults"],
         )
         viaggio = prenotaCorsa(prenotazione)
         prenotazione.viaggio = viaggio
@@ -543,9 +544,7 @@ def attachments_list(request):
         elif get_mese == "prevprev":  # due mesi fa
             data_end = (oggi.replace(day=1) - datetime.timedelta(days=1)).replace(
                 day=1
-            ) - datetime.timedelta(
-                days=1
-            )  # vado a inizio mese scorso
+            ) - datetime.timedelta(days=1)  # vado a inizio mese scorso
             data_start = data_end.replace(day=1)  # vado a inizio di due mesi fa
         else:
             raise Exception("Unexpected get mese fatture %s" % get_mese)

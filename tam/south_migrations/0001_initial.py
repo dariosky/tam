@@ -7,7 +7,6 @@ from tam.models import *
 
 class Migration:
     def forwards(self, orm):
-
         # Adding model 'TamLicense'
         db.create_table(
             "tam_tamlicense",
@@ -265,7 +264,6 @@ class Migration:
         )
 
     def backwards(self, orm):
-
         # Deleting unique_together for [listino, tratta, tipo_servizio, max_pax] on PrezzoListino.
         db.delete_unique(
             "tam_prezzolistino", ["listino_id", "tratta_id", "tipo_servizio", "max_pax"]

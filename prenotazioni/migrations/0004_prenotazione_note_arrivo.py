@@ -6,15 +6,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('prenotazioni', '0003_auto_20160831_0011'),
+        ("prenotazioni", "0003_auto_20160831_0011"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='prenotazione',
-            name='note_arrivo',
-            field=models.CharField(blank=True, max_length=40, verbose_name='Dettagli volo'),
+            model_name="prenotazione",
+            name="note_arrivo",
+            field=models.CharField(
+                blank=True, max_length=40, verbose_name="Dettagli volo"
+            ),
         ),
     ]

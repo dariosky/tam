@@ -640,9 +640,7 @@ def corsa(
         if step == 1:
             # print "privato",form.initial['privato']
             if not step1:
-                form.initial["da"] = form.initial[
-                    "a"
-                ] = (
+                form.initial["da"] = form.initial["a"] = (
                     profilo.luogo.pk
                 )  # se non bound la form comincia partendo e finendo nel luogo predefinito
             else:

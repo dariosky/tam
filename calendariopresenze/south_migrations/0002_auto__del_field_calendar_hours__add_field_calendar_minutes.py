@@ -19,7 +19,6 @@ class Migration(SchemaMigration):
         )
 
     def backwards(self, orm):
-
         # User chose to not deal with backwards NULL issues for 'Calendar.hours'
         raise RuntimeError(
             "Cannot reverse this migration. 'Calendar.hours' and its values cannot be restored."
