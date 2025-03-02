@@ -154,7 +154,7 @@ def get_value(viaggio, **kwargs):
 
     from tam.tamdates import tz_italy
 
-    if getattr(settings, "DATA_COMMISSIONE_IN_CLASSIFICHE_START"):
+    if getattr(settings, "DATA_COMMISSIONE_IN_CLASSIFICHE_START", None):
         data_commissione_in_classifiche_start = tz_italy.localize(
             settings.DATA_COMMISSIONE_IN_CLASSIFICHE_START
         )
