@@ -154,10 +154,16 @@ def get_value(viaggio, **kwargs):
 
     from tam.tamdates import tz_italy
 
-    DATA_COMMISSIONE_IN_CLASSIFICHE_START = tz_italy.localize(
-        datetime.datetime(2024, 9, 1, 0, 0)
-    )
-    if viaggio.commissione and viaggio.data < DATA_COMMISSIONE_IN_CLASSIFICHE_START:
+    if getattr(settings, "DATA_COMMISSIONE_IN_CLASSIFICHE_START"):
+        data_commissione_in_classifiche_start = tz_italy.localize(
+            settings.DATA_COMMISSIONE_IN_CLASSIFICHE_START
+        )
+    else:
+        data_commissione_in_classifiche_start = None
+    if viaggio.commissione and (
+        data_commissione_in_classifiche_start is None
+        or viaggio.data < data_commissione_in_classifiche_start
+    ):
         # tolgo la commissione dal lordo
         if viaggio.tipo_commissione == "P":
             importoViaggio = importoViaggio * (
