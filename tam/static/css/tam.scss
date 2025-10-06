@@ -640,6 +640,10 @@ h2.fatturaTipo5 {
   display: block;
 }
 
+#listaCorse th:nth-child(5), #listaCorse td:nth-child(5) {
+  min-width: 300px;
+}
+
 /************** CALENDARIO **************/
 #calendar_man {
   margin: 0;
