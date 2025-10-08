@@ -322,7 +322,9 @@ def prenota(request, id_prenotazione=None, template_name="prenotazioni/main.html
                 messages.warning(
                     request, _("Esiste già una prenotazione con questi dati")
                 )
-                return HttpResponseRedirect(
+                if getattr(settings, 'PRENOTAZIONI_ALLOW_DUPLICATES', False) is False:
+                    # we prevent duplicates by default
+                    return HttpResponseRedirect(
                     reverse(
                         "tamPrenotazioni-edit",
                         kwargs={"id_prenotazione": existing_prenotazione.id},
