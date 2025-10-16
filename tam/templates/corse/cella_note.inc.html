@@ -1,9 +1,9 @@
-{{ viaggio.note }}
-{% if viaggio.is_prenotazione %}
+{% if viaggio.note %}<div class="noteViaggio">{{ viaggio.note }}</div>{% endif %}
+{% comment %}{% if viaggio.is_prenotazione %}
 	{% with prenotazione=viaggio.prenotazione %}
-		{% if prenotazione.note_arrivo %}<div class="notePasseggero">{{ prenotazione.note_arrivo }}</div>{% endif %}
-		{% if prenotazione.note %}<div class="notePasseggero">{{ prenotazione.note }}</div>{% endif %}
+		{% if prenotazione.note_arrivo %}<div class="noteArrivo">{{ prenotazione.note_arrivo }}</div>{% endif %}
+		{% if prenotazione.note %}<div class="notePrenotazione">{{ prenotazione.note }}</div>{% endif %}
 	{% endwith %}
-{% endif %}
+{% endif %}{% endcomment %}
 {% if viaggio.passeggero.dati %}<div class="notePasseggero">{{ viaggio.passeggero.dati }}</div>{% endif %}
-{% if viaggio.cliente.note %}<div class="notePasseggero">{{ viaggio.cliente.note }}</div>{% endif %}
+{% if viaggio.cliente.note %}<div class="noteCliente">{{ viaggio.cliente.note }}</div>{% endif %}
