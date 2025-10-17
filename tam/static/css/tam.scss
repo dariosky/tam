@@ -40,13 +40,14 @@ $back-hilight: #FE9;
 
 .noteViaggio, .notePasseggero, .notePrenotazione, .noteCliente, .noteArrivo {
   white-space: pre-line;
-  background-color: lightyellow;
   border-radius: 5px;
   margin-top: 3px;
-  &.noteCliente, &.notePasseggero {
-    background-color: white;
-  }
 }
+
+.notePasseggero, .notePrenotazione, .noteCliente, .noteArrivo {
+  background-color: lightyellow;
+}
+
 
 html {
   height: 100%;
