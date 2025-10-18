@@ -1,0 +1,156 @@
+{% extends "base.html" %}{% load staticfiles %}
+{% block title %}Ricevuta corsa &raquo; {{ block.super }}{% endblock %}
+{% block content %}
+<style>
+    .corsa-ricevuta {
+        background:#fff;
+        width:100%;
+        padding:1.5rem 2rem;
+        box-sizing:border-box;
+        font-size:0.95rem;
+        line-height:1.35;
+    }
+    .corsa-ricevuta h1 {
+        margin:0 0 1rem;
+        font-size:1.4rem;
+        text-align:left;
+        letter-spacing:.5px;
+    }
+    .corsa-header {
+        display:flex;
+        justify-content:space-between;
+        align-content:space-between;
+        margin-bottom:1.5rem;
+        gap:1rem;
+    }
+    .corsa-header .ricevuta-cliente {
+        text-align:right;
+        min-width:240px;
+        font-size:0.95rem;
+    }
+    .corsa-header .ricevuta-cliente .nome {
+        font-weight:600;
+        font-size:1.05rem;
+    }
+    .corsa-header .meta {
+        margin-top:.35rem;
+        color:#444;
+        font-size:0.85rem;
+        line-height:1.25;
+    }
+    .corsa-columns {
+        display:flex;
+        flex-wrap:wrap;
+        gap:2rem;
+        margin-bottom:1.5rem;
+    }
+    .corsa-col {
+        flex:1 1 320px;
+        min-width:280px;
+        position:relative;
+    }
+    .corsa-col .col-inner {
+        border-top:2px solid #222;
+        padding-top:.6rem;
+    }
+    .corsa-col h2 {
+        margin:0 0 .25rem;
+        font-size:.75rem;
+        font-weight:700;
+        text-transform:uppercase;
+        letter-spacing:.08em;
+        color:#555;
+    }
+    .corsa-note {
+        margin:1.2rem 0 1.6rem;
+        padding:0.8rem 1rem;
+        background:#fafafa;
+        border:1px solid #e2e2e2;
+        border-radius:4px;
+    }
+    .corsa-note h3 {
+        margin:0 0 .4rem;
+        font-size:.8rem;
+        text-transform:uppercase;
+        letter-spacing:.07em;
+        color:#666;
+    }
+    .corsa-footer {
+        font-size:.75rem;
+        color:#666;
+        border-top:1px solid #ddd;
+        padding-top:.6rem;
+    }
+    .dati {
+        margin-top:.25rem;
+        font-size:.8rem;
+        color:#444;
+        white-space:pre-wrap;
+    }
+    a { color:#0b5cab; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+</style>
+
+<div class="corsa-ricevuta">
+    <div class="corsa-header">
+        <h1>Ricevuta Prenotazione Corsa</h1>
+        <div class="ricevuta-cliente">
+            {% comment %} Determina persona (cliente o privato) {% endcomment %}
+            {% if viaggio.cliente %}
+                <div class="nome">
+                    <a href="{% url "tamClienteId" viaggio.cliente.id %}" target="_blank">{{ viaggio.cliente }}</a>
+                </div>
+                {% if viaggio.cliente.dati %}
+                    <div class="dati">{{ viaggio.cliente.dati|linebreaksbr }}</div>
+                {% endif %}
+            {% else %}
+                {% if viaggio.passeggero %}
+                    <div class="nome">
+                        Privato:
+                        <a href="{% url "tamPrivatoId" viaggio.passeggero.id %}" target="_blank">{{ viaggio.passeggero }}</a>
+                    </div>
+                    {% if viaggio.passeggero.dati %}
+                        <div class="dati">{{ viaggio.passeggero.dati|linebreaksbr }}</div>
+                    {% endif %}
+                {% else %}
+                    <div class="nome">Cliente non specificato</div>
+                {% endif %}
+            {% endif %}
+            <div class="meta">
+                <strong>Tratta:</strong> {{ viaggio.da }} - {{ viaggio.a }}<br>
+                <strong>Orario corsa:</strong> {{ viaggio.data|date:"d M Y H:i" }}
+            </div>
+        </div>
+    </div>
+
+    <div class="corsa-columns">
+        <div class="corsa-col">
+            <div class="col-inner">
+                <h2>Conducente</h2>
+                <div class="contenuto">
+                    {{ viaggio.conducente.dati|linebreaksbr }}
+                </div>
+            </div>
+        </div>
+        <div class="corsa-col">
+            <div class="col-inner">
+                <h2>Consorzio</h2>
+                <div class="contenuto">
+                    {{ consorzio|safe|linebreaksbr }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if viaggio.note %}
+    <div class="corsa-note">
+        <h3>Note</h3>
+        {{ viaggio.note|linebreaksbr }}
+    </div>
+    {% endif %}
+
+    <div class="corsa-footer">
+        Orario Prenotazione: {{ orario_prenotazione|date:"d M Y H:i" }}
+    </div>
+</div>
+{% endblock content %}

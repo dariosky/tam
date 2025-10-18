@@ -16,6 +16,7 @@ from .views.tamviews import (
     corsaCopy,
     cliente,
     clienti,
+    corsa_ricevuta
 )
 from .views.tamviews import (
     listino,
@@ -76,6 +77,7 @@ urlpatterns = [
     url(r"^corsa/(?P<id>\d*)/dettagli/$", corsa, {"step": 2}, name="tamNuovaCorsa2Id"),
     url(r"^corsa/(?P<id>\d*)/delete/$", corsa, {"delete": True}, name="tamCorsaIdDel"),
     url(r"^corsa/(?P<id>\d*)/copy/$", corsaCopy, name="tamCorsaCopy"),
+    url(r"^corsa/(?P<viaggio_id>\d*)/ricevuta/$", corsa_ricevuta, name="tamRicevuta"),
     url(r"^cliente/$", cliente, name="tamCliente"),
     url(r"^cliente/(?P<id_cliente>\d*)/$", cliente, name="tamClienteId"),
     url(r"^clienti/$", clienti, name="tamListini"),

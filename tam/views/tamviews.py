@@ -824,7 +824,7 @@ def corsa(
                     messages.success(request, "Modificati i dati del privato.")
 
             return HttpResponseRedirect(reverse("tamCorse"))
-    # raise Exception("Sgnaps")
+    ncc_ricevuta = getattr(settings, 'NCC_RICEVUTA', False)
     return render(request, template_name, locals())
 
 
@@ -1740,3 +1740,11 @@ def exportListino(request, id_listino):
         return HttpResponseRedirect(reverse("tamListini"))
     profilo = ProfiloUtente.objects.get(user=request.user)
     return pdfListino.export(listino, luogoDiRiferimento=profilo.luogo)
+
+
+def corsa_ricevuta(request,viaggio_id, template_name="corsa_ricevuta.html"):
+    viaggio = get_object_or_404(Viaggio, pk=viaggio_id)
+    orario_prenotazione = datetime.datetime.now().replace(minute=0)-datetime.timedelta(hours=3)
+    return render(request, template_name, dict(viaggio=viaggio,
+                                               consorzio=settings.DATI_CONSORZIO_HTML,
+                                               orario_prenotazione=orario_prenotazione))

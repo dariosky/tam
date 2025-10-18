@@ -96,14 +96,17 @@
 			<input type="submit" id="actionButton" name="proceed" value="{{ continue_title }}" />
             {% if not new %}
 				{% ifnotequal step 1 %}
-					<a href="{% url "tamCorsaCopy" viaggio.pk %}">copia</a>
-					<a href="{% url "actionLog" %}?type=viaggio&amp;id={{ viaggio.id }}">log</a>
+                    <br/>
+					<a class='btn' href="{% url "tamCorsaCopy" viaggio.pk %}">Copia</a>
+					<a class='btn' href="{% url "actionLog" %}?type=viaggio&amp;id={{ viaggio.id }}">Log</a>
+                    {% if ncc_ricevuta %}
+                        <a class='btn' href="{% url "tamRicevuta" viaggio_id=viaggio.id %}">Ricevuta</a>
+                    {% endif %}
 				{% endifnotequal %}
                 {% with viaggio.delete_url as deleteUrl %}
                     {% if deleteUrl and perms.tam.delete_viaggio %}
-							<br/>
-							<a href="{{ deleteUrl }}">
-								<i class="sprite icon-delbtn"></i>
+							<a class='btn' href="{{ deleteUrl }}">
+								Cancella corsa
 		                    </a>
 					{% endif %}
                 {% endwith %}

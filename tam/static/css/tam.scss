@@ -835,5 +835,20 @@ input[type="button"], input[type="submit"], input[type="reset"], input[type="fil
   width: 68px;
 }
 
+.btn {
+  display: inline-block;
+  padding: 6px 10px;
+  background: #f3f3f3;
+  color: black;
+  text-decoration: none;
+  margin: 10px 5px;
+  border: 1px solid black;
+    border-radius: 4px;
+
+  &:visited {
+    color: black;
+  }
+}
+
 @import "stats";
 @import "fullmessage";
