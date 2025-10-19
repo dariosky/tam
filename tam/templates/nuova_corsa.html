@@ -105,9 +105,10 @@
 				{% endifnotequal %}
                 {% with viaggio.delete_url as deleteUrl %}
                     {% if deleteUrl and perms.tam.delete_viaggio %}
-							<a class='btn' href="{{ deleteUrl }}">
-								Cancella corsa
-		                    </a>
+                        <br>
+                        <a class='btn' href="{{ deleteUrl }}">
+                            Cancella corsa
+                        </a>
 					{% endif %}
                 {% endwith %}
 			{% endif %}

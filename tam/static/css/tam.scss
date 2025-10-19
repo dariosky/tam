@@ -804,7 +804,8 @@ select, input {
 }
 
 input[type="button"], input[type="submit"], input[type="reset"], input[type="file"], button {
-  min-height: 30px
+  min-height: 30px;
+  padding: 1em 2em;
 }
 
 #overlay {
