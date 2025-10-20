@@ -17,11 +17,6 @@ def prenotaCorsa(prenotazione, dontsave=False):
         # partenza dal cliente al luogo indicato
         partenza = utentePrenotazioni.luogo
         arrivo = prenotazione.luogo
-    note_complete = prenotazione.note
-    if prenotazione.note_camera:
-        note_complete = ("Camera: %s\n" % prenotazione.note_camera) + note_complete
-    if prenotazione.note_cliente:
-        note_complete = ("Cliente: %s\n" % prenotazione.note_cliente) + note_complete
     cliente = prenotazione.cliente
     viaggio = Viaggio(
         data=prenotazione.data_corsa,
@@ -32,7 +27,7 @@ def prenotaCorsa(prenotazione, dontsave=False):
         esclusivo=not prenotazione.is_collettivo,
         cliente=cliente,
         prezzo=0,
-        note=note_complete,
+        note="",
         incassato_albergo=cliente.incassato_albergo,
         fatturazione=cliente.fatturazione,
         pagamento_differito=cliente.pagamento_differito,

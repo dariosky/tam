@@ -38,13 +38,13 @@ $back-hilight: #FE9;
   }
 }
 
-.noteViaggio, .notePasseggero, .notePrenotazione, .noteCliente, .noteArrivo {
+.noteViaggio, .notePasseggero, .notePrenotazione, .noteCliente, .noteArrivo, .noteCamera {
   white-space: pre-line;
   border-radius: 5px;
-  margin-top: 3px;
+  margin: 3px 0;
 }
 
-.notePasseggero, .notePrenotazione, .noteCliente, .noteArrivo {
+.notePasseggero, .notePrenotazione, .noteCliente, .noteArrivo, .noteCamera {
   background-color: lightyellow;
 }
 
@@ -844,7 +844,7 @@ input[type="button"], input[type="submit"], input[type="reset"], input[type="fil
   text-decoration: none;
   margin: 10px 5px;
   border: 1px solid black;
-    border-radius: 4px;
+  border-radius: 4px;
 
   &:visited {
     color: black;
